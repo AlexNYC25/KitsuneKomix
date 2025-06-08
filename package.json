@@ -1,0 +1,41 @@
+{
+  "name": "kitsunekomix",
+  "version": "0.0.1",
+  "description": "A self hostable comic book media server (Work in progress)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --exec node --loader ts-node/esm src/index.ts",
+    "build": "tsc",
+    "serve": "node dist/index.js",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexNYC25/KitsuneKomix.git"
+  },
+  "keywords": [
+    "Self",
+    "host",
+    "comics"
+  ],
+  "author": "Alexis Montes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AlexNYC25/KitsuneKomix/issues"
+  },
+  "homepage": "https://github.com/AlexNYC25/KitsuneKomix#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "@vitest/ui": "^3.2.2",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.2"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
