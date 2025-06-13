@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ${DOCKERFILE:-Dockerfile.dev}
+    container_name: kitsunekomix
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code only in development
+      - .:/app
+      - /Users/alexismontes/Documents/komi_volumes/config:/app/config
+      - /Users/alexismontes/Documents/komi_volumes/comics:/app/comics
+      - /Users/alexismontes/Documents/komi_volumes/cache:/app/cache
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - CONFIG_DIR=/app/config
+    restart: unless-stopped
