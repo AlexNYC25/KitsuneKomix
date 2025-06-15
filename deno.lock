@@ -13,6 +13,7 @@
     "jsr:@std/assert@^1.0.13": "1.0.13",
     "jsr:@std/bytes@1": "1.0.6",
     "jsr:@std/crypto@1": "1.0.5",
+    "jsr:@std/dotenv@~0.225.5": "0.225.5",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/fmt@1": "1.0.8",
@@ -94,6 +95,9 @@
     },
     "@std/crypto@1.0.5": {
       "integrity": "0dcfbb319fe0bba1bd3af904ceb4f948cde1b92979ec1614528380ed308a3b40"
+    },
+    "@std/dotenv@0.225.5": {
+      "integrity": "9ce6f9d0ec3311f74a32535aa1b8c62ed88b1ab91b7f0815797d77a6f60c922f"
     },
     "@std/encoding@1.0.10": {
       "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
@@ -228,6 +232,7 @@
       "jsr:@funnylookinhat/logosaurus@^1.2.1",
       "jsr:@oak/oak@^17.1.4",
       "jsr:@std/assert@^1.0.13",
+      "jsr:@std/dotenv@~0.225.5",
       "jsr:@std/fs@^1.0.18",
       "jsr:@std/path@^1.1.0",
       "npm:comic-metadata-tool@^1.0.2"
