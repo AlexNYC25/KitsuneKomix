@@ -2,15 +2,106 @@ import { Database } from "@db/sqlite";
 
 import logger from '../utilities/logger.ts';
 import {
-  createComicsTable
+  createAppTasksTable,
+  createAppSettingsTable,
+  createComicsTable,
+  createComicBookStoryArcsTable,
+  createComicMetadataTable,
+  createComicSeriesTable,
+  createComicBookSeriesGroupsTable,
+  createComicBookPencillersTable,
+  createComicBookWritersTable,
+  createComicBookInkersTable,
+  createComicBookColoristsTable,
+  createComicBookLetterersTable,
+  createComicBookCoverArtistsTable,
+  createComicBookEditorsTable,
+  createComicBookPublishersTable,
+  createComicBookImprintsTable,
+  createComicBookGenresTable,
+  createComicBookTranslatorsTable,
+  createComicBookTagsTable,
+  createComicBookCharactersTable,
+  createComicBookLocationsTable,
+  createComicBookTeamsTable,
+  createComicBookAgeRatingsTable,
+  createComicBookPageTypesTable,
+  createComicBookPagesTable,
+  createComicBookMetadataPencillersTable,
+  createComicBookMetadataWritersTable,
+  createComicBookMetadataInkersTable,
+  createComicBookMetadataColoristsTable,
+  createComicBookMetadataLetterersTable,
+  createComicBookMetadataCoverArtistsTable,
+  createComicBookMetadataEditorsTable,
+  createComicBookMetadataTranslatorsTable,
+  createComicBookMetadataPublishersTable,
+  createComicBookMetadataImprintsTable,
+  createComicBookMetadataGenresTable,
+  createComicBookMetadataTagsTable,
+  createComicBookMetadataCharactersTable,
+  createComicBookMetadataLocationsTable,
+  createComicBookMetadataTeamsTable,
+  createComicBookMetadataStoryArcsTable,
+  createComicBookMetadataSeriesGroupsTable,
+  createComicBookMetadataAgeRatingsTable,
+  createComicBookMetadataPagesTable,
 } from './schemaDefinitions.ts';
+import { seedDatabase } from './seed.ts';
 
 export function initializeSchema(db: Database): void {
   logger.info('SETUP', 'Running schema setup...');
   db.exec(
-    [
-      createComicsTable,
-    ].join('\n\n')
-  );
+  [
+    createAppTasksTable,
+    createAppSettingsTable,
+    createComicBookStoryArcsTable,
+    createComicMetadataTable,
+    createComicSeriesTable,
+    createComicsTable,
+    createComicBookSeriesGroupsTable,
+    createComicBookPencillersTable,
+    createComicBookWritersTable,
+    createComicBookInkersTable,
+    createComicBookColoristsTable,
+    createComicBookLetterersTable,
+    createComicBookCoverArtistsTable,
+    createComicBookEditorsTable,
+    createComicBookPublishersTable,
+    createComicBookImprintsTable,
+    createComicBookGenresTable,
+    createComicBookTranslatorsTable,
+    createComicBookTagsTable,
+    createComicBookCharactersTable,
+    createComicBookLocationsTable,
+    createComicBookTeamsTable,
+    createComicBookAgeRatingsTable,
+    createComicBookPageTypesTable,
+    createComicBookPagesTable,
+    createComicBookMetadataPencillersTable,
+    createComicBookMetadataWritersTable,
+    createComicBookMetadataInkersTable,
+    createComicBookMetadataColoristsTable,
+    createComicBookMetadataLetterersTable,
+    createComicBookMetadataCoverArtistsTable,
+    createComicBookMetadataEditorsTable,
+    createComicBookMetadataTranslatorsTable,
+    createComicBookMetadataPublishersTable,
+    createComicBookMetadataImprintsTable,
+    createComicBookMetadataGenresTable,
+    createComicBookMetadataTagsTable,
+    createComicBookMetadataCharactersTable,
+    createComicBookMetadataLocationsTable,
+    createComicBookMetadataTeamsTable,
+    createComicBookMetadataStoryArcsTable,
+    createComicBookMetadataSeriesGroupsTable,
+    createComicBookMetadataAgeRatingsTable,
+    createComicBookMetadataPagesTable,
+  ].join('\n\n')
+);
   logger.info('SETUP', 'Schema initialized (tables created if missing).');
+
+  logger.info('SETUP', 'Seeding initial data...');
+  seedDatabase(db);
+  logger.info('SETUP', 'Database seeding completed.');
 }
