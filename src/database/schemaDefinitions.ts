@@ -19,6 +19,13 @@ export const createAppSettingsTable = `
   );
 `;
 
+export const createMigrationsTable = `
+  CREATE TABLE IF NOT EXISTS migrations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+  );
+`;
+
 //
 // Comic Book Database Schema Definitions
 //
