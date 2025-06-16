@@ -15,4 +15,15 @@ services:
     environment:
       - APP_ENV=${APP_ENV:-development}
       - CONFIG_DIR=/app/config
+      - COMICS_DIR=/app/comics
+      - CACHE_DIR=/app/cache
+    command: >
+      deno run
+      --allow-net
+      --allow-env
+      --allow-read
+      --allow-write
+      --allow-ffi
+      --watch
+      main.ts
     restart: unless-stopped
