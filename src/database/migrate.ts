@@ -11,7 +11,7 @@ export async function runMigrations(db: Database, migrationsDir = "./migrations"
   // Get applied migrations
   const applied = new Set<string>();
   const stmt = db.prepare("SELECT name FROM migrations");
-  for (const [name] of stmt.all() as [string][]) {
+  for (const { name } of stmt.all() as { name: string }[]) {
     applied.add(name);
   }
   stmt.finalize();
