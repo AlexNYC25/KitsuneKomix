@@ -1,8 +1,15 @@
 import { Application, Router, Context, Status } from "@oak/oak";
-import "./src/database/database.ts";
+
+import { setUpDatabase } from "./src/database/setup.ts";
+import { startBackgroundComicsParser } from "./src/tasks/background.ts";
 
 const app = new Application();
 const router = new Router();
+
+// Set up the database
+setUpDatabase();
+// Start the background task
+startBackgroundComicsParser();
 
 const port = parseInt(Deno.env.get("PORT") ?? "3000", 10);
 
