@@ -49,8 +49,15 @@ import {
 } from './schemaDefinitions.ts';
 import { seedDatabase } from './seed.ts';
 
+/**
+ * Initializes the database schema by creating necessary tables and seeding initial data.
+ * This function should be called once when the application starts to ensure the database is ready for use.
+ * 
+ * @param {Database} db - The SQLite database instance to initialize.
+ */
 export function initializeSchema(db: Database): void {
   logger.info('SETUP', 'Running schema setup...');
+  // The order of the queries is important, as some tables depend on others depending on foreign keys.
   db.exec(
   [
     createAppTasksTable,
@@ -98,7 +105,7 @@ export function initializeSchema(db: Database): void {
     createComicBookMetadataAgeRatingsTable,
     createComicBookMetadataPagesTable,
   ].join('\n\n')
-);
+  );
   logger.info('SETUP', 'Schema initialized (tables created if missing).');
 
   logger.info('SETUP', 'Seeding initial data...');

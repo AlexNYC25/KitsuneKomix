@@ -1,4 +1,8 @@
 
+//
+// Internal Database Schema Definitions
+//
+
 export const createAppTasksTable = `
   CREATE TABLE IF NOT EXISTS app_tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,7 +33,6 @@ export const createMigrationsTable = `
 //
 // Comic Book Database Schema Definitions
 //
-
 
 export const createComicBookStoryArcsTable = `
   CREATE TABLE IF NOT EXISTS comic_story_arcs (
