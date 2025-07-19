@@ -12,6 +12,7 @@
     "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
     "@std/fs": "jsr:@std/fs@^1.0.18",
     "@std/path": "jsr:@std/path@^1.1.0",
-    "comic-metadata-tool": "npm:comic-metadata-tool@^1.0.2"
+    "comic-metadata-tool": "npm:comic-metadata-tool@^1.0.4",
+    "winston": "npm:winston@^3.17.0"
   }
 }
