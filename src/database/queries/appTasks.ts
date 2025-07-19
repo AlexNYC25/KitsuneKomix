@@ -1,5 +1,5 @@
 import db from "../database.ts";
-import { AppTask } from '../interfaces/appTask.ts';
+import { AppTask } from '../../interfaces/appTask.interface.ts';
 
 export const GET_APP_TASK = `
   SELECT
@@ -32,6 +32,7 @@ export function getAppTaskQuery(taskName: string): AppTask | null {
     task_name: row.task_name as string,
     interval: row.interval as number,
     status: row.status as string,
+    running: row.running as boolean, // Ensure to handle the running field
     initiated_at: row.initiated_at as string | null,
     completed_at: row.completed_at as string | null,
   };
@@ -39,7 +40,7 @@ export function getAppTaskQuery(taskName: string): AppTask | null {
 
 export const UPDATE_APP_TASK_STATUS = `
   UPDATE app_tasks
-  SET status = ?, initiated_at = ?, completed_at = ?
+  SET status = ?, initiated_at = ?, completed_at = ?, running = ?
   WHERE task_name = ?;
 `;
 
@@ -50,8 +51,8 @@ export const UPDATE_APP_TASK_STATUS = `
  * @param {string | null} initiatedAt - The timestamp when the task was initiated, or null if not applicable.
  * @param {string | null} completedAt - The timestamp when the task was completed, or null if not applicable.
  */
-export function updateAppTaskStatus(taskName: string, status: string, initiatedAt: string | null, completedAt: string | null): void {
+export function updateAppTaskStatus(taskName: string, status: string, initiatedAt: string | null, completedAt: string | null, running: boolean): void {
   const stmt = db.prepare(UPDATE_APP_TASK_STATUS);
-  stmt.run(status, initiatedAt, completedAt, taskName);
+  stmt.run(status, initiatedAt, completedAt, taskName, running);
   stmt.finalize();
 }

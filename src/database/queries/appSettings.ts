@@ -1,5 +1,5 @@
 import db from "../database.ts";
-import { AppSetting } from "../interfaces/appSetting.ts";
+import { AppSetting } from "../../interfaces/appSetting.interface.ts";
 
 export const GET_APP_SETTING = `
   SELECT
