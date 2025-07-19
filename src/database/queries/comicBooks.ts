@@ -1,5 +1,5 @@
 import db from "../database.ts";
-import { ComicBook } from "../interfaces/comicBook.ts";
+import { ComicBook, ComicBookInsert } from "../../interfaces/comic-book.interface.ts";
 
 export const GET_COMIC_BOOKS = `
   SELECT
@@ -20,25 +20,25 @@ export const GET_COMIC_BOOKS = `
  * @returns {Array<ComicBook>} An array of ComicBook objects.
  */
 export function getComicBooksQuery(): Array<ComicBook> {
-  const stmt = db.prepare(GET_COMIC_BOOKS);
-  const rows = stmt.all() as Array<Record<string, unknown>>;
+	const stmt = db.prepare(GET_COMIC_BOOKS);
+	const rows = stmt.all() as Array<Record<string, unknown>>;
 
 	if (!rows || rows.length === 0) {
 		return [];
 	}
 
-  stmt.finalize();
+	stmt.finalize();
 
-  return rows.map(row => ({
-    id: row.id as number,
-    title: row.title as string,
-    file_name: row.file_name as string,
-    file_hash: row.file_hash as string,
-    file_path: row.file_path as string,
-    timestamp: row.timestamp ? new Date(row.timestamp as string) : null,
-    metadata_id: row.metadata_id as number,
-    series_id: row.series_id as number,
-  }));
+	return rows.map(row => ({
+		id: row.id as number,
+		title: row.title as string,
+		file_name: row.file_name as string,
+		file_hash: row.file_hash as string,
+		file_path: row.file_path as string,
+		timestamp: row.timestamp ? new Date(row.timestamp as string) : null,
+		metadata_id: row.metadata_id as number,
+		series_id: row.series_id as number,
+	}));
 }
 
 export const GET_COMIC_BOOK_BY_HASH = `
@@ -90,33 +90,37 @@ export const INSERT_COMIC_BOOK = `
 		timestamp,
 		metadata_id,
 		series_id
-	) VALUES (?, ?, ?, ?, ?, ?, ?);
+	) VALUES (?, ?, ?, ?, ?, ?, ?)
+	ON CONFLICT(file_path) DO UPDATE
+		SET file_path = excluded.file_path
+	RETURNING id;
 `;
 
 /**
  * Inserts a new comic book into the database.
- * @param {string} title - The title of the comic book.
- * @param {string} fileName - The name of the comic book file.
- * @param {string} fileHash - The hash of the comic book file.
- * @param {string} filePath - The path to the comic book file.
- * @param {Date | null} timestamp - The timestamp of when the comic book was added, or null if not applicable.
- * @param {number} metadataId - The ID of the associated metadata.
- * @param {number} seriesId - The ID of the associated series.
- * 
+ * @param {ComicBookInsert} comicBook - The comic book to insert.
+ * @throws Will throw an error if the insertion fails.
+ * @returns {number} The ID of the inserted comic book.
+ *
  * TODO: Consider sending the entire comic book object instead of individual parameters.
  */
-export function insertComicBookQuery(
-	title: string,
-	fileName: string,
-	fileHash: string,
-	filePath: string,
-	timestamp: Date | null,
-	metadataId: number,
-	seriesId: number
-): void {
+export function insertComicBookQuery(comicBook: ComicBookInsert): number {
 	const stmt = db.prepare(INSERT_COMIC_BOOK);
-	stmt.run(title, fileName, fileHash, filePath, timestamp ? timestamp.toISOString() : null, metadataId, seriesId);
+	const row = stmt.get<{ id: number }>(
+		comicBook.title,
+		comicBook.file_name,
+		comicBook.file_hash,
+		comicBook.file_path,
+		comicBook.timestamp ? comicBook.timestamp.toISOString() : null,
+		comicBook.metadata_id,
+		comicBook.series_id
+	);
 	stmt.finalize();
+
+	if (!row) {
+		throw new Error("Failed to insert comic book");
+	}
+	return row.id;
 }
 
 export const UPDATE_COMIC_BOOK = `
