@@ -7,6 +7,16 @@ import {
   ISSUE_NUMBER_REGEX,
 } from '../constants/regex.ts';
 
+import { ComicFileProperties } from '../interfaces/comic-file-properties.interface.ts';
+
+
+/**
+ * Extracts the issue number from a limited run comic book name.
+ * The expected format is "001 (of 12)" or similar.
+ *
+ * @param {string} name - The comic book name to extract the issue number from.
+ * @returns {Object} An object containing the cleaned name and the issue number.
+ */
 function extractLimitedRunIssueNumber(name: string): {
   cleanedName: string;
   issueNumber: string;
@@ -20,6 +30,13 @@ function extractLimitedRunIssueNumber(name: string): {
   return { cleanedName, issueNumber };
 }
 
+/**
+ * Extracts the year from a comic book name.
+ * The expected format is "Series Name (Year)" or similar.
+ *
+ * @param {string} name - The comic book name to extract the year from.
+ * @returns {Object} An object containing the cleaned name and the year.
+ */
 function extractYear(name: string): {
   cleanedName: string;
   year: string;
@@ -31,12 +48,28 @@ function extractYear(name: string): {
   return { cleanedName, year };
 }
 
+/**
+ * Extracts tags from a comic book name.
+ * Tags are expected to be enclosed in parentheses, e.g., "(Tag1) (Tag2)".
+ *
+ * @param {string} name - The comic book name to extract tags from.
+ * @param {string} yearToExclude - The year to exclude from the tags.
+ * @returns {string[]} An array of extracted tags.
+ */
 function extractTags(name: string, yearToExclude: string): string[] {
   return [...name.matchAll(TAGS_PARANTHESIS_REGEX)]
     .map(match => match[1].trim())
     .filter(tag => tag !== yearToExclude);
 }
 
+
+/**
+ * Extracts the volume number from a comic book name.
+ * The expected format is "Series Name Vol. 1" or similar.
+ *
+ * @param {string} name - The comic book name to extract the volume number from.
+ * @returns {Object} An object containing the cleaned name and the volume number.
+ */
 function extractVolume(name: string): {
   cleanedName: string;
   volumeNumber: string;
@@ -50,6 +83,14 @@ function extractVolume(name: string): {
   return { cleanedName, volumeNumber };
 }
 
+
+/**
+ * Extracts the issue number from a comic book name.
+ * The expected format is "Series Name 001" or similar.
+ *
+ * @param {string} name - The comic book name to extract the issue number from.
+ * @returns {Object} An object containing the cleaned name and the issue number.
+ */
 function extractIssueNumber(name: string): {
   cleanedName: string;
   issueNumber: string;
@@ -63,13 +104,21 @@ function extractIssueNumber(name: string): {
   return { cleanedName, issueNumber };
 }
 
-export function getComicFileProperties(filename: string): {
-  seriesName: string;
-  issueNumber: string;
-  volumeNumber: string;
-  year: string;
-  tags: string[];
-} {
+
+/**
+ * Parses a comic book filename to extract its properties.
+ * The filename is expected to follow a specific format that includes series name,
+ * issue number, volume number, year, and tags.
+ *
+ * @param {string} filename - The comic book filename to parse.
+ * @returns {Object} An object containing the parsed properties:
+ *   - seriesName: The name of the comic book series.
+ *   - issueNumber: The issue number of the comic book.
+ *   - volumeNumber: The volume number of the comic book.
+ *   - year: The year of publication.
+ *   - tags: An array of tags associated with the comic book.
+ */
+export function getComicFileProperties(filename: string): ComicFileProperties {
   let seriesName = filename.replace(FILE_NAME_EXTENSION_WHITESPACE_REGEX, '').trim();
   let issueNumber = '';
   let volumeNumber = '';

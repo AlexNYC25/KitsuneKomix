@@ -1,6 +1,15 @@
 
 import { YEAR_EXPANDED_REGEX, VOLUME_EXPANDED_REGEX, TAGS_BRACKETS_REGEX } from "../constants/regex.ts";
 
+import { ComicFolderProperties } from "../interfaces/comic-folder-properties.interface.ts";
+
+/**
+ * Extracts tags from a comic book name.
+ * Tags are expected to be enclosed in brackets, e.g., "[Tag1] [Tag2]".
+ *
+ * @param {string} name - The comic book name to extract tags from.
+ * @returns {Object} An object containing the series tags and the updated name.
+ */
 function extractTags(name: string): {
   seriesTags: string[],
   updatedName: string
@@ -18,6 +27,13 @@ function extractTags(name: string): {
   };
 }
 
+/**
+ * Extracts the year from a comic book name.
+ * The expected format is "Series Name (Year)" or similar.
+ *
+ * @param {string} name - The comic book name to extract the year from.
+ * @returns {Object} An object containing the series year and the updated name.
+ */
 function extractYear(name: string): {
   seriesYear: string,
   updatedName: string
@@ -33,6 +49,13 @@ function extractYear(name: string): {
   return { seriesYear: '', updatedName: name };
 }
 
+/**
+ * Extracts the volume number from a comic book name.
+ * The expected format is "Vol. 1", "Volume 1", or similar.
+ *
+ * @param {string} name - The comic book name to extract the volume number from.
+ * @returns {Object} An object containing the series volume and the updated name.
+ */
 function extractVolume(name: string): {
   seriesVolume: string,
   updatedName: string
@@ -59,12 +82,7 @@ function extractVolume(name: string): {
  * @property {string} seriesVolume - The volume number of the comic series
  * @property {string[]} seriesTags - An array of tags associated with the comic series
  */
-export function getSeriesFolderProperties(foldername: string): {
-  seriesName: string;
-  seriesYear: string;
-  seriesVolume: string;
-  seriesTags: string[];
-} {
+export function getSeriesFolderProperties(foldername: string): ComicFolderProperties {
   let name = foldername;
   let year = '';
   let volume = '';
