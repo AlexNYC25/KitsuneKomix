@@ -9,7 +9,7 @@ export async function runMigrations(db: Database, migrationsDir = "./migrations"
   db.exec(createMigrationsTable);
 
   // Get list of already applied migrations
-  logger.info('Migration:', "Checking for already applied migrations...");
+  logger.info("Running Database Migrations... Checking for already applied migrations...");
   const applied = new Set<string>();
   const stmt = db.prepare("SELECT name FROM migrations");
   for (const { name } of stmt.all() as { name: string }[]) {
@@ -29,9 +29,9 @@ export async function runMigrations(db: Database, migrationsDir = "./migrations"
   // Run through each migration file
   for (const file of migrationFiles) {
     // Check if the migration has already been applied
-    logger.info('Migration:', `Checking migration: ${file}`);
+    logger.info(`Running Database Migrations... Checking migration: ${file}`);
     if (!applied.has(file)) {
-      logger.info('Migration:', `Applying migration: ${file}`);
+      logger.info(`Running Database Migrations... Applying migration: ${file}`);
       // Load and execute the migration SQL
       const sql = await Deno.readTextFile(join(migrationsDir, file));
       db.exec(sql);
@@ -41,9 +41,9 @@ export async function runMigrations(db: Database, migrationsDir = "./migrations"
       insertStmt.run(file);
       insertStmt.finalize();
 
-      logger.info('Migration:', `Applied migration: ${file}`);
+      logger.info(`Running Database Migrations... Applied migration: ${file}`);
     }
   }
 
-  logger.info('Migration:', "All migrations applied successfully, db is up to date.");
+  logger.info(`Running Database Migrations... All migrations applied successfully, db is up to date.`);
 }
