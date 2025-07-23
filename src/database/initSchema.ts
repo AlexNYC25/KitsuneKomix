@@ -56,7 +56,7 @@ import { seedDatabase } from './seed.ts';
  * @param {Database} db - The SQLite database instance to initialize.
  */
 export function initializeSchema(db: Database): void {
-  logger.info('SETUP', 'Running schema setup...');
+  logger.info('Initializing Schema... Running schema setup...');
   // The order of the queries is important, as some tables depend on others depending on foreign keys.
   db.exec(
   [
@@ -106,9 +106,9 @@ export function initializeSchema(db: Database): void {
     createComicBookMetadataPagesTable,
   ].join('\n\n')
   );
-  logger.info('SETUP', 'Schema initialized (tables created if missing).');
+  logger.info('Initializing Schema... Schema initialized (tables created if missing).');
 
-  logger.info('SETUP', 'Seeding initial data...');
+  logger.info('Initializing Schema... Seeding initial data...');
   seedDatabase(db);
-  logger.info('SETUP', 'Database seeding completed.');
+  logger.info('Initializing Schema... Database seeding completed.');
 }
