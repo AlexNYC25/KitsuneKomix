@@ -5,7 +5,8 @@ import logger from "../utilities/logger.ts";
 // TODO: migrate these queries to some other file in case we need to use them elsewhere
 const SEED_QUERIES = {
 	"appTasks": "SELECT COUNT(*) FROM app_tasks",
-	"appSettings": "SELECT COUNT(*) FROM app_settings"
+	"appSettings": "SELECT COUNT(*) FROM app_settings",
+	"comicPageTypes": "SELECT COUNT(*) FROM comic_page_types"
 };
 
 /**
@@ -27,7 +28,7 @@ function seedTableIfEmpty(
   stmt.finalize();
   const count = ((result as number[] | undefined)?.[0] ?? 0);
   if (count === 0) {
-    logger.info('SEED', `Seeding initial data for ${table}...`);
+    logger.info(`Initializing Schema... Seeding initial data for ${table}...`);
     seedFn(db);
   }
 }
@@ -50,6 +51,25 @@ function seedAppSettings(db: Database) {
 	db.exec("INSERT INTO app_settings (setting_name, setting_value) VALUES ('comic_folder_hash', 'NOT_SET')");
 }
 
+
+// COMIC CONTANTS
+
+function seedComicPageTypes(db: Database) {
+  db.exec(`INSERT INTO comic_page_types (name)
+            VALUES  ('FrontCover'),
+                    ('InnerCover'),
+                    ('Roundup'),
+                    ('Story'),
+                    ('Advertisement'),
+                    ('Editorial'),
+                    ('Letters'),
+                    ('Preview'),
+                    ('BackCover'),
+                    ('Other'),
+                    ('Deleted')
+  `);
+}
+
 /**
  * Seeds the database with initial data if the specified tables are empty.
  * This function should be called once to ensure the database has the necessary initial data.
@@ -58,4 +78,5 @@ function seedAppSettings(db: Database) {
 export function seedDatabase(db: Database) {
 	seedTableIfEmpty(db, "app_tasks", SEED_QUERIES.appTasks, seedAppTasks);
 	seedTableIfEmpty(db, "app_settings", SEED_QUERIES.appSettings, seedAppSettings);
+	seedTableIfEmpty(db, "comic_page_types", SEED_QUERIES.comicPageTypes, seedComicPageTypes);
 }
