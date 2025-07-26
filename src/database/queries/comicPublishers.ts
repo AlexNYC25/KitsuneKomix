@@ -3,7 +3,7 @@ import db from "../database.ts";
 export const INSERT_COMIC_PUBLISHER = `
   INSERT INTO comic_publishers (name)
   VALUES (?)
-  ON CONFLICT(name) DO NOTHING
+  ON CONFLICT(name) DO UPDATE SET name = excluded.name
   RETURNING id
 `;
 
