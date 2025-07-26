@@ -1,7 +1,7 @@
 import db from "../database.ts";
 
 export const INSERT_COMIC_GENRE = `
-  INSERT INTO comic_genres (name)
+  INSERT INTO comic_genre (name)
     VALUES (?)
     ON CONFLICT(name)
     DO UPDATE SET name = excluded.name
