@@ -7,6 +7,8 @@ import { getFilesWithParentDirs } from "../helpers/walkDirs.ts";
 import { getSeriesFolderProperties } from "../helpers/folderNames.ts";
 
 import { getAppSettingQuery, updateAppSettingQuery } from "../database/queries/appSettings.ts";
+import { getComicBookByHashQuery } from "../database/queries/comicBooks.ts";
+
 
 import { parseAndLoadComicSeriesFromFileName, parseAndLoadComicSeriesFromComicInfoXmlMetadata } from "./metadata-load/series.ts";
 import { parseAndLoadComicMetadataFromComicInfoXmlMetadata, parseAndLoadComicMetadataFromFileName } from "./metadata-load/metadata.ts";
@@ -33,7 +35,7 @@ export const parseComicsDirectory = async () => {
   const dirPath = Deno.env.get("COMICS_DIR") || "";
   if (!dirPath) {
     throw new Error("COMICS_DIR environment variable is not set.");
-    }
+  }
 
   let okToParse = false;
 
@@ -76,13 +78,31 @@ export const parseComicsDirectory = async () => {
 
   const files = await getFilesWithParentDirs(dirPath, true, [".cbz", ".cbr", ".cb7", ".pdf"]);
 
-  // Update the app_settings table with the new hash
+  // Update the app_settings table with the new hash before processing
+  // This ensures that if the process is interrupted, we don't reprocess everything
   updateAppSettingQuery("comic_folder_hash", currentHash);
 
-  for (const file of files) {
-    // Call the function to parse each comic file
-    await parseComicFile({ file: file.file, parentDir: file.directory });
+  let newFilesCount = 0;
+  let skippedFilesCount = 0;
 
+  // Process each file
+  for (const file of files) {
+    // Calculate the hash of the file
+    const comicFileHash = await hashFile(file.file);
+
+    // Check if the file is already in the database
+    const existingComic = getComicBookByHashQuery(comicFileHash);
+
+    if (existingComic && existingComic.file_path === file.file) {
+      // Skip files that are already in the database with the same path
+      logger.info(`ComicsParser task... Skipping existing comic: ${file.file}`);
+      skippedFilesCount++;
+      continue;
+    }
+
+    // Process new or moved files
+    await parseComicFile({ file: file.file, parentDir: file.directory });
+    newFilesCount++;
   }
 
   // Update the app_settings table with the new hash
@@ -100,7 +120,7 @@ export const parseComicsDirectory = async () => {
  * @param parentDir The parent directory of the comic file.
  * @returns {Promise<void>} A promise that resolves when the parsing is complete.
  */
-const parseComicFile = async ({file, parentDir}: { file: string; parentDir: string }) => {
+const parseComicFile = async ({ file, parentDir }: { file: string; parentDir: string }) => {
   logger.info(`ComicsParser task... Parsing comic file: ${file}`);
 
   // first get the series metadata from the file by parsing the file name
@@ -111,7 +131,7 @@ const parseComicFile = async ({file, parentDir}: { file: string; parentDir: stri
   const comicFileHash = await hashFile(file);
 
   let metadata = null;
-  
+
   try {
     metadata = await getMetadata(file);
   } catch (error) {
