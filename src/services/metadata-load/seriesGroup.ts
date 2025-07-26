@@ -4,7 +4,7 @@ import type { ComicInfo } from "npm:comic-metadata-tool/dist/src/interfaces/comi
 import { splitProperty } from "../../helpers/propertyParsing.ts";
 
 import { insertComicSeriesGroupQuery } from "../../database/queries/comicSeriesGroups.ts";
-import { insertComicMetadataSeriesGroupQuery } from "../../database/queries/comicMetadataSeriesGroups.ts";
+import { insertOrUpdateComicMetadataSeriesGroup } from "../../database/queries/comicMetadataSeriesGroups.ts";
 
 /**
  * Parses and loads series groups from ComicInfo XML metadata.
@@ -46,7 +46,7 @@ export const parseAndLoadSeriesGroupsFromComicInfoXmlMetadata = (
 			}
 
 			try {
-				insertComicMetadataSeriesGroupQuery(comicMetadataId, seriesGroupId)
+				insertOrUpdateComicMetadataSeriesGroup(comicMetadataId, seriesGroupId)
 			} catch (error) {
 				logger.error(
 					`ComicsParser... Error inserting comic metadata series group for ${comicMetadataId}, ${seriesGroupId}: ${error}`
