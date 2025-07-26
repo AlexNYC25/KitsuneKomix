@@ -8,6 +8,7 @@ export const createAppTasksTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_name TEXT NOT NULL,
     status TEXT NOT NULL,
+    running BOOLEAN NOT NULL DEFAULT 0,
     initiated_at TEXT DEFAULT CURRENT_TIMESTAMP,
     completed_at TEXT,
     interval INTEGER NOT NULL DEFAULT 0
@@ -45,7 +46,7 @@ export const createComicBookStoryArcsTable = `
 export const createComicMetadataTable = `
   CREATE TABLE IF NOT EXISTS comic_metadata (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
+    title TEXT,
     series TEXT,
     number TEXT,
     count INTEGER,
@@ -91,7 +92,7 @@ export const createComicSeriesTable = `
 export const createComicsTable = `
   CREATE TABLE IF NOT EXISTS comic_books (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
+    title TEXT,
     file_name TEXT NOT NULL,
     file_hash TEXT NOT NULL,
     file_path TEXT NOT NULL UNIQUE,
@@ -154,14 +155,14 @@ export const createComicBookCoverArtistsTable = `
 export const createComicBookEditorsTable = `
   CREATE TABLE IF NOT EXISTS comic_editors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
+    name TEXT NOT NULL UNIQUE
   );
 `;
 
 export const createComicBookPublishersTable = `
   CREATE TABLE IF NOT EXISTS comic_publishers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
+    name TEXT NOT NULL UNIQUE
   );
 `;
 
@@ -254,6 +255,7 @@ export const createComicBookMetadataPencillersTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     penciller_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, penciller_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (penciller_id) REFERENCES comic_pencillers(id)
   );
@@ -264,6 +266,7 @@ export const createComicBookMetadataWritersTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     writer_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, writer_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (writer_id) REFERENCES comic_writers(id)
   );
@@ -274,6 +277,7 @@ export const createComicBookMetadataInkersTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     inker_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, inker_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (inker_id) REFERENCES comic_inkers(id)
   );
@@ -284,6 +288,7 @@ export const createComicBookMetadataColoristsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     colorist_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, colorist_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (colorist_id) REFERENCES comic_colorists(id)
   );
@@ -294,6 +299,7 @@ export const createComicBookMetadataLetterersTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     letterer_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, letterer_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (letterer_id) REFERENCES comic_letterers(id)
   );
@@ -304,6 +310,7 @@ export const createComicBookMetadataCoverArtistsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     cover_artist_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, cover_artist_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (cover_artist_id) REFERENCES comic_cover_artists(id)
   );
@@ -314,6 +321,7 @@ export const createComicBookMetadataEditorsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     editor_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, editor_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (editor_id) REFERENCES comic_editors(id)
   );
@@ -324,6 +332,7 @@ export const createComicBookMetadataTranslatorsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     translator_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, translator_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (translator_id) REFERENCES comic_translators(id)
   );
@@ -334,6 +343,7 @@ export const createComicBookMetadataPublishersTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     publisher_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, publisher_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (publisher_id) REFERENCES comic_publishers(id)
   );
@@ -344,6 +354,7 @@ export const createComicBookMetadataImprintsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     imprint_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, imprint_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (imprint_id) REFERENCES comic_imprints(id)
   );
@@ -354,6 +365,7 @@ export const createComicBookMetadataGenresTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     genre_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, genre_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (genre_id) REFERENCES comic_genre(id)
   );
@@ -364,6 +376,7 @@ export const createComicBookMetadataTagsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     tag_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, tag_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (tag_id) REFERENCES comic_tags(id)
   );
@@ -374,6 +387,7 @@ export const createComicBookMetadataCharactersTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     character_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, character_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (character_id) REFERENCES comic_characters(id)
   );
@@ -384,6 +398,7 @@ export const createComicBookMetadataLocationsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     location_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, location_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (location_id) REFERENCES comic_locations(id)
   );
@@ -394,6 +409,7 @@ export const createComicBookMetadataTeamsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     team_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, team_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (team_id) REFERENCES comic_teams(id)
   );
@@ -404,6 +420,7 @@ export const createComicBookMetadataStoryArcsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     story_arc_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, story_arc_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (story_arc_id) REFERENCES comic_story_arcs(id)
   );
@@ -414,6 +431,7 @@ export const createComicBookMetadataSeriesGroupsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     series_group_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, series_group_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (series_group_id) REFERENCES comic_series_groups(id)
   );
@@ -424,6 +442,7 @@ export const createComicBookMetadataAgeRatingsTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     age_rating_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, age_rating_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (age_rating_id) REFERENCES comic_age_ratings(id)
   );
@@ -434,6 +453,7 @@ export const createComicBookMetadataPagesTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     metadata_id INTEGER NOT NULL,
     page_id INTEGER NOT NULL,
+    UNIQUE (metadata_id, page_id),
     FOREIGN KEY (metadata_id) REFERENCES comic_metadata(id),
     FOREIGN KEY (page_id) REFERENCES comic_pages(id)
   );
