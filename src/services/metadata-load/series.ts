@@ -20,6 +20,7 @@ export const parseAndLoadComicSeriesFromComicInfoXmlMetadata = (
   parentDir: string,
   parsedComicDetails: ComicFileProperties,
   parsedFolderDetails: ComicFolderProperties,
+  libraryId: number
 ): number | null => {
   if (!metadata) {
     logger.error('ComicsParser... No metadata or comicInfoXml found');
@@ -37,7 +38,8 @@ export const parseAndLoadComicSeriesFromComicInfoXmlMetadata = (
       10
     ),
     end_year: null,
-    total_issues: metadata.Count || null
+    total_issues: metadata.Count || null,
+    library_id: libraryId // Ensure the library ID is set for the series
   };
 
   try {
@@ -66,6 +68,7 @@ export const parseAndLoadComicSeriesFromFileName = (
   parentDir: string,
   parsedComicDetails: ComicFileProperties,
   parsedFolderDetails: ComicFolderProperties,
+  libraryId: number
 ): number | null => {
   let seriesId = null;
   const seriesPayload: ComicSeriesInsert = {
@@ -79,7 +82,8 @@ export const parseAndLoadComicSeriesFromFileName = (
       10
     ),
     end_year: null,
-    total_issues: null
+    total_issues: null,
+    library_id: libraryId // Ensure the library ID is set for the series
   };
 
   try {
