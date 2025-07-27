@@ -4,6 +4,7 @@ import logger from '../utilities/logger.ts';
 import {
   createAppTasksTable,
   createAppSettingsTable,
+  createComicLibrariesTable,
   createComicsTable,
   createComicBookStoryArcsTable,
   createComicMetadataTable,
@@ -62,6 +63,7 @@ export function initializeSchema(db: Database): void {
   [
     createAppTasksTable,
     createAppSettingsTable,
+    createComicLibrariesTable,
     createComicBookStoryArcsTable,
     createComicMetadataTable,
     createComicSeriesTable,
