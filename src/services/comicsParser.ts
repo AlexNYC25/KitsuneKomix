@@ -8,7 +8,9 @@ import { getSeriesFolderProperties } from "../helpers/folderNames.ts";
 
 import { getAppSettingQuery, updateAppSettingQuery } from "../database/queries/appSettings.ts";
 import { getComicBookByHashQuery } from "../database/queries/comicBooks.ts";
+import { getLibrariesQuery } from "../database/queries/comicLibraries.ts";
 
+import { ComicLibrary } from "../interfaces/comic-library.interface.ts";
 
 import { parseAndLoadComicSeriesFromFileName, parseAndLoadComicSeriesFromComicInfoXmlMetadata } from "./metadata-load/series.ts";
 import { parseAndLoadComicMetadataFromComicInfoXmlMetadata, parseAndLoadComicMetadataFromFileName } from "./metadata-load/metadata.ts";
@@ -82,35 +84,101 @@ export const parseComicsDirectory = async () => {
   // This ensures that if the process is interrupted, we don't reprocess everything
   updateAppSettingQuery("comic_folder_hash", currentHash);
 
-  let newFilesCount = 0;
-  let skippedFilesCount = 0;
-
-  // Process each file
-  for (const file of files) {
-    // Calculate the hash of the file
-    const comicFileHash = await hashFile(file.file);
-
-    // Check if the file is already in the database
-    const existingComic = getComicBookByHashQuery(comicFileHash);
-
-    if (existingComic && existingComic.file_path === file.file) {
-      // Skip files that are already in the database with the same path
-      logger.info(`ComicsParser task... Skipping existing comic: ${file.file}`);
-      skippedFilesCount++;
-      continue;
-    }
-
-    // Process new or moved files
-    await parseComicFile({ file: file.file, parentDir: file.directory });
-    newFilesCount++;
+  // Get all enabled libraries from the database
+  const libraries = getLibrariesQuery().filter(lib => lib.enabled);
+  
+  if (libraries.length === 0) {
+    logger.info('ComicsParser task... No enabled libraries found. Skipping comics parsing.');
+    return;
   }
 
-  // Update the app_settings table with the new hash
-  updateAppSettingQuery("comic_folder_hash", currentHash);
+  logger.info(`ComicsParser task... Found ${libraries.length} enabled libraries to process.`);
+  
+  let totalNewFiles = 0;
+  let totalSkippedFiles = 0;
 
-  logger.info(`ComicsParser task... Finished parsing comics directory: ${dirPath}`);
+  // Process each library
+  for (const library of libraries) {
+    await parseLibrary(library);
+    
+    // Add counts from this library to totals
+    totalNewFiles += library.newFilesCount || 0;
+    totalSkippedFiles += library.skippedFilesCount || 0;
+  }
+  
+  logger.info(`ComicsParser task... Finished parsing all libraries. Processed ${totalNewFiles} new files, skipped ${totalSkippedFiles} existing files.`);
 
 }
+
+/**
+ * Parse a specific library
+ */
+const parseLibrary = async (library: ComicLibrary): Promise<void> => {
+  const libraryPath = library.path;
+  let okToParse = false;
+  
+  // Each library has its own hash setting
+  const hashSettingName = `library_hash_${library.id}`;
+  
+  logger.info(`ComicsParser task... Processing library "${library.name}" at ${libraryPath}`);
+  
+  // Get hash from DB
+  const appSetting = getAppSettingQuery(hashSettingName);
+  
+  if (!appSetting) {
+    // Create setting if it doesn't exist
+    //createAppSettingQuery(hashSettingName, "NOT_SET");
+    okToParse = true;
+  } else if (appSetting.setting_value === "NOT_SET") {
+    okToParse = true;
+  }
+  
+  // Calculate hash for this library
+  const currentHash = await hashFolder(libraryPath);
+  logger.info(`ComicsParser task... Library "${library.name}" hash: ${currentHash}`);
+  
+  if (appSetting && currentHash.trim() !== String(appSetting.setting_value).trim()) {
+    logger.info(`ComicsParser task... Library "${library.name}" hash has changed, parsing...`);
+    okToParse = true;
+  }
+  
+  if (!okToParse) {
+    logger.info(`ComicsParser task... Library "${library.name}" hash is up to date, skipping.`);
+    return;
+  }
+  
+  // Update hash before processing
+  updateAppSettingQuery(hashSettingName, currentHash);
+  
+  // Get all comic files in this library
+  const files = await getFilesWithParentDirs(libraryPath, true, [".cbz", ".cbr", ".cb7", ".pdf"]);
+  
+  library.newFilesCount = 0;
+  library.skippedFilesCount = 0;
+  
+  // Process each file with library context
+  for (const file of files) {
+    const comicFileHash = await hashFile(file.file);
+    const existingComic = getComicBookByHashQuery(comicFileHash);
+    
+    if (existingComic && existingComic.file_path === file.file) {
+      logger.info(`ComicsParser task... Skipping existing comic: ${file.file}`);
+      library.skippedFilesCount++;
+      continue;
+    }
+    
+    // Pass library ID to the file parser
+    await parseComicFile({
+      file: file.file,
+      parentDir: file.directory,
+      libraryId: library.id
+    });
+    
+    library.newFilesCount++;
+  }
+  
+  logger.info(`ComicsParser task... Finished parsing library "${library.name}". Processed ${library.newFilesCount} new files, skipped ${library.skippedFilesCount} existing files.`);
+};
 
 /**
  * The per comic file parsing function.
@@ -120,7 +188,7 @@ export const parseComicsDirectory = async () => {
  * @param parentDir The parent directory of the comic file.
  * @returns {Promise<void>} A promise that resolves when the parsing is complete.
  */
-const parseComicFile = async ({ file, parentDir }: { file: string; parentDir: string }) => {
+const parseComicFile = async ({ file, parentDir, libraryId }: { file: string; parentDir: string; libraryId: number }) => {
   logger.info(`ComicsParser task... Parsing comic file: ${file}`);
 
   // first get the series metadata from the file by parsing the file name
@@ -142,7 +210,12 @@ const parseComicFile = async ({ file, parentDir }: { file: string; parentDir: st
     logger.info(`ComicsParser task... No metadata found for file: ${file}`);
 
     // insert the series metadata from the metadata to the database, assuming the series metadata record in not already in the database
-    const seriesId = parseAndLoadComicSeriesFromFileName(parentDir, seriesMetadataFromFileName, seriesMetadataFromFolder);
+    const seriesId = parseAndLoadComicSeriesFromFileName(
+      parentDir,
+      seriesMetadataFromFileName,
+      seriesMetadataFromFolder,
+      libraryId
+    );
 
     if (!seriesId) {
       logger.error(`ComicsParser task... Failed to insert series metadata for ${seriesMetadataFromFileName.seriesName}, cannot insert comic book.`);
@@ -161,7 +234,7 @@ const parseComicFile = async ({ file, parentDir }: { file: string; parentDir: st
 
   } else if (metadata && metadata.comicInfoXml) {
     // insert the series metadata from the folder to the database, assuming the series metadata record in not already in the database
-    const seriesId = parseAndLoadComicSeriesFromComicInfoXmlMetadata(metadata.comicInfoXml, parentDir, seriesMetadataFromFileName, seriesMetadataFromFolder);
+    const seriesId = parseAndLoadComicSeriesFromComicInfoXmlMetadata(metadata.comicInfoXml, parentDir, seriesMetadataFromFileName, seriesMetadataFromFolder, libraryId);
 
     if (!seriesId) {
       logger.error(`ComicsParser task... Failed to insert series metadata for ${metadata.comicInfoXml.Series}, cannot insert comic book.`);
