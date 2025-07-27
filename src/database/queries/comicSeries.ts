@@ -3,8 +3,8 @@ import { ComicSeriesInsert } from "../../interfaces/comic-series.interface.ts";
 
 export const INSERT_COMIC_SERIES =
 	`INSERT INTO comic_series
-    	(name, folder_path, description, publisher, start_year, end_year, total_issues)
-	VALUES ($1, $2, $3, $4, $5, $6, $7)
+    	(name, folder_path, description, publisher, start_year, end_year, total_issues, library_id)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 	ON CONFLICT(folder_path)
 		DO UPDATE SET name = excluded.name
 	RETURNING id;
@@ -25,7 +25,8 @@ export function insertComicSeriesQuery(series: ComicSeriesInsert): number {
 		series.publisher,
 		series.start_year,
 		series.end_year,
-		series.total_issues
+		series.total_issues,
+		series.library_id
 	);
 	stmt.finalize();
 	if (!row) throw new Error("Failed to insert or upsert comic series");
