@@ -21,6 +21,7 @@ export interface ComicSeries {
     start_year: number | null;
     end_year: number | null;
     total_issues: number | null;
+    library_id: number; // The ID of the library this series belongs to
 }
 
 /**
