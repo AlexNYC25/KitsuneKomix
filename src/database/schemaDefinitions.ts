@@ -35,6 +35,19 @@ export const createMigrationsTable = `
 // Comic Book Database Schema Definitions
 //
 
+export const createComicLibrariesTable = `
+  CREATE TABLE IF NOT EXISTS comic_libraries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    path TEXT NOT NULL UNIQUE,
+    description TEXT,
+    enabled BOOLEAN DEFAULT 1,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_comic_libraries_path ON comic_libraries(path);
+`;
+
 export const createComicBookStoryArcsTable = `
   CREATE TABLE IF NOT EXISTS comic_story_arcs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,7 +98,9 @@ export const createComicSeriesTable = `
     publisher TEXT,
     start_year INTEGER,
     end_year INTEGER,
-    total_issues INTEGER
+    total_issues INTEGER,
+    library_id INTEGER NOT NULL,
+    FOREIGN KEY (library_id) REFERENCES comic_libraries(id)
   );
 `;
 
