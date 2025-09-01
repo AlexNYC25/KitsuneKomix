@@ -1,7 +1,7 @@
-import app from "./src/api/app.ts";
+import app from "../src/api/app.ts";
 
-import { setUpDatabase } from "./src/database/setup.ts";
-import { startBackgroundComicsParser } from "./src/tasks/background.ts";
+import { setUpDatabase } from "../src/database/setup.ts";
+import { startBackgroundComicsParser } from "../src/tasks/background.ts";
 
 // Set up the database
 setUpDatabase();
