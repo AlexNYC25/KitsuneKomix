@@ -2,15 +2,21 @@ FROM denoland/deno:2.4.5
 
 WORKDIR /app
 
+# Copy configuration files first
+COPY deno.json deno.lock ./
+
+# Copy source code
+COPY . .
+
+# Change ownership to deno user
+RUN chown -R deno:deno /app
+
 USER deno
 
-COPY deno.json deno.lock ./
-RUN deno cache --lock=deno.lock
-
-# Copy your source code
-COPY . .
+# Cache dependencies
+RUN deno cache --lock=deno.lock src/main.ts
 
 # Expose the port your Oak/Deno app will run on
 EXPOSE 3000
 
-CMD ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-ffi", "--allow-env", "main.ts"]
+CMD ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-ffi", "--allow-env", "src/main.ts"]
