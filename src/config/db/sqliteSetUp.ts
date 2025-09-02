@@ -1,6 +1,7 @@
 import { join } from "@std/path";
 import { fileExistsSync } from "../../utilities/file.ts";
 import { createTables } from "./sqliteInitializeSchema.ts";
+import { seedData } from "./seedData.ts";
 import { getDatabase } from "./sqliteConnection.ts";
 
 function dbTablesExist(): boolean {
@@ -40,6 +41,7 @@ export function initializeDatabase() {
     if (!tablesExist) {
       console.log("Database needs initialization, creating tables...");
       createTables(); // This will create the connection and the file if needed
+      seedData(); // Seed initial data if necessary
       console.log("Database initialized with schema successfully");
     } else {
       console.log(

@@ -12,6 +12,17 @@ const USERS = `
   );
 `;
 
+const APP_SETTINGS = `
+  CREATE TABLE IF NOT EXISTS app_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL UNIQUE,
+    value TEXT,
+    admin_only INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`;
+
 const COMIC_LIBRARIES = `
   CREATE TABLE IF NOT EXISTS comic_libraries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,6 +39,10 @@ export function createTables() {
   try {
     console.log("Creating database tables...");
     const db = getDatabase();
+
+    console.log("Executing APP_SETTINGS table SQL...");
+    db.exec(APP_SETTINGS);
+    console.log("APP_SETTINGS table created successfully");
 
     console.log("Executing USERS table SQL...");
     db.exec(USERS);
