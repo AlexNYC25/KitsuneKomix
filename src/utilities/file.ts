@@ -1,5 +1,3 @@
-
-
 export function fileExistsSync(path: string): boolean {
   try {
     const stat = Deno.statSync(path);

@@ -1,6 +1,5 @@
-
-import app from './api/app.ts'
-import { initializeDatabase } from './config/db/sqliteSetUp.ts';
+import app from "./api/app.ts";
+import { initializeDatabase } from "./config/db/sqliteSetUp.ts";
 
 initializeDatabase();
 
