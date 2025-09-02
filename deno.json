@@ -13,6 +13,7 @@
     "@std/fs": "jsr:@std/fs@^1.0.18",
     "@std/path": "jsr:@std/path@^1.1.0",
     "bullmq": "npm:bullmq@^5.58.4",
+    "chokidar": "npm:chokidar@^4.0.3",
     "comic-metadata-tool": "npm:comic-metadata-tool@^1.0.4",
     "pino": "npm:pino@^9.9.0",
     "winston": "npm:winston@^3.17.0",

@@ -4,7 +4,6 @@
     "jsr:@brielov/crypto@0.1": "0.1.0",
     "jsr:@db/sqlite@0.12": "0.12.0",
     "jsr:@denosaurs/plug@1": "1.1.0",
-    "jsr:@funnylookinhat/logosaurus@^1.2.1": "1.2.1",
     "jsr:@oak/commons@1": "1.0.1",
     "jsr:@oak/oak@^17.1.4": "17.1.4",
     "jsr:@std/assert@*": "1.0.13",
@@ -22,13 +21,13 @@
     "jsr:@std/fs@^1.0.18": "1.0.18",
     "jsr:@std/http@1": "1.0.18",
     "jsr:@std/internal@^1.0.6": "1.0.8",
-    "jsr:@std/io@~0.225.2": "0.225.2",
     "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@0.217": "0.217.0",
     "jsr:@std/path@1": "1.1.0",
     "jsr:@std/path@^1.1.0": "1.1.0",
     "npm:@types/node@*": "22.15.15",
     "npm:bullmq@^5.58.4": "5.58.4",
+    "npm:chokidar@^4.0.3": "4.0.3",
     "npm:comic-metadata-tool@^1.0.4": "1.0.4",
     "npm:path-to-regexp@^6.3.0": "6.3.0",
     "npm:pino@^9.9.0": "9.9.0",
@@ -53,13 +52,6 @@
         "jsr:@std/fmt@1",
         "jsr:@std/fs@1",
         "jsr:@std/path@1"
-      ]
-    },
-    "@funnylookinhat/logosaurus@1.2.1": {
-      "integrity": "84c9a8833c97aa5e3e5312fbbe6a490d1b87a9e7e20fecd70fc5a00b76b13e96",
-      "dependencies": [
-        "jsr:@std/fmt@^1.0.5",
-        "jsr:@std/io"
       ]
     },
     "@oak/commons@1.0.1": {
@@ -123,9 +115,6 @@
     },
     "@std/internal@1.0.8": {
       "integrity": "fc66e846d8d38a47cffd274d80d2ca3f0de71040f855783724bb6b87f60891f5"
-    },
-    "@std/io@0.225.2": {
-      "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7"
     },
     "@std/media-types@1.1.0": {
       "integrity": "c9d093f0c05c3512932b330e3cc1fe1d627b301db33a4c2c2185c02471d6eaa4"
@@ -222,6 +211,12 @@
         "semver",
         "tslib",
         "uuid"
+      ]
+    },
+    "chokidar@4.0.3": {
+      "integrity": "sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==",
+      "dependencies": [
+        "readdirp"
       ]
     },
     "cluster-key-slot@1.1.2": {
@@ -471,6 +466,9 @@
         "util-deprecate"
       ]
     },
+    "readdirp@4.1.2": {
+      "integrity": "sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg=="
+    },
     "real-require@0.2.0": {
       "integrity": "sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg=="
     },
@@ -580,13 +578,13 @@
     "dependencies": [
       "jsr:@brielov/crypto@0.1",
       "jsr:@db/sqlite@0.12",
-      "jsr:@funnylookinhat/logosaurus@^1.2.1",
       "jsr:@oak/oak@^17.1.4",
       "jsr:@std/assert@^1.0.13",
       "jsr:@std/dotenv@~0.225.5",
       "jsr:@std/fs@^1.0.18",
       "jsr:@std/path@^1.1.0",
       "npm:bullmq@^5.58.4",
+      "npm:chokidar@^4.0.3",
       "npm:comic-metadata-tool@^1.0.4",
       "npm:pino@^9.9.0",
       "npm:winston@^3.17.0",
