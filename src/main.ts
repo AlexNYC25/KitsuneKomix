@@ -1,5 +1,6 @@
 import app from "./api/app.ts";
 import { initializeDatabase } from "./config/db/sqliteSetUp.ts";
+import "./config/fileWatchers/libraryWatchers.ts";
 
 initializeDatabase();
 
