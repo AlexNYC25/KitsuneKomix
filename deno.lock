@@ -4,14 +4,10 @@
     "jsr:@brielov/crypto@0.1": "0.1.0",
     "jsr:@db/sqlite@0.12": "0.12.0",
     "jsr:@denosaurs/plug@1": "1.1.0",
-    "jsr:@oak/commons@1": "1.0.1",
-    "jsr:@oak/oak@^17.1.4": "17.1.4",
     "jsr:@std/assert@*": "1.0.13",
     "jsr:@std/assert@0.217": "0.217.0",
     "jsr:@std/assert@1": "1.0.13",
     "jsr:@std/assert@^1.0.13": "1.0.13",
-    "jsr:@std/bytes@1": "1.0.6",
-    "jsr:@std/crypto@1": "1.0.5",
     "jsr:@std/dotenv@~0.225.5": "0.225.5",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
@@ -19,9 +15,7 @@
     "jsr:@std/fmt@^1.0.5": "1.0.8",
     "jsr:@std/fs@1": "1.0.18",
     "jsr:@std/fs@^1.0.18": "1.0.18",
-    "jsr:@std/http@1": "1.0.18",
     "jsr:@std/internal@^1.0.6": "1.0.8",
-    "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@0.217": "0.217.0",
     "jsr:@std/path@1": "1.1.0",
     "jsr:@std/path@^1.1.0": "1.1.0",
@@ -29,7 +23,7 @@
     "npm:bullmq@^5.58.4": "5.58.4",
     "npm:chokidar@^4.0.3": "4.0.3",
     "npm:comic-metadata-tool@^1.0.4": "1.0.4",
-    "npm:path-to-regexp@^6.3.0": "6.3.0",
+    "npm:hono@^4.9.5": "4.9.5",
     "npm:pino@^9.9.0": "9.9.0",
     "npm:winston@^3.17.0": "3.17.0",
     "npm:zod@^4.1.5": "4.1.5"
@@ -54,29 +48,6 @@
         "jsr:@std/path@1"
       ]
     },
-    "@oak/commons@1.0.1": {
-      "integrity": "889ff210f0b4292591721be07244ecb1b5c118742f5273c70cf30d7cd4184d0c",
-      "dependencies": [
-        "jsr:@std/assert@1",
-        "jsr:@std/bytes",
-        "jsr:@std/crypto",
-        "jsr:@std/encoding@1",
-        "jsr:@std/http",
-        "jsr:@std/media-types"
-      ]
-    },
-    "@oak/oak@17.1.4": {
-      "integrity": "60530b582bf276ff741e39cc664026781aa08dd5f2bc5134d756cc427bf2c13e",
-      "dependencies": [
-        "jsr:@oak/commons",
-        "jsr:@std/assert@1",
-        "jsr:@std/bytes",
-        "jsr:@std/http",
-        "jsr:@std/media-types",
-        "jsr:@std/path@1",
-        "npm:path-to-regexp"
-      ]
-    },
     "@std/assert@0.217.0": {
       "integrity": "c98e279362ca6982d5285c3b89517b757c1e3477ee9f14eb2fdf80a45aaa9642"
     },
@@ -85,12 +56,6 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
-    },
-    "@std/bytes@1.0.6": {
-      "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
-    },
-    "@std/crypto@1.0.5": {
-      "integrity": "0dcfbb319fe0bba1bd3af904ceb4f948cde1b92979ec1614528380ed308a3b40"
     },
     "@std/dotenv@0.225.5": {
       "integrity": "9ce6f9d0ec3311f74a32535aa1b8c62ed88b1ab91b7f0815797d77a6f60c922f"
@@ -107,17 +72,8 @@
         "jsr:@std/path@^1.1.0"
       ]
     },
-    "@std/http@1.0.18": {
-      "integrity": "8d9546aa532c52a0cf318c74616db0638b4c1073405355d1b14f9e1591dccf20",
-      "dependencies": [
-        "jsr:@std/encoding@^1.0.10"
-      ]
-    },
     "@std/internal@1.0.8": {
       "integrity": "fc66e846d8d38a47cffd274d80d2ca3f0de71040f855783724bb6b87f60891f5"
-    },
-    "@std/media-types@1.1.0": {
-      "integrity": "c9d093f0c05c3512932b330e3cc1fe1d627b301db33a4c2c2185c02471d6eaa4"
     },
     "@std/path@0.217.0": {
       "integrity": "1217cc25534bca9a2f672d7fe7c6f356e4027df400c0e85c0ef3e4343bc67d11",
@@ -300,6 +256,9 @@
     "fn.name@1.1.0": {
       "integrity": "sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw=="
     },
+    "hono@4.9.5": {
+      "integrity": "sha512-aLAVl5/67ifNnoFVxnhR89dpmSLsgwBprw/PT671ASwUpJqmd7Ne8KPTQo37DbRZfgpHaHeZ4bPVUvbOkeedMw=="
+    },
     "inherits@2.0.4": {
       "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="
     },
@@ -422,9 +381,6 @@
       "dependencies": [
         "fn.name"
       ]
-    },
-    "path-to-regexp@6.3.0": {
-      "integrity": "sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ=="
     },
     "pino-abstract-transport@2.0.0": {
       "integrity": "sha512-F63x5tizV6WCh4R6RHyi2Ml+M70DNRXt/+HANowMflpgGFMAym/VKm6G7ZOQRjqN7XbGxK1Lg9t6ZrtzOaivMw==",
@@ -578,7 +534,6 @@
     "dependencies": [
       "jsr:@brielov/crypto@0.1",
       "jsr:@db/sqlite@0.12",
-      "jsr:@oak/oak@^17.1.4",
       "jsr:@std/assert@^1.0.13",
       "jsr:@std/dotenv@~0.225.5",
       "jsr:@std/fs@^1.0.18",
@@ -586,6 +541,7 @@
       "npm:bullmq@^5.58.4",
       "npm:chokidar@^4.0.3",
       "npm:comic-metadata-tool@^1.0.4",
+      "npm:hono@^4.9.5",
       "npm:pino@^9.9.0",
       "npm:winston@^3.17.0",
       "npm:zod@^4.1.5"

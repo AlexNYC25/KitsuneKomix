@@ -1,30 +1,17 @@
-import { Application, Context, Router, Status } from "@oak/oak";
+import { Hono } from "hono";
+import rootRouter from "./routes/root.router.ts";
 
-const app = new Application();
-const router = new Router();
+const app = new Hono();
 
-router.get("/", (ctx: Context) => {
-  ctx.response.body = "Hello, world!";
+app.route("/", rootRouter);
+
+app.notFound((c) => {
+  return c.json({ error: "Not Found" }, 404);
 });
 
-// 404 handler (for routes not matched)
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-app.use((ctx) => {
-  ctx.response.status = Status.NotFound;
-  ctx.response.body = { message: "Not Found" };
-});
-
-// Global error handler
-app.use(async (ctx, next) => {
-  try {
-    await next();
-  } catch (err) {
-    console.error(err);
-    ctx.response.status = Status.InternalServerError;
-    ctx.response.body = { message: "Internal Server Error" };
-  }
+app.onError((err, c) => {
+  console.error("Unhandled error:", err);
+  return c.json({ error: "Internal Server Error" }, 500);
 });
 
 export default app;
