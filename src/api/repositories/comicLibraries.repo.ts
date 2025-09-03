@@ -23,7 +23,6 @@ export const createComicLibrary = (library: NewLibrary): number => {
 
   stmt.run(library.name, library.path, library.description, library.enabled ? 1 : 0);
   const id = db.lastInsertRowId;
-  stmt.finalize();
   return id;
 };
 
