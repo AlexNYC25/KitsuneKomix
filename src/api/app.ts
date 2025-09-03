@@ -1,9 +1,11 @@
 import { Hono } from "hono";
 import rootRouter from "./routes/root.router.ts";
+import apiRouter from "./routes/api.router.ts";
 
 const app = new Hono();
 
 app.route("/", rootRouter);
+app.route("/api", apiRouter);
 
 app.notFound((c) => {
   return c.json({ error: "Not Found" }, 404);
