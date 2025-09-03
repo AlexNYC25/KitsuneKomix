@@ -4,6 +4,8 @@ const USERS = `
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
+    first_name TEXT,
+    last_name TEXT,
     password_hash TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     admin INTEGER NOT NULL DEFAULT 0,
