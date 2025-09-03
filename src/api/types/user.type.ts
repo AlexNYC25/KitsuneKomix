@@ -24,7 +24,7 @@ export type NewUser = {
   lastName?: string;
 };
 
-export type RegistrationInput = {
+export type UserRegistrationInput = {
   username: string;
   email: string;
   password: string;   // plain text from client
