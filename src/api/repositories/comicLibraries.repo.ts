@@ -1,8 +1,6 @@
 import { getDatabase } from "../../config/db/sqliteConnection.ts";
 import { NewLibrary, LibraryRow } from "../types/comicLibrary.type.ts";
 
-const db = getDatabase();
-
 function mapRowToLibrary(row: Record<string, unknown>): LibraryRow {
   return {
     id: row.id as number,
@@ -16,6 +14,7 @@ function mapRowToLibrary(row: Record<string, unknown>): LibraryRow {
 }
 
 export const createComicLibrary = (library: NewLibrary): number => {
+  const db = getDatabase();
   const stmt = db.prepare(`
     INSERT INTO comic_libraries (name, path, description, enabled)
     VALUES (?, ?, ?, ?)
@@ -27,6 +26,7 @@ export const createComicLibrary = (library: NewLibrary): number => {
 };
 
 export const getAllComicLibraries = (): LibraryRow[] => {
+  const db = getDatabase();
   const stmt = db.prepare(`
     SELECT id, name, path, description, enabled, created_at, updated_at
     FROM comic_libraries
@@ -36,6 +36,7 @@ export const getAllComicLibraries = (): LibraryRow[] => {
 };
 
 export const getComicLibraryById = (id: number): LibraryRow | undefined => {
+  const db = getDatabase();
   const stmt = db.prepare(`
     SELECT id, name, path, description, enabled, created_at, updated_at
     FROM comic_libraries

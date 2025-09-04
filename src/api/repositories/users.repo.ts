@@ -1,8 +1,6 @@
 import { getDatabase } from "../../config/db/sqliteConnection.ts";
 import { NewUser, UserRow } from "../types/user.type.ts";
 
-const db = getDatabase();
-
 function mapRowToUser(row: Record<string, unknown>): UserRow {
   return {
     id: row.id as number,
@@ -15,6 +13,7 @@ function mapRowToUser(row: Record<string, unknown>): UserRow {
 }
 
 export const createUser = (userData: NewUser): number => {
+  const db = getDatabase();
   const stmt = db.prepare(`
     INSERT INTO users (username, email, password_hash, first_name, last_name)
     VALUES (?, ?, ?, ?, ?)
@@ -34,6 +33,7 @@ export const createUser = (userData: NewUser): number => {
 
 
 export const getUserById = (id: number): UserRow | undefined => {
+	const db = getDatabase();
   const stmt = db.prepare("SELECT * FROM users WHERE id = ?");
   const user = stmt.get(id) as Record<string, unknown> | undefined;
   return user ? mapRowToUser(user) : undefined;
@@ -42,6 +42,7 @@ export const getUserById = (id: number): UserRow | undefined => {
 
 
 export const getUserByEmail = (email: string): UserRow | undefined => {
+	const db = getDatabase();
   const stmt = db.prepare("SELECT * FROM users WHERE email = ?");
   const row = stmt.get(email) as Record<string, unknown> | undefined;
   return row ? mapRowToUser(row) : undefined;
