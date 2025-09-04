@@ -2,7 +2,7 @@ export type UserRow = {
   id: number;
   username: string;
   email: string;
-  password_hash: string;       // stored hash
+  password_hash: string; // stored hash
   first_name: string | null;
   last_name: string | null;
 };
@@ -13,7 +13,7 @@ export type UserDomain = {
   email: string;
   firstName?: string;
   lastName?: string;
-  createdAt?: Date;            // optional if you store timestamps
+  createdAt?: Date; // optional if you store timestamps
 };
 
 export type NewUser = {
@@ -27,7 +27,7 @@ export type NewUser = {
 export type UserRegistrationInput = {
   username: string;
   email: string;
-  password: string;   // plain text from client
+  password: string; // plain text from client
   firstName?: string;
   lastName?: string;
 };

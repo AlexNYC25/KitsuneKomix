@@ -8,5 +8,3 @@ export const UserSchema = z.object({
   first_name: z.string().max(50).nullable().optional(),
   last_name: z.string().max(50).nullable().optional(),
 });
-
-

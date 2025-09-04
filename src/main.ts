@@ -6,4 +6,4 @@ initializeDatabase();
 
 const port = parseInt(Deno.env.get("PORT") ?? "3000", 10);
 
-Deno.serve({port: port}, app.fetch);
+Deno.serve({ port: port }, app.fetch);

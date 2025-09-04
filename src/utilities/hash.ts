@@ -1,4 +1,3 @@
-
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 
 /**
@@ -15,6 +14,9 @@ export async function hashPassword(plain: string): Promise<string> {
  * @param hash - stored hash from the DB
  * @param plain - user-provided password to check
  */
-export async function verifyPassword(hash: string, plain: string): Promise<boolean> {
+export async function verifyPassword(
+  hash: string,
+  plain: string,
+): Promise<boolean> {
   return await bcrypt.compare(plain, hash);
 }

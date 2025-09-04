@@ -9,5 +9,4 @@ apiRouter.route("/users", apiUsersRouter);
 apiRouter.route("/comic-libraries", comicLibraryRouter);
 apiRouter.route("/admin", adminRouter);
 
-
 export default apiRouter;

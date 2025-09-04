@@ -1,4 +1,4 @@
-import { Hono, Context } from "hono";
+import { Context, Hono } from "hono";
 
 const rootRouter = new Hono();
 

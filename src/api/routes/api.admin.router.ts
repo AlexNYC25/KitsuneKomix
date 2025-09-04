@@ -1,4 +1,4 @@
-import { Hono, Context } from "hono";
+import { Context, Hono } from "hono";
 import { adminController } from "../controllers/admin.controller.ts";
 
 const app = new Hono();

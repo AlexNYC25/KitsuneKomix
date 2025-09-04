@@ -27,21 +27,21 @@ const COMIC_LIBRARIES = `
 `;
 
 export function createTables() {
-    try {
-        dbLogger.info("Creating database tables...");
-        const db = getDatabase();
+  try {
+    dbLogger.info("Creating database tables...");
+    const db = getDatabase();
 
-        dbLogger.info("Executing USERS table SQL...");
-        db.exec(USERS);
-        dbLogger.info("USERS table created successfully");
+    dbLogger.info("Executing USERS table SQL...");
+    db.exec(USERS);
+    dbLogger.info("USERS table created successfully");
 
-        dbLogger.info("Executing COMIC_LIBRARIES table SQL...");
-        db.exec(COMIC_LIBRARIES);
-        dbLogger.info("COMIC_LIBRARIES table created successfully");
+    dbLogger.info("Executing COMIC_LIBRARIES table SQL...");
+    db.exec(COMIC_LIBRARIES);
+    dbLogger.info("COMIC_LIBRARIES table created successfully");
 
-        dbLogger.info("All tables created successfully");
-    } catch (error) {
-        dbLogger.error("Failed to create tables: " + error);
-        throw error;
-    }
+    dbLogger.info("All tables created successfully");
+  } catch (error) {
+    dbLogger.error("Failed to create tables: " + error);
+    throw error;
+  }
 }

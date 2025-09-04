@@ -53,7 +53,7 @@ export function initializeDatabase() {
     dbLogger.info("=== Database initialization completed ===");
   } catch (error) {
     dbLogger.error("=== Database initialization failed ===");
-    dbLogger.error("Error: " +  error);
+    dbLogger.error("Error: " + error);
     throw error;
   }
 }

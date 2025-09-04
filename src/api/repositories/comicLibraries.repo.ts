@@ -1,5 +1,5 @@
 import { getDatabase } from "../../config/db/sqliteConnection.ts";
-import { NewLibrary, LibraryRow } from "../types/comicLibrary.type.ts";
+import { LibraryRow, NewLibrary } from "../types/comicLibrary.type.ts";
 
 function mapRowToLibrary(row: Record<string, unknown>): LibraryRow {
   return {
@@ -20,7 +20,12 @@ export const createComicLibrary = (library: NewLibrary): number => {
     VALUES (?, ?, ?, ?)
   `);
 
-  stmt.run(library.name, library.path, library.description, library.enabled ? 1 : 0);
+  stmt.run(
+    library.name,
+    library.path,
+    library.description,
+    library.enabled ? 1 : 0,
+  );
   const id = db.lastInsertRowId;
   return id;
 };

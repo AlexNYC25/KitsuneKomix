@@ -31,21 +31,16 @@ export const createUser = (userData: NewUser): number => {
   return id;
 };
 
-
 export const getUserById = (id: number): UserRow | undefined => {
-	const db = getDatabase();
+  const db = getDatabase();
   const stmt = db.prepare("SELECT * FROM users WHERE id = ?");
   const user = stmt.get(id) as Record<string, unknown> | undefined;
   return user ? mapRowToUser(user) : undefined;
 };
 
-
-
 export const getUserByEmail = (email: string): UserRow | undefined => {
-	const db = getDatabase();
+  const db = getDatabase();
   const stmt = db.prepare("SELECT * FROM users WHERE email = ?");
   const row = stmt.get(email) as Record<string, unknown> | undefined;
   return row ? mapRowToUser(row) : undefined;
 };
-
-
