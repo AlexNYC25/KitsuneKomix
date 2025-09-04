@@ -22,6 +22,7 @@
     "npm:@types/node@*": "22.15.15",
     "npm:bullmq@^5.58.4": "5.58.4",
     "npm:chokidar@^4.0.3": "4.0.3",
+    "npm:comic-metadata-tool@*": "1.0.4",
     "npm:comic-metadata-tool@^1.0.4": "1.0.4",
     "npm:hono@^4.9.5": "4.9.5",
     "npm:pino@^9.9.0": "9.9.0",
@@ -529,6 +530,15 @@
     "zod@4.1.5": {
       "integrity": "sha512-rcUUZqlLJgBC33IT3PNMgsCq6TzLQEG/Ei/KTCU0PedSWRMAXoOUN+4t/0H+Q8bdnLPdqUYnvboJT0bn/229qg=="
     }
+  },
+  "redirects": {
+    "https://deno.land/x/bcrypt/mod.ts": "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
+  },
+  "remote": {
+    "https://deno.land/x/bcrypt@v0.4.1/mod.ts": "ff09bdae282583cf5f7d87efe37ddcecef7f14f6d12e8b8066a3058db8c6c2f7",
+    "https://deno.land/x/bcrypt@v0.4.1/src/bcrypt/base64.ts": "b8266450a4f1eb6960f60f2f7986afc4dde6b45bd2d7ee7ba10789e67e17b9f7",
+    "https://deno.land/x/bcrypt@v0.4.1/src/bcrypt/bcrypt.ts": "ec221648cc6453ea5e3803bc817c01157dada06aa6f7a0ba6b9f87aae32b21e2",
+    "https://deno.land/x/bcrypt@v0.4.1/src/main.ts": "08d201b289c8d9c46f8839c69cd6625b213863db29775c7a200afc3b540e64f8"
   },
   "workspace": {
     "dependencies": [
