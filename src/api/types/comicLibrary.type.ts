@@ -4,6 +4,7 @@ export type LibraryRow = {
   description: string | null;
   path: string;
   enabled: boolean;
+  changed_at: string;
   created_at: string;
   updated_at: string;
 };
@@ -14,6 +15,7 @@ export type LibraryDomain = {
   description?: string;
   path: string;
   enabled: boolean;
+  changed_at: string;
   created_at: string;
   updated_at: string;
 };
