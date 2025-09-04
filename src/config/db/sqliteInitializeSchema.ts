@@ -40,6 +40,38 @@ const COMIC_LIBRARIES = `
   );
 `;
 
+//TODO: Expand into mapping tables for authors, series, publishers, tags, etc.
+const COMIC_BOOKS = `
+  CREATE TABLE IF NOT EXISTS comic_books (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    library_id INTEGER NOT NULL,
+    file_path TEXT NOT NULL,
+    title TEXT,
+    series TEXT,
+    issue_number TEXT,
+    volume TEXT,
+    authors TEXT,
+    publisher TEXT,
+    publication_date TEXT,
+    tags TEXT,
+    read INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (library_id) REFERENCES comic_libraries(id) ON DELETE CASCADE
+  );
+`;
+
+const COMIC_SERIES = `
+  CREATE TABLE IF NOT EXISTS comic_series (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    folder_path TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`;
+
 export function createTables() {
   try {
     dbLogger.info("Creating database tables...");
@@ -56,6 +88,14 @@ export function createTables() {
     dbLogger.info("Executing COMIC_LIBRARIES table SQL...");
     db.exec(COMIC_LIBRARIES);
     dbLogger.info("COMIC_LIBRARIES table created successfully");
+
+    dbLogger.info("Executing COMIC_BOOKS table SQL...");
+    db.exec(COMIC_BOOKS);
+    dbLogger.info("COMIC_BOOKS table created successfully");
+
+    dbLogger.info("Executing COMIC_SERIES table SQL...");
+    db.exec(COMIC_SERIES);
+    dbLogger.info("COMIC_SERIES table created successfully");
 
     dbLogger.info("All tables created successfully");
   } catch (error) {
