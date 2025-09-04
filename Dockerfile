@@ -19,4 +19,4 @@ RUN deno cache --lock=deno.lock src/main.ts
 # Expose the port your Oak/Deno app will run on
 EXPOSE 3000
 
-CMD ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-ffi", "--allow-env", "src/main.ts"]
+CMD ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-ffi", "--allow-sys", "--allow-env", "src/main.ts"]
