@@ -9,3 +9,9 @@ export function fileExistsSync(path: string): boolean {
     throw err;
   }
 }
+
+export function isFileAComicBookFile(fileName: string): boolean {
+  const comicBookExtensions = [".cbz", ".cbr", ".cb7", ".cbt", ".cba"];
+  const lowerCaseFileName = fileName.toLowerCase();
+  return comicBookExtensions.some(ext => lowerCaseFileName.endsWith(ext));
+}
