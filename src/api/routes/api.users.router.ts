@@ -3,7 +3,7 @@ import { userController } from "../controllers/users.controller.ts";
 
 const apiUsersRouter = new Hono();  
 
-apiUsersRouter.post("/create", (c: Context) => {
+apiUsersRouter.post("/create-user", (c: Context) => {
   return userController.createUser(c);
 });
 
