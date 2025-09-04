@@ -35,6 +35,18 @@ export const dbLogger = pino({
   },
 });
 
+export const queueLogger = pino({
+  level: "debug",
+  transport: {
+    target: "pino-pretty",
+    options: {
+      translateTime: "SYS:standard",
+      ignore: "pid,hostname",
+      destination: join(logsDir, "queue.log"),
+    },
+  },
+});
+
 // Fallback simple loggers if pino-pretty fails
 export const simpleApiLogger = pino({
   level: "debug",

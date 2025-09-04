@@ -1,6 +1,7 @@
 import chokidar from "chokidar";
 
 import { getAllComicLibraries, getComicLibraryLastChangedTime } from "../../api/repositories/comicLibraries.repo.ts";
+import { addNewComicFile } from "../../queue/actions/newComicFile.ts";
 
 let instance: WatchManager | null = null;
 
@@ -40,8 +41,15 @@ export class WatchManager {
 
     }
 
-    private onFileAdded(path: string) {
+    private async onFileAdded(path: string) {
         console.log(`File added: ${path}`);
+        console.log(`Calling addNewComicFile with path: ${path}`);
+        try {
+            await addNewComicFile({ filePath: path, metadata: {} });
+            console.log(`Successfully called addNewComicFile for: ${path}`);
+        } catch (error) {
+            console.error(`Error calling addNewComicFile for ${path}:`, error);
+        }
     }
 
     private onFileRemoved(path: string) {
@@ -55,8 +63,6 @@ export class WatchManager {
     private refreshWatchedPaths() {
         const libraries = getAllComicLibraries().filter(lib => lib.enabled);
         const currentPaths = new Set(this.byPath.keys());
-
-        console.log(libraries);
 
         for (const lib of libraries) {
             if (!this.byPath.has(lib.path)) {
