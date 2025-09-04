@@ -3,6 +3,7 @@ import { fileExistsSync } from "../../utilities/file.ts";
 import { createTables } from "./sqliteInitializeSchema.ts";
 import { seedData } from "./seedData.ts";
 import { getDatabase } from "./sqliteConnection.ts";
+import { dbLogger } from "../logger/loggers.ts";
 
 function dbTablesExist(): boolean {
   try {
@@ -18,41 +19,41 @@ function dbTablesExist(): boolean {
 
 export function initializeDatabase() {
   try {
-    console.log("=== Starting database initialization ===");
+    dbLogger.info("=== Starting database initialization ===");
 
     const configDir = join(Deno.cwd(), "config");
     const dbPath = join(configDir, "database.sqlite");
 
     if (!fileExistsSync(configDir)) {
-      console.log("Config directory does not exist, creating it...");
+      dbLogger.info("Config directory does not exist, creating it...");
       Deno.mkdirSync(configDir, { recursive: true });
-      console.log("Config directory created successfully");
+      dbLogger.info("Config directory created successfully");
     } else {
-      console.log("Config directory already exists");
+      dbLogger.info("Config directory already exists");
     }
 
     // Check if database file exists
     const dbFileExists = fileExistsSync(dbPath);
-    console.log("Database file exists:", dbFileExists);
+    dbLogger.info("Database file exists: " + dbFileExists);
 
     // Check if tables exist by trying to query one of them
     const tablesExist = dbTablesExist();
 
     if (!tablesExist) {
-      console.log("Database needs initialization, creating tables...");
+      dbLogger.info("Database needs initialization, creating tables...");
       createTables(); // This will create the connection and the file if needed
       seedData(); // Seed initial data if necessary
-      console.log("Database initialized with schema successfully");
+      dbLogger.info("Database initialized with schema successfully");
     } else {
-      console.log(
+      dbLogger.info(
         "Database file and tables already exist, skipping initialization",
       );
     }
 
-    console.log("=== Database initialization completed ===");
+    dbLogger.info("=== Database initialization completed ===");
   } catch (error) {
-    console.error("=== Database initialization failed ===");
-    console.error("Error:", error);
+    dbLogger.error("=== Database initialization failed ===");
+    dbLogger.error("Error: " +  error);
     throw error;
   }
 }

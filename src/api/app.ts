@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import rootRouter from "./routes/root.router.ts";
 import apiRouter from "./routes/api.router.ts";
 
+import { apiLogger } from "../config/logger/loggers.ts";
+
 const app = new Hono();
 
 app.route("/", rootRouter);
@@ -12,7 +14,7 @@ app.notFound((c) => {
 });
 
 app.onError((err, c) => {
-  console.error("Unhandled error:", err);
+  apiLogger.error("Unhandled error: " + err.message);
   return c.json({ error: "Internal Server Error" }, 500);
 });
 

@@ -1,5 +1,6 @@
 import { getDatabase } from "./sqliteConnection.ts";
 
+import { dbLogger } from "../logger/loggers.ts";
 
 const SETTINGS_DATA = [
     { key: "app_name", value: "KitsuneKomix", admin_only: 1 },
@@ -18,5 +19,5 @@ export function seedData() {
         );
     });
 
-    console.log("Seeding initial data... (currently no seed data to insert)");
+    dbLogger.info("Seeding initial data... (currently no seed data to insert)");
 }

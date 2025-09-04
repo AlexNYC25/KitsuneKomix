@@ -1,5 +1,7 @@
 import { getDatabase } from "./sqlite.ts";
 
+import { dbLogger } from "../logger/loggers.ts";
+
 const USERS = `
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,20 +28,20 @@ const COMIC_LIBRARIES = `
 
 export function createTables() {
     try {
-        console.log("Creating database tables...");
+        dbLogger.info("Creating database tables...");
         const db = getDatabase();
-        
-        console.log("Executing USERS table SQL...");
+
+        dbLogger.info("Executing USERS table SQL...");
         db.exec(USERS);
-        console.log("USERS table created successfully");
-        
-        console.log("Executing COMIC_LIBRARIES table SQL...");
+        dbLogger.info("USERS table created successfully");
+
+        dbLogger.info("Executing COMIC_LIBRARIES table SQL...");
         db.exec(COMIC_LIBRARIES);
-        console.log("COMIC_LIBRARIES table created successfully");
-        
-        console.log("All tables created successfully");
+        dbLogger.info("COMIC_LIBRARIES table created successfully");
+
+        dbLogger.info("All tables created successfully");
     } catch (error) {
-        console.error("Failed to create tables:", error);
+        dbLogger.error("Failed to create tables: " + error);
         throw error;
     }
 }
