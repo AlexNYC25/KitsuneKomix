@@ -1,0 +1,20 @@
+# Ignore comic files and large directories
+comics/
+cache/
+logs/
+config/
+node_modules/
+.git/
+.DS_Store
+*.cbz
+*.cbr
+*.pdf
+
+# Ignore development files
+.env
+.env.local
+.vscode/
+*.log
+
+# Ignore old files
+_OLD/
