@@ -27,12 +27,18 @@ export class WatchManager {
             .on("add", (path) => this.onFileAdded(path))
             .on("change", (path) => this.onFileChanged(path))
             .on("unlink", (path) => this.onFileRemoved(path))
-            .on("error", (error) => console.error(`Watcher error: ${error}`));
+            .on("error", (error) => console.error(`Watcher error: ${error}`))
+            .on("ready", () => console.log("Chokidar watcher is ready"));
 
         // Load existing libraries and watch their paths
-        const libraries = getAllComicLibraries().filter(lib => lib.enabled);
-        for (const lib of libraries) {
-            this.addPath(lib.path, lib.id);
+        try {
+            const libraries = getAllComicLibraries().filter(lib => lib.enabled);
+            for (const lib of libraries) {
+                console.log(`Adding path to watch: ${lib.path} (ID: ${lib.id})`);
+                this.addPath(lib.path, lib.id);
+            }
+        } catch (error) {
+            console.error("Error loading comic libraries:", error);
         }
 
         // Periodically refresh watched paths to catch any changes in the database
