@@ -50,7 +50,6 @@ const COMIC_BOOKS = `
     series TEXT,
     issue_number TEXT,
     volume TEXT,
-    authors TEXT,
     publisher TEXT,
     publication_date TEXT,
     tags TEXT,
@@ -67,6 +66,16 @@ const COMIC_SERIES = `
     name TEXT NOT NULL UNIQUE,
     description TEXT,
     folder_path TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`;
+
+const COMIC_WRITERS = `
+  CREATE TABLE IF NOT EXISTS comic_writers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    biography TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -96,6 +105,10 @@ export function createTables() {
     dbLogger.info("Executing COMIC_SERIES table SQL...");
     db.exec(COMIC_SERIES);
     dbLogger.info("COMIC_SERIES table created successfully");
+
+    dbLogger.info("Executing COMIC_WRITERS table SQL...");
+    db.exec(COMIC_WRITERS);
+    dbLogger.info("COMIC_WRITERS table created successfully");
 
     dbLogger.info("All tables created successfully");
   } catch (error) {
