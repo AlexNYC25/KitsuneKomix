@@ -1,7 +1,7 @@
 import { Context } from "hono";
 
 import { adminService } from "../services/admin.service.ts";
-import { apiLogger } from "../../config/logger/loggers.ts";
+import { apiLogger } from "../config/logger/loggers.ts";
 
 export const adminController = {
   purgeAllData: (c: Context) => {

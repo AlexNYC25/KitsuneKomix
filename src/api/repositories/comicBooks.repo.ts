@@ -1,4 +1,4 @@
-import { getDatabase } from "../../config/db/sqliteConnection.ts";
+import { getDatabase } from "../config/db/sqliteConnection.ts";
 import { NewComicBook, ComicBookRow } from "../types/comicBook.type.ts";
 
 function mapRowToComicBook(row: Record<string, unknown>): ComicBookRow {

@@ -1,4 +1,4 @@
-import { getDatabase } from "../../config/db/sqliteConnection.ts";
+import { getDatabase } from "../config/db/sqliteConnection.ts";
 
 export function purgeAllData() {
   const db = getDatabase();

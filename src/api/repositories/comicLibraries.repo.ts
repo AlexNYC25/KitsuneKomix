@@ -1,4 +1,4 @@
-import { getDatabase } from "../../config/db/sqliteConnection.ts";
+import { getDatabase } from "../config/db/sqliteConnection.ts";
 import { LibraryRow, NewLibrary } from "../types/comicLibrary.type.ts";
 
 function mapRowToLibrary(row: Record<string, unknown>): LibraryRow {
