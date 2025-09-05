@@ -41,6 +41,7 @@ const COMIC_LIBRARIES = `
 `;
 
 //TODO: Expand into mapping tables for authors, series, publishers, tags, etc.
+//TODO: Remove read field and replace with a mapping table for users and read books
 const COMIC_BOOKS = `
   CREATE TABLE IF NOT EXISTS comic_books (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
