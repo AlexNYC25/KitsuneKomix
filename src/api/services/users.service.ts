@@ -1,4 +1,4 @@
-import { hashPassword } from "../../utilities/hash.ts";
+import { hashPassword } from "../utilities/hash.ts";
 import { NewUser, UserRegistrationInput } from "../types/user.type.ts";
 import { createUser, getUserByEmail } from "../repositories/users.repo.ts";
 
