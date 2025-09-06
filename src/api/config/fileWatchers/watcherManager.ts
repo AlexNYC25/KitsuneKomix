@@ -1,6 +1,6 @@
 import chokidar from "chokidar";
 
-import { getAllComicLibraries, getComicLibraryLastChangedTime } from "../../api/repositories/comicLibraries.repo.ts";
+import { getAllComicLibraries, getComicLibraryLastChangedTime } from "../../repositories/comicLibraries.repo.ts";
 import { addNewComicFile } from "../../queue/actions/newComicFile.ts";
 
 let instance: WatchManager | null = null;
