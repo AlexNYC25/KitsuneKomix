@@ -1,13 +1,10 @@
-export type LibraryRow = {
-  id: number;
-  name: string;
-  description: string | null;
-  path: string;
-  enabled: boolean;
-  changed_at: string;
-  created_at: string;
-  updated_at: string;
-};
+import { ComicLibrary, NewComicLibrary, ComicLibraryWithBooks } from "./database.types.ts";
+
+// Re-export database types
+export type { ComicLibrary, NewComicLibrary, ComicLibraryWithBooks };
+
+// Legacy types for backward compatibility
+export type LibraryRow = ComicLibrary;
 
 export type LibraryDomain = {
   id: number;
@@ -15,21 +12,21 @@ export type LibraryDomain = {
   description?: string;
   path: string;
   enabled: boolean;
-  changed_at: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type NewLibrary = {
-  name: string;
-  description?: string | null;
-  path: string;
-  enabled: boolean;
+  changedAt: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type LibraryRegistrationInput = {
   name: string;
-  description?: string | null;
+  description?: string;
   path: string;
-  enabled: boolean;
+  enabled?: boolean;
+};
+
+export type LibraryUpdateInput = {
+  name?: string;
+  description?: string;
+  path?: string;
+  enabled?: boolean;
 };

@@ -1,36 +1,29 @@
-export type ComicBookRow = {
-  id: number;
-  library_id: number;
-	file_path: string;
-	title: string | null;
-	series: string | null;
-	issue_number: string | null;
-	volume: string | null;
-	publisher: string | null;
-	publication_date: string | null;
-	tags: string | null;
-	read: number;
-	created_at: string;
-	updated_at: string;
-};
+import { ComicBook, NewComicBook, ComicBookWithRelations } from "./database.types.ts";
+
+// Re-export database types
+export type { ComicBook, NewComicBook, ComicBookWithRelations };
+
+// Legacy types for backward compatibility
+export type ComicBookRow = ComicBook;
 
 export type ComicBookDomain = {
-	id: number;
-	libraryId: number;
-	filePath: string;
-	title: string;
-	series?: string;
-	issueNumber?: string;
-	volume?: string;
-	publisher?: string;
-	publicationDate?: string;
-	tags?: string[]; // Array of tags
-	read: boolean;
-	createdAt: string;
-	updatedAt: string;
+  id: number;
+  libraryId: number;
+  filePath: string;
+  hash: string;
+  title?: string;
+  series?: string;
+  issueNumber?: string;
+  volume?: string;
+  publisher?: string;
+  publicationDate?: string;
+  tags?: string[]; // Parse from comma-separated string
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
-export type NewComicBook = {
+export type ComicBookInput = {
   title: string;
   issueNumber?: string;
   volume?: string;
@@ -38,12 +31,13 @@ export type NewComicBook = {
   publisher?: string;
   tags?: string[]; // Array of tags
   filePath: string;
-  metadata?: Record<string, unknown>; // Additional metadata as an object
-	publicationDate?: string;
+  hash: string;
+  metadata?: Record<string, unknown>; // Additional metadata
+  publicationDate?: string;
   libraryId: number;
 };
 
-export type ComicBookUpdate = Partial<NewComicBook>;
+export type ComicBookUpdate = Partial<Omit<ComicBookInput, 'filePath' | 'hash' | 'libraryId'>>;
 
 export type ComicBookSearchParams = {
   title?: string;
@@ -51,4 +45,5 @@ export type ComicBookSearchParams = {
   publisher?: string;
   tags?: string[];
   libraryId?: number;
+  read?: boolean;
 };

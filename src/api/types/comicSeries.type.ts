@@ -1,31 +1,30 @@
 
-export type ComicSeriesRow = {
-  id: number;
-  name: string;
-  description: string | null;
-  folder_path: string
-	created_at: string;
-	updated_at: string;
-};
+import { ComicSeries, NewComicSeries, ComicSeriesWithBooks } from "./database.types.ts";
+
+// Re-export database types
+export type { ComicSeries, NewComicSeries, ComicSeriesWithBooks };
+
+// Legacy types for backward compatibility
+export type ComicSeriesRow = ComicSeries;
 
 export type ComicSeriesDomain = {
-	id: number;
-	name: string;
-	description?: string;
-	folderPath: string;
-	createdAt: string;
-	updatedAt: string;
+  id: number;
+  name: string;
+  description?: string;
+  folderPath: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
-export type NewComicSeries = {
-	name: string;
-	description?: string | null;
-	folderPath?: string;
+export type ComicSeriesInput = {
+  name: string;
+  description?: string;
+  folderPath?: string;
 };
 
-export type ComicSeriesUpdate = Partial<NewComicSeries>;
+export type ComicSeriesUpdate = Partial<ComicSeriesInput>;
 
 export type ComicSeriesSearchParams = {
-	name?: string;
-	folderPath?: string;
+  name?: string;
+  folderPath?: string;
 };

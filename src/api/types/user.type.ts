@@ -1,11 +1,10 @@
-export type UserRow = {
-  id: number;
-  username: string;
-  email: string;
-  password_hash: string; // stored hash
-  first_name: string | null;
-  last_name: string | null;
-};
+import { User, NewUser } from "./database.types.ts";
+
+// Re-export database types
+export type { User, NewUser };
+
+// Legacy types for backward compatibility
+export type UserRow = User;
 
 export type UserDomain = {
   id: number;
@@ -13,15 +12,9 @@ export type UserDomain = {
   email: string;
   firstName?: string;
   lastName?: string;
-  createdAt?: Date; // optional if you store timestamps
-};
-
-export type NewUser = {
-  username: string;
-  email: string;
-  passwordHash: string;
-  firstName?: string;
-  lastName?: string;
+  admin: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type UserRegistrationInput = {
@@ -31,3 +24,18 @@ export type UserRegistrationInput = {
   firstName?: string;
   lastName?: string;
 };
+
+export type UserLoginInput = {
+  username: string;
+  password: string;
+};
+
+export type UserUpdateInput = {
+  username?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+};
+
+// Safe user type without sensitive data
+export type SafeUser = Omit<User, 'password_hash'>;
