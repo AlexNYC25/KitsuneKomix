@@ -27,7 +27,7 @@
     "npm:@types/node@*": "22.15.15",
     "npm:bullmq@^5.58.4": "5.58.4",
     "npm:chokidar@^4.0.3": "4.0.3",
-    "npm:comic-metadata-tool@^1.1.0": "1.1.0",
+    "npm:comic-metadata-tool@^1.2.0": "1.2.0",
     "npm:drizzle-kit@*": "0.31.4_esbuild@0.25.9",
     "npm:drizzle-kit@~0.31.4": "0.31.4_esbuild@0.25.9",
     "npm:drizzle-orm@~0.44.5": "0.44.5",
@@ -609,8 +609,8 @@
         "text-hex"
       ]
     },
-    "comic-metadata-tool@1.1.0": {
-      "integrity": "sha512-neDKHa35pyNHe7Sc8hEikdX5Z+DuY8GIamCj6UwleJd19aye8VYlfYdJAGXr1aBNBvtL2WvjrWNyFostODPoNQ==",
+    "comic-metadata-tool@1.2.0": {
+      "integrity": "sha512-sniEbMtr9EBC2aJDFTp091Bd1bCcWkUM+yH9CKgi/zsid0kxvXKDDQ06C4yg3WMiuPAlhqHMftSm/uA2MUtjNw==",
       "dependencies": [
         "7zip-bin",
         "@types/adm-zip",
@@ -1203,7 +1203,7 @@
       "npm:@libsql/client@~0.15.14",
       "npm:bullmq@^5.58.4",
       "npm:chokidar@^4.0.3",
-      "npm:comic-metadata-tool@^1.1.0",
+      "npm:comic-metadata-tool@^1.2.0",
       "npm:drizzle-kit@~0.31.4",
       "npm:drizzle-orm@~0.44.5",
       "npm:hono@^4.9.5",

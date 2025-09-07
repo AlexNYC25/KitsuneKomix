@@ -17,7 +17,7 @@
     "@std/path": "jsr:@std/path@^1.1.2",
     "bullmq": "npm:bullmq@^5.58.4",
     "chokidar": "npm:chokidar@^4.0.3",
-    "comic-metadata-tool": "npm:comic-metadata-tool@^1.1.0",
+    "comic-metadata-tool": "npm:comic-metadata-tool@^1.2.0",
     "drizzle-kit": "npm:drizzle-kit@^0.31.4",
     "drizzle-orm": "npm:drizzle-orm@^0.44.5",
     "hono": "npm:hono@^4.9.5",
