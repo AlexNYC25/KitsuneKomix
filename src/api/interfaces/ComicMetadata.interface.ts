@@ -1,5 +1,5 @@
 
-import type { ComicInfo } from "npm:comic-metadata-tool@^1.1.0/dist/src/interfaces/comicInfo.d.ts";
+import type { ComicInfo } from "npm:comic-metadata-tool";
 
 export interface ComicMetadata {
   comicInfoXml?: ComicInfo;
