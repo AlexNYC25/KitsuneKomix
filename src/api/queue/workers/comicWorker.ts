@@ -1,7 +1,7 @@
 import { Worker } from "bullmq";
 import { dirname } from "@std/path";
 
-import { MetadataCompiled } from "npm:comic-metadata-tool@^1.1.0/dist/src/interfaces/metadata-compiled.d.ts";
+import { MetadataCompiled } from "npm:comic-metadata-tool";
 import { ComicMetadata } from "../../interfaces/ComicMetadata.interface.ts";
 
 import { redisConnection } from "../../db/redis/redisConnection.ts";
