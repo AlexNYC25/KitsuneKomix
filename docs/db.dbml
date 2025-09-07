@@ -1,0 +1,63 @@
+Table app_setings {
+  id integer [primary key]
+  key text [not null, unique]
+  value text
+  admin_only bool
+  created_at date
+  updated_at date
+}
+
+Table users {
+  id integer [primary key]
+  username varchar
+  first_name text
+  last_name text
+  password_hash text [not null]
+  email text
+  admin book
+  created_at date
+  updated_at date
+}
+
+Table comic_libraries {
+  id integer [primary key]
+  name text [not null]
+  path text [not null]
+  description text
+  enabled bool [default: 1]
+  changed_at date
+  updated_at date
+}
+
+Table comic_books {
+  id integer [primary key]
+  library_id integer [not null]
+  file_path text [not null]
+  title text
+  series text
+  issue_number text
+  volume text
+  publisher text
+  puplication_date text
+  tags text
+  read integer [not null, default:0]
+
+}
+
+Table comic_writers {
+  id integer [primary key]
+  name text [unique]
+  description text
+}
+
+Table comic_book_writers {
+  id integer [primary key]
+  comicbook_id integer
+  writer_id integer
+}
+
+Ref library_books: comic_libraries.id < comic_books.library_id
+
+Ref comic_book_writers: comic_book_writers.writer_id > comic_writers.id
+Ref comic_writer_books: comic_book_writers.comicbook_id - comic_books.id
+
