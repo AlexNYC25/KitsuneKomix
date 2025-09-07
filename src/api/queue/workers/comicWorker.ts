@@ -4,12 +4,12 @@ import { dirname } from "@std/path";
 import { MetadataCompiled } from "npm:comic-metadata-tool@^1.1.0/dist/src/interfaces/metadata-compiled.d.ts";
 import { ComicMetadata } from "../../interfaces/ComicMetadata.interface.ts";
 
-import { redisConnection } from "../../config/db/redisConnection.ts";
+import { redisConnection } from "../../db/redis/redisConnection.ts";
 import { apiLogger, queueLogger } from "../../config/logger/loggers.ts";
 
 import { getMetadata } from "../../utilities/metadata.ts";
-import { insertComicBook } from "../../repositories/comicBooks.repo.ts";
-import { insertComicSeries, getComicSeriesByPath } from "../../repositories/comicSeries.repo.ts";
+import { insertComicBook } from "../../db/sqlite/models/comicBooks.model.ts";
+import { insertComicSeries, getComicSeriesByPath } from "../../db/sqlite/models/comicSeries.model.ts";
 
 import { appQueue } from "../queueManager.ts";
 
@@ -28,21 +28,21 @@ async function processNewComicFile(job: { data: { filePath: string; metadata: ob
     };
 
     // Insert the comic book
-    const comicId = insertComicBook(comicData);
+    const comicId = await insertComicBook(comicData);
     apiLogger.info(`Inserted new comic book with ID: ${comicId}`);
 
     // Check if series exists and trigger follow-up job if needed
     const parentPath = dirname(job.data.filePath);
     queueLogger.info(`Checking for comic series at path: ${parentPath}`);
     
-    const existingSeries = getComicSeriesByPath(parentPath);
+    const existingSeries = await getComicSeriesByPath(parentPath);
     
     if (!existingSeries) {
       queueLogger.info(`No existing series found for path: ${parentPath}, adding series processing job to queue`);
       
       // Add follow-up job to process the series
       await appQueue.add("processComicSeries", {
-        seriesPath: parentPath,
+        seriesPath: parentPath, 
         comicId: comicId,
         metadata: metadata
       });
@@ -59,30 +59,27 @@ async function processNewComicFile(job: { data: { filePath: string; metadata: ob
   }
 }
 
-function processComicSeries(job: { data: { seriesPath: string; comicId: number; metadata: ComicMetadata } }): Promise<void> {
-  return new Promise((resolve, reject) => {
-    try {
-      queueLogger.info(`Processing comic series for path: ${job.data.seriesPath}`);
-      
-      // Extract series name from the path (last directory name)
-      const seriesName = dirname(job.data.seriesPath).split('/').pop() || "Unknown Series";
-      
-      const seriesData = {
-        name: job.data.metadata?.comicInfoXml?.series || seriesName,
-        folderPath: job.data.seriesPath,
-        description: null,
-      };
+async function processComicSeries(job: { data: { seriesPath: string; comicId: number; metadata: ComicMetadata } }): Promise<void> {
+  try {
+    queueLogger.info(`Processing comic series for path: ${job.data.seriesPath}`);
+    
+    // Extract series name from the path (last directory name)
+    const seriesName = dirname(job.data.seriesPath).split('/').pop() || "Unknown Series";
+    
+    const seriesData = {
+      name: job.data.metadata?.comicInfoXml?.series || seriesName,
+      folderPath: job.data.seriesPath,
+      description: null,
+    };
 
-      const seriesId = insertComicSeries(seriesData);
-      apiLogger.info(`Inserted new comic series with ID: ${seriesId} for path: ${job.data.seriesPath}`);
-      resolve();
+    const seriesId = await insertComicSeries(seriesData);
+    apiLogger.info(`Inserted new comic series with ID: ${seriesId} for path: ${job.data.seriesPath}`);
       
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      queueLogger.error(`Error processing comic series ${job.data.seriesPath}: ${errorMessage}`);
-      reject(error);
-    }
-  });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    queueLogger.error(`Error processing comic series ${job.data.seriesPath}: ${errorMessage}`);
+    throw error;
+  }
 }
 
 export const comicFileWorker = new Worker(

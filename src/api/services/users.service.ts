@@ -1,6 +1,6 @@
 import { hashPassword } from "../utilities/hash.ts";
 import { NewUser, UserRegistrationInput } from "../types/user.type.ts";
-import { createUser, getUserByEmail } from "../repositories/users.repo.ts";
+import { createUser, getUserByEmail } from "../db/sqlite/models/users.model.ts";
 
 export async function createUserService(
   user: UserRegistrationInput,
@@ -9,7 +9,7 @@ export async function createUserService(
 
   try {
     // Check if user with the same email already exists
-    existingUser = getUserByEmail(user.email);
+    existingUser = await getUserByEmail(user.email);
   } catch (error) {
     console.error("Error checking existing user:", error);
     throw new Error("Internal server error");
@@ -23,7 +23,7 @@ export async function createUserService(
   const hashedPassword = await hashPassword(user.password);
 
   // Insert new user into the database
-  const newUserId = createUser({
+  const newUserId = await createUser({
     ...user,
     firstName: user.firstName ?? null,
     lastName: user.lastName ?? null,

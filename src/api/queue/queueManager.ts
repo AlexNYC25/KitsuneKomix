@@ -1,5 +1,5 @@
 import { Queue, QueueEvents, QueueOptions } from "bullmq";
-import { redisConnection } from "../config/db/redisConnection.ts";
+import { redisConnection } from "../db/redis/redisConnection.ts";
 import { queueLogger } from "../config/logger/loggers.ts";
 
 export const appQueue = new Queue("appQueue", {

@@ -2,14 +2,14 @@ export type ComicBookRow = {
   id: number;
   library_id: number;
 	file_path: string;
-	title: string;
+	title: string | null;
 	series: string | null;
 	issue_number: string | null;
 	volume: string | null;
 	publisher: string | null;
 	publication_date: string | null;
 	tags: string | null;
-	read: boolean;
+	read: number;
 	created_at: string;
 	updated_at: string;
 };

@@ -2,11 +2,11 @@ import {
   LibraryRegistrationInput,
   NewLibrary,
 } from "../types/comicLibrary.type.ts";
-import { createComicLibrary } from "../repositories/comicLibraries.repo.ts";
+import { createComicLibrary } from "../db/sqlite/models/comicLibraries.model.ts";
 
-export function registerComicLibrary(
+export async function registerComicLibrary(
   libraryData: LibraryRegistrationInput,
-): number {
+): Promise<number> {
   const newLibrary: NewLibrary = {
     name: libraryData.name,
     description: libraryData.description ?? null,
@@ -17,7 +17,7 @@ export function registerComicLibrary(
   //TODO: Add check to make sure the path is not already registered, and it does not fall within another registered library path
 
   try {
-    const newLibraryId = createComicLibrary(newLibrary);
+    const newLibraryId = await createComicLibrary(newLibrary);
     return newLibraryId;
   } catch (error) {
     console.error("Error registering comic library:", error);

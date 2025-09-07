@@ -20,7 +20,7 @@ export const comicLibraryController = {
       }
 
       // Use the service layer to handle library registration logic
-      const newLibraryId = registerComicLibrary(parsed.data);
+      const newLibraryId = await registerComicLibrary(parsed.data);
 
       return c.json({
         message: `Library[${parsed.data.name}] registered successfully`,

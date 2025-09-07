@@ -1,4 +1,4 @@
-import { purgeAllData } from "../repositories/admin.repo.ts";
+import { purgeAllData } from "../db/sqlite/models/admin.model.ts";
 
 export const adminService = {
   purgeAllData,

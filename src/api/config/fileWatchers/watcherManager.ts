@@ -1,6 +1,6 @@
 import chokidar from "chokidar";
 
-import { getAllComicLibraries, getComicLibraryLastChangedTime } from "../../repositories/comicLibraries.repo.ts";
+import { getAllComicLibraries, getComicLibraryLastChangedTime } from "../../db/sqlite/models/comicLibraries.model.ts";
 import { addNewComicFile } from "../../queue/actions/newComicFile.ts";
 
 let instance: WatchManager | null = null;
@@ -31,20 +31,24 @@ export class WatchManager {
             .on("ready", () => console.log("Chokidar watcher is ready"));
 
         // Load existing libraries and watch their paths
+        this.initializeWatchedPaths();
+
+        // Periodically refresh watched paths to catch any changes in the database
+        setInterval(() => this.refreshWatchedPaths(), 1 * 60 * 1000); // every 1 minute
+    }
+
+    private async initializeWatchedPaths() {
         try {
-            const libraries = getAllComicLibraries().filter(lib => lib.enabled);
+            const libraries = await getAllComicLibraries();
             for (const lib of libraries) {
-                console.log(`Adding path to watch: ${lib.path} (ID: ${lib.id})`);
-                this.addPath(lib.path, lib.id);
+                if (lib.enabled) {
+                    console.log(`Adding path to watch: ${lib.path} (ID: ${lib.id})`);
+                    this.addPath(lib.path, lib.id);
+                }
             }
         } catch (error) {
             console.error("Error loading comic libraries:", error);
         }
-
-        // Periodically refresh watched paths to catch any changes in the database
-        setInterval(() => this.refreshWatchedPaths(), 1 * 60 * 1000); // every 1 minute
-
-
     }
 
     private async onFileAdded(path: string) {
@@ -66,29 +70,34 @@ export class WatchManager {
         console.log(`File changed: ${path}`);
     }
 
-    private refreshWatchedPaths() {
-        const libraries = getAllComicLibraries().filter(lib => lib.enabled);
-        const currentPaths = new Set(this.byPath.keys());
+    private async refreshWatchedPaths() {
+        try {
+            const libraries = await getAllComicLibraries();
+            const enabledLibraries = libraries.filter(lib => lib.enabled);
+            const currentPaths = new Set(this.byPath.keys());
 
-        for (const lib of libraries) {
-            if (!this.byPath.has(lib.path)) {
-                // New library path to watch
-                this.addPath(lib.path, lib.id);
-            } else {
-                // Check if the library has changed
-                const lastChanged = getComicLibraryLastChangedTime(lib.id);
-                const lastWatched = this.byPath.get(lib.path);
-                if (lastChanged && lastWatched && new Date(lastChanged).getTime() > lastWatched) {
-                    // Update the timestamp
-                    this.byPath.set(lib.path, new Date(lastChanged).getTime());
+            for (const lib of enabledLibraries) {
+                if (!this.byPath.has(lib.path)) {
+                    // New library path to watch
+                    this.addPath(lib.path, lib.id);
+                } else {
+                    // Check if the library has changed
+                    const lastChanged = await getComicLibraryLastChangedTime(lib.id);
+                    const lastWatched = this.byPath.get(lib.path);
+                    if (lastChanged && lastWatched && new Date(lastChanged).getTime() > lastWatched) {
+                        // Update the timestamp
+                        this.byPath.set(lib.path, new Date(lastChanged).getTime());
+                    }
                 }
+                currentPaths.delete(lib.path);
             }
-            currentPaths.delete(lib.path);
-        }
 
-        // Remove paths that are no longer in the libraries
-        for (const obsoletePath of currentPaths) {
-            this.removePath(obsoletePath);
+            // Remove paths that are no longer in the libraries
+            for (const obsoletePath of currentPaths) {
+                this.removePath(obsoletePath);
+            }
+        } catch (error) {
+            console.error("Error refreshing watched paths:", error);
         }
     }
 

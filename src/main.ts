@@ -1,9 +1,10 @@
 import app from "./api/app.ts";
-import { initializeDatabase } from "./api/config/db/sqliteSetUp.ts";
 import { getWatcherManager } from "./api/config/fileWatchers/watcherManager.ts";
 import "./api/queue/workers/comicWorker.ts";
 
-initializeDatabase();
+import { runMigrations } from "./api/db/migrate.ts";
+
+await runMigrations();
 
 const _watchManager = getWatcherManager();
 
