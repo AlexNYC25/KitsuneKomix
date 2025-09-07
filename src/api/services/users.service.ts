@@ -1,5 +1,5 @@
 import { hashPassword } from "../utilities/hash.ts";
-import { NewUser, UserRegistrationInput } from "../types/user.type.ts";
+import { UserRegistrationInput } from "../types/index.ts";
 import { createUser, getUserByEmail } from "../db/sqlite/models/users.model.ts";
 
 export async function createUserService(
@@ -24,11 +24,13 @@ export async function createUserService(
 
   // Insert new user into the database
   const newUserId = await createUser({
-    ...user,
-    firstName: user.firstName ?? null,
-    lastName: user.lastName ?? null,
-    passwordHash: hashedPassword,
-  } as NewUser);
+    username: user.username,
+    email: user.email,
+    password_hash: hashedPassword,
+    first_name: user.firstName ?? null,
+    last_name: user.lastName ?? null,
+    admin: 0, // Default to non-admin
+  });
 
   return newUserId;
 }
