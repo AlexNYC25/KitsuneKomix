@@ -1,6 +1,9 @@
 import { getClient } from "../client.ts";
 import { comicBooksTable } from "../schema.ts";
-import type { ComicBookRow, NewComicBook } from "../../../types/comicBook.type.ts";
+import type { 
+  ComicBook, 
+  NewComicBook
+} from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 
 export const getAllComicBooks = async () => {
@@ -30,17 +33,7 @@ export const insertComicBook = async (comicBook: NewComicBook) => {
   try {
     const insertQuery = await db
       .insert(comicBooksTable)
-      .values({
-        library_id: comicBook.libraryId,
-        file_path: comicBook.filePath,
-        title: comicBook.title,
-        series: comicBook.series ?? null,
-        issue_number: comicBook.issueNumber ?? null,
-        volume: comicBook.volume ?? null,
-        publisher: comicBook.publisher ?? null,
-        publication_date: comicBook.publicationDate ?? null,
-        tags: comicBook.tags ? JSON.stringify(comicBook.tags) : null
-      })
+      .values(comicBook)
       .returning({ id: comicBooksTable.id });
 
     return insertQuery[0].id;
@@ -50,7 +43,7 @@ export const insertComicBook = async (comicBook: NewComicBook) => {
   }
 };
 
-export const getComicBookById = async (id: number): Promise<ComicBookRow | null> => {
+export const getComicBookById = async (id: number): Promise<ComicBook | null> => {
   const { db, client } = getClient();
   
   if (!db || !client) {
@@ -66,7 +59,7 @@ export const getComicBookById = async (id: number): Promise<ComicBookRow | null>
   }
 };
 
-export const getComicBookByFilePath = async (filePath: string): Promise<ComicBookRow | null> => {
+export const getComicBookByFilePath = async (filePath: string): Promise<ComicBook | null> => {
   const { db, client } = getClient();
   
   if (!db || !client) {

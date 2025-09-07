@@ -1,6 +1,9 @@
 import { getClient } from "../client.ts";
 import { usersTable } from "../schema.ts";
-import type { NewUser, UserRow } from "../../../types/user.type.ts";
+import type { 
+  User, 
+  NewUser
+} from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 
 export const createUser = async (userData: NewUser): Promise<number> => {
@@ -13,13 +16,7 @@ export const createUser = async (userData: NewUser): Promise<number> => {
   try {
     const result = await db
       .insert(usersTable)
-      .values({
-        username: userData.username,
-        email: userData.email,
-        password_hash: userData.passwordHash,
-        first_name: userData.firstName ?? null,
-        last_name: userData.lastName ?? null,
-      })
+      .values(userData)
       .returning({ id: usersTable.id });
 
     return result[0].id;
@@ -29,7 +26,7 @@ export const createUser = async (userData: NewUser): Promise<number> => {
   }
 };
 
-export const getUserById = async (id: number): Promise<UserRow | null> => {
+export const getUserById = async (id: number): Promise<User | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -38,14 +35,14 @@ export const getUserById = async (id: number): Promise<UserRow | null> => {
 
   try {
     const result = await db.select().from(usersTable).where(eq(usersTable.id, id));
-    return result.length > 0 ? result[0] as UserRow : null;
+    return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by ID:", error);
     throw error;
   }
 };
 
-export const getUserByEmail = async (email: string): Promise<UserRow | null> => {
+export const getUserByEmail = async (email: string): Promise<User | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -54,14 +51,14 @@ export const getUserByEmail = async (email: string): Promise<UserRow | null> => 
 
   try {
     const result = await db.select().from(usersTable).where(eq(usersTable.email, email));
-    return result.length > 0 ? result[0] as UserRow : null;
+    return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by email:", error);
     throw error;
   }
 };
 
-export const getUserByUsername = async (username: string): Promise<UserRow | null> => {
+export const getUserByUsername = async (username: string): Promise<User | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -70,14 +67,14 @@ export const getUserByUsername = async (username: string): Promise<UserRow | nul
 
   try {
     const result = await db.select().from(usersTable).where(eq(usersTable.username, username));
-    return result.length > 0 ? result[0] as UserRow : null;
+    return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by username:", error);
     throw error;
   }
 };
 
-export const getAllUsers = async (): Promise<UserRow[]> => {
+export const getAllUsers = async (): Promise<User[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -86,7 +83,7 @@ export const getAllUsers = async (): Promise<UserRow[]> => {
 
   try {
     const result = await db.select().from(usersTable);
-    return result as UserRow[];
+    return result;
   } catch (error) {
     console.error("Error fetching all users:", error);
     throw error;

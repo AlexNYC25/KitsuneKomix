@@ -1,6 +1,9 @@
 import { getClient } from "../client.ts";
 import { comicSeriesTable } from "../schema.ts";
-import type { NewComicSeries, ComicSeriesRow } from "../../../types/comicSeries.type.ts";
+import type { 
+  ComicSeries, 
+  NewComicSeries 
+} from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicSeries = async (seriesData: NewComicSeries): Promise<number> => {
@@ -13,11 +16,7 @@ export const insertComicSeries = async (seriesData: NewComicSeries): Promise<num
   try {
     const result = await db
       .insert(comicSeriesTable)
-      .values({
-        name: seriesData.name,
-        description: seriesData.description ?? null,
-        folder_path: seriesData.folderPath ?? null,
-      })
+      .values(seriesData)
       .onConflictDoNothing()
       .returning({ id: comicSeriesTable.id });
 
@@ -28,7 +27,7 @@ export const insertComicSeries = async (seriesData: NewComicSeries): Promise<num
   }
 };
 
-export const getComicSeriesById = async (id: number): Promise<ComicSeriesRow | null> => {
+export const getComicSeriesById = async (id: number): Promise<ComicSeries | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -37,14 +36,14 @@ export const getComicSeriesById = async (id: number): Promise<ComicSeriesRow | n
 
   try {
     const result = await db.select().from(comicSeriesTable).where(eq(comicSeriesTable.id, id));
-    return result.length > 0 ? result[0] as ComicSeriesRow : null;
+    return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by ID:", error);
     throw error;
   }
 };
 
-export const getComicSeriesByName = async (name: string): Promise<ComicSeriesRow | null> => {
+export const getComicSeriesByName = async (name: string): Promise<ComicSeries | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -53,14 +52,14 @@ export const getComicSeriesByName = async (name: string): Promise<ComicSeriesRow
 
   try {
     const result = await db.select().from(comicSeriesTable).where(eq(comicSeriesTable.name, name));
-    return result.length > 0 ? result[0] as ComicSeriesRow : null;
+    return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by name:", error);
     throw error;
   }
 };
 
-export const getComicSeriesByPath = async (folderPath: string): Promise<ComicSeriesRow | null> => {
+export const getComicSeriesByPath = async (folderPath: string): Promise<ComicSeries | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -69,14 +68,14 @@ export const getComicSeriesByPath = async (folderPath: string): Promise<ComicSer
 
   try {
     const result = await db.select().from(comicSeriesTable).where(eq(comicSeriesTable.folder_path, folderPath));
-    return result.length > 0 ? result[0] as ComicSeriesRow : null;
+    return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by path:", error);
     throw error;
   }
 };
 
-export const getAllComicSeries = async (): Promise<ComicSeriesRow[]> => {
+export const getAllComicSeries = async (): Promise<ComicSeries[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -85,7 +84,7 @@ export const getAllComicSeries = async (): Promise<ComicSeriesRow[]> => {
 
   try {
     const result = await db.select().from(comicSeriesTable);
-    return result as ComicSeriesRow[];
+    return result;
   } catch (error) {
     console.error("Error fetching all comic series:", error);
     throw error;
@@ -103,7 +102,7 @@ export const updateComicSeries = async (id: number, updates: Partial<NewComicSer
     const updateData: Record<string, unknown> = {};
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.description !== undefined) updateData.description = updates.description;
-    if (updates.folderPath !== undefined) updateData.folder_path = updates.folderPath;
+    if (updates.folder_path !== undefined) updateData.folder_path = updates.folder_path;
 
     if (Object.keys(updateData).length === 0) {
       return false;
