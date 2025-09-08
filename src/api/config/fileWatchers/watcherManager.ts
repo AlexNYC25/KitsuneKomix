@@ -52,6 +52,11 @@ export class WatchManager {
     }
 
     private async onFileAdded(path: string) {
+        // skip . files and hidden files
+        if (path.startsWith(".") || path.includes("/.")) {
+            console.log(`Ignoring file added: ${path}`);
+            return;
+        }
         console.log(`File added: ${path}`);
         console.log(`Calling addNewComicFile with path: ${path}`);
         try {
