@@ -14,11 +14,28 @@ export type ComicBookDomain = {
   title?: string;
   series?: string;
   issueNumber?: string;
+  count?: number;
   volume?: string;
+  alternateSeries?: string;
+  alternateIssueNumber?: string;
+  alternateCount?: number;
+  pageCount?: number;
+  summary?: string;
+  notes?: string;
+  year?: number;
+  month?: number;
+  day?: number;
   publisher?: string;
   publicationDate?: string;
-  tags?: string[]; // Parse from comma-separated string
-  read: boolean;
+  scanInfo?: string;
+  language?: string; // Note: corrected from schema typo
+  format?: string;
+  blackAndWhite?: boolean;
+  manga?: boolean;
+  readingDirection?: string;
+  review?: string;
+  ageRating?: string;
+  communityRating?: number;
   createdAt: string;
   updatedAt: string;
 };

@@ -9,6 +9,19 @@ import {
   comicPencillersTable,
   comicBookWritersTable,
   comicBookPencillersTable,
+  comicBookInkersTable,
+  comicBookColoristsTable,
+  comicBookLetterersTable,
+  comicBookEditorsTable,
+  comicBookCoverArtistsTable,
+  comicBookPublishersTable,
+  comicBookImprintsTable,
+  comicBookGenresTable,
+  comicBookCharactersTable,
+  comicBookLocationsTable,
+  comicBookTeamsTable,
+  comicBookStoryArcsTable,
+  comicBookSeriesGroupsTable,
 } from "../db/sqlite/schema.ts";
 
 // Inferred types from Drizzle schema
@@ -38,6 +51,45 @@ export type NewComicBookWriter = InferInsertModel<typeof comicBookWritersTable>;
 
 export type ComicBookPenciller = InferSelectModel<typeof comicBookPencillersTable>;
 export type NewComicBookPenciller = InferInsertModel<typeof comicBookPencillersTable>;
+
+export type ComicBookInker = InferSelectModel<typeof comicBookInkersTable>;
+export type NewComicBookInker = InferInsertModel<typeof comicBookInkersTable>;
+
+export type ComicBookColorist = InferSelectModel<typeof comicBookColoristsTable>;
+export type NewComicBookColorist = InferInsertModel<typeof comicBookColoristsTable>;
+
+export type ComicBookLetterer = InferSelectModel<typeof comicBookLetterersTable>;
+export type NewComicBookLetterer = InferInsertModel<typeof comicBookLetterersTable>;
+
+export type ComicBookEditor = InferSelectModel<typeof comicBookEditorsTable>;
+export type NewComicBookEditor = InferInsertModel<typeof comicBookEditorsTable>;
+
+export type ComicBookCoverArtist = InferSelectModel<typeof comicBookCoverArtistsTable>;
+export type NewComicBookCoverArtist = InferInsertModel<typeof comicBookCoverArtistsTable>;
+
+export type ComicBookPublisher = InferSelectModel<typeof comicBookPublishersTable>;
+export type NewComicBookPublisher = InferInsertModel<typeof comicBookPublishersTable>;
+
+export type ComicBookImprint = InferSelectModel<typeof comicBookImprintsTable>;
+export type NewComicBookImprint = InferInsertModel<typeof comicBookImprintsTable>;
+
+export type ComicBookGenre = InferSelectModel<typeof comicBookGenresTable>;
+export type NewComicBookGenre = InferInsertModel<typeof comicBookGenresTable>;
+
+export type ComicBookCharacter = InferSelectModel<typeof comicBookCharactersTable>;
+export type NewComicBookCharacter = InferInsertModel<typeof comicBookCharactersTable>;
+
+export type ComicBookLocation = InferSelectModel<typeof comicBookLocationsTable>;
+export type NewComicBookLocation = InferInsertModel<typeof comicBookLocationsTable>;
+
+export type ComicBookTeam = InferSelectModel<typeof comicBookTeamsTable>;
+export type NewComicBookTeam = InferInsertModel<typeof comicBookTeamsTable>;
+
+export type ComicBookStoryArc = InferSelectModel<typeof comicBookStoryArcsTable>;
+export type NewComicBookStoryArc = InferInsertModel<typeof comicBookStoryArcsTable>;
+
+export type ComicBookSeriesGroup = InferSelectModel<typeof comicBookSeriesGroupsTable>;
+export type NewComicBookSeriesGroup = InferInsertModel<typeof comicBookSeriesGroupsTable>;
 
 // Extended types with relationships
 export type ComicBookWithRelations = ComicBook & {
