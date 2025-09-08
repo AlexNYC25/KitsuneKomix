@@ -15,10 +15,10 @@ export interface StandardizedComicMetadata {
 	series: string;
 	issueNumber: string;
 	volume?: string;
-	count: number;
+	count?: number;
 	alternateSeries?: string;
 	alternateNumber?: string;
-	alternateCount?: string;
+	alternateCount?: number;
 	pageCount: number;
 	summary?: string;
 	notes?: string;
@@ -34,7 +34,7 @@ export interface StandardizedComicMetadata {
 	review?: string;
 
 	writers?: string[];
-	artists?: string[];
+	pencillers?: string[];
 	inkers?: string[];
 	colorists?: string[];
 	letterers?: string[];
@@ -42,14 +42,14 @@ export interface StandardizedComicMetadata {
 	coverArtists?: string[];
 	publisher?: string[];
 	imprint?: string[];
-	genre?: string[];
+	genres?: string[];
 	web?: string[];
 	characters?: string[];
 	teams?: string[];
 	mainCharacterTeam?: string;
 	locations?: string[];
-	storyArc?: string[];
-	seriesGroup?: string[];
+	storyArcs?: string[];
+	seriesGroups?: string[];
 
 
 	ageRating?: string;
