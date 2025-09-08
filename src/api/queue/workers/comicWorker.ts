@@ -7,7 +7,7 @@ import { ComicMetadata } from "../../interfaces/ComicMetadata.interface.ts";
 import { redisConnection } from "../../db/redis/redisConnection.ts";
 import { apiLogger, queueLogger } from "../../config/logger/loggers.ts";
 
-import { getMetadata } from "../../utilities/metadata.ts";
+import { getMetadata, standardizeMetadata } from "../../utilities/metadata.ts";
 import { insertComicBook } from "../../db/sqlite/models/comicBooks.model.ts";
 import { insertComicSeries, getComicSeriesByPath } from "../../db/sqlite/models/comicSeries.model.ts";
 
@@ -19,12 +19,25 @@ async function processNewComicFile(job: { data: { filePath: string; metadata: ob
   try {
     // Get metadata for the comic file
     const metadata: MetadataCompiled | null = await getMetadata(job.data.filePath);
+    
+    // Use standardized metadata if available, fallback to raw metadata
+    const standardizedMetadata = await standardizeMetadata(job.data.filePath);
+    
+    // Create a simple hash from file path for now (TODO: implement proper file hashing)
+    const simpleHash = btoa(job.data.filePath).replace(/[^a-zA-Z0-9]/g, '');
 
     const comicData = {
-      title: metadata?.comicInfoXml?.title || "Unknown Title",
-      tags: metadata?.comicInfoXml?.characters?.split(",").map((s) => s.trim()) || [],
-      filePath: job.data.filePath,
-      libraryId: 1, // Default library ID for now TODO: Determine library ID based on file path
+      library_id: 1, // Default library ID for now TODO: Determine library ID based on file path
+      file_path: job.data.filePath,
+      hash: simpleHash,
+      title: standardizedMetadata?.title || metadata?.comicInfoXml?.title || "Unknown Title",
+      series: standardizedMetadata?.series || metadata?.comicInfoXml?.series || null,
+      issue_number: standardizedMetadata?.issueNumber || metadata?.comicInfoXml?.number?.toString() || null,
+      volume: standardizedMetadata?.volume || metadata?.comicInfoXml?.volume?.toString() || null,
+      publisher: standardizedMetadata?.publisher?.[0] || metadata?.comicInfoXml?.publisher || null,
+      publication_date: standardizedMetadata?.year ? `${standardizedMetadata.year}` : null,
+      tags: standardizedMetadata?.characters?.join(",") || metadata?.comicInfoXml?.characters || null,
+      read: 0,
     };
 
     // Insert the comic book
@@ -64,12 +77,12 @@ async function processComicSeries(job: { data: { seriesPath: string; comicId: nu
     queueLogger.info(`Processing comic series for path: ${job.data.seriesPath}`);
     
     // Extract series name from the path (last directory name)
-    const seriesName = dirname(job.data.seriesPath).split('/').pop() || "Unknown Series";
+    const seriesName = job.data.seriesPath.split('/').pop() || "Unknown Series";
     
     const seriesData = {
       name: job.data.metadata?.comicInfoXml?.series || seriesName,
-      folderPath: job.data.seriesPath,
       description: null,
+      folder_path: job.data.seriesPath,
     };
 
     const seriesId = await insertComicSeries(seriesData);

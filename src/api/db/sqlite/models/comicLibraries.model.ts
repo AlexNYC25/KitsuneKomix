@@ -85,6 +85,34 @@ export const getComicLibraryByPath = async (path: string): Promise<ComicLibrary 
   }
 };
 
+export const getLibraryContainingPath = async (filePath: string): Promise<ComicLibrary | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    // Get all enabled libraries
+    const libraries = await db.select().from(comicLibrariesTable).where(eq(comicLibrariesTable.enabled, 1));
+
+    // Find the library whose path is a parent of the file path
+    for (const library of libraries) {
+      // Normalize paths by ensuring they end with / for proper comparison
+      const libraryPath = library.path.endsWith('/') ? library.path : library.path + '/';
+      const normalizedFilePath = filePath.endsWith('/') ? filePath : filePath + '/';
+      
+      if (normalizedFilePath.startsWith(libraryPath)) {
+        return library;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error finding library containing path:", error);
+    throw error;
+  }
+};
+
 export const getComicLibraryLastChangedTime = async (id: number): Promise<string | null> => {
   const { db, client } = getClient();
 
