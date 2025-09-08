@@ -56,10 +56,10 @@ function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetada
     series: comicInfo.series || "Unknown Series", 
     issueNumber: comicInfo.number?.toString() || "1",
     volume: comicInfo.volume?.toString(),
-    count: comicInfo.count || 1,
+    count: comicInfo.count,
     alternateSeries: comicInfo.alternateSeries,
     alternateNumber: comicInfo.alternateNumber?.toString(),
-    alternateCount: comicInfo.alternateCount?.toString(),
+    alternateCount: comicInfo.alternateCount,
     pageCount: comicInfo.pageCount || 0,
     summary: comicInfo.summary,
     notes: comicInfo.notes,
@@ -76,7 +76,7 @@ function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetada
 
     // People - handle both string and array formats
     writers: splitAndClean(comicInfo.writer),
-    artists: splitAndClean(comicInfo.penciller),
+    pencillers: splitAndClean(comicInfo.penciller),
     inkers: splitAndClean(comicInfo.inker),
     colorists: splitAndClean(comicInfo.colorist),
     letterers: splitAndClean(comicInfo.letterer),
@@ -86,14 +86,14 @@ function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetada
     // Publishers and other data
     publisher: comicInfo.publisher ? [comicInfo.publisher] : undefined,
     imprint: comicInfo.imprint ? [comicInfo.imprint] : undefined,
-    genre: splitAndClean(comicInfo.genre),
+    genres: splitAndClean(comicInfo.genre),
     web: comicInfo.web ? [comicInfo.web] : undefined,
     characters: splitAndClean(comicInfo.characters),
     teams: splitAndClean(comicInfo.teams),
     mainCharacterTeam: comicInfo.mainCharacterOrTeam,
     locations: splitAndClean(comicInfo.locations),
-    storyArc: splitAndClean(comicInfo.storyArc),
-    seriesGroup: comicInfo.seriesGroup ? [comicInfo.seriesGroup] : undefined,
+    storyArcs: splitAndClean(comicInfo.storyArc),
+    seriesGroups: splitAndClean(comicInfo.seriesGroup),
 
     // Ratings
     ageRating: comicInfo.ageRating,
@@ -144,7 +144,7 @@ function standardizeFromCoMet(comet: CoMet): StandardizedComicMetadata {
 
     // People - Use basic fields available in CoMet
     writers: splitAndClean(comet.writer),
-    artists: undefined, // Not available in CoMet
+    pencillers: undefined, // Not available in CoMet
     inkers: undefined,
     colorists: undefined,
     letterers: undefined,
@@ -154,14 +154,14 @@ function standardizeFromCoMet(comet: CoMet): StandardizedComicMetadata {
     // Publishers and other data
     publisher: comet.publisher ? [comet.publisher] : undefined,
     imprint: undefined,
-    genre: splitAndClean(comet.genre),
+    genres: splitAndClean(comet.genre),
     web: comet.identifier ? [comet.identifier] : undefined,
     characters: splitAndClean(comet.character),
     teams: undefined,
     mainCharacterTeam: undefined,
     locations: undefined,
-    storyArc: undefined,
-    seriesGroup: undefined,
+    storyArcs: undefined,
+    seriesGroups: undefined,
 
     // Ratings
     ageRating: comet.rating,
