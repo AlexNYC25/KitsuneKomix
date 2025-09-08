@@ -12,7 +12,7 @@ export async function getMetadata(filePath: string) {
     const metadata = await readComicFileMetadata(filePath);
     return metadata;
   } catch (error) {
-    console.error("Error fetching metadata:", error);
+    console.error("Error fetching metadata for file", filePath, ":", error);
     return null;
   }
 }
