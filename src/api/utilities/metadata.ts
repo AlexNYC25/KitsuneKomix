@@ -28,10 +28,8 @@ export async function standardizeMetadata(filePath: string): Promise<Standardize
   const cometXml = rawMetadata?.coMet;
 
   if (comicInfoXml) {
-    console.log("ComicInfo.xml metadata found:", comicInfoXml);
     return standardizeFromComicInfo(comicInfoXml);
   } else if (cometXml) {
-    console.log("CoMet metadata found:", cometXml);
     return standardizeFromCoMet(cometXml);
   }
 
