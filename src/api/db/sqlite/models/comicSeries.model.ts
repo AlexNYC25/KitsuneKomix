@@ -20,6 +20,39 @@ export const insertComicSeries = async (seriesData: NewComicSeries): Promise<num
       .onConflictDoNothing()
       .returning({ id: comicSeriesTable.id });
 
+    // If result is empty, it means the series already exists due to onConflictDoNothing
+    if (result.length === 0) {
+      // Find the existing series by folder_path (which should be unique)
+      if (seriesData.folder_path) {
+        const existingSeries = await db
+          .select({ id: comicSeriesTable.id })
+          .from(comicSeriesTable)
+          .where(eq(comicSeriesTable.folder_path, seriesData.folder_path));
+        
+        if (existingSeries.length > 0) {
+          console.log(`Comic series already exists at path: ${seriesData.folder_path}, returning existing ID: ${existingSeries[0].id}`);
+          return existingSeries[0].id;
+        }
+      }
+      
+      /*
+      // If we can't find by folder_path, try by name
+      if (seriesData.name) {
+        const existingSeriesByName = await db
+          .select({ id: comicSeriesTable.id })
+          .from(comicSeriesTable)
+          .where(eq(comicSeriesTable.name, seriesData.name));
+        
+        if (existingSeriesByName.length > 0) {
+          console.log(`Comic series already exists with name: ${seriesData.name}, returning existing ID: ${existingSeriesByName[0].id}`);
+          return existingSeriesByName[0].id;
+        }
+      }
+      */
+      
+      throw new Error(`Failed to insert comic series and could not find existing series. Data: ${JSON.stringify(seriesData)}`);
+    }
+
     return result[0].id;
   } catch (error) {
     console.error("Error inserting comic series:", error);
