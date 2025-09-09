@@ -1,4 +1,5 @@
 import { Context } from "hono";
+import { z } from "zod";
 
 import { ComicLibrarySchema } from "../schemas/comicLibrary.schema.ts";
 import { registerComicLibrary } from "../services/comicLibraries.service.ts";
@@ -13,7 +14,7 @@ export const comicLibraryController = {
       if (!parsed.success) {
         return c.json({
           message: "Invalid library data",
-          errors: parsed.error.flatten(),
+          errors: z.treeifyError(parsed.error),
         }, 400);
       }
 

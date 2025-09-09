@@ -1,5 +1,5 @@
 import { Context } from "hono";
-import { ZodSafeParseResult } from "zod";
+import { z, ZodSafeParseResult } from "zod";
 
 import { UserSchema } from "../schemas/user.schema.ts";
 import { UserRegistrationInput } from "../types/user.type.ts";
@@ -15,7 +15,7 @@ export const userController = {
       if (!parsed.success) {
         return c.json({
           message: "Invalid user data",
-          errors: parsed.error.flatten(),
+          errors: z.treeifyError(parsed.error),
         }, 400);
       }
 
