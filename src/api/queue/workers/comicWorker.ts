@@ -8,10 +8,11 @@ import { Worker } from "bullmq";
 import { dirname } from "@std/path";
 
 // Utility imports
-import { deleteFolderRecursive } from "../../utilities/file.ts";
+import { deleteFolderRecursive, getFileSize } from "../../utilities/file.ts";
 import { getMetadata, standardizeMetadata } from "../../utilities/metadata.ts";
 import { calculateFileHash } from "../../utilities/hash.ts";
 import { extractComicBook } from "../../utilities/extract.ts";
+import { getComicFileRawDetails, getComicSeriesRawDetails } from "../../utilities/comic-parser.ts";
 
 // Queue and configuration imports
 import { appQueue } from "../queueManager.ts";
@@ -63,6 +64,8 @@ async function processNewComicFile(job: { data: { filePath: string; metadata: ob
     const metadata: MetadataCompiled | null = await getMetadata(job.data.filePath);
     const libraryId: number | null = await findLibraryIdFromPath(job.data.filePath);
 
+    const rawFileDetails = getComicFileRawDetails(job.data.filePath);
+
     if (!libraryId) {
       throw new Error(`Could not determine library ID for file path: ${job.data.filePath}`);
     }
@@ -76,17 +79,18 @@ async function processNewComicFile(job: { data: { filePath: string; metadata: ob
       file_path: job.data.filePath,
       hash: fileHash,
       title: standardizedMetadata?.title || null,
-      series: standardizedMetadata?.series || null,
-      issue_number: standardizedMetadata?.issueNumber || null,
+      series: standardizedMetadata?.series || rawFileDetails.series || null,
+      issue_number: standardizedMetadata?.issueNumber || rawFileDetails.issue || null,
       count: standardizedMetadata?.count || null,
-      volume: standardizedMetadata?.volume || null,
+      volume: standardizedMetadata?.volume || rawFileDetails.volume || null,
       alternate_series: standardizedMetadata?.alternateSeries || null,
       alternate_issue_number: standardizedMetadata?.alternateNumber || null,
       alternate_count: standardizedMetadata?.alternateCount || null,
       page_count: standardizedMetadata?.pageCount || null,
+      file_size: await getFileSize(job.data.filePath),
       summary: standardizedMetadata?.summary || null,
       notes: standardizedMetadata?.notes || null,
-      year: standardizedMetadata?.year || null,
+      year: standardizedMetadata?.year || Number(rawFileDetails.year) || null,
       month: standardizedMetadata?.month || null,
       day: standardizedMetadata?.day || null,
       publisher: standardizedMetadata?.publisher?.[0] || null,
@@ -113,13 +117,25 @@ async function processNewComicFile(job: { data: { filePath: string; metadata: ob
     
     // Queue web link processing if available
     await queueWebLinkProcessing(comicId, standardizedMetadata?.web);
+
+    const rawSeriesDetails = getComicSeriesRawDetails(job.data.filePath.split('/').slice(0, -1).join('/'));
     
     // Queue series processing if needed
+    // Prepare comic metadata - prioritize folder-based series info over file metadata
     const comicMetadata: ComicMetadata | null = metadata ? {
       comicInfoXml: metadata.comicInfoXml,
       filePath: job.data.filePath,
       ...metadata
-    } : null;
+    } : {
+      // When no file metadata available, use folder-based series information
+      comicInfoXml: {
+        series: rawSeriesDetails.series,
+        volume: rawSeriesDetails.volume ? Number(rawSeriesDetails.volume) : undefined,
+        year: rawSeriesDetails.year ? Number(rawSeriesDetails.year) : undefined,
+      },
+      filePath: job.data.filePath,
+    };
+    
     await queueSeriesProcessing(comicId, job.data.filePath, comicMetadata);
     
     // Queue creator processing
@@ -158,8 +174,9 @@ async function processComicFileImages(job: { data: { filePath: string; comicId: 
       const pageNumber = imagePaths.indexOf(imagePath) + 1;
       const imageHash = await calculateFileHash(imagePath);
       const relativePath = imagePath.split('/').pop() || imagePath; // Get filename only
+      const sizeOfImagePage = await getFileSize(imagePath);
 
-      const pageId = await insertComicPage(job.data.comicId, relativePath, pageNumber, imageHash);
+      const pageId = await insertComicPage(job.data.comicId, relativePath, pageNumber, imageHash, sizeOfImagePage);
       apiLogger.info(`Inserted comic page with ID: ${pageId} for comic ID: ${job.data.comicId}`);
     }
 
