@@ -24,6 +24,7 @@ export type ComicExtractionResult = {
   pageCount: number;
   pages: string[];
   coverImagePath?: string;
+  fileSizeBytes: number;
   error?: string;
 };
 
@@ -102,6 +103,8 @@ export async function extractComicBook(
   comicPath: string, 
   extractToPath?: string
 ): Promise<ComicExtractionResult> {
+  let fileSizeBytes = 0;
+  
   try {
     // Validate input file
     if (!isComicBookFile(comicPath)) {
@@ -112,6 +115,9 @@ export async function extractComicBook(
     if (!stat.isFile) {
       throw new Error("Comic path is not a file");
     }
+    
+    // Capture file size
+    fileSizeBytes = stat.size;
 
     // Determine extraction path
     const comicBasename = basename(comicPath, extname(comicPath));
@@ -160,7 +166,8 @@ export async function extractComicBook(
       extractedPath: targetPath,
       pageCount: pages.length,
       pages,
-      coverImagePath
+      coverImagePath,
+      fileSizeBytes
     };
 
   } catch (error) {
@@ -170,6 +177,7 @@ export async function extractComicBook(
       extractedPath: "",
       pageCount: 0,
       pages: [],
+      fileSizeBytes,
       error: errorMessage
     };
   }
