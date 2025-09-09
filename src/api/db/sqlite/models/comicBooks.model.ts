@@ -114,6 +114,7 @@ export const updateComicBook = async (id: number, updates: Partial<NewComicBook>
     if (updates.review !== undefined) updateData.review = updates.review;
     if (updates.age_rating !== undefined) updateData.age_rating = updates.age_rating;
     if (updates.community_rating !== undefined) updateData.community_rating = updates.community_rating;
+    if (updates.file_size !== undefined) updateData.file_size = updates.file_size;
 
     if (Object.keys(updateData).length === 0) {
       return false;
