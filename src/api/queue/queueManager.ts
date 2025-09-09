@@ -21,17 +21,17 @@ export const appQueueEvents = new QueueEvents("appQueue", {
 
 // Add connection event handlers
 appQueue.on("error", (error) => {
-  console.error("Queue connection error:", error);
+  //console.error("Queue connection error:", error);
   queueLogger.error(`Queue connection error: ${error}`);
 });
 
 appQueueEvents.on("completed", ({ jobId }) => {
-  console.log(`Queue event: Job ${jobId} completed`);
+  //console.log(`Queue event: Job ${jobId} completed`);
   queueLogger.info(`Job ${jobId} has completed`);
 });
 
 appQueueEvents.on("failed", ({ jobId, failedReason }) => {
-  console.log(`Queue event: Job ${jobId} failed - ${failedReason}`);
+  //console.log(`Queue event: Job ${jobId} failed - ${failedReason}`);
   queueLogger.error(`Job ${jobId} has failed with reason: ${failedReason}`);
 });
 
