@@ -22,7 +22,7 @@ export async function runMigrations() {
   }
 
   try {
-    await migrate(db, { migrationsFolder: "./config/drizzle" });
+    await migrate(db, { migrationsFolder: "./drizzle" });
     dbLogger.info("Migrations completed successfully!");
   } catch (error) {
     dbLogger.error(`Migration failed: ${error}`);

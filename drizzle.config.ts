@@ -4,7 +4,7 @@ import process from "node:process";
 
 const DB_PATH = join(process.cwd(), "config", "database.sqlite");
 export default defineConfig({
-  out: './config/drizzle',
+  out: './drizzle',
   schema: './src/api/db/sqlite/schema.ts',
   dialect: 'sqlite',
   dbCredentials: {
