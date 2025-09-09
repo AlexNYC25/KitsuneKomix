@@ -2,7 +2,7 @@ import { getClient } from "../client.ts";
 import { comicPagesTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
-export const insertComicPage = async (comicBookId: number, filePath: string, pageNumber: number, hash: string): Promise<number> => {
+export const insertComicPage = async (comicBookId: number, filePath: string, pageNumber: number, hash: string, fileSize: number): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -17,6 +17,7 @@ export const insertComicPage = async (comicBookId: number, filePath: string, pag
         file_path: filePath,
         page_number: pageNumber,
         hash: hash,
+        file_size: fileSize,
       })
       .returning({ id: comicPagesTable.id });
 

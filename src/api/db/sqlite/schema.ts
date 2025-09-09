@@ -47,6 +47,7 @@ export const comicBooksTable = sqliteTable("comic_books", {
 	alternate_issue_number: text(),
 	alternate_count: int(),
 	page_count: int(),
+	file_size: int(),
 	summary: text(),
 	notes: text(),
 	year: int(),
@@ -73,6 +74,7 @@ export const comicPagesTable = sqliteTable("comic_pages", {
 	file_path: text().notNull(),
 	page_number: int().notNull(),
 	hash : text().notNull(),
+	file_size: int().notNull(),
 	created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 	updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
