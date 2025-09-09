@@ -156,3 +156,17 @@ export async function safeDeletFolder(
     }
   }
 }
+
+export async function getFileSize(filePath: string): Promise<number> {
+  try {
+    const stat = await Deno.stat(filePath);
+    if (stat.isFile) {
+      return stat.size;
+    } else {
+      throw new Error(`${filePath} is not a file.`);
+    }
+  } catch (error) {
+    console.error(`Error getting file size for ${filePath}:`, error);
+    throw error;
+  }
+}
