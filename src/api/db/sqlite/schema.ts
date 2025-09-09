@@ -67,6 +67,24 @@ export const comicBooksTable = sqliteTable("comic_books", {
 	updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const comicPagesTable = sqliteTable("comic_pages", {
+	id: int().primaryKey({ autoIncrement: true }),
+	comic_book_id: int().notNull().references(() => comicBooksTable.id, { onDelete: "cascade" }),
+	file_path: text().notNull(),
+	page_number: int().notNull(),
+	hash : text().notNull(),
+	created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const comicBookCovers = sqliteTable("comic_book_covers", {
+	id: int().primaryKey({ autoIncrement: true }),
+	comic_book_id: int().notNull().references(() => comicBooksTable.id, { onDelete: "cascade" }),
+	file_path: text().notNull(),
+	created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const comicWebLinksTable = sqliteTable("comic_web_links", {
 	id: int().primaryKey({ autoIncrement: true }),
 	comic_book_id: int().notNull().references(() => comicBooksTable.id, { onDelete: "cascade" }),
