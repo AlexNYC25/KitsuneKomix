@@ -1,9 +1,6 @@
 import { getClient } from "../client.ts";
 import { usersTable } from "../schema.ts";
-import type { 
-  User, 
-  NewUser
-} from "../../../types/index.ts";
+import type { NewUser, User } from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 
 export const createUser = async (userData: NewUser): Promise<number> => {
@@ -34,7 +31,9 @@ export const getUserById = async (id: number): Promise<User | null> => {
   }
 
   try {
-    const result = await db.select().from(usersTable).where(eq(usersTable.id, id));
+    const result = await db.select().from(usersTable).where(
+      eq(usersTable.id, id),
+    );
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by ID:", error);
@@ -50,7 +49,9 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   }
 
   try {
-    const result = await db.select().from(usersTable).where(eq(usersTable.email, email));
+    const result = await db.select().from(usersTable).where(
+      eq(usersTable.email, email),
+    );
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by email:", error);
@@ -58,7 +59,9 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   }
 };
 
-export const getUserByUsername = async (username: string): Promise<User | null> => {
+export const getUserByUsername = async (
+  username: string,
+): Promise<User | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -66,7 +69,9 @@ export const getUserByUsername = async (username: string): Promise<User | null> 
   }
 
   try {
-    const result = await db.select().from(usersTable).where(eq(usersTable.username, username));
+    const result = await db.select().from(usersTable).where(
+      eq(usersTable.username, username),
+    );
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by username:", error);
@@ -90,14 +95,17 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 };
 
-export const updateUser = async (id: number, updates: Partial<{
-  username: string;
-  email: string;
-  password_hash: string;
-  first_name?: string | null;
-  last_name?: string | null;
-  admin: boolean;
-}>): Promise<boolean> => {
+export const updateUser = async (
+  id: number,
+  updates: Partial<{
+    username: string;
+    email: string;
+    password_hash: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    admin: boolean;
+  }>,
+): Promise<boolean> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -108,9 +116,15 @@ export const updateUser = async (id: number, updates: Partial<{
     const updateData: Record<string, unknown> = {};
     if (updates.username !== undefined) updateData.username = updates.username;
     if (updates.email !== undefined) updateData.email = updates.email;
-    if (updates.password_hash !== undefined) updateData.password_hash = updates.password_hash;
-    if (updates.first_name !== undefined) updateData.first_name = updates.first_name;
-    if (updates.last_name !== undefined) updateData.last_name = updates.last_name;
+    if (updates.password_hash !== undefined) {
+      updateData.password_hash = updates.password_hash;
+    }
+    if (updates.first_name !== undefined) {
+      updateData.first_name = updates.first_name;
+    }
+    if (updates.last_name !== undefined) {
+      updateData.last_name = updates.last_name;
+    }
     if (updates.admin !== undefined) updateData.admin = updates.admin ? 1 : 0;
 
     const result = await db

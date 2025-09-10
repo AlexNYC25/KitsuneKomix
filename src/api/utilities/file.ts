@@ -13,7 +13,7 @@ export function fileExistsSync(path: string): boolean {
 export function isFileAComicBookFile(fileName: string): boolean {
   const comicBookExtensions = [".cbz", ".cbr", ".cb7", ".cbt", ".cba"];
   const lowerCaseFileName = fileName.toLowerCase();
-  return comicBookExtensions.some(ext => lowerCaseFileName.endsWith(ext));
+  return comicBookExtensions.some((ext) => lowerCaseFileName.endsWith(ext));
 }
 
 /**
@@ -21,7 +21,9 @@ export function isFileAComicBookFile(fileName: string): boolean {
  * @param folderPath - absolute path to the folder to delete
  * @returns Promise<boolean> - true if deletion was successful, false otherwise
  */
-export async function deleteFolderRecursive(folderPath: string): Promise<boolean> {
+export async function deleteFolderRecursive(
+  folderPath: string,
+): Promise<boolean> {
   try {
     await Deno.remove(folderPath, { recursive: true });
     return true;
@@ -100,8 +102,8 @@ export async function safeDeletFolder(
     checkExists?: boolean;
     dryRun?: boolean;
     onProgress?: (item: string) => void;
-  } = {}
-): Promise<{success: boolean, error?: string}> {
+  } = {},
+): Promise<{ success: boolean; error?: string }> {
   const { checkExists = true, dryRun = false, onProgress } = options;
 
   try {
@@ -132,7 +134,7 @@ export async function safeDeletFolder(
 
     // Perform actual deletion
     await Deno.remove(folderPath, { recursive: true });
-    
+
     if (onProgress) {
       onProgress(`Successfully deleted: ${folderPath}`);
     }
@@ -140,18 +142,18 @@ export async function safeDeletFolder(
     return { success: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     if (error instanceof Deno.errors.NotFound) {
       return { success: true }; // Already doesn't exist
     } else if (error instanceof Deno.errors.PermissionDenied) {
-      return { 
-        success: false, 
-        error: `Permission denied deleting folder: ${folderPath}` 
+      return {
+        success: false,
+        error: `Permission denied deleting folder: ${folderPath}`,
       };
     } else {
-      return { 
-        success: false, 
-        error: `Failed to delete folder ${folderPath}: ${errorMessage}` 
+      return {
+        success: false,
+        error: `Failed to delete folder ${folderPath}: ${errorMessage}`,
       };
     }
   }

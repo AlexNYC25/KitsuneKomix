@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicLetterersTable, comicBookLetterersTable} from "../schema.ts";
+import { comicBookLetterersTable, comicLetterersTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicLetterer = async (name: string): Promise<number> => {
@@ -23,15 +23,21 @@ export const insertComicLetterer = async (name: string): Promise<number> => {
         .select({ id: comicLetterersTable.id })
         .from(comicLetterersTable)
         .where(eq(comicLetterersTable.name, name));
-      
+
       if (existingLetterer.length > 0) {
-        console.log(`Comic letterer already exists with name: ${name}, returning existing ID: ${existingLetterer[0].id}`);
+        console.log(
+          `Comic letterer already exists with name: ${name}, returning existing ID: ${
+            existingLetterer[0].id
+          }`,
+        );
         return existingLetterer[0].id;
       }
-      
-      throw new Error(`Failed to insert comic letterer and could not find existing letterer. Name: ${name}`);
+
+      throw new Error(
+        `Failed to insert comic letterer and could not find existing letterer. Name: ${name}`,
+      );
     }
-    
+
     return result[0].id;
   } catch (error) {
     console.error("Error inserting comic letterer:", error);
@@ -39,7 +45,10 @@ export const insertComicLetterer = async (name: string): Promise<number> => {
   }
 };
 
-export const linkLettererToComicBook = async (lettererId: number, comicBookId: number): Promise<void> => {
+export const linkLettererToComicBook = async (
+  lettererId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {

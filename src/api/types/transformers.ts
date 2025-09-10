@@ -1,10 +1,10 @@
-import type { 
-  User, 
-  ComicLibrary, 
-  ComicBook, 
-  UserDomain,
+import type {
+  ComicBook,
+  ComicBookDomain,
+  ComicLibrary,
   LibraryDomain,
-  ComicBookDomain 
+  User,
+  UserDomain,
 } from "./index.ts";
 
 /**
@@ -83,7 +83,7 @@ export function comicBookToDomain(book: ComicBook): ComicBookDomain {
  */
 export function parseTagsFromString(tags: string | null): string[] | undefined {
   if (!tags) return undefined;
-  return tags.split(',').map(tag => tag.trim()).filter(Boolean);
+  return tags.split(",").map((tag) => tag.trim()).filter(Boolean);
 }
 
 /**
@@ -91,7 +91,7 @@ export function parseTagsFromString(tags: string | null): string[] | undefined {
  */
 export function tagsToString(tags: string[] | undefined): string | undefined {
   if (!tags || tags.length === 0) return undefined;
-  return tags.join(', ');
+  return tags.join(", ");
 }
 
 /**

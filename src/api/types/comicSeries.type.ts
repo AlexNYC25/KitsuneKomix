@@ -1,8 +1,11 @@
-
-import { ComicSeries, NewComicSeries, ComicSeriesWithBooks } from "./database.types.ts";
+import {
+  ComicSeries,
+  ComicSeriesWithBooks,
+  NewComicSeries,
+} from "./database.types.ts";
 
 // Re-export database types
-export type { ComicSeries, NewComicSeries, ComicSeriesWithBooks };
+export type { ComicSeries, ComicSeriesWithBooks, NewComicSeries };
 
 // Legacy types for backward compatibility
 export type ComicSeriesRow = ComicSeries;

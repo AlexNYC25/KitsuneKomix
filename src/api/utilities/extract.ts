@@ -1,18 +1,32 @@
-import { join, extname, basename } from "@std/path";
+import { basename, extname, join } from "@std/path";
 
 /**
  * Supported comic book archive formats
  */
 export const SUPPORTED_COMIC_FORMATS = [
-  '.cbz', '.cbr', '.cb7', '.cbt', '.cba',
-  '.zip', '.rar', '.7z', '.tar'
+  ".cbz",
+  ".cbr",
+  ".cb7",
+  ".cbt",
+  ".cba",
+  ".zip",
+  ".rar",
+  ".7z",
+  ".tar",
 ] as const;
 
 /**
  * Supported image formats within comic archives
  */
 export const SUPPORTED_IMAGE_FORMATS = [
-  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.tif'
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+  ".bmp",
+  ".tiff",
+  ".tif",
 ] as const;
 
 /**
@@ -45,7 +59,9 @@ export type ComicArchiveInfo = {
  */
 export function isComicBookFile(filePath: string): boolean {
   const ext = extname(filePath).toLowerCase();
-  return SUPPORTED_COMIC_FORMATS.includes(ext as typeof SUPPORTED_COMIC_FORMATS[number]);
+  return SUPPORTED_COMIC_FORMATS.includes(
+    ext as typeof SUPPORTED_COMIC_FORMATS[number],
+  );
 }
 
 /**
@@ -55,7 +71,9 @@ export function isComicBookFile(filePath: string): boolean {
  */
 export function isImageFile(filePath: string): boolean {
   const ext = extname(filePath).toLowerCase();
-  return SUPPORTED_IMAGE_FORMATS.includes(ext as typeof SUPPORTED_IMAGE_FORMATS[number]);
+  return SUPPORTED_IMAGE_FORMATS.includes(
+    ext as typeof SUPPORTED_IMAGE_FORMATS[number],
+  );
 }
 
 /**
@@ -63,14 +81,16 @@ export function isImageFile(filePath: string): boolean {
  * @param filePath - path to the comic book file
  * @returns ComicArchiveInfo object with details about the archive
  */
-export async function getComicArchiveInfo(filePath: string): Promise<ComicArchiveInfo> {
+export async function getComicArchiveInfo(
+  filePath: string,
+): Promise<ComicArchiveInfo> {
   const format = extname(filePath).toLowerCase();
   const isSupported = isComicBookFile(filePath);
-  
+
   const info: ComicArchiveInfo = {
     filePath,
     format,
-    isSupported
+    isSupported,
   };
 
   if (!isSupported) {
@@ -82,7 +102,7 @@ export async function getComicArchiveInfo(filePath: string): Promise<ComicArchiv
     if (!stat.isFile) {
       throw new Error("Path is not a file");
     }
-    
+
     // For now, we can't easily get page count without extracting
     // In the future, we could use archive libraries to list contents
     info.estimatedPageCount = 0;
@@ -100,11 +120,11 @@ export async function getComicArchiveInfo(filePath: string): Promise<ComicArchiv
  * @returns Promise<ComicExtractionResult> with extraction details
  */
 export async function extractComicBook(
-  comicPath: string, 
-  extractToPath?: string
+  comicPath: string,
+  extractToPath?: string,
 ): Promise<ComicExtractionResult> {
   let fileSizeBytes = 0;
-  
+
   try {
     // Validate input file
     if (!isComicBookFile(comicPath)) {
@@ -115,14 +135,14 @@ export async function extractComicBook(
     if (!stat.isFile) {
       throw new Error("Comic path is not a file");
     }
-    
+
     // Capture file size
     fileSizeBytes = stat.size;
 
     // Determine extraction path
     const comicBasename = basename(comicPath, extname(comicPath));
-    const targetPath = extractToPath || await Deno.makeTempDir({ 
-      prefix: `comic_extract_${comicBasename}_` 
+    const targetPath = extractToPath || await Deno.makeTempDir({
+      prefix: `comic_extract_${comicBasename}_`,
     });
 
     // Ensure extraction directory exists
@@ -133,20 +153,20 @@ export async function extractComicBook(
 
     // Extract based on format
     switch (format) {
-      case '.cbz':
-      case '.zip':
+      case ".cbz":
+      case ".zip":
         extractionSuccess = await extractZipArchive(comicPath, targetPath);
         break;
-      case '.cbr':
-      case '.rar':
+      case ".cbr":
+      case ".rar":
         extractionSuccess = await extractRarArchive(comicPath, targetPath);
         break;
-      case '.cb7':
-      case '.7z':
+      case ".cb7":
+      case ".7z":
         extractionSuccess = await extract7zArchive(comicPath, targetPath);
         break;
-      case '.cbt':
-      case '.tar':
+      case ".cbt":
+      case ".tar":
         extractionSuccess = await extractTarArchive(comicPath, targetPath);
         break;
       default:
@@ -167,9 +187,8 @@ export async function extractComicBook(
       pageCount: pages.length,
       pages,
       coverImagePath,
-      fileSizeBytes
+      fileSizeBytes,
     };
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     return {
@@ -178,7 +197,7 @@ export async function extractComicBook(
       pageCount: 0,
       pages: [],
       fileSizeBytes,
-      error: errorMessage
+      error: errorMessage,
     };
   }
 }
@@ -186,17 +205,20 @@ export async function extractComicBook(
 /**
  * Extract ZIP/CBZ archives using external unzip command
  */
-async function extractZipArchive(archivePath: string, targetPath: string): Promise<boolean> {
+async function extractZipArchive(
+  archivePath: string,
+  targetPath: string,
+): Promise<boolean> {
   try {
     // Use external unzip command
     const process = new Deno.Command("unzip", {
       args: ["-j", "-o", archivePath, "-d", targetPath],
       stdout: "null",
-      stderr: "null"
+      stderr: "null",
     });
-    
+
     const { success } = await process.output();
-    
+
     if (success) {
       return true;
     } else {
@@ -213,26 +235,33 @@ async function extractZipArchive(archivePath: string, targetPath: string): Promi
 /**
  * Extract RAR/CBR archives
  */
-async function extractRarArchive(archivePath: string, targetPath: string): Promise<boolean> {
+async function extractRarArchive(
+  archivePath: string,
+  targetPath: string,
+): Promise<boolean> {
   try {
     // Try 7z first (p7zip-full may have limited RAR support)
     const process = new Deno.Command("7z", {
       args: ["e", "-o" + targetPath, "-y", archivePath],
       stdout: "null",
-      stderr: "null"
+      stderr: "null",
     });
-    
+
     const result = await process.output();
-    
+
     if (result.success) {
       return true;
     } else {
-      console.warn(`7z could not extract RAR file: ${archivePath}. RAR format may not be fully supported.`);
+      console.warn(
+        `7z could not extract RAR file: ${archivePath}. RAR format may not be fully supported.`,
+      );
       return false;
     }
   } catch (error) {
     console.error(`RAR extraction error: ${error}`);
-    console.error(`Note: Full RAR support requires additional packages not available in this container.`);
+    console.error(
+      `Note: Full RAR support requires additional packages not available in this container.`,
+    );
     return false;
   }
 }
@@ -240,14 +269,17 @@ async function extractRarArchive(archivePath: string, targetPath: string): Promi
 /**
  * Extract 7Z/CB7 archives
  */
-async function extract7zArchive(archivePath: string, targetPath: string): Promise<boolean> {
+async function extract7zArchive(
+  archivePath: string,
+  targetPath: string,
+): Promise<boolean> {
   try {
     const process = new Deno.Command("7z", {
       args: ["e", "-o" + targetPath, "-y", archivePath],
       stdout: "null",
-      stderr: "null"
+      stderr: "null",
     });
-    
+
     const { success } = await process.output();
     return success;
   } catch (error) {
@@ -259,14 +291,17 @@ async function extract7zArchive(archivePath: string, targetPath: string): Promis
 /**
  * Extract TAR/CBT archives
  */
-async function extractTarArchive(archivePath: string, targetPath: string): Promise<boolean> {
+async function extractTarArchive(
+  archivePath: string,
+  targetPath: string,
+): Promise<boolean> {
   try {
     const process = new Deno.Command("tar", {
       args: ["-xf", archivePath, "-C", targetPath],
       stdout: "null",
-      stderr: "null"
+      stderr: "null",
     });
-    
+
     const { success } = await process.output();
     return success;
   } catch (error) {
@@ -282,25 +317,27 @@ async function extractTarArchive(archivePath: string, targetPath: string): Promi
  */
 export async function findImageFiles(directoryPath: string): Promise<string[]> {
   const imageFiles: string[] = [];
-  
+
   try {
     for await (const dirEntry of Deno.readDir(directoryPath)) {
       if (dirEntry.isFile && isImageFile(dirEntry.name)) {
         imageFiles.push(join(directoryPath, dirEntry.name));
       }
     }
-    
+
     // Sort files naturally (handles numeric sequences properly)
     imageFiles.sort((a, b) => {
       const aName = basename(a);
       const bName = basename(b);
-      return aName.localeCompare(bName, undefined, { numeric: true, sensitivity: 'base' });
+      return aName.localeCompare(bName, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
     });
-    
   } catch (error) {
     console.error(`Error finding image files: ${error}`);
   }
-  
+
   return imageFiles;
 }
 
@@ -308,7 +345,9 @@ export async function findImageFiles(directoryPath: string): Promise<string[]> {
  * Clean up extracted comic files
  * @param extractedPath - path to the extracted comic directory
  */
-export async function cleanupExtractedComic(extractedPath: string): Promise<void> {
+export async function cleanupExtractedComic(
+  extractedPath: string,
+): Promise<void> {
   try {
     await Deno.remove(extractedPath, { recursive: true });
   } catch (error) {
@@ -321,17 +360,19 @@ export async function cleanupExtractedComic(extractedPath: string): Promise<void
  * @param comicPath - path to the comic book archive
  * @returns Promise<string | null> path to the extracted cover image or null if failed
  */
-export async function extractComicCover(comicPath: string): Promise<string | null> {
+export async function extractComicCover(
+  comicPath: string,
+): Promise<string | null> {
   try {
     const result = await extractComicBook(comicPath);
-    
+
     if (!result.success || !result.coverImagePath) {
       return null;
     }
-    
+
     // Copy cover to a permanent location if needed
     const coverPath = result.coverImagePath;
-    
+
     // TODO: extract to the permanent covers directory and clean up temp files
     // note the location of the cover image for later use
     return coverPath;
@@ -347,14 +388,19 @@ export async function extractComicCover(comicPath: string): Promise<string | nul
  * @param pageNumber - page number to extract (0-based)
  * @returns Promise<string | null> path to the extracted page image or null if failed
  */
-export async function extractComicPage(comicPath: string, pageNumber: number): Promise<string | null> {
+export async function extractComicPage(
+  comicPath: string,
+  pageNumber: number,
+): Promise<string | null> {
   try {
     const result = await extractComicBook(comicPath);
-    
-    if (!result.success || pageNumber >= result.pages.length || pageNumber < 0) {
+
+    if (
+      !result.success || pageNumber >= result.pages.length || pageNumber < 0
+    ) {
       return null;
     }
-    
+
     return result.pages[pageNumber];
   } catch (error) {
     console.error(`Error extracting comic page: ${error}`);

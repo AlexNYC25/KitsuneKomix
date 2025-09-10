@@ -1,9 +1,14 @@
-import { readComicFileMetadata, MetadataCompiled, ComicInfo, CoMet } from "comic-metadata-tool"
+import {
+  CoMet,
+  ComicInfo,
+  MetadataCompiled,
+  readComicFileMetadata,
+} from "comic-metadata-tool";
 import { StandardizedComicMetadata } from "../interfaces/StandardizedComicMetadata.interface.ts";
 
 /**
  * Uses the comic-metadata-tool to read metadata from a comic file.
- * @param filePath 
+ * @param filePath
  * @returns A promise that resolves to the metadata object or null if an error occurs.
  * @throws Will log an error if metadata reading fails.
  */
@@ -17,7 +22,9 @@ export async function getMetadata(filePath: string) {
   }
 }
 
-export async function standardizeMetadata(filePath: string): Promise<StandardizedComicMetadata | null> {
+export async function standardizeMetadata(
+  filePath: string,
+): Promise<StandardizedComicMetadata | null> {
   const rawMetadata: MetadataCompiled | null = await getMetadata(filePath);
 
   if (!rawMetadata) {
@@ -34,14 +41,18 @@ export async function standardizeMetadata(filePath: string): Promise<Standardize
   }
 
   return null;
-};
+}
 
-function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetadata {
+function standardizeFromComicInfo(
+  comicInfo: ComicInfo,
+): StandardizedComicMetadata {
   // Helper function to safely split comma-separated strings
-  const splitAndClean = (value: string | string[] | undefined): string[] | undefined => {
+  const splitAndClean = (
+    value: string | string[] | undefined,
+  ): string[] | undefined => {
     if (!value) return undefined;
     if (Array.isArray(value)) return value.filter(Boolean);
-    return value.split(',').map((s: string) => s.trim()).filter(Boolean);
+    return value.split(",").map((s: string) => s.trim()).filter(Boolean);
   };
 
   // Helper to convert YesNo to boolean
@@ -53,7 +64,7 @@ function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetada
 
   return {
     title: comicInfo.title,
-    series: comicInfo.series || "Unknown Series", 
+    series: comicInfo.series || "Unknown Series",
     issueNumber: comicInfo.number?.toString() || "1",
     volume: comicInfo.volume?.toString(),
     count: comicInfo.count,
@@ -82,7 +93,7 @@ function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetada
     letterers: splitAndClean(comicInfo.letterer),
     editors: splitAndClean(comicInfo.editor),
     coverArtists: splitAndClean(comicInfo.coverArtist),
-    
+
     // Publishers and other data
     publisher: comicInfo.publisher ? [comicInfo.publisher] : undefined,
     imprint: comicInfo.imprint ? [comicInfo.imprint] : undefined,
@@ -97,10 +108,12 @@ function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetada
 
     // Ratings
     ageRating: comicInfo.ageRating,
-    communityRating: comicInfo.communityRating ? parseFloat(comicInfo.communityRating.toString()) : undefined,
+    communityRating: comicInfo.communityRating
+      ? parseFloat(comicInfo.communityRating.toString())
+      : undefined,
 
     // Pages - convert ComicPageInfo to StandardizedComicMetadataPage
-    pages: comicInfo.pages?.map(page => ({
+    pages: comicInfo.pages?.map((page) => ({
       image: page.Image?.toString() || "",
       type: page.Type || "Story",
       doublePage: page.DoublePage,
@@ -113,16 +126,18 @@ function standardizeFromComicInfo(comicInfo: ComicInfo): StandardizedComicMetada
 
 function standardizeFromCoMet(comet: CoMet): StandardizedComicMetadata {
   // Helper function to safely split comma-separated strings
-  const splitAndClean = (value: string | string[] | undefined): string[] | undefined => {
+  const splitAndClean = (
+    value: string | string[] | undefined,
+  ): string[] | undefined => {
     if (!value) return undefined;
     if (Array.isArray(value)) return value.filter(Boolean);
-    return value.split(',').map((s: string) => s.trim()).filter(Boolean);
+    return value.split(",").map((s: string) => s.trim()).filter(Boolean);
   };
 
   return {
     title: comet.title || "Unknown Title",
     series: comet.series || "Unknown Series",
-    issueNumber: comet.issue?.toString() || "1", 
+    issueNumber: comet.issue?.toString() || "1",
     volume: comet.volume?.toString(),
     count: 1, // CoMet doesn't have issueCount
     alternateSeries: undefined,
@@ -139,7 +154,8 @@ function standardizeFromCoMet(comet: CoMet): StandardizedComicMetadata {
     format: comet.format,
     blackAndWhite: undefined,
     manga: undefined,
-    readingDirection: comet.readingDirection as StandardizedComicMetadata['readingDirection'],
+    readingDirection: comet
+      .readingDirection as StandardizedComicMetadata["readingDirection"],
     review: undefined,
 
     // People - Use basic fields available in CoMet
@@ -150,7 +166,7 @@ function standardizeFromCoMet(comet: CoMet): StandardizedComicMetadata {
     letterers: undefined,
     editors: undefined,
     coverArtists: undefined,
-    
+
     // Publishers and other data
     publisher: comet.publisher ? [comet.publisher] : undefined,
     imprint: undefined,

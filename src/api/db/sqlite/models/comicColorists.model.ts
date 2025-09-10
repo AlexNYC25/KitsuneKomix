@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicColoristsTable, comicBookColoristsTable} from "../schema.ts";
+import { comicBookColoristsTable, comicColoristsTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicColorist = async (name: string): Promise<number> => {
@@ -23,15 +23,21 @@ export const insertComicColorist = async (name: string): Promise<number> => {
         .select({ id: comicColoristsTable.id })
         .from(comicColoristsTable)
         .where(eq(comicColoristsTable.name, name));
-      
+
       if (existingColorist.length > 0) {
-        console.log(`Comic colorist already exists with name: ${name}, returning existing ID: ${existingColorist[0].id}`);
+        console.log(
+          `Comic colorist already exists with name: ${name}, returning existing ID: ${
+            existingColorist[0].id
+          }`,
+        );
         return existingColorist[0].id;
       }
-      
-      throw new Error(`Failed to insert comic colorist and could not find existing colorist. Name: ${name}`);
+
+      throw new Error(
+        `Failed to insert comic colorist and could not find existing colorist. Name: ${name}`,
+      );
     }
-    
+
     return result[0].id;
   } catch (error) {
     console.error("Error inserting comic colorist:", error);
@@ -39,7 +45,10 @@ export const insertComicColorist = async (name: string): Promise<number> => {
   }
 };
 
-export const linkColoristToComicBook = async (coloristId: number, comicBookId: number): Promise<void> => {
+export const linkColoristToComicBook = async (
+  coloristId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {

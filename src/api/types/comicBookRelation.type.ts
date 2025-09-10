@@ -1,23 +1,30 @@
-import { 
-  ComicBookWriter, 
-  NewComicBookWriter,
+import {
   ComicBookPenciller,
-  NewComicBookPenciller
+  ComicBookWriter,
+  NewComicBookPenciller,
+  NewComicBookWriter,
 } from "./database.types.ts";
 
 // Re-export database types
-export type { 
-  ComicBookWriter, 
-  NewComicBookWriter,
+export type {
   ComicBookPenciller,
-  NewComicBookPenciller
+  ComicBookWriter,
+  NewComicBookPenciller,
+  NewComicBookWriter,
 };
 
 // Junction table types for many-to-many relationships
 export type ComicBookCreatorRelation = {
   comicBookId: number;
   creatorId: number;
-  role: 'writer' | 'penciller' | 'inker' | 'colorist' | 'letterer' | 'editor' | 'cover';
+  role:
+    | "writer"
+    | "penciller"
+    | "inker"
+    | "colorist"
+    | "letterer"
+    | "editor"
+    | "cover";
 };
 
 export type ComicBookWithCreators = {

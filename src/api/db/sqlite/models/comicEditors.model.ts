@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicEditorsTable, comicBookEditorsTable} from "../schema.ts";
+import { comicBookEditorsTable, comicEditorsTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicEditor = async (name: string): Promise<number> => {
@@ -23,15 +23,21 @@ export const insertComicEditor = async (name: string): Promise<number> => {
         .select({ id: comicEditorsTable.id })
         .from(comicEditorsTable)
         .where(eq(comicEditorsTable.name, name));
-      
+
       if (existingEditor.length > 0) {
-        console.log(`Comic editor already exists with name: ${name}, returning existing ID: ${existingEditor[0].id}`);
+        console.log(
+          `Comic editor already exists with name: ${name}, returning existing ID: ${
+            existingEditor[0].id
+          }`,
+        );
         return existingEditor[0].id;
       }
-      
-      throw new Error(`Failed to insert comic editor and could not find existing editor. Name: ${name}`);
+
+      throw new Error(
+        `Failed to insert comic editor and could not find existing editor. Name: ${name}`,
+      );
     }
-    
+
     return result[0].id;
   } catch (error) {
     console.error("Error inserting comic editor:", error);
@@ -39,7 +45,10 @@ export const insertComicEditor = async (name: string): Promise<number> => {
   }
 };
 
-export const linkEditorToComicBook = async (editorId: number, comicBookId: number): Promise<void> => {
+export const linkEditorToComicBook = async (
+  editorId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {

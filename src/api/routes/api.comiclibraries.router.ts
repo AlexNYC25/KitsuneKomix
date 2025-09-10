@@ -47,11 +47,13 @@ app.post(
       } catch (error) {
         console.error("Error parsing JSON or registering library:", error);
         if (error instanceof SyntaxError && error.message.includes("JSON")) {
-          return c.json({ message: "Invalid JSON format in request body" }, 400);
+          return c.json(
+            { message: "Invalid JSON format in request body" },
+            400,
+          );
         }
         return c.json({ message: "Internal server error" }, 500);
       }
-
     } catch (error) {
       console.error("Error parsing JSON or registering library:", error);
       if (error instanceof SyntaxError && error.message.includes("JSON")) {

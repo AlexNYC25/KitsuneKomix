@@ -1,32 +1,34 @@
 import { getClient } from "../client.ts";
-import { 
-  comicBookWritersTable,
-  comicBookPencillersTable,
-  comicBookInkersTable,
-  comicBookColoristsTable,
-  comicBookLetterersTable,
-  comicBookEditorsTable,
-  comicBookCoverArtistsTable,
-  comicBookPublishersTable,
-  comicBookImprintsTable,
-  comicBookGenresTable,
+import {
   comicBookCharactersTable,
+  comicBookColoristsTable,
+  comicBookCoverArtistsTable,
+  comicBookEditorsTable,
+  comicBookGenresTable,
+  comicBookImprintsTable,
+  comicBookInkersTable,
+  comicBookLetterersTable,
   comicBookLocationsTable,
-  comicBookTeamsTable,
+  comicBookPencillersTable,
+  comicBookPublishersTable,
+  comicBookSeriesGroupsTable,
   comicBookStoryArcsTable,
-  comicBookSeriesGroupsTable
+  comicBookTeamsTable,
+  comicBookWritersTable,
 } from "../schema.ts";
-import type { 
-  NewComicBookWriter,
+import type {
+  NewComicBookCharacter,
+  NewComicBookGenre,
   NewComicBookPenciller,
   NewComicBookPublisher,
-  NewComicBookGenre,
-  NewComicBookCharacter
+  NewComicBookWriter,
 } from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 
 // Writers
-export const addComicBookWriter = async (relation: NewComicBookWriter): Promise<number> => {
+export const addComicBookWriter = async (
+  relation: NewComicBookWriter,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -47,7 +49,10 @@ export const addComicBookWriter = async (relation: NewComicBookWriter): Promise<
   }
 };
 
-export const removeComicBookWriter = async (comicBookId: number, writerId: number): Promise<boolean> => {
+export const removeComicBookWriter = async (
+  comicBookId: number,
+  writerId: number,
+): Promise<boolean> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -59,7 +64,7 @@ export const removeComicBookWriter = async (comicBookId: number, writerId: numbe
       .delete(comicBookWritersTable)
       .where(
         eq(comicBookWritersTable.comic_book_id, comicBookId) &&
-        eq(comicBookWritersTable.comic_writer_id, writerId)
+          eq(comicBookWritersTable.comic_writer_id, writerId),
       )
       .returning({ id: comicBookWritersTable.id });
 
@@ -71,7 +76,9 @@ export const removeComicBookWriter = async (comicBookId: number, writerId: numbe
 };
 
 // Pencillers
-export const addComicBookPenciller = async (relation: NewComicBookPenciller): Promise<number> => {
+export const addComicBookPenciller = async (
+  relation: NewComicBookPenciller,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -93,7 +100,9 @@ export const addComicBookPenciller = async (relation: NewComicBookPenciller): Pr
 };
 
 // Characters
-export const addComicBookCharacter = async (relation: NewComicBookCharacter): Promise<number> => {
+export const addComicBookCharacter = async (
+  relation: NewComicBookCharacter,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -115,7 +124,9 @@ export const addComicBookCharacter = async (relation: NewComicBookCharacter): Pr
 };
 
 // Publishers
-export const addComicBookPublisher = async (relation: NewComicBookPublisher): Promise<number> => {
+export const addComicBookPublisher = async (
+  relation: NewComicBookPublisher,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -137,7 +148,9 @@ export const addComicBookPublisher = async (relation: NewComicBookPublisher): Pr
 };
 
 // Genres
-export const addComicBookGenre = async (relation: NewComicBookGenre): Promise<number> => {
+export const addComicBookGenre = async (
+  relation: NewComicBookGenre,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -159,7 +172,9 @@ export const addComicBookGenre = async (relation: NewComicBookGenre): Promise<nu
 };
 
 // Utility function to remove all relations for a comic book
-export const removeAllComicBookRelations = async (comicBookId: number): Promise<void> => {
+export const removeAllComicBookRelations = async (
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -169,21 +184,51 @@ export const removeAllComicBookRelations = async (comicBookId: number): Promise<
   try {
     // Remove all relationship entries for this comic book
     await Promise.all([
-      db.delete(comicBookWritersTable).where(eq(comicBookWritersTable.comic_book_id, comicBookId)),
-      db.delete(comicBookPencillersTable).where(eq(comicBookPencillersTable.comic_book_id, comicBookId)),
-      db.delete(comicBookInkersTable).where(eq(comicBookInkersTable.comic_book_id, comicBookId)),
-      db.delete(comicBookColoristsTable).where(eq(comicBookColoristsTable.comic_book_id, comicBookId)),
-      db.delete(comicBookLetterersTable).where(eq(comicBookLetterersTable.comic_book_id, comicBookId)),
-      db.delete(comicBookEditorsTable).where(eq(comicBookEditorsTable.comic_book_id, comicBookId)),
-      db.delete(comicBookCoverArtistsTable).where(eq(comicBookCoverArtistsTable.comic_book_id, comicBookId)),
-      db.delete(comicBookPublishersTable).where(eq(comicBookPublishersTable.comic_book_id, comicBookId)),
-      db.delete(comicBookImprintsTable).where(eq(comicBookImprintsTable.comic_book_id, comicBookId)),
-      db.delete(comicBookGenresTable).where(eq(comicBookGenresTable.comic_book_id, comicBookId)),
-      db.delete(comicBookCharactersTable).where(eq(comicBookCharactersTable.comic_book_id, comicBookId)),
-      db.delete(comicBookLocationsTable).where(eq(comicBookLocationsTable.comic_book_id, comicBookId)),
-      db.delete(comicBookTeamsTable).where(eq(comicBookTeamsTable.comic_book_id, comicBookId)),
-      db.delete(comicBookStoryArcsTable).where(eq(comicBookStoryArcsTable.comic_book_id, comicBookId)),
-      db.delete(comicBookSeriesGroupsTable).where(eq(comicBookSeriesGroupsTable.comic_book_id, comicBookId))
+      db.delete(comicBookWritersTable).where(
+        eq(comicBookWritersTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookPencillersTable).where(
+        eq(comicBookPencillersTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookInkersTable).where(
+        eq(comicBookInkersTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookColoristsTable).where(
+        eq(comicBookColoristsTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookLetterersTable).where(
+        eq(comicBookLetterersTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookEditorsTable).where(
+        eq(comicBookEditorsTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookCoverArtistsTable).where(
+        eq(comicBookCoverArtistsTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookPublishersTable).where(
+        eq(comicBookPublishersTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookImprintsTable).where(
+        eq(comicBookImprintsTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookGenresTable).where(
+        eq(comicBookGenresTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookCharactersTable).where(
+        eq(comicBookCharactersTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookLocationsTable).where(
+        eq(comicBookLocationsTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookTeamsTable).where(
+        eq(comicBookTeamsTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookStoryArcsTable).where(
+        eq(comicBookStoryArcsTable.comic_book_id, comicBookId),
+      ),
+      db.delete(comicBookSeriesGroupsTable).where(
+        eq(comicBookSeriesGroupsTable.comic_book_id, comicBookId),
+      ),
     ]);
   } catch (error) {
     console.error("Error removing comic book relations:", error);

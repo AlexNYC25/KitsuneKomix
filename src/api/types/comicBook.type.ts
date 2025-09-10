@@ -1,7 +1,11 @@
-import { ComicBook, NewComicBook, ComicBookWithRelations } from "./database.types.ts";
+import {
+  ComicBook,
+  ComicBookWithRelations,
+  NewComicBook,
+} from "./database.types.ts";
 
 // Re-export database types
-export type { ComicBook, NewComicBook, ComicBookWithRelations };
+export type { ComicBook, ComicBookWithRelations, NewComicBook };
 
 // Legacy types for backward compatibility
 export type ComicBookRow = ComicBook;
@@ -54,7 +58,9 @@ export type ComicBookInput = {
   libraryId: number;
 };
 
-export type ComicBookUpdate = Partial<Omit<ComicBookInput, 'filePath' | 'hash' | 'libraryId'>>;
+export type ComicBookUpdate = Partial<
+  Omit<ComicBookInput, "filePath" | "hash" | "libraryId">
+>;
 
 export type ComicBookSearchParams = {
   title?: string;

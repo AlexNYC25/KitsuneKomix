@@ -1,8 +1,14 @@
 import { getClient } from "../client.ts";
-import { comicSeriesGroupsTable, comicBookSeriesGroupsTable } from "../schema.ts";
+import {
+  comicBookSeriesGroupsTable,
+  comicSeriesGroupsTable,
+} from "../schema.ts";
 import { eq } from "drizzle-orm";
 
-export const insertComicSeriesGroup = async (name: string, description?: string): Promise<number> => {
+export const insertComicSeriesGroup = async (
+  name: string,
+  description?: string,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -25,11 +31,17 @@ export const insertComicSeriesGroup = async (name: string, description?: string)
         .where(eq(comicSeriesGroupsTable.name, name));
 
       if (existingGroup.length > 0) {
-        console.log(`Comic series group already exists with name: ${name}, returning existing ID: ${existingGroup[0].id}`);
+        console.log(
+          `Comic series group already exists with name: ${name}, returning existing ID: ${
+            existingGroup[0].id
+          }`,
+        );
         return existingGroup[0].id;
       }
 
-      throw new Error(`Failed to insert comic series group and could not find existing group. Name: ${name}`);
+      throw new Error(
+        `Failed to insert comic series group and could not find existing group. Name: ${name}`,
+      );
     }
 
     return result[0].id;
@@ -39,7 +51,10 @@ export const insertComicSeriesGroup = async (name: string, description?: string)
   }
 };
 
-export const linkSeriesGroupToComicBook = async (seriesGroupId: number, comicBookId: number): Promise<void> => {
+export const linkSeriesGroupToComicBook = async (
+  seriesGroupId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -49,7 +64,10 @@ export const linkSeriesGroupToComicBook = async (seriesGroupId: number, comicBoo
   try {
     await db
       .insert(comicBookSeriesGroupsTable)
-      .values({ comic_series_group_id: seriesGroupId, comic_book_id: comicBookId })
+      .values({
+        comic_series_group_id: seriesGroupId,
+        comic_book_id: comicBookId,
+      })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking comic series group to comic book:", error);

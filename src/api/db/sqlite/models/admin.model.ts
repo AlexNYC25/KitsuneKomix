@@ -25,7 +25,7 @@ export const purgeAllData = async () => {
       const tableName = row[0] as string;
       await client.execute({
         sql: `DELETE FROM sqlite_sequence WHERE name = ?`,
-        args: [tableName]
+        args: [tableName],
       });
     }
   } finally {

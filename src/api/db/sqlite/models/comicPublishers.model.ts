@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicPublishersTable, comicBookPublishersTable } from "../schema.ts";
+import { comicBookPublishersTable, comicPublishersTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicPublisher = async (name: string): Promise<number> => {
@@ -13,24 +13,30 @@ export const insertComicPublisher = async (name: string): Promise<number> => {
     const result = await db
       .insert(comicPublishersTable)
       .values({ name })
-			.onConflictDoNothing()
+      .onConflictDoNothing()
       .returning({ id: comicPublishersTable.id });
-		
-		// If result is empty, it means the publisher already exists due to onConflictDoNothing
-		if (result.length === 0) {
-			// Find the existing publisher by name (which should be unique)
-			const existingPublisher = await db
-				.select({ id: comicPublishersTable.id })
-				.from(comicPublishersTable)
-				.where(eq(comicPublishersTable.name, name));
-			
-			if (existingPublisher.length > 0) {
-				console.log(`Comic publisher already exists with name: ${name}, returning existing ID: ${existingPublisher[0].id}`);
-				return existingPublisher[0].id;
-			}
-			
-			throw new Error(`Failed to insert comic publisher and could not find existing publisher. Name: ${name}`);
-		}
+
+    // If result is empty, it means the publisher already exists due to onConflictDoNothing
+    if (result.length === 0) {
+      // Find the existing publisher by name (which should be unique)
+      const existingPublisher = await db
+        .select({ id: comicPublishersTable.id })
+        .from(comicPublishersTable)
+        .where(eq(comicPublishersTable.name, name));
+
+      if (existingPublisher.length > 0) {
+        console.log(
+          `Comic publisher already exists with name: ${name}, returning existing ID: ${
+            existingPublisher[0].id
+          }`,
+        );
+        return existingPublisher[0].id;
+      }
+
+      throw new Error(
+        `Failed to insert comic publisher and could not find existing publisher. Name: ${name}`,
+      );
+    }
 
     return result[0].id;
   } catch (error) {
@@ -39,7 +45,10 @@ export const insertComicPublisher = async (name: string): Promise<number> => {
   }
 };
 
-export const linkPublisherToComicBook = async (publisherId: number, comicBookId: number): Promise<void> => {
+export const linkPublisherToComicBook = async (
+  publisherId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {

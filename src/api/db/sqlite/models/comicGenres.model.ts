@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicGenresTable, comicBookGenresTable } from "../schema.ts";
+import { comicBookGenresTable, comicGenresTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicGenre = async (genreName: string): Promise<number> => {
@@ -23,13 +23,19 @@ export const insertComicGenre = async (genreName: string): Promise<number> => {
         .select({ id: comicGenresTable.id })
         .from(comicGenresTable)
         .where(eq(comicGenresTable.name, genreName));
-      
+
       if (existingGenre.length > 0) {
-        console.log(`Comic genre already exists with name: ${genreName}, returning existing ID: ${existingGenre[0].id}`);
+        console.log(
+          `Comic genre already exists with name: ${genreName}, returning existing ID: ${
+            existingGenre[0].id
+          }`,
+        );
         return existingGenre[0].id;
       }
-      
-      throw new Error(`Failed to insert comic genre and could not find existing genre. Name: ${genreName}`);
+
+      throw new Error(
+        `Failed to insert comic genre and could not find existing genre. Name: ${genreName}`,
+      );
     }
 
     return result[0].id;
@@ -39,7 +45,10 @@ export const insertComicGenre = async (genreName: string): Promise<number> => {
   }
 };
 
-export const linkGenreToComicBook = async (genreId: number, comicBookId: number): Promise<void> => {
+export const linkGenreToComicBook = async (
+  genreId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {

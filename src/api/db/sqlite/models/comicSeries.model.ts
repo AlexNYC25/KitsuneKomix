@@ -1,12 +1,11 @@
 import { getClient } from "../client.ts";
 import { comicSeriesTable } from "../schema.ts";
-import type { 
-  ComicSeries, 
-  NewComicSeries 
-} from "../../../types/index.ts";
+import type { ComicSeries, NewComicSeries } from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 
-export const insertComicSeries = async (seriesData: NewComicSeries): Promise<number> => {
+export const insertComicSeries = async (
+  seriesData: NewComicSeries,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -28,13 +27,17 @@ export const insertComicSeries = async (seriesData: NewComicSeries): Promise<num
           .select({ id: comicSeriesTable.id })
           .from(comicSeriesTable)
           .where(eq(comicSeriesTable.folder_path, seriesData.folder_path));
-        
+
         if (existingSeries.length > 0) {
-          console.log(`Comic series already exists at path: ${seriesData.folder_path}, returning existing ID: ${existingSeries[0].id}`);
+          console.log(
+            `Comic series already exists at path: ${seriesData.folder_path}, returning existing ID: ${
+              existingSeries[0].id
+            }`,
+          );
           return existingSeries[0].id;
         }
       }
-      
+
       /*
       // If we can't find by folder_path, try by name
       if (seriesData.name) {
@@ -42,15 +45,19 @@ export const insertComicSeries = async (seriesData: NewComicSeries): Promise<num
           .select({ id: comicSeriesTable.id })
           .from(comicSeriesTable)
           .where(eq(comicSeriesTable.name, seriesData.name));
-        
+
         if (existingSeriesByName.length > 0) {
           console.log(`Comic series already exists with name: ${seriesData.name}, returning existing ID: ${existingSeriesByName[0].id}`);
           return existingSeriesByName[0].id;
         }
       }
       */
-      
-      throw new Error(`Failed to insert comic series and could not find existing series. Data: ${JSON.stringify(seriesData)}`);
+
+      throw new Error(
+        `Failed to insert comic series and could not find existing series. Data: ${
+          JSON.stringify(seriesData)
+        }`,
+      );
     }
 
     return result[0].id;
@@ -60,7 +67,9 @@ export const insertComicSeries = async (seriesData: NewComicSeries): Promise<num
   }
 };
 
-export const getComicSeriesById = async (id: number): Promise<ComicSeries | null> => {
+export const getComicSeriesById = async (
+  id: number,
+): Promise<ComicSeries | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -68,7 +77,9 @@ export const getComicSeriesById = async (id: number): Promise<ComicSeries | null
   }
 
   try {
-    const result = await db.select().from(comicSeriesTable).where(eq(comicSeriesTable.id, id));
+    const result = await db.select().from(comicSeriesTable).where(
+      eq(comicSeriesTable.id, id),
+    );
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by ID:", error);
@@ -76,7 +87,9 @@ export const getComicSeriesById = async (id: number): Promise<ComicSeries | null
   }
 };
 
-export const getComicSeriesByName = async (name: string): Promise<ComicSeries | null> => {
+export const getComicSeriesByName = async (
+  name: string,
+): Promise<ComicSeries | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -84,7 +97,9 @@ export const getComicSeriesByName = async (name: string): Promise<ComicSeries | 
   }
 
   try {
-    const result = await db.select().from(comicSeriesTable).where(eq(comicSeriesTable.name, name));
+    const result = await db.select().from(comicSeriesTable).where(
+      eq(comicSeriesTable.name, name),
+    );
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by name:", error);
@@ -92,7 +107,9 @@ export const getComicSeriesByName = async (name: string): Promise<ComicSeries | 
   }
 };
 
-export const getComicSeriesByPath = async (folderPath: string): Promise<ComicSeries | null> => {
+export const getComicSeriesByPath = async (
+  folderPath: string,
+): Promise<ComicSeries | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -100,7 +117,9 @@ export const getComicSeriesByPath = async (folderPath: string): Promise<ComicSer
   }
 
   try {
-    const result = await db.select().from(comicSeriesTable).where(eq(comicSeriesTable.folder_path, folderPath));
+    const result = await db.select().from(comicSeriesTable).where(
+      eq(comicSeriesTable.folder_path, folderPath),
+    );
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by path:", error);
@@ -124,7 +143,10 @@ export const getAllComicSeries = async (): Promise<ComicSeries[]> => {
   }
 };
 
-export const updateComicSeries = async (id: number, updates: Partial<NewComicSeries>): Promise<boolean> => {
+export const updateComicSeries = async (
+  id: number,
+  updates: Partial<NewComicSeries>,
+): Promise<boolean> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -134,8 +156,12 @@ export const updateComicSeries = async (id: number, updates: Partial<NewComicSer
   try {
     const updateData: Record<string, unknown> = {};
     if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.description !== undefined) updateData.description = updates.description;
-    if (updates.folder_path !== undefined) updateData.folder_path = updates.folder_path;
+    if (updates.description !== undefined) {
+      updateData.description = updates.description;
+    }
+    if (updates.folder_path !== undefined) {
+      updateData.folder_path = updates.folder_path;
+    }
 
     if (Object.keys(updateData).length === 0) {
       return false;

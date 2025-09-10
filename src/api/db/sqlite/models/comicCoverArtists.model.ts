@@ -1,5 +1,8 @@
 import { getClient } from "../client.ts";
-import { comicCoverArtistsTable, comicBookCoverArtistsTable} from "../schema.ts";
+import {
+  comicBookCoverArtistsTable,
+  comicCoverArtistsTable,
+} from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicCoverArtist = async (name: string): Promise<number> => {
@@ -23,15 +26,21 @@ export const insertComicCoverArtist = async (name: string): Promise<number> => {
         .select({ id: comicCoverArtistsTable.id })
         .from(comicCoverArtistsTable)
         .where(eq(comicCoverArtistsTable.name, name));
-      
+
       if (existingCoverArtist.length > 0) {
-        console.log(`Comic cover artist already exists with name: ${name}, returning existing ID: ${existingCoverArtist[0].id}`);
+        console.log(
+          `Comic cover artist already exists with name: ${name}, returning existing ID: ${
+            existingCoverArtist[0].id
+          }`,
+        );
         return existingCoverArtist[0].id;
       }
-      
-      throw new Error(`Failed to insert comic cover artist and could not find existing cover artist. Name: ${name}`);
+
+      throw new Error(
+        `Failed to insert comic cover artist and could not find existing cover artist. Name: ${name}`,
+      );
     }
-    
+
     return result[0].id;
   } catch (error) {
     console.error("Error inserting comic cover artist:", error);
@@ -39,7 +48,10 @@ export const insertComicCoverArtist = async (name: string): Promise<number> => {
   }
 };
 
-export const linkCoverArtistToComicBook = async (coverArtistId: number, comicBookId: number): Promise<void> => {
+export const linkCoverArtistToComicBook = async (
+  coverArtistId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -49,7 +61,10 @@ export const linkCoverArtistToComicBook = async (coverArtistId: number, comicBoo
   try {
     await db
       .insert(comicBookCoverArtistsTable)
-      .values({ comic_cover_artist_id: coverArtistId, comic_book_id: comicBookId })
+      .values({
+        comic_cover_artist_id: coverArtistId,
+        comic_book_id: comicBookId,
+      })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking cover artist to comic book:", error);

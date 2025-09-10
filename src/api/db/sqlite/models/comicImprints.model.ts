@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicImprintsTable, comicBookImprintsTable} from "../schema.ts";
+import { comicBookImprintsTable, comicImprintsTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicImprint = async (name: string): Promise<number> => {
@@ -23,15 +23,21 @@ export const insertComicImprint = async (name: string): Promise<number> => {
         .select({ id: comicImprintsTable.id })
         .from(comicImprintsTable)
         .where(eq(comicImprintsTable.name, name));
-      
+
       if (existingImprint.length > 0) {
-        console.log(`Comic imprint already exists with name: ${name}, returning existing ID: ${existingImprint[0].id}`);
+        console.log(
+          `Comic imprint already exists with name: ${name}, returning existing ID: ${
+            existingImprint[0].id
+          }`,
+        );
         return existingImprint[0].id;
       }
-      
-      throw new Error(`Failed to insert comic imprint and could not find existing imprint. Name: ${name}`);
+
+      throw new Error(
+        `Failed to insert comic imprint and could not find existing imprint. Name: ${name}`,
+      );
     }
-    
+
     return result[0].id;
   } catch (error) {
     console.error("Error inserting comic imprint:", error);
@@ -39,7 +45,10 @@ export const insertComicImprint = async (name: string): Promise<number> => {
   }
 };
 
-export const linkImprintToComicBook = async (imprintId: number, comicBookId: number): Promise<void> => {
+export const linkImprintToComicBook = async (
+  imprintId: number,
+  comicBookId: number,
+): Promise<void> => {
   const { db, client } = getClient();
 
   if (!db || !client) {

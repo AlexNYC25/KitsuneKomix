@@ -1,20 +1,20 @@
-import { 
-  ComicWriter, 
-  NewComicWriter, 
-  ComicWriterWithBooks,
+import {
   ComicPenciller,
+  ComicPencillerWithBooks,
+  ComicWriter,
+  ComicWriterWithBooks,
   NewComicPenciller,
-  ComicPencillerWithBooks
+  NewComicWriter,
 } from "./database.types.ts";
 
 // Re-export database types
-export type { 
-  ComicWriter, 
-  NewComicWriter, 
-  ComicWriterWithBooks,
+export type {
   ComicPenciller,
+  ComicPencillerWithBooks,
+  ComicWriter,
+  ComicWriterWithBooks,
   NewComicPenciller,
-  ComicPencillerWithBooks
+  NewComicWriter,
 };
 
 export type ComicCreatorInput = {

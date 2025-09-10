@@ -1,7 +1,7 @@
-import { User, NewUser } from "./database.types.ts";
+import { NewUser, User } from "./database.types.ts";
 
 // Re-export database types
-export type { User, NewUser };
+export type { NewUser, User };
 
 // Legacy types for backward compatibility
 export type UserRow = User;
@@ -38,4 +38,4 @@ export type UserUpdateInput = {
 };
 
 // Safe user type without sensitive data
-export type SafeUser = Omit<User, 'password_hash'>;
+export type SafeUser = Omit<User, "password_hash">;

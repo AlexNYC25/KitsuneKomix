@@ -1,14 +1,16 @@
 import { getClient } from "../client.ts";
 import { comicLibrariesTable } from "../schema.ts";
-import type { 
-  ComicLibrary, 
-  LibraryRegistrationInput, 
-  LibraryUpdateInput 
+import type {
+  ComicLibrary,
+  LibraryRegistrationInput,
+  LibraryUpdateInput,
 } from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
-export const createComicLibrary = async (library: LibraryRegistrationInput): Promise<number> => {
+export const createComicLibrary = async (
+  library: LibraryRegistrationInput,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -49,7 +51,9 @@ export const getAllComicLibraries = async (): Promise<ComicLibrary[]> => {
   }
 };
 
-export const getComicLibraryById = async (id: number): Promise<ComicLibrary | null> => {
+export const getComicLibraryById = async (
+  id: number,
+): Promise<ComicLibrary | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -57,9 +61,11 @@ export const getComicLibraryById = async (id: number): Promise<ComicLibrary | nu
   }
 
   try {
-    const result = await db.select().from(comicLibrariesTable).where(eq(comicLibrariesTable.id, id));
+    const result = await db.select().from(comicLibrariesTable).where(
+      eq(comicLibrariesTable.id, id),
+    );
     if (result.length === 0) return null;
-    
+
     return result[0];
   } catch (error) {
     console.error("Error fetching comic library by ID:", error);
@@ -67,7 +73,9 @@ export const getComicLibraryById = async (id: number): Promise<ComicLibrary | nu
   }
 };
 
-export const getComicLibraryByPath = async (path: string): Promise<ComicLibrary | null> => {
+export const getComicLibraryByPath = async (
+  path: string,
+): Promise<ComicLibrary | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -75,9 +83,11 @@ export const getComicLibraryByPath = async (path: string): Promise<ComicLibrary 
   }
 
   try {
-    const result = await db.select().from(comicLibrariesTable).where(eq(comicLibrariesTable.path, path));
+    const result = await db.select().from(comicLibrariesTable).where(
+      eq(comicLibrariesTable.path, path),
+    );
     if (result.length === 0) return null;
-    
+
     return result[0];
   } catch (error) {
     console.error("Error fetching comic library by path:", error);
@@ -85,7 +95,9 @@ export const getComicLibraryByPath = async (path: string): Promise<ComicLibrary 
   }
 };
 
-export const getLibraryContainingPath = async (filePath: string): Promise<ComicLibrary | null> => {
+export const getLibraryContainingPath = async (
+  filePath: string,
+): Promise<ComicLibrary | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -94,14 +106,20 @@ export const getLibraryContainingPath = async (filePath: string): Promise<ComicL
 
   try {
     // Get all enabled libraries
-    const libraries = await db.select().from(comicLibrariesTable).where(eq(comicLibrariesTable.enabled, 1));
+    const libraries = await db.select().from(comicLibrariesTable).where(
+      eq(comicLibrariesTable.enabled, 1),
+    );
 
     // Find the library whose path is a parent of the file path
     for (const library of libraries) {
       // Normalize paths by ensuring they end with / for proper comparison
-      const libraryPath = library.path.endsWith('/') ? library.path : library.path + '/';
-      const normalizedFilePath = filePath.endsWith('/') ? filePath : filePath + '/';
-      
+      const libraryPath = library.path.endsWith("/")
+        ? library.path
+        : library.path + "/";
+      const normalizedFilePath = filePath.endsWith("/")
+        ? filePath
+        : filePath + "/";
+
       if (normalizedFilePath.startsWith(libraryPath)) {
         return library;
       }
@@ -113,7 +131,9 @@ export const getLibraryContainingPath = async (filePath: string): Promise<ComicL
   }
 };
 
-export const getComicLibraryLastChangedTime = async (id: number): Promise<string | null> => {
+export const getComicLibraryLastChangedTime = async (
+  id: number,
+): Promise<string | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -125,7 +145,7 @@ export const getComicLibraryLastChangedTime = async (id: number): Promise<string
       .select({ changed_at: comicLibrariesTable.changed_at })
       .from(comicLibrariesTable)
       .where(eq(comicLibrariesTable.id, id));
-    
+
     return result.length > 0 ? result[0].changed_at : null;
   } catch (error) {
     console.error("Error fetching comic library changed time:", error);
@@ -151,7 +171,10 @@ export const setComicLibraryChangedTime = async (id: number): Promise<void> => {
   }
 };
 
-export const updateComicLibrary = async (id: number, updates: LibraryUpdateInput): Promise<boolean> => {
+export const updateComicLibrary = async (
+  id: number,
+  updates: LibraryUpdateInput,
+): Promise<boolean> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -162,8 +185,12 @@ export const updateComicLibrary = async (id: number, updates: LibraryUpdateInput
     const updateData: Record<string, unknown> = {};
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.path !== undefined) updateData.path = updates.path;
-    if (updates.description !== undefined) updateData.description = updates.description;
-    if (updates.enabled !== undefined) updateData.enabled = updates.enabled ? 1 : 0;
+    if (updates.description !== undefined) {
+      updateData.description = updates.description;
+    }
+    if (updates.enabled !== undefined) {
+      updateData.enabled = updates.enabled ? 1 : 0;
+    }
 
     const result = await db
       .update(comicLibrariesTable)

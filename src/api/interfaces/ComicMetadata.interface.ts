@@ -1,4 +1,3 @@
-
 import type { ComicInfo } from "npm:comic-metadata-tool";
 
 export interface ComicMetadata {

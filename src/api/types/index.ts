@@ -22,7 +22,7 @@ export type PaginationParams = {
 
 export type SortParams = {
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 };
 
 export type SearchResponse<T> = {
