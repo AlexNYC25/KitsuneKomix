@@ -1,8 +1,11 @@
 import { Context, Hono } from "hono";
-import { adminController } from "../controllers/admin.controller.ts";
+
+import { purgeAllData } from "../db/sqlite/models/admin.model.ts";
 
 const app = new Hono();
 
-app.post("/purge-data", (c: Context) => adminController.purgeAllData(c));
+app.post("/purge-data", (_c: Context) => {
+	return purgeAllData();
+});
 
 export default app;
