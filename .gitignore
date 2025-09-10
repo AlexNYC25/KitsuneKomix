@@ -144,3 +144,12 @@ dist
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# vs code files
+.vscode
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
