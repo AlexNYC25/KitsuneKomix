@@ -215,6 +215,31 @@ export const getComicBookByHash = async (hash: string): Promise<ComicBook | null
   }
 };
 
+export const searchComicBooks = async (query: string): Promise<ComicBook[]> => {
+  const { db, client } = getClient();
+  
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const likeQuery = `%${query}%`;
+    const result = await db
+      .select()
+      .from(comicBooksTable)
+      .where(
+        eq(comicBooksTable.title, likeQuery) ||
+        eq(comicBooksTable.series, likeQuery) ||
+        eq(comicBooksTable.publisher, likeQuery) ||
+        eq(comicBooksTable.summary, likeQuery)
+      );
+    return result;
+  } catch (error) {
+    console.error("Error searching comic books:", error);
+    throw error;
+  }
+};
+
 export const deleteComicBook = async (id: number): Promise<boolean> => {
   const { db, client } = getClient();
 
