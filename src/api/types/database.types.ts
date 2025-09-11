@@ -14,6 +14,7 @@ import {
   comicBookPublishersTable,
   comicBookSeriesGroupsTable,
   comicBooksTable,
+  comicBookThumbnails,
   comicBookStoryArcsTable,
   comicBookTeamsTable,
   comicBookWritersTable,
@@ -36,6 +37,9 @@ export type NewComicLibrary = InferInsertModel<typeof comicLibrariesTable>;
 
 export type ComicBook = InferSelectModel<typeof comicBooksTable>;
 export type NewComicBook = InferInsertModel<typeof comicBooksTable>;
+
+export type ComicBookThumbnail = InferSelectModel<typeof comicBookThumbnails>;
+export type NewComicBookThumbnail = InferInsertModel<typeof comicBookThumbnails>;
 
 export type ComicSeries = InferSelectModel<typeof comicSeriesTable>;
 export type NewComicSeries = InferInsertModel<typeof comicSeriesTable>;
