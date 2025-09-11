@@ -1,6 +1,8 @@
+import { eq } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
 import { comicBookPencillersTable, comicPencillersTable } from "../schema.ts";
-import { eq } from "drizzle-orm";
+import type { ComicPenciller } from "../../../types/index.ts";
 
 export const insertComicPenciller = async (
   name: string,
@@ -65,6 +67,37 @@ export const linkPencillerToComicBook = async (
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking penciller to comic book:", error);
+    throw error;
+  }
+};
+
+export const getPencillersByComicBookId = async (
+  comicBookId: number,
+): Promise<ComicPenciller[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({
+        comic_penciller: comicPencillersTable
+      })
+      .from(comicPencillersTable)
+      .innerJoin(
+        comicBookPencillersTable,
+        eq(
+          comicPencillersTable.id,
+          comicBookPencillersTable.comic_penciller_id,
+        ),
+      )
+      .where(eq(comicBookPencillersTable.comic_book_id, comicBookId));
+
+    return result.map(({ comic_penciller }) => comic_penciller);
+  } catch (error) {
+    console.error("Error fetching pencillers by comic book ID:", error);
     throw error;
   }
 };
