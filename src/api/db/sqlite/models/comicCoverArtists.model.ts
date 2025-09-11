@@ -1,9 +1,12 @@
+import { eq } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
+
+import { ComicCoverArtist } from "../../../types/index.ts";
 import {
   comicBookCoverArtistsTable,
   comicCoverArtistsTable,
 } from "../schema.ts";
-import { eq } from "drizzle-orm";
 
 export const insertComicCoverArtist = async (name: string): Promise<number> => {
   const { db, client } = getClient();
@@ -68,6 +71,37 @@ export const linkCoverArtistToComicBook = async (
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking cover artist to comic book:", error);
+    throw error;
+  }
+};
+
+export const getCoverArtistsByComicBookId = async (
+  comicBookId: number,
+): Promise<ComicCoverArtist[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({
+        comic_cover_artist: comicCoverArtistsTable
+      })
+      .from(comicCoverArtistsTable)
+      .innerJoin(
+        comicBookCoverArtistsTable,
+        eq(
+          comicCoverArtistsTable.id,
+          comicBookCoverArtistsTable.comic_cover_artist_id,
+        ),
+      )
+      .where(eq(comicBookCoverArtistsTable.comic_book_id, comicBookId));
+
+    return result.map((row) => row.comic_cover_artist);
+  } catch (error) {
+    console.error("Error fetching cover artists by comic book ID:", error);
     throw error;
   }
 };
