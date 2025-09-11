@@ -47,6 +47,42 @@ Table comic_books {
 
 }
 
+Table comic_pages {
+  id integer [primary key]
+  comicbook_id int
+  file_path string
+  page_number integer
+  hash string
+  file_size int
+  created_at date
+  update_at date
+}
+
+Table comic_book_covers {
+  id integer [primary key]
+  comicbook_id integer
+  file_path string
+  created_at date
+  updated_at date
+}
+
+Table comic_book_thumbnails {
+  id integer [primary key]
+  comicbook_id integer
+  file_path string
+  created_at date
+  updated_at date
+}
+
+Table comic_web_links {
+  id integer [primary key]
+  comicbook_id integer
+  url string
+  description text
+  created_at date
+  updated_at date
+}
+
 Table comic_writers {
   id integer [primary key]
   name text [unique]
@@ -268,6 +304,12 @@ Table comic_book_locations {
 }
 
 Ref library_books: comic_libraries.id < comic_books.library_id
+
+ref comic_book_web_links: comic_web_links.comicbook_id > comic_books.id
+
+Ref comic_book_pages:  comic_pages.comicbook_id > comic_books.id
+Ref comic_book_covers: comic_book_covers.comicbook_id > comic_books.id
+Ref comic_book_thumbnails: comic_book_thumbnails.comicbook_id > comic_books.id
 
 Ref comic_book_writers: comic_book_writers.writer_id > comic_writers.id
 Ref comic_writer_books: comic_book_writers.comicbook_id > comic_books.id
