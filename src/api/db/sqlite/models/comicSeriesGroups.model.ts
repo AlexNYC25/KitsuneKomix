@@ -1,9 +1,12 @@
+import { eq } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
+
+import type { ComicSeriesGroup } from "../../../types/index.ts";
 import {
   comicBookSeriesGroupsTable,
   comicSeriesGroupsTable,
 } from "../schema.ts";
-import { eq } from "drizzle-orm";
 
 export const insertComicSeriesGroup = async (
   name: string,
@@ -72,5 +75,36 @@ export const linkSeriesGroupToComicBook = async (
   } catch (error) {
     console.error("Error linking comic series group to comic book:", error);
     throw new Error("Failed to link comic series group to comic book.");
+  }
+};
+
+export const getSeriesGroupsByComicBookId = async (
+  comicBookId: number,
+): Promise<ComicSeriesGroup[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({
+        comic_series_group: comicSeriesGroupsTable
+      })
+      .from(comicSeriesGroupsTable)
+      .innerJoin(
+        comicBookSeriesGroupsTable,
+        eq(comicSeriesGroupsTable.id, comicBookSeriesGroupsTable.comic_series_group_id),
+      )
+      .where(eq(comicBookSeriesGroupsTable.comic_book_id, comicBookId));
+
+    return result.map(row => row.comic_series_group);
+  } catch (error) {
+    console.error(
+      `Error fetching series groups for comic book ID ${comicBookId}:`,
+      error,
+    );
+    throw new Error("Failed to fetch series groups for comic book.");
   }
 };

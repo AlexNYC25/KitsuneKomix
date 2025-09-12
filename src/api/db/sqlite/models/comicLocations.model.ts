@@ -1,6 +1,10 @@
-import { getClient } from "../client.ts";
-import { comicBookLocationsTable, comicLocationsTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
+
+import { getClient } from "../client.ts";
+
+import { comicBookLocationsTable, comicLocationsTable } from "../schema.ts";
+import type { ComicLocation } from "../../../types/index.ts";
+
 
 export const insertComicLocation = async (name: string): Promise<number> => {
   const { db, client } = getClient();
@@ -63,5 +67,39 @@ export const linkLocationToComicBook = async (
   } catch (error) {
     console.error("Error linking comic location to comic book:", error);
     throw new Error("Failed to link comic location to comic book.");
+  }
+};
+
+export const getLocationsByComicBookId = async (
+  comicBookId: number,
+): Promise<ComicLocation[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({
+        comic_location: comicLocationsTable,
+      })
+      .from(comicLocationsTable)
+      .innerJoin(
+        comicBookLocationsTable,
+        eq(
+          comicLocationsTable.id,
+          comicBookLocationsTable.comic_location_id,
+        ),
+      )
+      .where(eq(comicBookLocationsTable.comic_book_id, comicBookId));
+
+    return result.map((row) => row.comic_location);
+  } catch (error) {
+    console.error(
+      "Error fetching comic locations by comic book ID:",
+      error,
+    );
+    throw new Error("Failed to fetch comic locations.");
   }
 };

@@ -1,6 +1,10 @@
-import { getClient } from "../client.ts";
-import { comicBookGenresTable, comicGenresTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
+
+import { getClient } from "../client.ts";
+
+import type { ComicGenre } from "../../../types/index.ts";
+import { comicBookGenresTable, comicGenresTable } from "../schema.ts";
+
 
 export const insertComicGenre = async (genreName: string): Promise<number> => {
   const { db, client } = getClient();
@@ -62,6 +66,34 @@ export const linkGenreToComicBook = async (
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking genre to comic book:", error);
+    throw error;
+  }
+};
+
+export const getGenresForComicBook = async (
+  comicBookId: number,
+): Promise<ComicGenre[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({
+        comic_genre: comicGenresTable
+      })
+      .from(comicGenresTable)
+      .innerJoin(
+        comicBookGenresTable,
+        eq(comicGenresTable.id, comicBookGenresTable.comic_genre_id),
+      )
+      .where(eq(comicBookGenresTable.comic_book_id, comicBookId));
+
+    return result.map((row) => row.comic_genre);
+  } catch (error) {
+    console.error("Error fetching genres for comic book:", error);
     throw error;
   }
 };

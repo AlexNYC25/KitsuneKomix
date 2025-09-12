@@ -1,6 +1,9 @@
-import { getClient } from "../client.ts";
-import { comicBookStoryArcsTable, comicStoryArcsTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
+
+import { getClient } from "../client.ts";
+
+import type { ComicStoryArc } from "../../../types/index.ts";
+import { comicBookStoryArcsTable, comicStoryArcsTable } from "../schema.ts";
 
 export const insertComicStoryArc = async (name: string): Promise<number> => {
   const { db, client } = getClient();
@@ -63,5 +66,36 @@ export const linkStoryArcToComicBook = async (
   } catch (error) {
     console.error("Error linking comic story arc to comic book:", error);
     throw new Error("Failed to link comic story arc to comic book.");
+  }
+};
+
+export const getStoryArcsByComicBookId = async (
+  comicBookId: number,
+): Promise<ComicStoryArc[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({
+        comic_story_arc: comicStoryArcsTable
+      })
+      .from(comicStoryArcsTable)
+      .innerJoin(
+        comicBookStoryArcsTable,
+        eq(comicStoryArcsTable.id, comicBookStoryArcsTable.comic_story_arc_id),
+      )
+      .where(eq(comicBookStoryArcsTable.comic_book_id, comicBookId));
+
+    return result.map(row => row.comic_story_arc);
+  } catch (error) {
+    console.error(
+      `Error fetching story arcs for comic book ID ${comicBookId}:`,
+      error,
+    );
+    throw new Error("Failed to fetch story arcs for comic book.");
   }
 };

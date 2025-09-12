@@ -1,6 +1,10 @@
-import { getClient } from "../client.ts";
-import { comicBookTeamsTable, comicTeamsTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
+
+import { getClient } from "../client.ts";
+
+import { comicBookTeamsTable, comicTeamsTable } from "../schema.ts";
+import type { ComicTeam } from "../../../types/index.ts";
+
 
 export const insertComicTeam = async (name: string): Promise<number> => {
   const { db, client } = getClient();
@@ -62,6 +66,37 @@ export const linkTeamToComicBook = async (
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error(`Error linking comic team to comic book`, error);
+    throw error;
+  }
+};
+
+export const getTeamsByComicBookId = async (
+  comicBookId: number,
+): Promise<ComicTeam[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({
+        comic_team: comicTeamsTable,
+      })
+      .from(comicTeamsTable)
+      .innerJoin(
+        comicBookTeamsTable,
+        eq(comicTeamsTable.id, comicBookTeamsTable.comic_team_id),
+      )
+      .where(eq(comicBookTeamsTable.comic_book_id, comicBookId));
+
+    return result.map((row) => row.comic_team);
+  } catch (error) {
+    console.error(
+      `Error fetching comic teams for comic book ID ${comicBookId}`,
+      error,
+    );
     throw error;
   }
 };
