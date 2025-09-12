@@ -16,6 +16,7 @@ import {
   getComicFileRawDetails,
   getComicSeriesRawDetails,
 } from "../../utilities/comic-parser.ts";
+import { createImageThumbnail } from "../../utilities/image.ts";
 
 // Queue and configuration imports
 import { appQueue } from "../queueManager.ts";
@@ -34,6 +35,7 @@ import {
 import { getLibraryContainingPath } from "../../db/sqlite/models/comicLibraries.model.ts";
 import { insertComicPage } from "../../db/sqlite/models/comicPages.model.ts";
 import { insertComicBookCover } from "../../db/sqlite/models/comicBookCovers.model.ts";
+import { insertComicBookThumbnail } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
 
 // Database model imports - People/Creators
 import {
@@ -43,7 +45,7 @@ import {
 import {
   insertComicPenciller,
   linkPencillerToComicBook,
-} from "../../db/sqlite/models/comicPenceillers.model.ts";
+} from "../../db/sqlite/models/comicPencillers.model.ts";
 import {
   insertComicInker,
   linkInkerToComicBook,
@@ -270,6 +272,26 @@ async function processComicFileImages(
 
     // ============== PROCESS COVER IMAGE ==============
     if (coverImagePath) {
+      queueLogger.info(`Generating thumbnail for cover image: ${coverImagePath}`);
+      
+      const thumbnail = await createImageThumbnail(coverImagePath, { width: 300, height: 450 });
+
+      // Insert thumbnail record
+      if (thumbnail.success && thumbnail.thumbnailPath) {
+        queueLogger.info(`DEBUG: Inserting thumbnail for comic ID: ${job.data.comicId}`);
+        const thumbnailId = await insertComicBookThumbnail(
+          job.data.comicId,
+          thumbnail.thumbnailPath,
+        );
+        apiLogger.info(
+          `Inserted comic book cover thumbnail with ID: ${thumbnailId} for comic ID: ${job.data.comicId}`,
+        );
+      } else {
+        queueLogger.error(
+          `Failed to create thumbnail for cover image: ${coverImagePath}. Error: ${thumbnail.error || 'Unknown error'}`,
+        );
+      }
+
       const relativeCoverPath = coverImagePath.split("/").pop() ||
         coverImagePath; // Get filename only
       const coverId = await insertComicBookCover(
