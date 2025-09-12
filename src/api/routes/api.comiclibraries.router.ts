@@ -7,6 +7,29 @@ import { LibraryRegistrationInput } from "../types/index.ts";
 
 const app = new Hono();
 
+app.get("/", async (c: Context) => {
+  // TODO: use the model/service to get the libraries from the database
+  return c.json({ message: "Comic Libraries API is running" }, 200);
+});
+
+app.get("/:id", async (c: Context) => {
+  const id = c.req.param("id");
+  // TODO: use the model/service to get the library from the database
+  return c.json({ message: `Library[${id}] retrieved successfully` }, 200);
+});
+
+app.patch('/:id/analyze', async (c: Context) => {
+  const id = c.req.param("id");
+  // TODO: use the model/service to analyze the library
+  return c.json({ message: `Library[${id}] analysis started successfully` }, 200);
+});
+
+app.post('/:id/empty-trash', async (c: Context) => {
+  const id = c.req.param("id");
+  // TODO: use the model/service to empty the trash for the library
+  return c.json({ message: `Library[${id}] trash emptied successfully` }, 200);
+});
+
 app.post(
   "/create-library",
   async (c: Context) => {
@@ -63,5 +86,14 @@ app.post(
     }
   },
 );
+
+app.delete("/delete-library/:id", async (c: Context) => {
+  const id = c.req.param("id");
+
+  // TODO: use the model/service to delete the library from the database
+
+  return c.json({ message: `Library[${id}] deleted successfully` }, 200);
+});
+
 
 export default app;
