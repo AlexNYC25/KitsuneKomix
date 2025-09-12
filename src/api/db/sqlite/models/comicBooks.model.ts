@@ -1,9 +1,12 @@
+import { eq, desc, asc } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
+
 import { comicBooksTable } from "../schema.ts";
 import type { ComicBook, NewComicBook } from "../../../types/index.ts";
-import { eq } from "drizzle-orm";
 
-export const getAllComicBooks = async () => {
+
+export const getAllComicBooks = async (offset: number, limit: number, sort: string | undefined): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -11,13 +14,13 @@ export const getAllComicBooks = async () => {
   }
 
   try {
-    db.select().from(comicBooksTable);
-    const result = await client.execute(
-      db.select().from(comicBooksTable).toSQL(),
+    const result = await db.select().from(comicBooksTable).limit(limit).offset(offset).orderBy(
+      sort === "asc" ? asc(comicBooksTable.file_path) : desc(comicBooksTable.file_path),
     );
-    return result.rows;
+    
+    return result;
   } catch (error) {
-    console.error("Error fetching comic books:", error);
+    console.error("Error fetching all comic books:", error);
     throw error;
   }
 };
