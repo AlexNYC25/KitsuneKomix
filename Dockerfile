@@ -1,4 +1,4 @@
-FROM denoland/deno:2.4.5
+FROM denoland/deno:2.4.5 AS base
 
 # Switch to root to install packages
 USER root
@@ -14,18 +14,36 @@ WORKDIR /app
 # Copy configuration files first
 COPY deno.json deno.lock ./
 
-# Copy source code
-COPY . .
-
+# Development stage
+FROM base AS development
+# Copy source code (will be overridden by volume mount in dev)
+COPY src ./src
+# Copy drizzle migrations (essential for database)
+COPY drizzle ./drizzle
+COPY drizzle.config.ts ./
 # Change ownership to deno user
 RUN chown -R deno:deno /app
-
 USER deno
-
 # Cache dependencies
 RUN deno cache --lock=deno.lock src/main.ts
+# Expose ports
+EXPOSE 8000 9229
+# Development command with hot reloading
+CMD ["task", "dev"]
 
-# Expose the port your Deno app will run on
-EXPOSE 3000
+# Production stage
+FROM base AS production
+# Copy all source code for production
+COPY . .
+# Change ownership to deno user
+RUN chown -R deno:deno /app
+USER deno
+# Cache dependencies
+RUN deno cache --lock=deno.lock src/main.ts
+# Expose only the app port
+EXPOSE 8000
+# Production command
+CMD ["task", "start"]
 
-CMD ["run", "--allow-env", "--allow-read", "--allow-net", "--allow-write", "--allow-ffi", "--allow-sys", "--allow-run", "src/main.ts"]
+# Default to production
+FROM production
