@@ -407,3 +407,413 @@ export async function extractComicPage(
     return null;
   }
 }
+
+/**
+ * Extract a specific page range from a comic book archive using streaming for large files
+ * @param comicPath - path to the comic book archive
+ * @param extractToPath - optional path to extract to (defaults to temp directory)
+ * @param pageStart - starting page number (0-based, inclusive)
+ * @param pageEnd - ending page number (0-based, inclusive)
+ * @returns Promise<ComicExtractionResult> with extraction details for the page range
+ */
+export async function extractComicBookByStreaming(
+  comicPath: string,
+  extractToPath?: string,
+  pageStart: number = 0,
+  pageEnd: number = 0,
+): Promise<ComicExtractionResult> {
+  let fileSizeBytes = 0;
+
+  try {
+    // Validate input file
+    if (!isComicBookFile(comicPath)) {
+      throw new Error(`Unsupported comic format: ${extname(comicPath)}`);
+    }
+
+    const stat = await Deno.stat(comicPath);
+    if (!stat.isFile) {
+      throw new Error("Comic path is not a file");
+    }
+
+    // Validate page range
+    if (pageStart < 0 || pageEnd < 0 || pageStart > pageEnd) {
+      throw new Error("Invalid page range: pageStart and pageEnd must be non-negative and pageStart <= pageEnd");
+    }
+
+    // Capture file size
+    fileSizeBytes = stat.size;
+
+    // Determine extraction path
+    const comicBasename = basename(comicPath, extname(comicPath));
+    const targetPath = extractToPath || await Deno.makeTempDir({
+      prefix: `comic_extract_stream_${comicBasename}_${pageStart}-${pageEnd}_`,
+    });
+
+    // Ensure extraction directory exists
+    await Deno.mkdir(targetPath, { recursive: true });
+
+    const format = extname(comicPath).toLowerCase();
+    let extractedPages: string[] = [];
+
+    // Extract based on format using streaming approach
+    switch (format) {
+      case ".cbz":
+      case ".zip":
+        extractedPages = await extractZipArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        break;
+      case ".cbr":
+      case ".rar":
+        extractedPages = await extractRarArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        break;
+      case ".cb7":
+      case ".7z":
+        extractedPages = await extract7zArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        break;
+      case ".cbt":
+      case ".tar":
+        extractedPages = await extractTarArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        break;
+      default:
+        throw new Error(`Streaming extraction not implemented for format: ${format}`);
+    }
+
+    if (extractedPages.length === 0) {
+      throw new Error("No pages extracted in the specified range");
+    }
+
+    const coverImagePath = extractedPages.length > 0 ? extractedPages[0] : undefined;
+
+    return {
+      success: true,
+      extractedPath: targetPath,
+      pageCount: extractedPages.length,
+      pages: extractedPages,
+      coverImagePath,
+      fileSizeBytes,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return {
+      success: false,
+      extractedPath: "",
+      pageCount: 0,
+      pages: [],
+      fileSizeBytes,
+      error: errorMessage,
+    };
+  }
+}
+
+/**
+ * Extract specific page range from ZIP/CBZ archives using streaming
+ */
+async function extractZipArchiveByRange(
+  archivePath: string,
+  targetPath: string,
+  pageStart: number,
+  pageEnd: number,
+): Promise<string[]> {
+  try {
+    // First, list the contents to identify image files and their order
+    const listProcess = new Deno.Command("unzip", {
+      args: ["-l", archivePath],
+      stdout: "piped",
+      stderr: "null",
+    });
+
+    const listResult = await listProcess.output();
+    if (!listResult.success) {
+      throw new Error("Failed to list archive contents");
+    }
+
+    const listOutput = new TextDecoder().decode(listResult.stdout);
+    const imageFiles = extractImageFileNamesFromListing(listOutput);
+    
+    // Calculate the range of files to extract
+    const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
+    
+    if (filesToExtract.length === 0) {
+      return [];
+    }
+
+    // Extract only the specific files
+    const extractedPaths: string[] = [];
+    for (const fileName of filesToExtract) {
+      const process = new Deno.Command("unzip", {
+        args: ["-j", "-o", archivePath, fileName, "-d", targetPath],
+        stdout: "null",
+        stderr: "null",
+      });
+
+      const result = await process.output();
+      if (result.success) {
+        const extractedPath = join(targetPath, basename(fileName));
+        extractedPaths.push(extractedPath);
+      }
+    }
+
+    return extractedPaths;
+  } catch (error) {
+    console.error(`ZIP streaming extraction error: ${error}`);
+    return [];
+  }
+}
+
+/**
+ * Extract specific page range from RAR/CBR archives using streaming
+ */
+async function extractRarArchiveByRange(
+  archivePath: string,
+  targetPath: string,
+  pageStart: number,
+  pageEnd: number,
+): Promise<string[]> {
+  try {
+    // List archive contents first
+    const listProcess = new Deno.Command("7z", {
+      args: ["l", archivePath],
+      stdout: "piped",
+      stderr: "null",
+    });
+
+    const listResult = await listProcess.output();
+    if (!listResult.success) {
+      throw new Error("Failed to list RAR archive contents");
+    }
+
+    const listOutput = new TextDecoder().decode(listResult.stdout);
+    const imageFiles = extractImageFileNamesFrom7zListing(listOutput);
+    
+    // Calculate the range of files to extract
+    const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
+    
+    if (filesToExtract.length === 0) {
+      return [];
+    }
+
+    // Extract specific files
+    const extractedPaths: string[] = [];
+    for (const fileName of filesToExtract) {
+      const process = new Deno.Command("7z", {
+        args: ["e", "-o" + targetPath, "-y", archivePath, fileName],
+        stdout: "null",
+        stderr: "null",
+      });
+
+      const result = await process.output();
+      if (result.success) {
+        const extractedPath = join(targetPath, basename(fileName));
+        extractedPaths.push(extractedPath);
+      }
+    }
+
+    return extractedPaths;
+  } catch (error) {
+    console.error(`RAR streaming extraction error: ${error}`);
+    return [];
+  }
+}
+
+/**
+ * Extract specific page range from 7Z/CB7 archives using streaming
+ */
+async function extract7zArchiveByRange(
+  archivePath: string,
+  targetPath: string,
+  pageStart: number,
+  pageEnd: number,
+): Promise<string[]> {
+  try {
+    // List archive contents first
+    const listProcess = new Deno.Command("7z", {
+      args: ["l", archivePath],
+      stdout: "piped",
+      stderr: "null",
+    });
+
+    const listResult = await listProcess.output();
+    if (!listResult.success) {
+      throw new Error("Failed to list 7Z archive contents");
+    }
+
+    const listOutput = new TextDecoder().decode(listResult.stdout);
+    const imageFiles = extractImageFileNamesFrom7zListing(listOutput);
+    
+    // Calculate the range of files to extract
+    const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
+    
+    if (filesToExtract.length === 0) {
+      return [];
+    }
+
+    // Extract specific files
+    const extractedPaths: string[] = [];
+    for (const fileName of filesToExtract) {
+      const process = new Deno.Command("7z", {
+        args: ["e", "-o" + targetPath, "-y", archivePath, fileName],
+        stdout: "null",
+        stderr: "null",
+      });
+
+      const result = await process.output();
+      if (result.success) {
+        const extractedPath = join(targetPath, basename(fileName));
+        extractedPaths.push(extractedPath);
+      }
+    }
+
+    return extractedPaths;
+  } catch (error) {
+    console.error(`7Z streaming extraction error: ${error}`);
+    return [];
+  }
+}
+
+/**
+ * Extract specific page range from TAR/CBT archives using streaming
+ */
+async function extractTarArchiveByRange(
+  archivePath: string,
+  targetPath: string,
+  pageStart: number,
+  pageEnd: number,
+): Promise<string[]> {
+  try {
+    // List archive contents first
+    const listProcess = new Deno.Command("tar", {
+      args: ["-tf", archivePath],
+      stdout: "piped",
+      stderr: "null",
+    });
+
+    const listResult = await listProcess.output();
+    if (!listResult.success) {
+      throw new Error("Failed to list TAR archive contents");
+    }
+
+    const listOutput = new TextDecoder().decode(listResult.stdout);
+    const imageFiles = extractImageFileNamesFromTarListing(listOutput);
+    
+    // Calculate the range of files to extract
+    const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
+    
+    if (filesToExtract.length === 0) {
+      return [];
+    }
+
+    // Extract specific files
+    const extractedPaths: string[] = [];
+    for (const fileName of filesToExtract) {
+      const process = new Deno.Command("tar", {
+        args: ["-xf", archivePath, "-C", targetPath, fileName],
+        stdout: "null",
+        stderr: "null",
+      });
+
+      const result = await process.output();
+      if (result.success) {
+        const extractedPath = join(targetPath, basename(fileName));
+        extractedPaths.push(extractedPath);
+      }
+    }
+
+    return extractedPaths;
+  } catch (error) {
+    console.error(`TAR streaming extraction error: ${error}`);
+    return [];
+  }
+}
+
+/**
+ * Parse image file names from unzip listing output
+ */
+function extractImageFileNamesFromListing(listOutput: string): string[] {
+  const lines = listOutput.split('\n');
+  const imageFiles: string[] = [];
+  
+  for (const line of lines) {
+    // Skip header and footer lines
+    if (line.includes('Archive:') || line.includes('Length') || line.includes('---') || line.trim() === '') {
+      continue;
+    }
+    
+    // Extract filename from unzip -l output (filename is typically the last part)
+    const parts = line.trim().split(/\s+/);
+    if (parts.length >= 4) {
+      const fileName = parts.slice(3).join(' '); // Handle filenames with spaces
+      if (isImageFile(fileName)) {
+        imageFiles.push(fileName);
+      }
+    }
+  }
+  
+  // Sort files naturally
+  imageFiles.sort((a, b) => {
+    return a.localeCompare(b, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+  
+  return imageFiles;
+}
+
+/**
+ * Parse image file names from 7z listing output
+ */
+function extractImageFileNamesFrom7zListing(listOutput: string): string[] {
+  const lines = listOutput.split('\n');
+  const imageFiles: string[] = [];
+  
+  for (const line of lines) {
+    // Skip header lines and look for file entries
+    if (line.includes('Date') || line.includes('---') || line.trim() === '' || line.includes('Listing archive')) {
+      continue;
+    }
+    
+    // 7z output format: Date Time Attr Size Compressed Name
+    const parts = line.trim().split(/\s+/);
+    if (parts.length >= 6) {
+      const fileName = parts.slice(5).join(' '); // Handle filenames with spaces
+      if (isImageFile(fileName)) {
+        imageFiles.push(fileName);
+      }
+    }
+  }
+  
+  // Sort files naturally
+  imageFiles.sort((a, b) => {
+    return a.localeCompare(b, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+  
+  return imageFiles;
+}
+
+/**
+ * Parse image file names from tar listing output
+ */
+function extractImageFileNamesFromTarListing(listOutput: string): string[] {
+  const lines = listOutput.split('\n');
+  const imageFiles: string[] = [];
+  
+  for (const line of lines) {
+    const fileName = line.trim();
+    if (fileName && isImageFile(fileName)) {
+      imageFiles.push(fileName);
+    }
+  }
+  
+  // Sort files naturally
+  imageFiles.sort((a, b) => {
+    return a.localeCompare(b, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+  
+  return imageFiles;
+}
+
