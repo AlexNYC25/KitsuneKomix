@@ -1,10 +1,12 @@
 {
   "nodeModulesDir": "auto",
   "tasks": {
-    "dev": "deno run --watch --allow-env --allow-read --allow-net --allow-write --allow-ffi --allow-sys ./src/main.ts",
-    "dev:debug": "deno run --watch --inspect-brk=0.0.0.0:9229 --allow-env --allow-read --allow-net --allow-write --allow-ffi --allow-sys ./src/main.ts",
-    "start": "deno run --allow-env --allow-read --allow-net --allow-write --allow-ffi --allow-sys ./src/main.ts",
+    "dev": "deno run --watch --allow-env --allow-read --allow-net --allow-write --allow-ffi --allow-sys --allow-run ./src/main.ts",
+    "dev:debug": "deno run --watch --inspect-brk=0.0.0.0:9229 --allow-env --allow-read --allow-net --allow-write --allow-ffi --allow-sys --allow-run ./src/main.ts",
+    "dev:hot": "deno run --watch=./src --allow-env --allow-read --allow-net --allow-write --allow-ffi --allow-sys --allow-run ./src/main.ts",
+    "start": "deno run --allow-env --allow-read --allow-net --allow-write --allow-ffi --allow-sys --allow-run ./src/main.ts",
     "test": "deno test --allow-read --allow-net --allow-env --allow-write",
+    "test:watch": "deno test --watch --allow-read --allow-net --allow-env --allow-write",
     "db:generate": "deno run -A npm:drizzle-kit generate"
   },
   "imports": {
