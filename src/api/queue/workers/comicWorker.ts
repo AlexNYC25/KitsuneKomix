@@ -31,6 +31,7 @@ import { insertComicBook } from "../../db/sqlite/models/comicBooks.model.ts";
 import {
   getComicSeriesByPath,
   insertComicSeries,
+  addComicBookToSeries,
 } from "../../db/sqlite/models/comicSeries.model.ts";
 import { getLibraryContainingPath } from "../../db/sqlite/models/comicLibraries.model.ts";
 import { insertComicPage } from "../../db/sqlite/models/comicPages.model.ts";
@@ -355,6 +356,25 @@ async function processComicSeries(
     apiLogger.info(
       `Inserted new comic series with ID: ${seriesId} for path: ${job.data.seriesPath}`,
     );
+
+    // Link the comic book to the newly created series
+    try {
+      const linked = await addComicBookToSeries(seriesId, job.data.comicId);
+      if (linked) {
+        apiLogger.info(
+          `Successfully linked comic book ${job.data.comicId} to new series ${seriesId}`,
+        );
+      } else {
+        apiLogger.warn(
+          `Comic book ${job.data.comicId} may already be linked to series ${seriesId}`,
+        );
+      }
+    } catch (linkError) {
+      queueLogger.error(
+        `Error linking comic book ${job.data.comicId} to series ${seriesId}: ${linkError}`,
+      );
+      // Don't throw here as the series was successfully created
+    }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     queueLogger.error(
@@ -460,6 +480,24 @@ async function queueSeriesProcessing(
     queueLogger.info(
       `Series already exists for path: ${parentPath}, series ID: ${existingSeries.id}`,
     );
+    
+    // Add the comic book to the existing series
+    try {
+      const linked = await addComicBookToSeries(existingSeries.id, comicId);
+      if (linked) {
+        apiLogger.info(
+          `Successfully linked comic book ${comicId} to existing series ${existingSeries.id}`,
+        );
+      } else {
+        apiLogger.warn(
+          `Comic book ${comicId} may already be linked to series ${existingSeries.id}`,
+        );
+      }
+    } catch (error) {
+      queueLogger.error(
+        `Error linking comic book ${comicId} to series ${existingSeries.id}: ${error}`,
+      );
+    }
   }
 }
 
