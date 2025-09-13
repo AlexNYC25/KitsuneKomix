@@ -1,19 +1,29 @@
-
 services:
   app:
     build:
       context: .
       dockerfile: ./Dockerfile
+      target: ${BUILD_TARGET:-production}
     container_name: kitsunekomix_app
     ports:
       - "8000:8000"
+      # Debug port (only used in development)
+      - "${DEBUG_PORT:-9229}:9229"
     volumes:
       - ./cache:/app/cache
       - ./comics:/app/comics
       - ./config:/app/config
       - ./logs:/app/logs
+      # Mount source code for development hot reloading
+      # These will be ignored in production due to target stage
+      - ${SOURCE_MOUNT:-./src}:/app/src
+      - ${CONFIG_MOUNT:-./deno.json}:/app/deno.json
+      - ${LOCK_MOUNT:-./deno.lock}:/app/deno.lock
+      - ${DRIZZLE_CONFIG_MOUNT:-./drizzle.config.ts}:/app/drizzle.config.ts
+      # Mount drizzle migrations for development
+      - ./drizzle:/app/drizzle
     environment:
-      ENV: development
+      ENV: ${NODE_ENV:-production}
       PORT: 8000
       REDIS_HOST: "redis"
       REDIS_PORT: 6379
