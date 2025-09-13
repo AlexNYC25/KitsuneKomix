@@ -22,7 +22,19 @@ export async function runMigrations() {
   }
 
   try {
-    await migrate(db, { migrationsFolder: "./drizzle" });
+    // Use absolute path to drizzle migrations folder
+    const migrationsPath = join(Deno.cwd(), "drizzle");
+    dbLogger.info(`Looking for migrations in: ${migrationsPath}`);
+    
+    // Check if migrations directory exists
+    try {
+      await Deno.stat(migrationsPath);
+      dbLogger.info("Migrations directory found");
+    } catch {
+      throw new Error(`Migrations directory not found at: ${migrationsPath}`);
+    }
+    
+    await migrate(db, { migrationsFolder: migrationsPath });
     dbLogger.info("Migrations completed successfully!");
   } catch (error) {
     dbLogger.error(`Migration failed: ${error}`);
