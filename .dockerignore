@@ -1,20 +1,47 @@
-# Ignore comic files and large directories
-comics/
-cache/
-logs/
-config/
-node_modules/
-.git/
-.DS_Store
-*.cbz
-*.cbr
-*.pdf
+# Runtime data and mounted volumes
+cache/*
+logs/*
+config/*.sqlite
+config/logs/*
 
-# Ignore development files
+# Comics (mounted as volume)
+comics/*
+
+# Git
+.git/
+.gitignore
+
+# Node modules (handled by Deno)
+node_modules/
+npm-debug.log*
+
+# Environment files
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
 .vscode/
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 *.log
 
-# Ignore old files
+# Docker development files
+Dockerfile.dev
+docker-compose.dev.yml
+dev.sh
+
+# Documentation
+README.md
+LICENSE
+CHANGELOG.MD
+
+# Old files
 _OLD/
