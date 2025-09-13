@@ -15,6 +15,13 @@
       "when": 1757558062158,
       "tag": "0001_nosy_shaman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1757799641812,
+      "tag": "0002_keen_argent",
+      "breakpoints": true
     }
   ]
 }

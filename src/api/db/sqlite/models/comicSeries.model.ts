@@ -1,7 +1,9 @@
-import { getClient } from "../client.ts";
-import { comicSeriesTable } from "../schema.ts";
-import type { ComicSeries, NewComicSeries } from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
+
+import { getClient } from "../client.ts";
+
+import { comicSeriesTable, comicSeriesBooks } from "../schema.ts";
+import type { ComicSeries, NewComicSeries } from "../../../types/index.ts";
 
 export const insertComicSeries = async (
   seriesData: NewComicSeries,
@@ -196,6 +198,77 @@ export const deleteComicSeries = async (id: number): Promise<boolean> => {
     return result.length > 0;
   } catch (error) {
     console.error("Error deleting comic series:", error);
+    throw error;
+  }
+};
+
+export const addComicBookToSeries = async (
+  seriesId: number,
+  comicBookId: number,
+): Promise<boolean> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .insert(comicSeriesBooks)
+      .values({
+        comic_series_id: seriesId,
+        comic_book_id: comicBookId,
+      })
+      .onConflictDoNothing()
+      .returning({ id: comicSeriesBooks.id });
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error adding comic book to series:", error);
+    throw error;
+  }
+};
+
+export const getComicBooksInSeries = async (
+  seriesId: number,
+): Promise<number[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+  
+  try {
+    const result = await db
+      .select()
+      .from(comicSeriesBooks)
+      .where(eq(comicSeriesBooks.comic_series_id, seriesId));
+
+    return result.map((row) => row.id);
+  } catch (error) {
+    console.error("Error fetching comic books in series:", error);
+    throw error;
+  }
+};
+
+export const getSeriesIdFromComicBook = async (
+  comicBookId: number,
+): Promise<number | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(comicSeriesBooks)
+      .where(eq(comicSeriesBooks.comic_book_id, comicBookId));
+
+    return result.length > 0 ? result[0].comic_series_id : null;
+  } catch (error) {
+    console.error("Error fetching series ID from comic book ID:", error);
     throw error;
   }
 };
