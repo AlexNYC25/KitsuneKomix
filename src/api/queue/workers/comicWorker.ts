@@ -3,12 +3,13 @@
 // ==================================================================================
 
 // Standard library imports
-import { MetadataCompiled } from "npm:comic-metadata-tool";
+import { MetadataCompiled } from "comic-metadata-tool";
 import { Worker } from "bullmq";
 import { dirname } from "@std/path";
 
 // Utility imports
 import { deleteFolderRecursive, getFileSize } from "../../utilities/file.ts";
+import { getImageDimensions } from "../../utilities/imageUtils.ts";
 import { getMetadata, standardizeMetadata } from "../../utilities/metadata.ts";
 import { calculateFileHash } from "../../utilities/hash.ts";
 import { extractComicBook } from "../../utilities/extract.ts";
@@ -101,6 +102,7 @@ import {
   insertComicSeriesGroup,
   linkSeriesGroupToComicBook,
 } from "../../db/sqlite/models/comicSeriesGroups.model.ts";
+import { StandardizedComicMetadata } from "../../interfaces/StandardizedComicMetadata.interface.ts";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS
@@ -132,7 +134,7 @@ async function processNewComicFile(
       );
     }
 
-    const standardizedMetadata = await standardizeMetadata(job.data.filePath);
+    const standardizedMetadata: StandardizedComicMetadata| null = await standardizeMetadata(job.data.filePath);
     const fileHash = await calculateFileHash(job.data.filePath);
 
     // ============== COMIC BOOK DATA PREPARATION ==============
@@ -236,6 +238,20 @@ async function processComicFileImages(
       `Processing comic file images for file: ${job.data.filePath} and comic ID: ${job.data.comicId}`,
     );
 
+    // ============== GET STANDARDIZED METADATA ==============
+    const standardizedMetadata = await standardizeMetadata(job.data.filePath);
+    const metadataPages = standardizedMetadata?.pages || [];
+    
+    queueLogger.info(
+      `Found ${metadataPages.length} metadata pages for comic: ${job.data.filePath}`,
+    );
+    
+    // Log page types for debugging
+    if (metadataPages.length > 0) {
+      const pageTypes = metadataPages.map(page => `${page.image}:${page.type}`).join(', ');
+      queueLogger.info(`Page types from metadata: ${pageTypes}`);
+    }
+
     // ============== EXTRACT COMIC IMAGES ==============
     const extractionResult = await extractComicBook(job.data.filePath);
 
@@ -253,58 +269,126 @@ async function processComicFileImages(
       extractionResult;
 
     // ============== PROCESS INDIVIDUAL PAGES ==============
+    let coverPages: Array<{ pageId: number; imagePath: string; pageNumber: number }> = [];
+    
     for (const imagePath of imagePaths) {
       const pageNumber = imagePaths.indexOf(imagePath) + 1;
       const imageHash = await calculateFileHash(imagePath);
       const relativePath = imagePath.split("/").pop() || imagePath; // Get filename only
-      const sizeOfImagePage = await getFileSize(imagePath);
-
-      const pageId = await insertComicPage(
-        job.data.comicId,
-        relativePath,
-        pageNumber,
-        imageHash,
-        sizeOfImagePage,
-      );
-      apiLogger.info(
-        `Inserted comic page with ID: ${pageId} for comic ID: ${job.data.comicId}`,
-      );
-    }
-
-    // ============== PROCESS COVER IMAGE ==============
-    if (coverImagePath) {
-      queueLogger.info(`Generating thumbnail for cover image: ${coverImagePath}`);
       
-      const thumbnail = await createImageThumbnail(coverImagePath, { width: 300, height: 450 });
-
-      // Insert thumbnail record
-      if (thumbnail.success && thumbnail.thumbnailPath) {
-        queueLogger.info(`DEBUG: Inserting thumbnail for comic ID: ${job.data.comicId}`);
-        const thumbnailId = await insertComicBookThumbnail(
-          job.data.comicId,
-          thumbnail.thumbnailPath,
-        );
-        apiLogger.info(
-          `Inserted comic book cover thumbnail with ID: ${thumbnailId} for comic ID: ${job.data.comicId}`,
-        );
+      // Find corresponding metadata page (image field contains page number as string)
+      const metadataPage = metadataPages.find(page => 
+        parseInt(page.image) === pageNumber
+      );
+      
+      if (metadataPage) {
+        queueLogger.info(`Found metadata for page ${pageNumber}: type="${metadataPage.type}", doublePage=${metadataPage.doublePage}, size=${metadataPage.size}, dimensions=${metadataPage.width}x${metadataPage.height}`);
       } else {
-        queueLogger.error(
-          `Failed to create thumbnail for cover image: ${coverImagePath}. Error: ${thumbnail.error || 'Unknown error'}`,
-        );
+        queueLogger.info(`No metadata found for page ${pageNumber}, using manual detection`);
+      }
+      
+      // Use metadata values when available, otherwise determine manually
+      let fileSize: number;
+      let imageWidth: number | null = null;
+      let imageHeight: number | null = null;
+      
+      if (metadataPage?.size && metadataPage?.width && metadataPage?.height) {
+        // Use metadata values
+        fileSize = metadataPage.size;
+        imageWidth = metadataPage.width;
+        imageHeight = metadataPage.height;
+        queueLogger.info(`Using metadata for page ${pageNumber}: ${metadataPage.width}x${metadataPage.height}, ${metadataPage.size} bytes`);
+      } else {
+        // Manually determine values
+        fileSize = await getFileSize(imagePath);
+        const dimensions = await getImageDimensions(imagePath);
+        imageWidth = dimensions?.width || null;
+        imageHeight = dimensions?.height || null;
+        queueLogger.info(`Manually determined for page ${pageNumber}: ${imageWidth}x${imageHeight}, ${fileSize} bytes`);
       }
 
-      const relativeCoverPath = coverImagePath.split("/").pop() ||
-        coverImagePath; // Get filename only
-      const coverId = await insertComicBookCover(
-        job.data.comicId,
-        relativeCoverPath,
+      const pageData = {
+        comic_book_id: job.data.comicId,
+        file_path: relativePath,
+        page_number: pageNumber,
+        type: metadataPage?.type || (pageNumber === 1 ? "Cover" : "Story"),
+        double_page: metadataPage?.doublePage ? 1 : 0,
+        width: imageWidth,
+        length: imageHeight,
+        hash: imageHash,
+        file_size: fileSize,
+      };
+
+      const pageId = await insertComicPage(
+        pageData.comic_book_id,
+        pageData.file_path,
+        pageData.page_number,
+        pageData.hash,
+        pageData.file_size,
+        pageData.type,
+        pageData.double_page,
+        pageData.width,
+        pageData.length,
       );
+      
       apiLogger.info(
-        `Inserted comic book cover with ID: ${coverId} for comic ID: ${job.data.comicId}`,
+        `Inserted comic page with ID: ${pageId} for comic ID: ${job.data.comicId}, page ${pageNumber}`,
       );
+
+      // Check if this page should be treated as a cover
+      const isFirstPage = pageNumber === 1;
+      const isFrontCoverFromMetadata = metadataPage?.type === "FrontCover";
+      
+      if (isFirstPage || isFrontCoverFromMetadata) {
+        coverPages.push({ pageId, imagePath, pageNumber });
+        queueLogger.info(
+          `Page ${pageNumber} identified as cover page (firstPage: ${isFirstPage}, metadata: ${isFrontCoverFromMetadata})`
+        );
+      }
+    }
+
+    // ============== PROCESS COVER PAGES ==============
+    if (coverPages.length > 0) {
+      queueLogger.info(`Processing ${coverPages.length} cover page(s)`);
+      
+      for (const coverPage of coverPages) {
+        queueLogger.info(`Processing cover for page ${coverPage.pageNumber} (ID: ${coverPage.pageId})`);
+        
+        // Create cover record pointing to the page
+        const coverRelativePath = coverPage.imagePath.split("/").pop() || coverPage.imagePath;
+        const coverId = await insertComicBookCover(
+          coverPage.pageId,
+          coverRelativePath,
+        );
+        
+        apiLogger.info(
+          `Inserted comic book cover with ID: ${coverId} for page ID: ${coverPage.pageId}`,
+        );
+
+        // ============== GENERATE THUMBNAIL ==============
+        queueLogger.info(`Generating thumbnail for cover image: ${coverPage.imagePath}`);
+        
+        const thumbnail = await createImageThumbnail(coverPage.imagePath, { width: 300, height: 450 });
+
+        // Insert thumbnail record pointing to the cover
+        if (thumbnail.success && thumbnail.thumbnailPath) {
+          queueLogger.info(`Inserting thumbnail for cover ID: ${coverId}`);
+          const thumbnailId = await insertComicBookThumbnail(
+            coverId,
+            thumbnail.thumbnailPath,
+          );
+          apiLogger.info(
+            `Inserted comic book thumbnail with ID: ${thumbnailId} for cover ID: ${coverId}`,
+          );
+        } else {
+          queueLogger.error(
+            `Failed to create thumbnail for cover image: ${coverPage.imagePath}. Error: ${thumbnail.error || 'Unknown error'}`,
+          );
+        }
+      }
     } else {
       queueLogger.warn(
-        `No cover image found during extraction for comic file: ${job.data.filePath}`,
+        `No cover pages identified for comic file: ${job.data.filePath}`,
       );
     }
 
