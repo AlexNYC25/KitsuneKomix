@@ -3,7 +3,7 @@ import { comicBookCovers } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicBookCover = async (
-  comicBookId: number,
+  comicPageId: number,
   filePath: string,
 ): Promise<number> => {
   const { db, client } = getClient();
@@ -16,7 +16,7 @@ export const insertComicBookCover = async (
     const result = await db
       .insert(comicBookCovers)
       .values({
-        comic_book_id: comicBookId,
+        comic_page_id: comicPageId,
         file_path: filePath,
       })
       .returning({ id: comicBookCovers.id });

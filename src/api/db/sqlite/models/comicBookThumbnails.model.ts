@@ -1,10 +1,10 @@
 import { getClient } from "../client.ts";
-import { comicBookThumbnails} from "../schema.ts";
+import { comicBookCovers, comicBookThumbnails, comicPagesTable} from "../schema.ts";
 
 import { eq } from "drizzle-orm";
 import type { ComicBookThumbnail } from "../../../types/index.ts";
 
-export const insertComicBookThumbnail = async (comicBookId: number, filePath: string): Promise<number> => {
+export const insertComicBookThumbnail = async (comicBookCoverId: number, filePath: string): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -14,12 +14,12 @@ export const insertComicBookThumbnail = async (comicBookId: number, filePath: st
   try {
     const result = await db
       .insert(comicBookThumbnails)
-      .values({ comic_book_id: comicBookId, file_path: filePath })
+      .values({ comic_book_cover_id: comicBookCoverId, file_path: filePath })
       .returning({ id: comicBookThumbnails.id });
 
     if (result.length === 0) {
       throw new Error(
-        `Failed to insert thumbnail for comic book ID ${comicBookId}`,
+        `Failed to insert thumbnail for comic book cover ID ${comicBookCoverId}`,
       );
     }
 
@@ -39,11 +39,23 @@ export const getThumbnailsByComicBookId = async (comicBookId: number): Promise<C
 
   try {
     const result = await db
-      .select()
+      .select(
+        {
+          comic_book_thumbnails: comicBookThumbnails
+        }
+      )
       .from(comicBookThumbnails)
-      .where(eq(comicBookThumbnails.comic_book_id, comicBookId));
+      .leftJoin(
+        comicBookCovers,
+        eq(comicBookThumbnails.comic_book_cover_id, comicBookCovers.id)
+      )
+      .leftJoin(
+        comicPagesTable,
+        eq(comicBookCovers.comic_page_id, comicPagesTable.id)
+      )
+      .where(eq(comicPagesTable.comic_book_id, comicBookId));
 
-    return result;
+    return result.map((row) => row.comic_book_thumbnails);
   } catch (error) {
     console.error("Error fetching thumbnails by comic book ID:", error);
     throw error;
