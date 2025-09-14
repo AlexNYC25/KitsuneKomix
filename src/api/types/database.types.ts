@@ -35,6 +35,7 @@ import {
   comicTeamsTable,
   comicStoryArcsTable,
   comicSeriesGroupsTable,
+  comicPagesTable,
   usersTable,
 } from "../db/sqlite/schema.ts";
 
@@ -104,6 +105,9 @@ export type NewComicStoryArc = InferInsertModel<typeof comicStoryArcsTable>;
 
 export type ComicSeriesGroup = InferSelectModel<typeof comicSeriesGroupsTable>;
 export type NewComicSeriesGroup = InferInsertModel<typeof comicSeriesGroupsTable>;
+
+export type ComicPage = InferSelectModel<typeof comicPagesTable>;
+export type NewComicPage = InferInsertModel<typeof comicPagesTable>;
 
 export type ComicBookPenciller = InferSelectModel<
   typeof comicBookPencillersTable
