@@ -32,6 +32,15 @@ Table comic_libraries {
   updated_at date
 }
 
+Table comic_series {
+  id integer [primary key]
+  name text [not null]
+  description text
+  folder_path text [unique]
+  created_at date
+  updated_at date
+}
+
 Table comic_books {
   id integer [primary key]
   library_id integer [not null]
@@ -47,11 +56,23 @@ Table comic_books {
 
 }
 
+Table comic_series_books {
+  id integer [primary key]
+  comic_series_id integer [not null]
+  comic_book_id integer [not null]
+  created_at date
+  updated_at date
+}
+
 Table comic_pages {
   id integer [primary key]
   comicbook_id int
   file_path string
   page_number integer
+  type string
+  double_page boolean
+  length int
+  width int
   hash string
   file_size int
   created_at date
@@ -60,7 +81,7 @@ Table comic_pages {
 
 Table comic_book_covers {
   id integer [primary key]
-  comicbook_id integer
+  comic_page_id integer
   file_path string
   created_at date
   updated_at date
@@ -68,8 +89,8 @@ Table comic_book_covers {
 
 Table comic_book_thumbnails {
   id integer [primary key]
-  comicbook_id integer
-  file_path string
+  comic_book_cover_id integer
+  file_path string [note: "Should only reflect path to thumbnail in cache"]
   created_at date
   updated_at date
 }
@@ -305,11 +326,14 @@ Table comic_book_locations {
 
 Ref library_books: comic_libraries.id < comic_books.library_id
 
+Ref comic_series_books_series: comic_series_books.comic_series_id > comic_series.id
+Ref comic_series_books_book: comic_series_books.comic_book_id - comic_books.id
+
 ref comic_book_web_links: comic_web_links.comicbook_id > comic_books.id
 
 Ref comic_book_pages:  comic_pages.comicbook_id > comic_books.id
-Ref comic_book_covers: comic_book_covers.comicbook_id > comic_books.id
-Ref comic_book_thumbnails: comic_book_thumbnails.comicbook_id > comic_books.id
+Ref comic_book_covers_pages: comic_book_covers.comic_page_id - comic_pages.id
+Ref comic_book_thumbnails: comic_book_thumbnails.comic_book_cover_id - comic_book_covers.id
 
 Ref comic_book_writers: comic_book_writers.writer_id > comic_writers.id
 Ref comic_writer_books: comic_book_writers.comicbook_id > comic_books.id

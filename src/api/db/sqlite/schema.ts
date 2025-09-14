@@ -1,6 +1,7 @@
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
 import { id } from "zod/v4/locales";
+import { double } from "drizzle-orm/mysql-core";
 
 export const usersTable = sqliteTable("users", {
   id: int().primaryKey({ autoIncrement: true }),
@@ -78,6 +79,10 @@ export const comicPagesTable = sqliteTable("comic_pages", {
   }),
   file_path: text().notNull(),
   page_number: int().notNull(),
+  type: text().notNull(), // e.g., "Story", "Cover", etc.
+  double_page: int().notNull().default(0),
+  length: int(), // in pixels
+  width: int(), // in pixels
   hash: text().notNull(),
   file_size: int().notNull(),
   created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -86,7 +91,7 @@ export const comicPagesTable = sqliteTable("comic_pages", {
 
 export const comicBookCovers = sqliteTable("comic_book_covers", {
   id: int().primaryKey({ autoIncrement: true }),
-  comic_book_id: int().notNull().references(() => comicBooksTable.id, {
+  comic_page_id: int().notNull().references(() => comicPagesTable.id, {
     onDelete: "cascade",
   }),
   file_path: text().notNull(),
@@ -96,7 +101,7 @@ export const comicBookCovers = sqliteTable("comic_book_covers", {
 
 export const comicBookThumbnails = sqliteTable("comic_book_thumbnails", {
 	id: int().primaryKey({ autoIncrement: true }),
-	comic_book_id: int().notNull().references(() => comicBooksTable.id, {
+	comic_book_cover_id: int().notNull().references(() => comicBookCovers.id, {
 		onDelete: "cascade",
 	}),
 	file_path: text().notNull(),

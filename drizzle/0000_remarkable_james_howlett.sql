@@ -40,11 +40,11 @@ CREATE TABLE `comic_book_cover_artists` (
 --> statement-breakpoint
 CREATE TABLE `comic_book_covers` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`comic_book_id` integer NOT NULL,
+	`comic_page_id` integer NOT NULL,
 	`file_path` text NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	FOREIGN KEY (`comic_book_id`) REFERENCES `comic_books`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`comic_page_id`) REFERENCES `comic_pages`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `comic_book_editors` (
@@ -155,6 +155,15 @@ CREATE TABLE `comic_book_teams` (
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	FOREIGN KEY (`comic_book_id`) REFERENCES `comic_books`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`comic_team_id`) REFERENCES `comic_teams`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `comic_book_thumbnails` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`comic_book_cover_id` integer NOT NULL,
+	`file_path` text NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	FOREIGN KEY (`comic_book_cover_id`) REFERENCES `comic_book_covers`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `comic_book_writers` (
@@ -300,6 +309,10 @@ CREATE TABLE `comic_pages` (
 	`comic_book_id` integer NOT NULL,
 	`file_path` text NOT NULL,
 	`page_number` integer NOT NULL,
+	`type` text NOT NULL,
+	`double_page` integer DEFAULT 0 NOT NULL,
+	`length` integer,
+	`width` integer,
 	`hash` text NOT NULL,
 	`file_size` integer NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -325,6 +338,16 @@ CREATE TABLE `comic_publishers` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `comic_publishers_name_unique` ON `comic_publishers` (`name`);--> statement-breakpoint
+CREATE TABLE `comic_series_books` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`comic_series_id` integer NOT NULL,
+	`comic_book_id` integer NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	FOREIGN KEY (`comic_series_id`) REFERENCES `comic_series`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`comic_book_id`) REFERENCES `comic_books`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `comic_series_groups` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
