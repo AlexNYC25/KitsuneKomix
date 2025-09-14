@@ -10,7 +10,15 @@ import {
   searchComicBooks,
   updateComicBook,
 } from "../db/sqlite/models/comicBooks.model.ts";
-import { fetchAllComicBooksWithRelatedData, fetchComicBookMetadataById } from "../services/comicbooks.service.ts";
+import { 
+  fetchAllComicBooksWithRelatedData, 
+  fetchComicBookMetadataById, 
+  startStreamingComicBookFile, 
+  getComicPagesInfo,
+  getNextComicBookId,
+  getPreviousComicBookId,
+  getComicDuplicatesInTheDb,
+} from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
 
 const app = new Hono();
@@ -46,6 +54,15 @@ app.get(
   },
 );
 
+
+/**
+ * Get a comic book with its full metadata by ID
+ * ROUTE: GET /api/comic-books/:id/metadata
+ * 
+ * This should return a single comic book with its full metadata by its ID
+ * @param id - The ID of the comic book to retrieve
+ * @return JSON object of the comic book with its full metadata
+ */
 app.get(
   "/:id/metadata",
   zValidator(
@@ -113,28 +130,106 @@ app.get("/:id/download", async (c: Context) => {
   return response;
 });
 
-app.get("/:id/stream", async (c: Context) => {
-  const id = c.req.param("id");
+/**
+ * Stream a comic book page by page, this should be the first step in a reading session
+ * 
+ * GET /api/comic-books/:id/stream
+ * 
+ * This should return the first page of the comic book and a token to continue streaming:
+ *  - Starts the preloading of the next comic book pages in the background
+ *  - TODO: Set the progress of the reading session in the db 
+ */
+app.get(
+  "/:id/stream",
+  zValidator(
+    "param",
+    z.object({
+      id: z.string().regex(/^\d+$/).transform(Number),
+    }),
+  ),
+  async (c: Context) => {
+    const id = c.req.param("id");
 
-  //TODO: implement comic book stream logic
-  return c.json({ message: "Comic book stream not implemented yet" }, 501);
-});
+    const requestImageHeader = c.req.header("Accept") || "";
+    console.log("Request Accept Header:", requestImageHeader);
 
-app.get("/:id/stream/:page", async (c: Context) => {
-  const id = c.req.param("id");
-  const page = c.req.param("page");
+    const result = await startStreamingComicBookFile(parseInt(id, 10), 1, requestImageHeader, 10);
 
-  //TODO: implement comic book stream logic
-  return c.json({ message: "Comic book stream not implemented yet" }, 501);
-});
+    return c.json(result);
+  }
+);
 
-app.get("/:id/pages", async (c: Context) => {
-  const id = c.req.param("id");
+/**
+ * Stream a specific page of a comic book by ID
+ * 
+ * GET /api/comic-books/:id/stream/:page
+ * 
+ * This should return the specified page of the comic book
+ *  - Continues the preloading of the next comic book pages in the background
+ *  - TODO: Either sets or updates the progress of the reading session in the db
+ */
+app.get(
+  "/:id/stream/:page",
+  zValidator(
+    "param",
+    z.object({
+      id: z.string().regex(/^\d+$/).transform(Number),
+      page: z.string().regex(/^\d+$/).transform(Number),
+    }),
+  ),
+  async (c: Context) => {
+    const id = c.req.param("id");
+    const page = c.req.param("page");
 
-  //TODO: implement comic book pages retrieval logic
-  return c.json({ message: "Comic book pages retrieval not implemented yet" }, 501);
-});
+    try {
+      const requestImageHeader = c.req.header("Accept") || "";
 
+      const result = await startStreamingComicBookFile(parseInt(id, 10), parseInt(page, 10), requestImageHeader, 10);
+
+      return c.json(result);
+
+    } catch (error) {    
+      console.error("Error streaming comic book file:", error);
+      return c.json({ error: "Failed to stream comic book file test" }, 500);
+    }
+
+  }
+);
+
+/**
+ * Get information about the pages of a comic book by ID
+ * 
+ * GET /api/comic-books/:id/pages
+ * 
+ * This should return information about the pages of the comic book such as:
+ * - Total number of pages in the comic book according to the metadata
+ * - Total number of pages actually extracted and stored in the database
+ * - array of page numbers and their corresponding ids
+ */
+app.get("/:id/pages",
+  zValidator(
+    "param",
+    z.object({
+      id: z.string().regex(/^\d+$/).transform(Number),
+    }),
+  ),
+  async (c: Context) => {
+    const id = c.req.param("id");
+
+    try {
+      const result = await getComicPagesInfo(parseInt(id, 10));
+
+      return c.json(result);
+
+    } catch (error) {    
+      console.error("Error fetching comic book pages info:", error);
+      return c.json({ error: "Failed to fetch comic book pages info" }, 500);
+    }
+  }
+);
+
+// TODO: Set up authentication and some way to check what user is requesting the read
+// NOTE: this will be to check if a user has read a comic book and to track reading progress
 app.get("/:id/read", async (c: Context) => {
   const id = c.req.param("id");
 
@@ -142,6 +237,40 @@ app.get("/:id/read", async (c: Context) => {
   return c.json({ message: "Comic book read not implemented yet" }, 501);
 });
 
+// TODO: Set up authentication and some way to check what user is requesting the read
+// NOTE: this will be used to mark a comic book as read by a user and to track reading progress
+app.post("/:id/read", async (c: Context) => {
+  const id = c.req.param("id");
+
+  //TODO: implement comic book read logic
+  return c.json({ message: "Comic book read not implemented yet" }, 501);
+});
+
+/**
+ * Update a comic book by ID, partial updates allowed
+ * 
+ * PUT /api/comic-books/:id/update
+ *
+ * This should allow partial updates to a comic book's metadata, specifically to certain fields:
+ * - title
+ * - series (name only, not the ID)
+ * - issue_number
+ * - volume
+ * - publisher
+ * - year
+ * - summary
+ * - authors
+ * - genres
+ * - tags
+ * - hash
+ * - page_count
+ * - review
+ * - age_rating
+ * - community_rating
+ * - file_size
+ * 
+ * TODO: Reconsider some fields like hash and file_size, should they be updatable?
+ */
 app.put(
   "/:id/update",
   zValidator(
@@ -191,6 +320,13 @@ app.put(
   },
 );
 
+/**
+ * Delete a comic book by ID
+ * 
+ * DELETE /api/comic-books/:id/delete
+ * 
+ * This should delete a comic book by its ID
+ */
 app.delete(
   "/:id/delete",
   zValidator(
@@ -218,32 +354,76 @@ app.delete(
   },
 );
 
-app.get("/:id/next", async (c: Context) => {
-  const id = c.req.param("id");
+/**
+ * Get the next comic book in the series, returning back the comic book of the next issue number
+ * 
+ * GET /api/comic-books/:id/next
+ * 
+ * This should return the next comic book in the same series based on the issue number
+ */
+app.get(
+  "/:id/next",
+  zValidator(
+    "param",
+    z.object({
+      id: z.string().regex(/^\d+$/).transform(Number),
+    }),
+  ),
+  async (c: Context) => {
+    const id = c.req.param("id");
 
-  //TODO: implement comic book next logic
-  return c.json({ message: "Comic book next not implemented yet" }, 501);
+  try {
+    const nextComic = await getNextComicBookId(parseInt(id, 10));
+    if (nextComic) {
+      return c.json({
+        nextComic: nextComic,
+        message: "Fetched next comic book successfully"
+      });
+    } else {
+      return c.json({
+        message: "No next comic book found"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching next comic book:", error);
+    return c.json({ error: "Failed to fetch next comic book" }, 500);
+  }
 });
 
-app.get("/:id/previous", async (c: Context) => {
+/**
+ * Get the previous comic book in the series, returning back the comic book of the previous issue number
+ * 
+ * GET /api/comic-books/:id/previous
+ * 
+ * This should return the previous comic book in the same series based on the issue number
+ */
+app.get(
+  "/:id/previous",
+  zValidator(
+    "param",
+    z.object({
+      id: z.string().regex(/^\d+$/).transform(Number),
+    }),
+  ),
+  async (c: Context) => {
   const id = c.req.param("id");
 
-  //TODO: implement comic book previous logic
-  return c.json({ message: "Comic book previous not implemented yet" }, 501);
-});
-
-app.post("/:id/read", async (c: Context) => {
-  const id = c.req.param("id");
-
-  //TODO: implement comic book read logic
-  return c.json({ message: "Comic book read not implemented yet" }, 501);
-});
-
-app.get("/:id/readlists", async (c: Context) => {
-  const id = c.req.param("id");
-
-  //TODO: implement comic book readlists retrieval logic
-  return c.json({ message: "Comic book readlists retrieval not implemented yet" }, 501);
+  try {
+    const previousComic = await getPreviousComicBookId(parseInt(id, 10));
+    if (previousComic) {
+      return c.json({
+        previousComic: previousComic,
+        message: "Fetched previous comic book successfully"
+      });
+    } else {
+      return c.json({
+        message: "No previous comic book found"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching previous comic book:", error);
+    return c.json({ error: "Failed to fetch previous comic book" }, 500);
+  }
 });
 
 app.get("/:id/thumbnails", async (c: Context) => {
@@ -275,6 +455,14 @@ app.post("/:id/thumbnail", async (c: Context) => {
   //TODO: implement comic book thumbnail upload logic
   return c.json({ message: "Comic book thumbnail upload not implemented yet" }, 501);
 });
+
+app.get("/:id/readlists", async (c: Context) => {
+  const id = c.req.param("id");
+
+  //TODO: implement comic book readlists retrieval logic
+  return c.json({ message: "Comic book readlists retrieval not implemented yet" }, 501);
+});
+
 
 /**
  * Get all comic books
@@ -347,8 +535,23 @@ app.get(
 );
 
 app.get("/duplicates", async (c: Context) => {
-  //TODO: implement duplicate detection logic
-  return c.json({ message: "Duplicate detection not implemented yet" }, 501);
+  try {
+    const duplicates = await getComicDuplicatesInTheDb();
+
+    if (duplicates) {
+      return c.json({
+        duplicates: duplicates,
+        message: "Fetched comic book duplicates successfully"
+      });
+    } else {
+      return c.json({
+        message: "No duplicate comic books found"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching comic book duplicates:", error);
+    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
+  }
 });
 
 app.get("/latest", async (c: Context) => {
