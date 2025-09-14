@@ -1,7 +1,9 @@
 import { getClient } from "../db/sqlite/client.ts";
 
+import { extractComicPage, extractComicBookByStreaming } from "../utilities/extract.ts";
+
 import { ComicBook, ComicPenciller, ComicWriter, ComicInker, ComicLetterer, ComicEditor, ComicColorist, ComicCoverArtist, ComicPublisher, ComicImprint, ComicGenre, ComicCharacter, ComicLocation, ComicTeam, ComicStoryArc, ComicSeriesGroup, ComicBookWithMetadata } from "../types/index.ts";
-import { getAllComicBooks, getComicBookById } from "../db/sqlite/models/comicBooks.model.ts";
+import { getAllComicBooks, getComicBookById, getComicBooksByHash, getComicDuplicates } from "../db/sqlite/models/comicBooks.model.ts";
 
 import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
 import { getColoristByComicBookId } from "../db/sqlite/models/comicColorists.model.ts";
@@ -21,6 +23,10 @@ import { getLocationsByComicBookId} from "../db/sqlite/models/comicLocations.mod
 
 import { getStoryArcsByComicBookId } from "../db/sqlite/models/comicStoryArcs.model.ts";
 import { getSeriesGroupsByComicBookId } from "../db/sqlite/models/comicSeriesGroups.model.ts";
+
+import { getComicPagesByComicBookId } from "../db/sqlite/models/comicPages.model.ts";
+
+import { getSeriesIdFromComicBook, getComicBooksInSeries } from "../db/sqlite/models/comicSeries.model.ts";
 
 export const fetchAllComicBooksWithRelatedData = async (page: number = 1, limit: number = 100, sort: string | undefined, filter?: string | undefined, filter_property?: string | undefined) => {
   const { db, client } = getClient();
@@ -145,3 +151,440 @@ export const fetchComicBookMetadataById = async (id: number): Promise<ComicBookW
 		throw error;
 	}
 };
+
+/**
+ * Start streaming the comic book file.
+ * 
+ * @param comicId ID of the comic book to stream
+ * @param page Page number to stream (1-based)
+ * @param acceptHeader Browser's Accept header for format negotiation
+ * @param preloadPages Number of additional pages to preload for caching
+ */
+export const startStreamingComicBookFile = async (
+  comicId: number, 
+  page: number = 1, 
+  acceptHeader?: string,
+  preloadPages: number = 5
+) => {
+  // Get the comic book record from the database
+  const comic = await getComicBookById(comicId);
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  const filePath = comic.file_path;
+
+  // Check if file exists
+  try {
+    await Deno.stat(filePath);
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      throw new Error("Comic book file not found on disk.");
+    } else {
+      throw error;
+    }
+  }
+
+  // Validate page number
+  if (page < 1) {
+    throw new Error("Invalid page number requested.");
+  }
+  if (comic.page_count && page > comic.page_count) {
+    throw new Error("Requested page exceeds total number of pages in the comic test.");
+  }
+
+  // Determine best output format for browser compatibility
+  const targetFormat = determineBestOutputFormat(acceptHeader);
+  const formatExtension = targetFormat.split('/')[1];
+
+  // Check if page exists in cache (with correct format)
+  const cacheDir = "./cache/pages";
+  const comicCacheDir = `${cacheDir}/${comicId}`;
+  const cachedPagePath = `${comicCacheDir}/${page}.${formatExtension}`;
+
+  // Create cache directory if it doesn't exist
+  await Deno.mkdir(comicCacheDir, { recursive: true });
+
+  let pagePath = cachedPagePath;
+
+  // Check if page is already in cache
+  const pageInCache = await checkIfPageInCache(comicId, page, formatExtension);
+  
+  if (!pageInCache) {
+    console.log(`Page ${page} not in cache, extracting...`);
+    
+    // Determine if we should use streaming extraction for large files
+    const fileSize = (await Deno.stat(filePath)).size;
+    const isLargeFile = fileSize > 100 * 1024 * 1024; // 100MB threshold
+
+    if (isLargeFile) {
+      // Use streaming extraction for large files
+      const pageRange = Math.min(preloadPages, comic.page_count || preloadPages);
+      const startPage = Math.max(0, page - 1); // Convert to 0-based
+      const endPage = Math.min((comic.page_count || page) - 1, startPage + pageRange);
+
+      console.log(`Large file detected, using streaming extraction for pages ${startPage + 1}-${endPage + 1}`);
+      
+      const extractionResult = await extractComicBookByStreaming(
+        filePath,
+        undefined, // Use temp directory
+        startPage,
+        endPage
+      );
+
+      if (extractionResult.success && extractionResult.pages.length > 0) {
+        // Process and cache the extracted pages
+        for (let i = 0; i < extractionResult.pages.length; i++) {
+          const extractedPagePath = extractionResult.pages[i];
+          const pageNumber = startPage + i + 1; // Convert back to 1-based
+          const outputPath = `${comicCacheDir}/${pageNumber}.${formatExtension}`;
+          
+          // Convert to browser-compatible format
+          const conversionSuccess = await convertImageForBrowser(
+            extractedPagePath,
+            outputPath,
+            targetFormat
+          );
+
+          if (conversionSuccess) {
+            console.log(`Cached page ${pageNumber} in ${targetFormat} format`);
+            
+            // Set the path for the requested page
+            if (pageNumber === page) {
+              pagePath = outputPath;
+            }
+          }
+        }
+
+        // Clean up temporary extraction directory
+        if (extractionResult.extractedPath) {
+          try {
+            await Deno.remove(extractionResult.extractedPath, { recursive: true });
+          } catch (error) {
+            console.warn(`Could not clean up temp directory: ${error}`);
+          }
+        }
+      } else {
+        throw new Error("Failed to extract page from comic archive");
+      }
+    } else {
+      // Use single page extraction for smaller files
+      console.log(`Small file, extracting single page ${page}`);
+      
+      const extractedPagePath = await extractComicPage(filePath, page - 1); // Convert to 0-based
+      
+      if (!extractedPagePath) {
+        throw new Error("Failed to extract page from comic archive");
+      }
+
+      // Convert to browser-compatible format
+      const conversionSuccess = await convertImageForBrowser(
+        extractedPagePath,
+        cachedPagePath,
+        targetFormat
+      );
+
+      if (!conversionSuccess) {
+        throw new Error("Failed to convert image to browser-compatible format");
+      }
+
+      console.log(`Cached page ${page} in ${targetFormat} format`);
+    }
+
+    // Background preloading for better UX (don't await this)
+    if (!isLargeFile && preloadPages > 0) {
+      preloadAdjacentPages(comicId, page, preloadPages, targetFormat, comic.page_count || 0)
+        .catch((error: unknown) => console.warn(`Preloading failed: ${error}`));
+    }
+  }
+
+  // Return the path to the cached page
+  return {
+    pagePath,
+    format: targetFormat,
+    comicId,
+    page,
+    cached: pageInCache
+  };
+};
+
+export const getComicPagesInfo = async (comicId: number) => {
+
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  // check if there is a comicbook with that id
+  const comic = await getComicBookById(comicId);
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  const comicPages = await getComicPagesByComicBookId(comicId);
+
+  return {
+    comicId,
+    totalPages: comic.page_count || comicPages.length,
+    pagesInDb: comicPages.length,
+    pages: comicPages
+  };
+
+}
+
+export const getNextComicBookId = async (currentComicId: number): Promise<ComicBook | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    // Get the current comic book to find its series and issue number
+    const currentComic = await getComicBookById(currentComicId);
+    if (!currentComic) {
+      throw new Error("Current comic book not found.");
+    }
+
+    const seriesId = await getSeriesIdFromComicBook(currentComicId);
+    if (!seriesId) {
+      return null; // Current comic is not part of a series
+    }
+
+    const comicsInSeries = await getComicBooksInSeries(seriesId);
+    if (comicsInSeries.length === 0) {
+      return null; // No comics found in the series
+    }
+
+    // Sort the comics in the series by issue number
+    const sortedComics = await Promise.all(
+      comicsInSeries.map(async (comicId) => {
+        const comic = await getComicBookById(comicId);
+        return comic ? { id: comic.id, issueNumber: comic.issue_number || 0 } : null;
+      })
+    );
+
+    // Find the next comic book in the same series with a higher issue number
+    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) || 0;
+    const nextComic = sortedComics
+      .filter((c): c is { id: number; issueNumber: number } => c !== null)
+      .sort((a, b) => a.issueNumber - b.issueNumber)
+      .find(c => c.issueNumber > currentIssueNumber);
+
+    return nextComic ? await getComicBookById(nextComic.id) : null;
+  } catch (error) {
+    console.error("Error fetching next comic book ID:", error);
+    throw new Error("Failed to fetch next comic book ID");
+  }
+};
+
+export const getPreviousComicBookId = async (currentComicId: number): Promise<ComicBook | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    // Get the current comic book to find its series and issue number
+    const currentComic = await getComicBookById(currentComicId);
+    if (!currentComic) {
+      throw new Error("Current comic book not found.");
+    }
+
+    const seriesId = await getSeriesIdFromComicBook(currentComicId);
+    if (!seriesId) {
+      return null; // Current comic is not part of a series
+    }
+
+    const comicsInSeries = await getComicBooksInSeries(seriesId);
+    if (comicsInSeries.length === 0) {
+      return null; // No comics found in the series
+    }
+
+    // Sort the comics in the series by issue number
+    const sortedComics = await Promise.all(
+      comicsInSeries.map(async (comicId) => {
+        const comic = await getComicBookById(comicId);
+        return comic ? { id: comic.id, issueNumber: comic.issue_number || 0 } : null;
+      })
+    );
+
+    // Find the previous comic book in the same series with a lower issue number
+    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) || 0;
+    const previousComics = sortedComics
+      .filter((c): c is { id: number; issueNumber: number } => c !== null)
+      .sort((a, b) => b.issueNumber - a.issueNumber) // Sort descending
+      .filter(c => c.issueNumber < currentIssueNumber);
+
+    const previousComic = previousComics.length > 0 ? previousComics[0] : null;
+
+    return previousComic ? await getComicBookById(previousComic.id) : null;
+  } catch (error) {
+    console.error("Error fetching previous comic book ID:", error);
+    throw new Error("Failed to fetch previous comic book ID");
+  }
+};
+
+export const getComicDuplicatesInTheDb = async (): Promise<ComicBook[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const duplicates = await getComicDuplicates();
+
+    return duplicates;
+  } catch (error) {
+    console.error("Error fetching comic duplicates:", error);
+    throw error;
+  }
+};
+
+// FIXME: This function is not finished yet, the comic worker needs to be update to store multiple thumbnails per comic
+export const getComicThumbnails = async (comicId: number): Promise<string[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  // check if there is a comicbook with that id
+  const comic = await getComicBookById(comicId);
+
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+  
+  const comicPages = await getComicPagesByComicBookId(comicId);
+
+  return comicPages.map(page => page.file_path);
+};
+
+// ******************************************************************************
+// Helper functions
+// ******************************************************************************
+
+/**
+ * Check if a page exists in cache with the specified format
+ */
+const checkIfPageInCache = async (comicId: number, page: number, formatExtension: string = 'jpg'): Promise<boolean> => {
+  const cacheDir = "./cache/pages";
+  const pagePath = `${cacheDir}/${comicId}/${page}.${formatExtension}`;
+
+  try {
+    await Deno.stat(pagePath);
+    return true; // Page exists in cache
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      return false; // Page does not exist in cache
+    } else {
+      throw error; // Some other error occurred
+    }
+  }
+};
+
+/**
+ * Preload adjacent pages for better user experience
+ */
+async function preloadAdjacentPages(
+  comicId: number, 
+  currentPage: number, 
+  preloadCount: number, 
+  targetFormat: string,
+  totalPages: number
+): Promise<void> {
+  const formatExtension = targetFormat.split('/')[1];
+  const cacheDir = `./cache/pages/${comicId}`;
+  
+  // Calculate pages to preload (next few pages)
+  const pagesToPreload: number[] = [];
+  for (let i = 1; i <= preloadCount; i++) {
+    const nextPage = currentPage + i;
+    if (nextPage <= totalPages) {
+      const pageInCache = await checkIfPageInCache(comicId, nextPage, formatExtension);
+      if (!pageInCache) {
+        pagesToPreload.push(nextPage);
+      }
+    }
+  }
+
+  // Extract and cache the pages that aren't already cached
+  if (pagesToPreload.length > 0) {
+    console.log(`Preloading pages: ${pagesToPreload.join(', ')}`);
+    
+    const comic = await getComicBookById(comicId);
+    if (!comic) return;
+
+    for (const pageNum of pagesToPreload) {
+      try {
+        const extractedPagePath = await extractComicPage(comic.file_path, pageNum - 1); // Convert to 0-based
+        
+        if (extractedPagePath) {
+          const outputPath = `${cacheDir}/${pageNum}.${formatExtension}`;
+          const conversionSuccess = await convertImageForBrowser(
+            extractedPagePath,
+            outputPath,
+            targetFormat
+          );
+          
+          if (conversionSuccess) {
+            console.log(`Preloaded page ${pageNum}`);
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to preload page ${pageNum}: ${error}`);
+      }
+    }
+  }
+}
+
+/**
+ * Determine the best output format based on browser capabilities
+ */
+function determineBestOutputFormat(acceptHeader?: string): string {
+  if (!acceptHeader) {
+    return 'image/jpeg'; // Default fallback
+  }
+
+  // Check what the browser accepts
+  if (acceptHeader.includes('image/webp')) {
+    return 'image/webp'; // Best compression, modern browsers
+  }
+  if (acceptHeader.includes('image/png')) {
+    return 'image/png'; // Good quality, universal support
+  }
+  return 'image/jpeg'; // Universal fallback
+}
+
+/**
+ * Convert image to browser-compatible format if needed
+ */
+async function convertImageForBrowser(
+  inputPath: string, 
+  outputPath: string, 
+  targetFormat: string
+): Promise<boolean> {
+  try {
+    const inputExt = inputPath.toLowerCase().split('.').pop();
+    const targetExt = targetFormat.split('/')[1];
+
+    // If already in target format, just copy
+    if (inputExt === targetExt) {
+      await Deno.copyFile(inputPath, outputPath);
+      return true;
+    }
+
+    // Use Sharp for conversion - create a simple copy for now
+    // TODO: Implement proper format conversion using Sharp when needed
+    await Deno.copyFile(inputPath, outputPath);
+    
+    return true;
+  } catch (error) {
+    console.error(`Error converting image format: ${error}`);
+    return false;
+  }
+}
