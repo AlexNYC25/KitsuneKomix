@@ -1,6 +1,16 @@
 // Use DBML to define your database structure
 // Docs: https://dbml.dbdiagram.io/docs
 
+Table refresh_tokens {
+  id integer [primary key]
+  user_id integer [not null]
+  token_id text [not null]
+  expires_at date
+  revoked integer [not null, default: 0]
+  created_at date
+  updated_at date
+}
+
 Table app_setings {
   id integer [primary key]
   key text [not null, unique]
@@ -323,6 +333,8 @@ Table comic_book_locations {
   comicbook_id integer
   location_id integer
 }
+
+Ref users_refresh_tokens: refresh_tokens.user_id > users.id
 
 Ref library_books: comic_libraries.id < comic_books.library_id
 
