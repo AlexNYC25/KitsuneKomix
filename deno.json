@@ -25,6 +25,7 @@
     "drizzle-kit": "npm:drizzle-kit@^0.31.4",
     "drizzle-orm": "npm:drizzle-orm@^0.44.5",
     "hono": "npm:hono@^4.9.5",
+    "jose": "npm:jose@^6.1.0",
     "pino": "npm:pino@^9.9.0",
     "pino-pretty": "npm:pino-pretty@^11.2.2",
     "sharp": "npm:sharp@^0.33.4",

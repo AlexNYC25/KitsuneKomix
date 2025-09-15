@@ -37,6 +37,7 @@
     "npm:drizzle-kit@~0.31.4": "0.31.4_esbuild@0.25.9",
     "npm:drizzle-orm@~0.44.5": "0.44.5",
     "npm:hono@^4.9.5": "4.9.5",
+    "npm:jose@^6.1.0": "6.1.0",
     "npm:pino-pretty@^11.2.2": "11.3.0",
     "npm:pino@^9.9.0": "9.9.0",
     "npm:sharp@0.33.4": "0.33.4",
@@ -981,6 +982,9 @@
     "is-stream@2.0.1": {
       "integrity": "sha512-hFoiJiTl63nn+kstHGBtewWSKnQLpyb155KHheA1l39uvtO9nWIop1p3udqPcUd/xbF1VLMO4n7OI6p7RbngDg=="
     },
+    "jose@6.1.0": {
+      "integrity": "sha512-TTQJyoEoKcC1lscpVDCSsVgYzUDg/0Bt3WE//WiTPK6uOCQC2KZS4MpugbMWt/zyjkopgZoXhZuCi00gLudfUA=="
+    },
     "joycon@3.1.1": {
       "integrity": "sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw=="
     },
@@ -1442,6 +1446,7 @@
       "npm:drizzle-kit@~0.31.4",
       "npm:drizzle-orm@~0.44.5",
       "npm:hono@^4.9.5",
+      "npm:jose@^6.1.0",
       "npm:pino-pretty@^11.2.2",
       "npm:pino@^9.9.0",
       "npm:sharp@~0.33.4",
