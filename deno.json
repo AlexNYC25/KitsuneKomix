@@ -19,6 +19,7 @@
     "@std/fs": "jsr:@std/fs@^1.0.18",
     "@std/media-types": "jsr:@std/media-types@^1.1.0",
     "@std/path": "jsr:@std/path@^1.1.2",
+    "bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts",
     "bullmq": "npm:bullmq@^5.58.4",
     "chokidar": "npm:chokidar@^4.0.3",
     "comic-metadata-tool": "npm:comic-metadata-tool@^1.2.0",
