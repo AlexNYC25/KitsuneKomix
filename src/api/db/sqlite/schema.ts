@@ -1,7 +1,5 @@
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
-import { id } from "zod/v4/locales";
-import { double } from "drizzle-orm/mysql-core";
 
 export const usersTable = sqliteTable("users", {
   id: int().primaryKey({ autoIncrement: true }),
