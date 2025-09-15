@@ -8,6 +8,10 @@ if (!secret) {
   throw new Error("JWT_SECRET environment variable is not set.");
 }
 
+const refreshSecret = Deno.env.get("JWT_REFRESH_SECRET") || secret + "_refresh";
+
 export const JWT_SECRET = secret;
+export const JWT_REFRESH_SECRET = refreshSecret;
 
 export const ACCESS_KEY = new TextEncoder().encode(JWT_SECRET);
+export const REFRESH_KEY = new TextEncoder().encode(JWT_REFRESH_SECRET);
