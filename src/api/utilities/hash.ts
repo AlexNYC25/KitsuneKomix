@@ -1,4 +1,4 @@
-import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+import * as bcrypt from "bcrypt";
 
 /**
  * Hash a plaintext password using bcrypt.
