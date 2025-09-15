@@ -18,7 +18,8 @@ services:
       # These will be ignored in production due to target stage
       - ${SOURCE_MOUNT:-./src}:/app/src
       - ${CONFIG_MOUNT:-./deno.json}:/app/deno.json
-      - ${LOCK_MOUNT:-./deno.lock}:/app/deno.lock
+      # Don't mount deno.lock to avoid write conflicts
+      # - ${LOCK_MOUNT:-./deno.lock}:/app/deno.lock
       - ${DRIZZLE_CONFIG_MOUNT:-./drizzle.config.ts}:/app/drizzle.config.ts
       # Mount drizzle migrations for development
       - ./drizzle:/app/drizzle
@@ -27,6 +28,7 @@ services:
       PORT: 8000
       REDIS_HOST: "redis"
       REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       redis:
         condition: service_healthy
