@@ -15,6 +15,18 @@ export const usersTable = sqliteTable("users", {
   updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+export const refreshTokensTable = sqliteTable("refresh_tokens", {
+  id: int().primaryKey({ autoIncrement: true }),
+  user_id: int().notNull().references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
+  token_id: text().notNull().unique(), // JWT ID (jti claim)
+  expires_at: text().notNull(),
+  revoked: int().notNull().default(0),
+  created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+  updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 export const appSettingsTable = sqliteTable("app_settings", {
   id: int().primaryKey({ autoIncrement: true }),
   key: text().notNull().unique(),
