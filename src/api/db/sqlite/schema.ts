@@ -1,5 +1,6 @@
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
+import { id } from "zod/v4/locales";
 
 export const usersTable = sqliteTable("users", {
   id: int().primaryKey({ autoIncrement: true }),
@@ -78,6 +79,20 @@ export const comicBooksTable = sqliteTable("comic_books", {
   review: text(),
   age_rating: text(),
   community_rating: int(),
+  created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+  updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const comicBookHistoryTable = sqliteTable("comic_book_history", {
+  id: int().primaryKey({ autoIncrement: true }),
+  user_id: int().notNull().references(() => usersTable.id, {
+    onDelete: "cascade"
+  }),
+  comic_book_id: int().notNull().references(() => comicBooksTable.id, {
+    onDelete: "cascade"
+  }),
+  read: int().notNull().default(0),
+  last_read_page: int(),
   created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
