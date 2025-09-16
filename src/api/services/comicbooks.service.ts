@@ -2,7 +2,7 @@ import { getClient } from "../db/sqlite/client.ts";
 
 import { extractComicPage, extractComicBookByStreaming } from "../utilities/extract.ts";
 
-import { ComicBook, ComicPenciller, ComicWriter, ComicInker, ComicLetterer, ComicEditor, ComicColorist, ComicCoverArtist, ComicPublisher, ComicImprint, ComicGenre, ComicCharacter, ComicLocation, ComicTeam, ComicStoryArc, ComicSeriesGroup, ComicBookWithMetadata, ComicBookHistory } from "../types/index.ts";
+import { ComicBook, ComicPenciller, ComicWriter, ComicInker, ComicLetterer, ComicEditor, ComicColorist, ComicCoverArtist, ComicPublisher, ComicImprint, ComicGenre, ComicCharacter, ComicLocation, ComicTeam, ComicStoryArc, ComicSeriesGroup, ComicBookWithMetadata, ComicBookHistory, ComicBookThumbnail } from "../types/index.ts";
 import { getAllComicBooks, getComicBookById, getComicBooksByHash, getComicDuplicates } from "../db/sqlite/models/comicBooks.model.ts";
 
 import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
@@ -25,6 +25,8 @@ import { getStoryArcsByComicBookId } from "../db/sqlite/models/comicStoryArcs.mo
 import { getSeriesGroupsByComicBookId } from "../db/sqlite/models/comicSeriesGroups.model.ts";
 
 import { getComicPagesByComicBookId } from "../db/sqlite/models/comicPages.model.ts";
+
+import { getThumbnailsByComicBookId, getComicThumbnailById } from "../db/sqlite/models/comicBookThumbnails.model.ts";
 
 import { getSeriesIdFromComicBook, getComicBooksInSeries } from "../db/sqlite/models/comicSeries.model.ts";
 
@@ -446,14 +448,7 @@ export const getComicDuplicatesInTheDb = async (): Promise<ComicBook[]> => {
   }
 };
 
-// FIXME: This function is not finished yet, the comic worker needs to be update to store multiple thumbnails per comic
-export const getComicThumbnails = async (comicId: number): Promise<string[]> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
+export const getComicThumbnails = async (comicId: number): Promise<ComicBookThumbnail[] | null> => {
   // check if there is a comicbook with that id
   const comic = await getComicBookById(comicId);
 
@@ -461,10 +456,21 @@ export const getComicThumbnails = async (comicId: number): Promise<string[]> => 
     throw new Error("Comic book not found.");
   }
   
-  const comicPages = await getComicPagesByComicBookId(comicId);
-
-  return comicPages.map(page => page.file_path);
+  const comicThumbnails = await getThumbnailsByComicBookId(comicId);
+  return comicThumbnails;
 };
+
+export const getComicThumbnailByComicIdThumbnailId = async (comicId: number, thumbnailId: number): Promise<ComicBookThumbnail | null> => {
+  const comic = await getComicBookById(comicId);
+
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  const comicThumbnail = await getComicThumbnailById(thumbnailId);
+  return comicThumbnail;
+}
+
 
 export const checkComicReadByUser = async (comicId: number, userId: number): Promise<boolean> => {
   const history: ComicBookHistory | null = await getComicBookHistoryByUserAndComic(userId, comicId);
