@@ -66,6 +66,16 @@ Table comic_books {
 
 }
 
+table comic_book_history {
+  id integer [primary key]
+  user_id integer [not null]
+  comicbook_id integer [not null]
+  read bool [default: 0]
+  last_read_page integer
+  created_at date
+  updated_at date
+}
+
 Table comic_series_books {
   id integer [primary key]
   comic_series_id integer [not null]
@@ -340,6 +350,11 @@ Ref library_books: comic_libraries.id < comic_books.library_id
 
 Ref comic_series_books_series: comic_series_books.comic_series_id > comic_series.id
 Ref comic_series_books_book: comic_series_books.comic_book_id - comic_books.id
+
+Ref comic_book_history_users: comic_book_history.user_id > users.id
+Ref comic_book_history_books: comic_book_history.comicbook_id > comic_books.id
+
+
 
 ref comic_book_web_links: comic_web_links.comicbook_id > comic_books.id
 
