@@ -3,7 +3,7 @@ import z from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { basename } from "@std/path";
 
-
+import { requireAuth } from "../middleware/authChecks.ts";
 import {
   deleteComicBook,
   getComicBookById,
@@ -18,6 +18,8 @@ import {
   getNextComicBookId,
   getPreviousComicBookId,
   getComicDuplicatesInTheDb,
+  checkComicReadByUser,
+  setComicReadByUser
 } from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
 
@@ -138,6 +140,7 @@ app.get("/:id/download", async (c: Context) => {
  * This should return the first page of the comic book and a token to continue streaming:
  *  - Starts the preloading of the next comic book pages in the background
  *  - TODO: Set the progress of the reading session in the db 
+ *  - TODO: Look into adding a flag to set the request to private so we don't log the reading progress in the db
  */
 app.get(
   "/:id/stream",
@@ -228,22 +231,57 @@ app.get("/:id/pages",
   }
 );
 
-// TODO: Set up authentication and some way to check what user is requesting the read
-// NOTE: this will be to check if a user has read a comic book and to track reading progress
-app.get("/:id/read", async (c: Context) => {
-  const id = c.req.param("id");
+/**
+ * Check if a comic book has been read by a user
+ * 
+ * GET /api/comic-books/:id/read
+ * 
+ * This should return whether the comic book has been marked as read by the user, with the user id being read from 
+ * the jwt token provided in the Authorization header
+ */
+app.get(
+  "/:id/read", 
+  requireAuth,
+  zValidator(
+    "param",
+    z.object({
+      id: z.string().regex(/^\d+$/).transform(Number),
+    }),
+  ),
+  async (c: Context) => {
+    const id = c.req.param("id");
+    const userId = c.get("user").sub;
 
-  //TODO: implement comic book read logic
-  return c.json({ message: "Comic book read not implemented yet" }, 501);
+    const hasRead = await checkComicReadByUser(userId, parseInt(id, 10));
+    return c.json({ hasRead });
 });
 
-// TODO: Set up authentication and some way to check what user is requesting the read
-// NOTE: this will be used to mark a comic book as read by a user and to track reading progress
-app.post("/:id/read", async (c: Context) => {
+/**
+ * Mark a comic book as read by a user
+ * 
+ * POST /api/comic-books/:id/read
+ *
+ * This should mark the comic book as read by the user, with the user id being read from the jwt token provided in the Authorization header
+ */
+app.post(
+  "/:id/read",
+  requireAuth,
+  zValidator(
+    "param",
+    z.object({
+      id: z.string().regex(/^\d+$/).transform(Number),
+    }),
+  ),
+  async (c: Context) => {
   const id = c.req.param("id");
+  const userId = c.get("user").sub;
 
-  //TODO: implement comic book read logic
-  return c.json({ message: "Comic book read not implemented yet" }, 501);
+  const success = await setComicReadByUser(userId, parseInt(id, 10), true);
+  if (success) {
+    return c.json({ message: "Comic book marked as read" });
+  } else {
+    return c.json({ error: "Failed to mark comic book as read" }, 500);
+  }
 });
 
 /**
