@@ -19,7 +19,9 @@ import {
   getPreviousComicBookId,
   getComicDuplicatesInTheDb,
   checkComicReadByUser,
-  setComicReadByUser
+  setComicReadByUser,
+  getComicThumbnails,
+  getComicThumbnailByComicIdThumbnailId
 } from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
 
@@ -467,19 +469,47 @@ app.get(
 app.get("/:id/thumbnails", async (c: Context) => {
   const id = c.req.param("id");
 
-  //TODO: implement comic book thumbnails retrieval logic
-  return c.json({ message: "Comic book thumbnails retrieval not implemented yet" }, 501);
+  try {
+    const thumbnails = await getComicThumbnails(parseInt(id, 10));
+    if (thumbnails) {
+      return c.json({
+        thumbnails: thumbnails,
+        message: "Fetched comic book thumbnails successfully"
+      });
+    } else {
+      return c.json({
+        message: "No thumbnails found for this comic book"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching comic book thumbnails:", error);
+    return c.json({ error: "Failed to fetch comic book thumbnails" }, 500);
+  }
 });
 
 app.get("/:id/thumbnails/:thumbId", async (c: Context) => {
   const id = c.req.param("id");
   const thumbId = c.req.param("thumbId");
 
-  //TODO: implement comic book thumbnail retrieval logic
-  return c.json({ message: "Comic book thumbnail retrieval not implemented yet" }, 501);
+  try {
+    const thumbnail = await getComicThumbnailByComicIdThumbnailId(parseInt(id, 10), parseInt(thumbId, 10));
+    if (thumbnail) {
+      return c.json({
+        thumbnail: thumbnail,
+        message: "Fetched comic book thumbnail successfully"
+      });
+    } else {
+      return c.json({
+        message: "No thumbnail found for this comic book with the provided thumbnail ID"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching comic book thumbnail:", error);
+    return c.json({ error: "Failed to fetch comic book thumbnail" }, 500);
+  }
 });
 
-app.delete("/:id/thumbnail/:thumbId", async (c: Context) => {
+app.delete("/:id/thumbnails/:thumbId", async (c: Context) => {
   const id = c.req.param("id");
   const thumbId = c.req.param("thumbId");
 
@@ -487,7 +517,7 @@ app.delete("/:id/thumbnail/:thumbId", async (c: Context) => {
   return c.json({ message: "Comic book thumbnail deletion not implemented yet" }, 501);
 });
 
-app.post("/:id/thumbnail", async (c: Context) => {
+app.post("/:id/thumbnails", async (c: Context) => {
   const id = c.req.param("id");
 
   //TODO: implement comic book thumbnail upload logic
