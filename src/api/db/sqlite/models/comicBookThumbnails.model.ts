@@ -1,7 +1,7 @@
 import { getClient } from "../client.ts";
 import { comicBookCovers, comicBookThumbnails, comicPagesTable} from "../schema.ts";
 
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import type { ComicBookThumbnail } from "../../../types/index.ts";
 
 export const insertComicBookThumbnail = async (comicBookCoverId: number, filePath: string): Promise<number> => {
@@ -58,6 +58,32 @@ export const getThumbnailsByComicBookId = async (comicBookId: number): Promise<C
     return result.map((row) => row.comic_book_thumbnails);
   } catch (error) {
     console.error("Error fetching thumbnails by comic book ID:", error);
+    throw error;
+  }
+};
+
+export const getComicThumbnailById = async (thumbnailId: number): Promise<ComicBookThumbnail | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select(
+        {
+          comic_book_thumbnails: comicBookThumbnails
+        }
+      )
+      .from(comicBookThumbnails)
+      .where(
+        eq(comicBookThumbnails.id, thumbnailId)
+      );
+
+    return result.length > 0 ? result[0].comic_book_thumbnails : null;
+  } catch (error) {
+    console.error("Error fetching comic book thumbnail by ID:", error);
     throw error;
   }
 };
