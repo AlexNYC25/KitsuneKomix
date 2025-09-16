@@ -2,7 +2,7 @@ import { getClient } from "../db/sqlite/client.ts";
 
 import { extractComicPage, extractComicBookByStreaming } from "../utilities/extract.ts";
 
-import { ComicBook, ComicPenciller, ComicWriter, ComicInker, ComicLetterer, ComicEditor, ComicColorist, ComicCoverArtist, ComicPublisher, ComicImprint, ComicGenre, ComicCharacter, ComicLocation, ComicTeam, ComicStoryArc, ComicSeriesGroup, ComicBookWithMetadata } from "../types/index.ts";
+import { ComicBook, ComicPenciller, ComicWriter, ComicInker, ComicLetterer, ComicEditor, ComicColorist, ComicCoverArtist, ComicPublisher, ComicImprint, ComicGenre, ComicCharacter, ComicLocation, ComicTeam, ComicStoryArc, ComicSeriesGroup, ComicBookWithMetadata, ComicBookHistory } from "../types/index.ts";
 import { getAllComicBooks, getComicBookById, getComicBooksByHash, getComicDuplicates } from "../db/sqlite/models/comicBooks.model.ts";
 
 import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
@@ -27,6 +27,8 @@ import { getSeriesGroupsByComicBookId } from "../db/sqlite/models/comicSeriesGro
 import { getComicPagesByComicBookId } from "../db/sqlite/models/comicPages.model.ts";
 
 import { getSeriesIdFromComicBook, getComicBooksInSeries } from "../db/sqlite/models/comicSeries.model.ts";
+
+import { getComicBookHistoryByUserAndComic, updateComicBookHistory, insertComicBookHistory } from "../db/sqlite/models/comicBookHistory.model.ts";
 
 export const fetchAllComicBooksWithRelatedData = async (page: number = 1, limit: number = 100, sort: string | undefined, filter?: string | undefined, filter_property?: string | undefined) => {
   const { db, client } = getClient();
@@ -462,6 +464,63 @@ export const getComicThumbnails = async (comicId: number): Promise<string[]> => 
   const comicPages = await getComicPagesByComicBookId(comicId);
 
   return comicPages.map(page => page.file_path);
+};
+
+export const checkComicReadByUser = async (comicId: number, userId: number): Promise<boolean> => {
+  const history: ComicBookHistory | null = await getComicBookHistoryByUserAndComic(userId, comicId);
+  if (history && history.read === 1) {
+    return true;
+  }
+  return false;
+};
+
+export const setComicReadByUser = async (comicId: number, userId: number, read: boolean): Promise<boolean> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  // check if there is a comicbook with that id
+  const comic = await getComicBookById(comicId);
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  // Check if a history record already exists
+  const existingHistory = await getComicBookHistoryByUserAndComic(userId, comicId);
+
+  if (existingHistory) {
+    // Update the existing record
+    const readValue = read ? 1 : 0;
+    // Update the existing record
+    const comicbookHistoryId = await updateComicBookHistory(existingHistory.id, { read: readValue, last_read_page: null });
+
+    if (!comicbookHistoryId) {
+      throw new Error("Failed to update comic book history.");
+    }
+
+    if (!existingHistory.id) {
+      throw new Error("Failed to update comic book history.");
+    }
+
+    return true;
+  } else {
+    // Create a new history record
+    const newHistory = {
+      user_id: userId,
+      comic_book_id: comicId,
+      read: read ? 1 : 0,
+      last_read_page: null,
+    };
+    const comicbookHistoryId = await insertComicBookHistory(newHistory);
+
+    if (!comicbookHistoryId) {
+      throw new Error("Failed to create comic book history.");
+    }
+
+    return true;
+  }
 };
 
 // ******************************************************************************
