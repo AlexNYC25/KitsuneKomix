@@ -4,6 +4,7 @@ import { comicBookThumbnails } from "../schema.ts";
 import { eq } from "drizzle-orm";
 import type { ComicBookThumbnail } from "../../../types/index.ts";
 
+//TODO: Refactor to handle both generated and custom thumbnails
 export const insertComicBookThumbnail = async (
   comicBookId: number,
   comicBookCoverId: number, 

@@ -471,6 +471,7 @@ export const getComicThumbnailByComicIdThumbnailId = async (comicId: number, thu
   return comicThumbnail;
 }
 
+//FIXME: Updated function to also delete the thumbnail from the filesystem
 export const deleteComicsThumbnailById = async (comicId: number, thumbnailId: number): Promise<boolean> => {
   const { db, client } = getClient();
 
