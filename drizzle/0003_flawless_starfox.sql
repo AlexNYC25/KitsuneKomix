@@ -15,7 +15,18 @@ CREATE TABLE `__new_comic_book_thumbnails` (
 	FOREIGN KEY (`uploaded_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-INSERT INTO `__new_comic_book_thumbnails`("id", "comic_book_id", "comic_book_cover_id", "file_path", "thumbnail_type", "name", "description", "uploaded_by", "created_at", "updated_at") SELECT "id", "comic_book_id", "comic_book_cover_id", "file_path", "thumbnail_type", "name", "description", "uploaded_by", "created_at", "updated_at" FROM `comic_book_thumbnails`;--> statement-breakpoint
+INSERT INTO `__new_comic_book_thumbnails`("id", "comic_book_id", "comic_book_cover_id", "file_path", "thumbnail_type", "created_at", "updated_at") 
+SELECT 
+    t."id", 
+    p."comic_book_id",
+    t."comic_book_cover_id", 
+    t."file_path", 
+    'generated' as "thumbnail_type",
+    t."created_at", 
+    t."updated_at" 
+FROM `comic_book_thumbnails` t
+JOIN `comic_book_covers` c ON t.comic_book_cover_id = c.id
+JOIN `comic_pages` p ON c.comic_page_id = p.id;--> statement-breakpoint
 DROP TABLE `comic_book_thumbnails`;--> statement-breakpoint
 ALTER TABLE `__new_comic_book_thumbnails` RENAME TO `comic_book_thumbnails`;--> statement-breakpoint
 PRAGMA foreign_keys=ON;
