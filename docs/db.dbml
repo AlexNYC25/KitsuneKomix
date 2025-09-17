@@ -110,6 +110,9 @@ Table comic_book_covers {
 Table comic_book_thumbnails {
   id integer [primary key]
   comic_book_cover_id integer
+  thumbnail_type string [default: "Generated"]
+  name string
+  description string
   file_path string [note: "Should only reflect path to thumbnail in cache"]
   created_at date
   updated_at date
