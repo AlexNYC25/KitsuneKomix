@@ -26,7 +26,7 @@ import { getSeriesGroupsByComicBookId } from "../db/sqlite/models/comicSeriesGro
 
 import { getComicPagesByComicBookId } from "../db/sqlite/models/comicPages.model.ts";
 
-import { getThumbnailsByComicBookId, getComicThumbnailById } from "../db/sqlite/models/comicBookThumbnails.model.ts";
+import { getThumbnailsByComicBookId, getComicThumbnailById, deleteComicBookThumbnail, insertCustomComicBookThumbnail } from "../db/sqlite/models/comicBookThumbnails.model.ts";
 
 import { getSeriesIdFromComicBook, getComicBooksInSeries } from "../db/sqlite/models/comicSeries.model.ts";
 
@@ -471,6 +471,75 @@ export const getComicThumbnailByComicIdThumbnailId = async (comicId: number, thu
   return comicThumbnail;
 }
 
+export const deleteComicsThumbnailById = async (comicId: number, thumbnailId: number): Promise<boolean> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  // check if there is a comicbook with that id
+  const comic = await getComicBookById(comicId);
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  // Check if the thumbnail exists
+  const thumbnail = await getComicThumbnailById(thumbnailId);
+  if (!thumbnail) {
+    throw new Error("Comic book thumbnail not found.");
+  }
+
+  try {
+    await deleteComicBookThumbnail(thumbnailId);
+    return true;
+  } catch (error) {
+    console.error("Error deleting comic book thumbnail:", error);
+    throw new Error("Failed to delete comic book thumbnail.");
+  }
+};
+
+export const createCustomThumbnail = async (
+  comicId: number, 
+  imageData: ArrayBuffer, 
+  userId: number,
+  name?: string,
+  description?: string
+): Promise<{ thumbnailId: number; filePath: string }> => {
+  // Check if comic exists
+  const comic = await getComicBookById(comicId);
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  // Generate filename for the custom thumbnail
+  const timestamp = Date.now();
+  const filename = `custom_thumbnail_${comicId}_${timestamp}.jpg`;
+  const thumbnailDir = `/app/cache/thumbnails/custom`;
+  const filePath = `${thumbnailDir}/${filename}`;
+
+  try {
+    // Ensure directory exists
+    await Deno.mkdir(thumbnailDir, { recursive: true });
+
+    // Write the image data to file
+    await Deno.writeFile(filePath, new Uint8Array(imageData));
+
+    // Store in database
+    const thumbnailId = await insertCustomComicBookThumbnail(
+      comicId,
+      filePath,
+      userId,
+      name,
+      description
+    );
+
+    return { thumbnailId, filePath };
+  } catch (error) {
+    console.error("Error creating custom thumbnail:", error);
+    throw new Error("Failed to create custom thumbnail.");
+  }
+};
 
 export const checkComicReadByUser = async (comicId: number, userId: number): Promise<boolean> => {
   const history: ComicBookHistory | null = await getComicBookHistoryByUserAndComic(userId, comicId);
