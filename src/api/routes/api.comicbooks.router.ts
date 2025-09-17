@@ -21,7 +21,9 @@ import {
   checkComicReadByUser,
   setComicReadByUser,
   getComicThumbnails,
-  getComicThumbnailByComicIdThumbnailId
+  getComicThumbnailByComicIdThumbnailId,
+  createCustomThumbnail,
+  deleteComicsThumbnailById
 } from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
 
@@ -513,15 +515,83 @@ app.delete("/:id/thumbnails/:thumbId", async (c: Context) => {
   const id = c.req.param("id");
   const thumbId = c.req.param("thumbId");
 
-  //TODO: implement comic book thumbnail deletion logic
-  return c.json({ message: "Comic book thumbnail deletion not implemented yet" }, 501);
+  try {
+    await deleteComicsThumbnailById(parseInt(id, 10), parseInt(thumbId, 10));
+    return c.json({ message: "Comic book thumbnail deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting comic book thumbnail:", error);
+    return c.json({ error: "Failed to delete comic book thumbnail" }, 500);
+  }
 });
 
-app.post("/:id/thumbnails", async (c: Context) => {
+app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
   const id = c.req.param("id");
+  const comicId = parseInt(id, 10);
 
-  //TODO: implement comic book thumbnail upload logic
-  return c.json({ message: "Comic book thumbnail upload not implemented yet" }, 501);
+  if (isNaN(comicId)) {
+    return c.json({ error: "Invalid comic book ID" }, 400);
+  }
+
+  try {
+    // Get user from auth middleware
+    const user = c.get("user");
+    const userId = parseInt(user.sub);
+
+    // Parse the multipart form data
+    const body = await c.req.parseBody();
+    
+    // Extract image file
+    const imageFile = body.image;
+    if (!imageFile || !(imageFile instanceof File)) {
+      return c.json({ error: "Image file is required" }, 400);
+    }
+
+    // Optional name and description
+    const name = body.name as string | undefined;
+    const description = body.description as string | undefined;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(imageFile.type)) {
+      return c.json({ 
+        error: "Invalid file type. Supported types: JPEG, PNG, WebP" 
+      }, 400);
+    }
+
+    // Convert file to ArrayBuffer
+    const imageData = await imageFile.arrayBuffer();
+
+    // Create the custom thumbnail
+    const result = await createCustomThumbnail(
+      comicId,
+      imageData,
+      userId,
+      name,
+      description
+    );
+
+    return c.json({
+      message: "Custom thumbnail created successfully",
+      thumbnail: {
+        id: result.thumbnailId,
+        filePath: result.filePath,
+        name: name,
+        description: description,
+        type: "custom"
+      }
+    }, 201);
+
+  } catch (error) {
+    console.error("Error creating custom thumbnail:", error);
+    
+    if (error instanceof Error) {
+      if (error.message.includes("not found")) {
+        return c.json({ error: error.message }, 404);
+      }
+    }
+    
+    return c.json({ error: "Failed to create custom thumbnail" }, 500);
+  }
 });
 
 app.get("/:id/readlists", async (c: Context) => {
