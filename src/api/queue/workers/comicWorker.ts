@@ -374,6 +374,7 @@ async function processComicFileImages(
         if (thumbnail.success && thumbnail.thumbnailPath) {
           queueLogger.info(`Inserting thumbnail for cover ID: ${coverId}`);
           const thumbnailId = await insertComicBookThumbnail(
+            job.data.comicId,
             coverId,
             thumbnail.thumbnailPath,
           );
