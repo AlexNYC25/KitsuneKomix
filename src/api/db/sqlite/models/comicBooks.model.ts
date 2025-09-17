@@ -1,4 +1,4 @@
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, desc, asc, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
@@ -81,6 +81,26 @@ export const getComicBookByFilePath = async (
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic book by file path:", error);
+    throw error;
+  }
+};
+
+export const getComicBooksByHash = async (
+  hash: string,
+): Promise<ComicBook[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db.select().from(comicBooksTable).where(
+      eq(comicBooksTable.hash, hash),
+    );
+    return result;
+  } catch (error) {
+    console.error("Error fetching comic books by hash:", error);
     throw error;
   }
 };
@@ -319,6 +339,27 @@ export const deleteComicBook = async (id: number): Promise<boolean> => {
     return result.length > 0;
   } catch (error) {
     console.error("Error deleting comic book:", error);
+    throw error;
+  }
+};
+
+export const getComicDuplicates = async (): Promise<ComicBook[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    // This is a simplified example. Actual duplicate detection logic may vary.
+    const result = await db
+      .select()
+      .from(comicBooksTable)
+      .groupBy(comicBooksTable.hash)
+      .having(sql`COUNT(*) > 1`);
+    return result;
+  } catch (error) {
+    console.error("Error fetching duplicate comic books:", error);
     throw error;
   }
 };

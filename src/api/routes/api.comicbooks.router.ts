@@ -594,6 +594,8 @@ app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
   }
 });
 
+
+//TODO: Updated parsing to actually read the readlists from the db, have the table and model ready
 app.get("/:id/readlists", async (c: Context) => {
   const id = c.req.param("id");
 
@@ -692,9 +694,16 @@ app.get("/duplicates", async (c: Context) => {
   }
 });
 
+// Note this should be for the books that were added most recently to the database, not necessarily the latest published
 app.get("/latest", async (c: Context) => {
   //TODO: implement latest comics retrieval logic
   return c.json({ message: "Latest comics retrieval not implemented yet" }, 501);
+});
+
+// Note this should be for the books that were published most recently, not necessarily the latest added to the database
+app.get("/newest", async (c: Context) => {
+  //TODO: implement newest comics retrieval logic
+  return c.json({ message: "Newest comics retrieval not implemented yet" }, 501);
 });
 
 app.get("/random", async (c: Context) => {
@@ -712,18 +721,32 @@ app.get("/queue", async (c: Context) => {
   return c.json({ message: "Comic book queue retrieval not implemented yet" }, 501);
 });
 
-app.post("/metadata", async (c: Context) => {
+// Note this should be a batch update of metadata for multiple comic books either adding or replacing existing metadata
+app.post("/metadata-batch", async (c: Context) => {
   const metadata = await c.req.json();
 
   //TODO: implement metadata update logic
   return c.json({ message: "Metadata update not implemented yet" }, 501);
 });
 
-app.post("/metadata-batch", async (c: Context) => {
-  const metadata = await c.req.json();
+app.get("/duplicates", async (c: Context) => {
+  try {
+    const duplicates = await getComicDuplicatesInTheDb();
 
-  //TODO: implement metadata update logic
-  return c.json({ message: "Metadata update not implemented yet" }, 501);
+    if (duplicates) {
+      return c.json({
+        duplicates: duplicates,
+        message: "Fetched comic book duplicates successfully"
+      });
+    } else {
+      return c.json({
+        message: "No duplicate comic books found"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching comic book duplicates:", error);
+    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
+  }
 });
 
 export default app;
