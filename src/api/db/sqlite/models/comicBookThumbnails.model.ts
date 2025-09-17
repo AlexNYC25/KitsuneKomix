@@ -1,10 +1,14 @@
 import { getClient } from "../client.ts";
-import { comicBookCovers, comicBookThumbnails, comicPagesTable} from "../schema.ts";
+import { comicBookThumbnails } from "../schema.ts";
 
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { ComicBookThumbnail } from "../../../types/index.ts";
 
-export const insertComicBookThumbnail = async (comicBookCoverId: number, filePath: string): Promise<number> => {
+export const insertComicBookThumbnail = async (
+  comicBookId: number,
+  comicBookCoverId: number, 
+  filePath: string
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -14,7 +18,12 @@ export const insertComicBookThumbnail = async (comicBookCoverId: number, filePat
   try {
     const result = await db
       .insert(comicBookThumbnails)
-      .values({ comic_book_cover_id: comicBookCoverId, file_path: filePath })
+      .values({ 
+        comic_book_id: comicBookId,
+        comic_book_cover_id: comicBookCoverId, 
+        file_path: filePath,
+        thumbnail_type: "generated"
+      })
       .returning({ id: comicBookThumbnails.id });
 
     if (result.length === 0) {
@@ -38,24 +47,16 @@ export const getThumbnailsByComicBookId = async (comicBookId: number): Promise<C
   }
 
   try {
+    // Updated query to handle both generated and custom thumbnails
     const result = await db
-      .select(
-        {
-          comic_book_thumbnails: comicBookThumbnails
-        }
-      )
+      .select()
       .from(comicBookThumbnails)
-      .leftJoin(
-        comicBookCovers,
-        eq(comicBookThumbnails.comic_book_cover_id, comicBookCovers.id)
-      )
-      .leftJoin(
-        comicPagesTable,
-        eq(comicBookCovers.comic_page_id, comicPagesTable.id)
-      )
-      .where(eq(comicPagesTable.comic_book_id, comicBookId));
+      .where(
+        // Get thumbnails directly linked to the comic book OR through covers/pages
+        eq(comicBookThumbnails.comic_book_id, comicBookId)
+      );
 
-    return result.map((row) => row.comic_book_thumbnails);
+    return result;
   } catch (error) {
     console.error("Error fetching thumbnails by comic book ID:", error);
     throw error;
@@ -71,19 +72,73 @@ export const getComicThumbnailById = async (thumbnailId: number): Promise<ComicB
 
   try {
     const result = await db
-      .select(
-        {
-          comic_book_thumbnails: comicBookThumbnails
-        }
-      )
+      .select()
       .from(comicBookThumbnails)
-      .where(
-        eq(comicBookThumbnails.id, thumbnailId)
-      );
+      .where(eq(comicBookThumbnails.id, thumbnailId));
 
-    return result.length > 0 ? result[0].comic_book_thumbnails : null;
+    return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic book thumbnail by ID:", error);
+    throw error;
+  }
+};
+
+/**
+ * Insert a custom thumbnail directly linked to a comic book
+ */
+export const insertCustomComicBookThumbnail = async (
+  comicBookId: number, 
+  filePath: string, 
+  uploadedBy: number,
+  name?: string,
+  description?: string
+): Promise<number> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .insert(comicBookThumbnails)
+      .values({ 
+        comic_book_id: comicBookId,
+        comic_book_cover_id: null, // Custom thumbnails aren't linked to covers
+        file_path: filePath,
+        thumbnail_type: "custom",
+        name: name,
+        description: description,
+        uploaded_by: uploadedBy
+      })
+      .returning({ id: comicBookThumbnails.id });
+
+    if (result.length === 0) {
+      throw new Error(
+        `Failed to insert custom thumbnail for comic book ID ${comicBookId}`,
+      );
+    }
+
+    return result[0].id;
+  } catch (error) {
+    console.error("Error inserting custom comic book thumbnail:", error);
+    throw error;
+  }
+};
+
+export const deleteComicBookThumbnail = async (thumbnailId: number): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookThumbnails)
+      .where(eq(comicBookThumbnails.id, thumbnailId));
+  } catch (error) {
+    console.error("Error deleting comic book thumbnail:", error);
     throw error;
   }
 };
