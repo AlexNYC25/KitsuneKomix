@@ -16,23 +16,48 @@ export const insertComicBookThumbnail = async (
   }
 
   try {
-    const result = await db
-      .insert(comicBookThumbnails)
-      .values({ 
-        comic_book_id: comicBookId,
-        comic_book_cover_id: comicBookCoverId, 
-        file_path: filePath,
-        thumbnail_type: "generated"
-      })
-      .returning({ id: comicBookThumbnails.id });
+    // Check if comic_book_id column exists (for migration compatibility)
+    const tableInfo = await db.run("PRAGMA table_info(comic_book_thumbnails)");
+    const hasComicBookIdColumn = tableInfo.rows?.some((row: any) => row[1] === 'comic_book_id');
 
-    if (result.length === 0) {
-      throw new Error(
-        `Failed to insert thumbnail for comic book cover ID ${comicBookCoverId}`,
-      );
+    if (hasComicBookIdColumn) {
+      // Use new schema
+      const result = await db
+        .insert(comicBookThumbnails)
+        .values({ 
+          comic_book_id: comicBookId,
+          comic_book_cover_id: comicBookCoverId, 
+          file_path: filePath,
+          thumbnail_type: "generated"
+        })
+        .returning({ id: comicBookThumbnails.id });
+
+      if (result.length === 0) {
+        throw new Error(
+          `Failed to insert thumbnail for comic book cover ID ${comicBookCoverId}`,
+        );
+      }
+
+      return result[0].id;
+    } else {
+      // Use old schema (backwards compatibility during migration)
+      const result = await db
+        .insert(comicBookThumbnails)
+        .values({ 
+          comic_book_id: comicBookId,
+          comic_book_cover_id: comicBookCoverId, 
+          file_path: filePath
+        })
+        .returning({ id: comicBookThumbnails.id });
+
+      if (result.length === 0) {
+        throw new Error(
+          `Failed to insert thumbnail for comic book cover ID ${comicBookCoverId}`,
+        );
+      }
+
+      return result[0].id;
     }
-
-    return result[0].id;
   } catch (error) {
     console.error("Error inserting comic book thumbnail:", error);
     throw error;
