@@ -23,11 +23,248 @@ import {
   getComicThumbnails,
   getComicThumbnailByComicIdThumbnailId,
   createCustomThumbnail,
-  deleteComicsThumbnailById
+  deleteComicsThumbnailById,
+  getRandomComicBook
 } from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
 
 const app = new Hono();
+
+
+/**
+ * Get all comic books
+ * ROUTE: GET /api/comic-books/all
+ * 
+ * This should return a list of all comic books in the database, with the option of pagination, sorting, and filtering
+ * @return JSON array of comic books
+ */
+app.get(
+  "/all",
+  zValidator(
+    "query",
+    z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
+      limit: z
+        .string()
+        .optional()
+        .transform((val) => (val ? parseInt(val) : 20)),
+      sort: z.string().optional(),
+      filter: z.string().optional(),
+      filter_property: z.string().optional(),
+    }),
+  ),
+  async (c: Context) => {
+    const { page, limit, sort, filter, filter_property } = c.req.query();
+    
+    try {
+      const serviceResult = await fetchAllComicBooksWithRelatedData(parseInt(page) || 1, parseInt(limit) || 20, sort, filter, filter_property);
+
+      return c.json({
+        data: serviceResult.comics,
+        count: serviceResult.comics.length,
+        hasNextPage: serviceResult.hasNextPage,
+        currentPage: parseInt(page) || 1,
+        pageSize: parseInt(limit) || 100,
+        filter: filter || null,
+        filter_property: filter_property || null,
+        sort: sort || null,
+      });
+    } catch (error) {
+      console.error("API Route Error:", error);
+      return c.json({ error: "Failed to fetch comic books" }, 500);
+    }
+  },
+);
+
+/**
+ * Search comic books by query
+ *
+ * GET /api/comic-books/search?q=searchTerm
+ * 
+ * This route allows users to search for comic books by a query string.
+ * The query string should be passed as a parameter named 'q'.
+ */
+// TODO: Re consider this route it may be redundant with the current filter implementation in /all
+app.get(
+  "/search",
+  zValidator(
+    "query",
+    z.object({
+      q: z.string().min(1, "Query parameter 'q' is required"),
+    }),
+  ),
+  async (c: Context) => {
+    const query = c.req.query("q");
+
+    if (!query) {
+      return c.json({ message: "Query parameter 'q' is required" }, 400);
+    }
+
+    const comics = await searchComicBooks(query);
+    if (comics) {
+      return c.json(comics);
+    } else {
+      return c.notFound();
+    }
+  },
+);
+
+/**
+ * Get comic book duplicates
+ * 
+ * GET /api/comic-books/duplicates
+ * 
+ * This route returns a list of duplicate comic books based on the unique hash generated for each comic book
+ */
+app.get("/duplicates", async (c: Context) => {
+  try {
+    const duplicates = await getComicDuplicatesInTheDb();
+
+    if (duplicates) {
+      return c.json({
+        duplicates: duplicates,
+        message: "Fetched comic book duplicates successfully"
+      });
+    } else {
+      return c.json({
+        message: "No duplicate comic books found"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching comic book duplicates:", error);
+    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
+  }
+});
+
+/**
+ * Get the latest comic books added to the database
+ * 
+ * GET /api/comic-books/latest
+ * 
+ * This route returns the latest comic books added to the database, sorted by the date they were added
+ */
+app.get("/latest",
+  zValidator(
+    "query",
+    z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
+      limit: z
+        .string()
+        .optional()
+        .transform((val) => (val ? parseInt(val) : 10)),
+    }),
+  ),
+  async (c: Context) => {
+    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
+    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
+
+    try {
+      const comicsResult = await fetchAllComicBooksWithRelatedData(page, limit, "created_at", "desc");
+      return c.json({
+        data: comicsResult.comics,
+        count: comicsResult.comics.length,
+        currentPage: page,
+        pageSize: limit,
+      });
+    } catch (error) {
+      console.error("Error fetching latest comic books:", error);
+      return c.json({ error: "Failed to fetch latest comic books" }, 500);
+    }
+  }
+);
+
+/**
+ * Get the newest comic books by publication date
+ * 
+ * GET /api/comic-books/newest
+ * 
+ * This route returns the newest comic books sorted by their publication date
+ */
+app.get("/newest",
+  zValidator(
+    "query",
+    z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
+      limit: z
+        .string()
+        .optional()
+        .transform((val) => (val ? parseInt(val) : 10)),
+    }),
+  ),
+  async (c: Context) => {
+    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
+    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
+
+    try {
+      const comicsResult = await fetchAllComicBooksWithRelatedData(page, limit, "publication_date", "desc");
+      return c.json({
+        data: comicsResult.comics,
+        count: comicsResult.comics.length,
+        currentPage: page,
+        pageSize: limit,
+        hasNextPage: comicsResult.hasNextPage
+      });
+    } catch (error) {
+      console.error("Error fetching newest comic books:", error);
+      return c.json({ error: "Failed to fetch newest comic books" }, 500);
+    }
+  }
+);
+
+/**
+ * Get a random comic book
+ * 
+ * GET /api/comic-books/random
+ * 
+ * This route returns a random comic book from the database
+ * */
+app.get("/random", async (c: Context) => {
+  try {
+    const comic = await getRandomComicBook();
+    return c.json(comic);
+  } catch (error) {
+    console.error("Error fetching random comic book:", error);
+    return c.json({ error: "Failed to fetch random comic book" }, 500);
+  }
+});
+
+app.get("/list", async (c: Context) => {
+  //TODO: implement comic book list retrieval logic
+  return c.json({ message: "Comic book list retrieval not implemented yet" }, 501);
+});
+
+app.get("/queue", async (c: Context) => {
+  //TODO: implement comic book queue retrieval logic
+  return c.json({ message: "Comic book queue retrieval not implemented yet" }, 501);
+});
+
+// Note this should be a batch update of metadata for multiple comic books either adding or replacing existing metadata
+app.post("/metadata-batch", async (c: Context) => {
+  const metadata = await c.req.json();
+
+  //TODO: implement metadata update logic
+  return c.json({ message: "Metadata update not implemented yet" }, 501);
+});
+
+app.get("/duplicates", async (c: Context) => {
+  try {
+    const duplicates = await getComicDuplicatesInTheDb();
+
+    if (duplicates) {
+      return c.json({
+        duplicates: duplicates,
+        message: "Fetched comic book duplicates successfully"
+      });
+    } else {
+      return c.json({
+        message: "No duplicate comic books found"
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching comic book duplicates:", error);
+    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
+  }
+});
 
 /**
  * Get a comic book by ID
@@ -633,149 +870,5 @@ app.get("/:id/readlists", async (c: Context) => {
 });
 
 
-/**
- * Get all comic books
- * ROUTE: GET /api/comic-books/all
- * 
- * This should return a list of all comic books in the database, with the option of pagination, sorting, and filtering
- * @return JSON array of comic books
- */
-app.get(
-  "/all",
-  zValidator(
-    "query",
-    z.object({
-      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
-      limit: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val) : 20)),
-      sort: z.string().optional(),
-      filter: z.string().optional(),
-      filter_property: z.string().optional(),
-    }),
-  ),
-  async (c: Context) => {
-    const { page, limit, sort, filter, filter_property } = c.req.query();
-    
-    try {
-      const serviceResult = await fetchAllComicBooksWithRelatedData(parseInt(page) || 1, parseInt(limit) || 20, sort, filter, filter_property);
-
-      return c.json({
-        data: serviceResult.comics,
-        count: serviceResult.comics.length,
-        hasNextPage: serviceResult.hasNextPage,
-        currentPage: parseInt(page) || 1,
-        pageSize: parseInt(limit) || 100,
-        filter: filter || null,
-        filter_property: filter_property || null,
-        sort: sort || null,
-      });
-    } catch (error) {
-      console.error("API Route Error:", error);
-      return c.json({ error: "Failed to fetch comic books" }, 500);
-    }
-  },
-);
-
-// TODO: Re consider this route it may be redundant with the current filter implementation in /all
-app.get(
-  "/search",
-  zValidator(
-    "query",
-    z.object({
-      q: z.string().min(1, "Query parameter 'q' is required"),
-    }),
-  ),
-  async (c: Context) => {
-    const query = c.req.query("q");
-
-    if (!query) {
-      return c.json({ message: "Query parameter 'q' is required" }, 400);
-    }
-
-    const comics = await searchComicBooks(query);
-    if (comics) {
-      return c.json(comics);
-    } else {
-      return c.notFound();
-    }
-  },
-);
-
-app.get("/duplicates", async (c: Context) => {
-  try {
-    const duplicates = await getComicDuplicatesInTheDb();
-
-    if (duplicates) {
-      return c.json({
-        duplicates: duplicates,
-        message: "Fetched comic book duplicates successfully"
-      });
-    } else {
-      return c.json({
-        message: "No duplicate comic books found"
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching comic book duplicates:", error);
-    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
-  }
-});
-
-// Note this should be for the books that were added most recently to the database, not necessarily the latest published
-app.get("/latest", async (c: Context) => {
-  //TODO: implement latest comics retrieval logic
-  return c.json({ message: "Latest comics retrieval not implemented yet" }, 501);
-});
-
-// Note this should be for the books that were published most recently, not necessarily the latest added to the database
-app.get("/newest", async (c: Context) => {
-  //TODO: implement newest comics retrieval logic
-  return c.json({ message: "Newest comics retrieval not implemented yet" }, 501);
-});
-
-app.get("/random", async (c: Context) => {
-  //TODO: implement random comic retrieval logic
-  return c.json({ message: "Random comic retrieval not implemented yet" }, 501);
-});
-
-app.get("/list", async (c: Context) => {
-  //TODO: implement comic book list retrieval logic
-  return c.json({ message: "Comic book list retrieval not implemented yet" }, 501);
-});
-
-app.get("/queue", async (c: Context) => {
-  //TODO: implement comic book queue retrieval logic
-  return c.json({ message: "Comic book queue retrieval not implemented yet" }, 501);
-});
-
-// Note this should be a batch update of metadata for multiple comic books either adding or replacing existing metadata
-app.post("/metadata-batch", async (c: Context) => {
-  const metadata = await c.req.json();
-
-  //TODO: implement metadata update logic
-  return c.json({ message: "Metadata update not implemented yet" }, 501);
-});
-
-app.get("/duplicates", async (c: Context) => {
-  try {
-    const duplicates = await getComicDuplicatesInTheDb();
-
-    if (duplicates) {
-      return c.json({
-        duplicates: duplicates,
-        message: "Fetched comic book duplicates successfully"
-      });
-    } else {
-      return c.json({
-        message: "No duplicate comic books found"
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching comic book duplicates:", error);
-    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
-  }
-});
 
 export default app;
