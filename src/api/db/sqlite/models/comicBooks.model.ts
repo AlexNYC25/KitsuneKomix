@@ -25,6 +25,46 @@ export const getAllComicBooks = async (offset: number, limit: number, sort: stri
   }
 };
 
+export const getAllComicBooksSortByDate = async (offset: number, limit: number, sort: string | undefined): Promise<ComicBook[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db.select().from(comicBooksTable).limit(limit).offset(offset).orderBy(
+      sort === "asc" ? asc(comicBooksTable.created_at) : desc(comicBooksTable.created_at),
+    );
+    
+    return result;
+  } catch (error) {
+    console.error("Error fetching all comic books sorted by date:", error);
+    throw error;
+  }
+};
+
+export const getRandomBook = async (): Promise<ComicBook | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(comicBooksTable)
+      .orderBy(sql`RANDOM()`)
+      .limit(1);
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error("Error fetching random comic book:", error);
+    throw error;
+  }
+}
+
 export const insertComicBook = async (comicBook: NewComicBook) => {
   const { db, client } = getClient();
 
