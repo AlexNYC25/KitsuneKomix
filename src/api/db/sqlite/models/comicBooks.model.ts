@@ -1,12 +1,15 @@
-import { eq, desc, asc, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
 import { comicBooksTable } from "../schema.ts";
 import type { ComicBook, NewComicBook } from "../../../types/index.ts";
 
-
-export const getAllComicBooks = async (offset: number, limit: number, sort: string | undefined): Promise<ComicBook[]> => {
+export const getAllComicBooks = async (
+  offset: number,
+  limit: number,
+  sort: string | undefined,
+): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -14,10 +17,14 @@ export const getAllComicBooks = async (offset: number, limit: number, sort: stri
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).limit(limit).offset(offset).orderBy(
-      sort === "asc" ? asc(comicBooksTable.file_path) : desc(comicBooksTable.file_path),
+    const result = await db.select().from(comicBooksTable).limit(limit).offset(
+      offset,
+    ).orderBy(
+      sort === "asc"
+        ? asc(comicBooksTable.file_path)
+        : desc(comicBooksTable.file_path),
     );
-    
+
     return result;
   } catch (error) {
     console.error("Error fetching all comic books:", error);
@@ -25,7 +32,11 @@ export const getAllComicBooks = async (offset: number, limit: number, sort: stri
   }
 };
 
-export const getAllComicBooksSortByDate = async (offset: number, limit: number, sort: string | undefined): Promise<ComicBook[]> => {
+export const getAllComicBooksSortByDate = async (
+  offset: number,
+  limit: number,
+  sort: string | undefined,
+): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -33,13 +44,43 @@ export const getAllComicBooksSortByDate = async (offset: number, limit: number, 
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).limit(limit).offset(offset).orderBy(
-      sort === "asc" ? asc(comicBooksTable.created_at) : desc(comicBooksTable.created_at),
+    const result = await db.select().from(comicBooksTable).limit(limit).offset(
+      offset,
+    ).orderBy(
+      sort === "asc"
+        ? asc(comicBooksTable.created_at)
+        : desc(comicBooksTable.created_at),
     );
-    
+
     return result;
   } catch (error) {
     console.error("Error fetching all comic books sorted by date:", error);
+    throw error;
+  }
+};
+
+export const getAllComicBooksSortByFileName = async (
+  letter: string,
+  limit: number = 50,
+  offset: number = 0,
+): Promise<ComicBook[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const likeQuery = `${letter}%`;
+    const result = await db.select().from(comicBooksTable).where(
+      sql`${comicBooksTable.file_path} LIKE ${likeQuery}`,
+    ).orderBy(desc(comicBooksTable.file_path))
+      .limit(limit)
+      .offset(offset);
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching comic books by starting letter:", error);
     throw error;
   }
 };
@@ -63,7 +104,7 @@ export const getRandomBook = async (): Promise<ComicBook | null> => {
     console.error("Error fetching random comic book:", error);
     throw error;
   }
-}
+};
 
 export const insertComicBook = async (comicBook: NewComicBook) => {
   const { db, client } = getClient();
