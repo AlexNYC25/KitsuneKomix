@@ -1,9 +1,39 @@
 import { getClient } from "../db/sqlite/client.ts";
 
-import { extractComicPage, extractComicBookByStreaming } from "../utilities/extract.ts";
+import {
+  extractComicBookByStreaming,
+  extractComicPage,
+} from "../utilities/extract.ts";
 
-import { ComicBook, ComicPenciller, ComicWriter, ComicInker, ComicLetterer, ComicEditor, ComicColorist, ComicCoverArtist, ComicPublisher, ComicImprint, ComicGenre, ComicCharacter, ComicLocation, ComicTeam, ComicStoryArc, ComicSeriesGroup, ComicBookWithMetadata, ComicBookHistory, ComicBookThumbnail } from "../types/index.ts";
-import { getAllComicBooks, getComicBookById, getComicBooksByHash, getComicDuplicates, getAllComicBooksSortByDate, getRandomBook } from "../db/sqlite/models/comicBooks.model.ts";
+import {
+  ComicBook,
+  ComicBookHistory,
+  ComicBookThumbnail,
+  ComicBookWithMetadata,
+  ComicCharacter,
+  ComicColorist,
+  ComicCoverArtist,
+  ComicEditor,
+  ComicGenre,
+  ComicImprint,
+  ComicInker,
+  ComicLetterer,
+  ComicLocation,
+  ComicPenciller,
+  ComicPublisher,
+  ComicSeriesGroup,
+  ComicStoryArc,
+  ComicTeam,
+  ComicWriter,
+} from "../types/index.ts";
+import {
+  getAllComicBooks,
+  getAllComicBooksSortByDate,
+  getComicBookById,
+  getComicDuplicates,
+  getRandomBook,
+  getAllComicBooksSortByFileName,
+} from "../db/sqlite/models/comicBooks.model.ts";
 
 import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
 import { getColoristByComicBookId } from "../db/sqlite/models/comicColorists.model.ts";
@@ -19,20 +49,38 @@ import { getImprintsByComicBookId } from "../db/sqlite/models/comicImprints.mode
 import { getGenresForComicBook } from "../db/sqlite/models/comicGenres.model.ts";
 import { getCharactersByComicBookId } from "../db/sqlite/models/comicCharacters.model.ts";
 import { getTeamsByComicBookId } from "../db/sqlite/models/comicTeams.model.ts";
-import { getLocationsByComicBookId} from "../db/sqlite/models/comicLocations.model.ts";
+import { getLocationsByComicBookId } from "../db/sqlite/models/comicLocations.model.ts";
 
 import { getStoryArcsByComicBookId } from "../db/sqlite/models/comicStoryArcs.model.ts";
 import { getSeriesGroupsByComicBookId } from "../db/sqlite/models/comicSeriesGroups.model.ts";
 
 import { getComicPagesByComicBookId } from "../db/sqlite/models/comicPages.model.ts";
 
-import { getThumbnailsByComicBookId, getComicThumbnailById, deleteComicBookThumbnail, insertCustomComicBookThumbnail } from "../db/sqlite/models/comicBookThumbnails.model.ts";
+import {
+  deleteComicBookThumbnail,
+  getComicThumbnailById,
+  getThumbnailsByComicBookId,
+  insertCustomComicBookThumbnail,
+} from "../db/sqlite/models/comicBookThumbnails.model.ts";
 
-import { getSeriesIdFromComicBook, getComicBooksInSeries } from "../db/sqlite/models/comicSeries.model.ts";
+import {
+  getComicBooksInSeries,
+  getSeriesIdFromComicBook,
+} from "../db/sqlite/models/comicSeries.model.ts";
 
-import { getComicBookHistoryByUserAndComic, updateComicBookHistory, insertComicBookHistory } from "../db/sqlite/models/comicBookHistory.model.ts";
+import {
+  getComicBookHistoryByUserAndComic,
+  insertComicBookHistory,
+  updateComicBookHistory,
+} from "../db/sqlite/models/comicBookHistory.model.ts";
 
-export const fetchAllComicBooksWithRelatedData = async (page: number = 1, limit: number = 100, sort: string | undefined, filter?: string | undefined, filter_property?: string | undefined) => {
+export const fetchAllComicBooksWithRelatedData = async (
+  page: number = 1,
+  limit: number = 100,
+  sort: string | undefined,
+  filter?: string | undefined,
+  filter_property?: string | undefined,
+) => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -40,42 +88,66 @@ export const fetchAllComicBooksWithRelatedData = async (page: number = 1, limit:
   }
 
   const offset = (page - 1) * limit;
-	const limitPlusOne = limit + 1; // Fetch one extra to check if there's a next page
+  const limitPlusOne = limit + 1; // Fetch one extra to check if there's a next page
   const sortOrder = sort === "asc" ? "asc" : "desc";
 
   // Basic filtering logic (can be expanded as needed)
   const filterCondition = filter && filter_property
-    ? (book: ComicBook) => book[filter_property as keyof ComicBook] && book[filter_property as keyof ComicBook]?.toString().includes(filter)
+    ? (book: ComicBook) =>
+      book[filter_property as keyof ComicBook] &&
+      book[filter_property as keyof ComicBook]?.toString().includes(filter)
     : () => true;
 
-  try {    
-    const books: ComicBook[] = await getAllComicBooks(offset, limitPlusOne, sortOrder);
-        
-		const booksWithMetadata: ComicBookWithMetadata[] = [];
+  try {
+    const books: ComicBook[] = await getAllComicBooks(
+      offset,
+      limitPlusOne,
+      sortOrder,
+    );
+
+    const booksWithMetadata: ComicBookWithMetadata[] = [];
 
     for (const book of books) {
-			const comicBookWithMetadata: ComicBookWithMetadata = { ...book } as ComicBookWithMetadata;
+      const comicBookWithMetadata: ComicBookWithMetadata = {
+        ...book,
+      } as ComicBookWithMetadata;
 
       // Fetch and attach related data (authors, artists, genres, etc.) here if needed
       // This is a placeholder for actual implementation
       const writers: ComicWriter[] = await getWritersByComicBookId(book.id);
-      const pencillers: ComicPenciller[] = await getPencillersByComicBookId(book.id);
+      const pencillers: ComicPenciller[] = await getPencillersByComicBookId(
+        book.id,
+      );
       const inkers: ComicInker[] = await getInkersByComicBookId(book.id);
-      const letterers: ComicLetterer[] = await getLetterersByComicBookId(book.id);
+      const letterers: ComicLetterer[] = await getLetterersByComicBookId(
+        book.id,
+      );
       const editors: ComicEditor[] = await getEditorsByComicBookId(book.id);
-      const colorists: ComicColorist[] = await getColoristByComicBookId(book.id);
-      const coverArtists: ComicCoverArtist[] = await getCoverArtistsByComicBookId(book.id);
+      const colorists: ComicColorist[] = await getColoristByComicBookId(
+        book.id,
+      );
+      const coverArtists: ComicCoverArtist[] =
+        await getCoverArtistsByComicBookId(book.id);
 
-      const publishers: ComicPublisher[] = await getPublishersByComicBookId(book.id);
+      const publishers: ComicPublisher[] = await getPublishersByComicBookId(
+        book.id,
+      );
       const imprints: ComicImprint[] = await getImprintsByComicBookId(book.id);
 
       const genres: ComicGenre[] = await getGenresForComicBook(book.id);
-      const characters: ComicCharacter[] = await getCharactersByComicBookId(book.id);
+      const characters: ComicCharacter[] = await getCharactersByComicBookId(
+        book.id,
+      );
       const teams: ComicTeam[] = await getTeamsByComicBookId(book.id);
-      const locations: ComicLocation[] = await getLocationsByComicBookId(book.id);
+      const locations: ComicLocation[] = await getLocationsByComicBookId(
+        book.id,
+      );
 
-      const storyArcs: ComicStoryArc[] = await getStoryArcsByComicBookId(book.id);
-      const seriesGroups: ComicSeriesGroup[] = await getSeriesGroupsByComicBookId(book.id);
+      const storyArcs: ComicStoryArc[] = await getStoryArcsByComicBookId(
+        book.id,
+      );
+      const seriesGroups: ComicSeriesGroup[] =
+        await getSeriesGroupsByComicBookId(book.id);
 
       comicBookWithMetadata.writers = writers;
       comicBookWithMetadata.pencillers = pencillers;
@@ -93,32 +165,34 @@ export const fetchAllComicBooksWithRelatedData = async (page: number = 1, limit:
       comicBookWithMetadata.storyArcs = storyArcs;
       comicBookWithMetadata.seriesGroups = seriesGroups;
 
-			booksWithMetadata.push(comicBookWithMetadata);
+      booksWithMetadata.push(comicBookWithMetadata);
     }
 
     // Apply filtering
-		const filteredBooks = booksWithMetadata.filter(filterCondition);
+    const filteredBooks = booksWithMetadata.filter(filterCondition);
 
-    console.log("Service Debug - After filtering:", { 
-      filteredBooksLength: filteredBooks.length, 
+    console.log("Service Debug - After filtering:", {
+      filteredBooksLength: filteredBooks.length,
       finalResult: filteredBooks.slice(0, limit).length,
       filter,
-      filter_property 
+      filter_property,
     });
 
     // Return paginated and filtered results
     return {
-			comics: filteredBooks.slice(0, limit), // Return only the requested limit
-			hasNextPage: filteredBooks.length > limit, // Indicate if there's a next page
-		};
+      comics: filteredBooks.slice(0, limit), // Return only the requested limit
+      hasNextPage: filteredBooks.length > limit, // Indicate if there's a next page
+    };
   } catch (error) {
     console.error("Error fetching all comic books:", error);
     throw error;
   }
 };
 
-export const fetchTheLatestsComicBooksAdded = async (offset: number = 0, limit: number = 10) => {
-
+export const fetchTheLatestsComicBooksAdded = async (
+  offset: number = 0,
+  limit: number = 10,
+) => {
   try {
     const result = await getAllComicBooksSortByDate(offset, limit, "desc");
     return result;
@@ -128,58 +202,74 @@ export const fetchTheLatestsComicBooksAdded = async (offset: number = 0, limit: 
   }
 };
 
-export const fetchComicBookMetadataById = async (id: number): Promise<ComicBookWithMetadata | null> => {
-	const { db, client } = getClient();
+// we want to fetch comic books by the first letter of their title
+export const fetchComicBooksByLetter = async (letter: string, offset: number = 0, limit: number = 100): Promise<ComicBook[]> => {
+  const letterFormatted = letter.toLowerCase().trim();
 
-	if (!db || !client) {
-		throw new Error("Database is not initialized.");
-	}
+  try {
+    const books: ComicBook[] = await getAllComicBooksSortByFileName(letterFormatted, offset, limit);
 
-	try {
-		const comicBook = await getComicBookById(id);
-		if (!comicBook) {
-			return null;
-		}
+    return books;
+  } catch (error) {
+    console.error("Error fetching comic books by letter:", error);
+    throw error;
+  }
+};
 
-		const metadata: ComicBookWithMetadata = {
-			...comicBook,
-			writers: await getWritersByComicBookId(id),
-			pencillers: await getPencillersByComicBookId(id),
-			inkers: await getInkersByComicBookId(id),
-			letterers: await getLetterersByComicBookId(id),
-			editors: await getEditorsByComicBookId(id),
-			colorists: await getColoristByComicBookId(id),
-			coverArtists: await getCoverArtistsByComicBookId(id),
-			publishers: await getPublishersByComicBookId(id),
-			imprints: await getImprintsByComicBookId(id),
-			genres: await getGenresForComicBook(id),
-			characters: await getCharactersByComicBookId(id),
-			teams: await getTeamsByComicBookId(id),
-			locations: await getLocationsByComicBookId(id),
-			storyArcs: await getStoryArcsByComicBookId(id),
-			seriesGroups: await getSeriesGroupsByComicBookId(id),
-		};
+export const fetchComicBookMetadataById = async (
+  id: number,
+): Promise<ComicBookWithMetadata | null> => {
+  const { db, client } = getClient();
 
-		return metadata;
-	} catch (error) {
-		console.error("Error fetching comic book metadata:", error);
-		throw error;
-	}
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const comicBook = await getComicBookById(id);
+    if (!comicBook) {
+      return null;
+    }
+
+    const metadata: ComicBookWithMetadata = {
+      ...comicBook,
+      writers: await getWritersByComicBookId(id),
+      pencillers: await getPencillersByComicBookId(id),
+      inkers: await getInkersByComicBookId(id),
+      letterers: await getLetterersByComicBookId(id),
+      editors: await getEditorsByComicBookId(id),
+      colorists: await getColoristByComicBookId(id),
+      coverArtists: await getCoverArtistsByComicBookId(id),
+      publishers: await getPublishersByComicBookId(id),
+      imprints: await getImprintsByComicBookId(id),
+      genres: await getGenresForComicBook(id),
+      characters: await getCharactersByComicBookId(id),
+      teams: await getTeamsByComicBookId(id),
+      locations: await getLocationsByComicBookId(id),
+      storyArcs: await getStoryArcsByComicBookId(id),
+      seriesGroups: await getSeriesGroupsByComicBookId(id),
+    };
+
+    return metadata;
+  } catch (error) {
+    console.error("Error fetching comic book metadata:", error);
+    throw error;
+  }
 };
 
 /**
  * Start streaming the comic book file.
- * 
+ *
  * @param comicId ID of the comic book to stream
  * @param page Page number to stream (1-based)
  * @param acceptHeader Browser's Accept header for format negotiation
  * @param preloadPages Number of additional pages to preload for caching
  */
 export const startStreamingComicBookFile = async (
-  comicId: number, 
-  page: number = 1, 
+  comicId: number,
+  page: number = 1,
   acceptHeader?: string,
-  preloadPages: number = 5
+  preloadPages: number = 5,
 ) => {
   // Get the comic book record from the database
   const comic = await getComicBookById(comicId);
@@ -205,12 +295,14 @@ export const startStreamingComicBookFile = async (
     throw new Error("Invalid page number requested.");
   }
   if (comic.page_count && page > comic.page_count) {
-    throw new Error("Requested page exceeds total number of pages in the comic test.");
+    throw new Error(
+      "Requested page exceeds total number of pages in the comic test.",
+    );
   }
 
   // Determine best output format for browser compatibility
   const targetFormat = determineBestOutputFormat(acceptHeader);
-  const formatExtension = targetFormat.split('/')[1];
+  const formatExtension = targetFormat.split("/")[1];
 
   // Check if page exists in cache (with correct format)
   const cacheDir = "./cache/pages";
@@ -224,27 +316,37 @@ export const startStreamingComicBookFile = async (
 
   // Check if page is already in cache
   const pageInCache = await checkIfPageInCache(comicId, page, formatExtension);
-  
+
   if (!pageInCache) {
     console.log(`Page ${page} not in cache, extracting...`);
-    
+
     // Determine if we should use streaming extraction for large files
     const fileSize = (await Deno.stat(filePath)).size;
     const isLargeFile = fileSize > 100 * 1024 * 1024; // 100MB threshold
 
     if (isLargeFile) {
       // Use streaming extraction for large files
-      const pageRange = Math.min(preloadPages, comic.page_count || preloadPages);
+      const pageRange = Math.min(
+        preloadPages,
+        comic.page_count || preloadPages,
+      );
       const startPage = Math.max(0, page - 1); // Convert to 0-based
-      const endPage = Math.min((comic.page_count || page) - 1, startPage + pageRange);
+      const endPage = Math.min(
+        (comic.page_count || page) - 1,
+        startPage + pageRange,
+      );
 
-      console.log(`Large file detected, using streaming extraction for pages ${startPage + 1}-${endPage + 1}`);
-      
+      console.log(
+        `Large file detected, using streaming extraction for pages ${
+          startPage + 1
+        }-${endPage + 1}`,
+      );
+
       const extractionResult = await extractComicBookByStreaming(
         filePath,
         undefined, // Use temp directory
         startPage,
-        endPage
+        endPage,
       );
 
       if (extractionResult.success && extractionResult.pages.length > 0) {
@@ -252,18 +354,19 @@ export const startStreamingComicBookFile = async (
         for (let i = 0; i < extractionResult.pages.length; i++) {
           const extractedPagePath = extractionResult.pages[i];
           const pageNumber = startPage + i + 1; // Convert back to 1-based
-          const outputPath = `${comicCacheDir}/${pageNumber}.${formatExtension}`;
-          
+          const outputPath =
+            `${comicCacheDir}/${pageNumber}.${formatExtension}`;
+
           // Convert to browser-compatible format
           const conversionSuccess = await convertImageForBrowser(
             extractedPagePath,
             outputPath,
-            targetFormat
+            targetFormat,
           );
 
           if (conversionSuccess) {
             console.log(`Cached page ${pageNumber} in ${targetFormat} format`);
-            
+
             // Set the path for the requested page
             if (pageNumber === page) {
               pagePath = outputPath;
@@ -274,7 +377,9 @@ export const startStreamingComicBookFile = async (
         // Clean up temporary extraction directory
         if (extractionResult.extractedPath) {
           try {
-            await Deno.remove(extractionResult.extractedPath, { recursive: true });
+            await Deno.remove(extractionResult.extractedPath, {
+              recursive: true,
+            });
           } catch (error) {
             console.warn(`Could not clean up temp directory: ${error}`);
           }
@@ -285,9 +390,9 @@ export const startStreamingComicBookFile = async (
     } else {
       // Use single page extraction for smaller files
       console.log(`Small file, extracting single page ${page}`);
-      
+
       const extractedPagePath = await extractComicPage(filePath, page - 1); // Convert to 0-based
-      
+
       if (!extractedPagePath) {
         throw new Error("Failed to extract page from comic archive");
       }
@@ -296,7 +401,7 @@ export const startStreamingComicBookFile = async (
       const conversionSuccess = await convertImageForBrowser(
         extractedPagePath,
         cachedPagePath,
-        targetFormat
+        targetFormat,
       );
 
       if (!conversionSuccess) {
@@ -308,7 +413,13 @@ export const startStreamingComicBookFile = async (
 
     // Background preloading for better UX (don't await this)
     if (!isLargeFile && preloadPages > 0) {
-      preloadAdjacentPages(comicId, page, preloadPages, targetFormat, comic.page_count || 0)
+      preloadAdjacentPages(
+        comicId,
+        page,
+        preloadPages,
+        targetFormat,
+        comic.page_count || 0,
+      )
         .catch((error: unknown) => console.warn(`Preloading failed: ${error}`));
     }
   }
@@ -319,12 +430,11 @@ export const startStreamingComicBookFile = async (
     format: targetFormat,
     comicId,
     page,
-    cached: pageInCache
+    cached: pageInCache,
   };
 };
 
 export const getComicPagesInfo = async (comicId: number) => {
-
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -343,12 +453,13 @@ export const getComicPagesInfo = async (comicId: number) => {
     comicId,
     totalPages: comic.page_count || comicPages.length,
     pagesInDb: comicPages.length,
-    pages: comicPages
+    pages: comicPages,
   };
+};
 
-}
-
-export const getNextComicBookId = async (currentComicId: number): Promise<ComicBook | null> => {
+export const getNextComicBookId = async (
+  currentComicId: number,
+): Promise<ComicBook | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -376,16 +487,19 @@ export const getNextComicBookId = async (currentComicId: number): Promise<ComicB
     const sortedComics = await Promise.all(
       comicsInSeries.map(async (comicId) => {
         const comic = await getComicBookById(comicId);
-        return comic ? { id: comic.id, issueNumber: comic.issue_number || 0 } : null;
-      })
+        return comic
+          ? { id: comic.id, issueNumber: comic.issue_number || 0 }
+          : null;
+      }),
     );
 
     // Find the next comic book in the same series with a higher issue number
-    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) || 0;
+    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) ||
+      0;
     const nextComic = sortedComics
       .filter((c): c is { id: number; issueNumber: number } => c !== null)
       .sort((a, b) => a.issueNumber - b.issueNumber)
-      .find(c => c.issueNumber > currentIssueNumber);
+      .find((c) => c.issueNumber > currentIssueNumber);
 
     return nextComic ? await getComicBookById(nextComic.id) : null;
   } catch (error) {
@@ -394,7 +508,9 @@ export const getNextComicBookId = async (currentComicId: number): Promise<ComicB
   }
 };
 
-export const getPreviousComicBookId = async (currentComicId: number): Promise<ComicBook | null> => {
+export const getPreviousComicBookId = async (
+  currentComicId: number,
+): Promise<ComicBook | null> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -422,16 +538,19 @@ export const getPreviousComicBookId = async (currentComicId: number): Promise<Co
     const sortedComics = await Promise.all(
       comicsInSeries.map(async (comicId) => {
         const comic = await getComicBookById(comicId);
-        return comic ? { id: comic.id, issueNumber: comic.issue_number || 0 } : null;
-      })
+        return comic
+          ? { id: comic.id, issueNumber: comic.issue_number || 0 }
+          : null;
+      }),
     );
 
     // Find the previous comic book in the same series with a lower issue number
-    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) || 0;
+    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) ||
+      0;
     const previousComics = sortedComics
       .filter((c): c is { id: number; issueNumber: number } => c !== null)
       .sort((a, b) => b.issueNumber - a.issueNumber) // Sort descending
-      .filter(c => c.issueNumber < currentIssueNumber);
+      .filter((c) => c.issueNumber < currentIssueNumber);
 
     const previousComic = previousComics.length > 0 ? previousComics[0] : null;
 
@@ -459,19 +578,24 @@ export const getComicDuplicatesInTheDb = async (): Promise<ComicBook[]> => {
   }
 };
 
-export const getComicThumbnails = async (comicId: number): Promise<ComicBookThumbnail[] | null> => {
+export const getComicThumbnails = async (
+  comicId: number,
+): Promise<ComicBookThumbnail[] | null> => {
   // check if there is a comicbook with that id
   const comic = await getComicBookById(comicId);
 
   if (!comic) {
     throw new Error("Comic book not found.");
   }
-  
+
   const comicThumbnails = await getThumbnailsByComicBookId(comicId);
   return comicThumbnails;
 };
 
-export const getComicThumbnailByComicIdThumbnailId = async (comicId: number, thumbnailId: number): Promise<ComicBookThumbnail | null> => {
+export const getComicThumbnailByComicIdThumbnailId = async (
+  comicId: number,
+  thumbnailId: number,
+): Promise<ComicBookThumbnail | null> => {
   const comic = await getComicBookById(comicId);
 
   if (!comic) {
@@ -480,10 +604,13 @@ export const getComicThumbnailByComicIdThumbnailId = async (comicId: number, thu
 
   const comicThumbnail = await getComicThumbnailById(thumbnailId);
   return comicThumbnail;
-}
+};
 
 //FIXME: Updated function to also delete the thumbnail from the filesystem
-export const deleteComicsThumbnailById = async (comicId: number, thumbnailId: number): Promise<boolean> => {
+export const deleteComicsThumbnailById = async (
+  comicId: number,
+  thumbnailId: number,
+): Promise<boolean> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -512,11 +639,11 @@ export const deleteComicsThumbnailById = async (comicId: number, thumbnailId: nu
 };
 
 export const createCustomThumbnail = async (
-  comicId: number, 
-  imageData: ArrayBuffer, 
+  comicId: number,
+  imageData: ArrayBuffer,
   userId: number,
   name?: string,
-  description?: string
+  description?: string,
 ): Promise<{ thumbnailId: number; filePath: string }> => {
   // Check if comic exists
   const comic = await getComicBookById(comicId);
@@ -543,7 +670,7 @@ export const createCustomThumbnail = async (
       filePath,
       userId,
       name,
-      description
+      description,
     );
 
     return { thumbnailId, filePath };
@@ -553,15 +680,23 @@ export const createCustomThumbnail = async (
   }
 };
 
-export const checkComicReadByUser = async (comicId: number, userId: number): Promise<boolean> => {
-  const history: ComicBookHistory | null = await getComicBookHistoryByUserAndComic(userId, comicId);
+export const checkComicReadByUser = async (
+  comicId: number,
+  userId: number,
+): Promise<boolean> => {
+  const history: ComicBookHistory | null =
+    await getComicBookHistoryByUserAndComic(userId, comicId);
   if (history && history.read === 1) {
     return true;
   }
   return false;
 };
 
-export const setComicReadByUser = async (comicId: number, userId: number, read: boolean): Promise<boolean> => {
+export const setComicReadByUser = async (
+  comicId: number,
+  userId: number,
+  read: boolean,
+): Promise<boolean> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -575,13 +710,19 @@ export const setComicReadByUser = async (comicId: number, userId: number, read: 
   }
 
   // Check if a history record already exists
-  const existingHistory = await getComicBookHistoryByUserAndComic(userId, comicId);
+  const existingHistory = await getComicBookHistoryByUserAndComic(
+    userId,
+    comicId,
+  );
 
   if (existingHistory) {
     // Update the existing record
     const readValue = read ? 1 : 0;
     // Update the existing record
-    const comicbookHistoryId = await updateComicBookHistory(existingHistory.id, { read: readValue, last_read_page: null });
+    const comicbookHistoryId = await updateComicBookHistory(
+      existingHistory.id,
+      { read: readValue, last_read_page: null },
+    );
 
     if (!comicbookHistoryId) {
       throw new Error("Failed to update comic book history.");
@@ -627,7 +768,11 @@ export const getRandomComicBook = async (): Promise<ComicBook | null> => {
 /**
  * Check if a page exists in cache with the specified format
  */
-const checkIfPageInCache = async (comicId: number, page: number, formatExtension: string = 'jpg'): Promise<boolean> => {
+const checkIfPageInCache = async (
+  comicId: number,
+  page: number,
+  formatExtension: string = "jpg",
+): Promise<boolean> => {
   const cacheDir = "./cache/pages";
   const pagePath = `${cacheDir}/${comicId}/${page}.${formatExtension}`;
 
@@ -647,21 +792,25 @@ const checkIfPageInCache = async (comicId: number, page: number, formatExtension
  * Preload adjacent pages for better user experience
  */
 async function preloadAdjacentPages(
-  comicId: number, 
-  currentPage: number, 
-  preloadCount: number, 
+  comicId: number,
+  currentPage: number,
+  preloadCount: number,
   targetFormat: string,
-  totalPages: number
+  totalPages: number,
 ): Promise<void> {
-  const formatExtension = targetFormat.split('/')[1];
+  const formatExtension = targetFormat.split("/")[1];
   const cacheDir = `./cache/pages/${comicId}`;
-  
+
   // Calculate pages to preload (next few pages)
   const pagesToPreload: number[] = [];
   for (let i = 1; i <= preloadCount; i++) {
     const nextPage = currentPage + i;
     if (nextPage <= totalPages) {
-      const pageInCache = await checkIfPageInCache(comicId, nextPage, formatExtension);
+      const pageInCache = await checkIfPageInCache(
+        comicId,
+        nextPage,
+        formatExtension,
+      );
       if (!pageInCache) {
         pagesToPreload.push(nextPage);
       }
@@ -670,23 +819,26 @@ async function preloadAdjacentPages(
 
   // Extract and cache the pages that aren't already cached
   if (pagesToPreload.length > 0) {
-    console.log(`Preloading pages: ${pagesToPreload.join(', ')}`);
-    
+    console.log(`Preloading pages: ${pagesToPreload.join(", ")}`);
+
     const comic = await getComicBookById(comicId);
     if (!comic) return;
 
     for (const pageNum of pagesToPreload) {
       try {
-        const extractedPagePath = await extractComicPage(comic.file_path, pageNum - 1); // Convert to 0-based
-        
+        const extractedPagePath = await extractComicPage(
+          comic.file_path,
+          pageNum - 1,
+        ); // Convert to 0-based
+
         if (extractedPagePath) {
           const outputPath = `${cacheDir}/${pageNum}.${formatExtension}`;
           const conversionSuccess = await convertImageForBrowser(
             extractedPagePath,
             outputPath,
-            targetFormat
+            targetFormat,
           );
-          
+
           if (conversionSuccess) {
             console.log(`Preloaded page ${pageNum}`);
           }
@@ -703,30 +855,30 @@ async function preloadAdjacentPages(
  */
 function determineBestOutputFormat(acceptHeader?: string): string {
   if (!acceptHeader) {
-    return 'image/jpeg'; // Default fallback
+    return "image/jpeg"; // Default fallback
   }
 
   // Check what the browser accepts
-  if (acceptHeader.includes('image/webp')) {
-    return 'image/webp'; // Best compression, modern browsers
+  if (acceptHeader.includes("image/webp")) {
+    return "image/webp"; // Best compression, modern browsers
   }
-  if (acceptHeader.includes('image/png')) {
-    return 'image/png'; // Good quality, universal support
+  if (acceptHeader.includes("image/png")) {
+    return "image/png"; // Good quality, universal support
   }
-  return 'image/jpeg'; // Universal fallback
+  return "image/jpeg"; // Universal fallback
 }
 
 /**
  * Convert image to browser-compatible format if needed
  */
 async function convertImageForBrowser(
-  inputPath: string, 
-  outputPath: string, 
-  targetFormat: string
+  inputPath: string,
+  outputPath: string,
+  targetFormat: string,
 ): Promise<boolean> {
   try {
-    const inputExt = inputPath.toLowerCase().split('.').pop();
-    const targetExt = targetFormat.split('/')[1];
+    const inputExt = inputPath.toLowerCase().split(".").pop();
+    const targetExt = targetFormat.split("/")[1];
 
     // If already in target format, just copy
     if (inputExt === targetExt) {
@@ -737,7 +889,7 @@ async function convertImageForBrowser(
     // Use Sharp for conversion - create a simple copy for now
     // TODO: Implement proper format conversion using Sharp when needed
     await Deno.copyFile(inputPath, outputPath);
-    
+
     return true;
   } catch (error) {
     console.error(`Error converting image format: ${error}`);
