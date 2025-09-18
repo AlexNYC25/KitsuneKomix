@@ -468,6 +468,13 @@ app.get(
   }
 });
 
+/**
+ * Get all thumbnails for a comic book by ID
+ * 
+ * GET /api/comic-books/:id/thumbnails
+ * 
+ * This should return all thumbnails for a comic book, both generated and custom ones
+ */
 app.get("/:id/thumbnails", async (c: Context) => {
   const id = c.req.param("id");
 
@@ -489,6 +496,13 @@ app.get("/:id/thumbnails", async (c: Context) => {
   }
 });
 
+/**
+ * Get a specific thumbnail for a comic book by ID and thumbnail ID
+ * 
+ * GET /api/comic-books/:id/thumbnails/:thumbId
+ * 
+ * This should return a specific thumbnail for a comic book by its ID and the thumbnail ID
+ */
 app.get("/:id/thumbnails/:thumbId", async (c: Context) => {
   const id = c.req.param("id");
   const thumbId = c.req.param("thumbId");
@@ -511,6 +525,14 @@ app.get("/:id/thumbnails/:thumbId", async (c: Context) => {
   }
 });
 
+/**
+ * Delete a specific thumbnail for a comic book by ID and thumbnail ID
+ * 
+ * DELETE /api/comic-books/:id/thumbnails/:thumbId
+ * 
+ * This should delete a specific thumbnail for a comic book by its ID and the thumbnail ID,
+ * the comic book id is provided for validation purposes so its a 2 point check
+ */
 app.delete("/:id/thumbnails/:thumbId", async (c: Context) => {
   const id = c.req.param("id");
   const thumbId = c.req.param("thumbId");
@@ -524,6 +546,13 @@ app.delete("/:id/thumbnails/:thumbId", async (c: Context) => {
   }
 });
 
+/**
+ * Create a custom thumbnail for a comic book by ID
+ * 
+ * POST /api/comic-books/:id/thumbnails
+ * 
+ * This should create a custom thumbnail for a comic book by its ID
+ */
 app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
   const id = c.req.param("id");
   const comicId = parseInt(id, 10);
