@@ -123,7 +123,7 @@ export async function createImageThumbnail(
       ? "jpg"
       : thumbnailConfig.outputFormat;
     const thumbnailFileName = `${imageHash}_thumb.${outputExtension}`;
-    const thumbnailPath = `./cache/thumbnails/${thumbnailFileName}`;
+    const thumbnailPath = `/app/cache/thumbnails/${thumbnailFileName}`;
 
     // Ensure thumbnail directory exists
     await ensureDir(dirname(thumbnailPath));
