@@ -10,31 +10,31 @@ import {
   searchComicBooks,
   updateComicBook,
 } from "../db/sqlite/models/comicBooks.model.ts";
-import { 
-  fetchAllComicBooksWithRelatedData, 
-  fetchComicBookMetadataById, 
-  startStreamingComicBookFile, 
-  getComicPagesInfo,
-  getNextComicBookId,
-  getPreviousComicBookId,
-  getComicDuplicatesInTheDb,
+import {
   checkComicReadByUser,
-  setComicReadByUser,
-  getComicThumbnails,
-  getComicThumbnailByComicIdThumbnailId,
   createCustomThumbnail,
   deleteComicsThumbnailById,
-  getRandomComicBook
+  fetchAllComicBooksWithRelatedData,
+  fetchComicBookMetadataById,
+  getComicDuplicatesInTheDb,
+  getComicPagesInfo,
+  getComicThumbnailByComicIdThumbnailId,
+  getComicThumbnails,
+  getNextComicBookId,
+  getPreviousComicBookId,
+  getRandomComicBook,
+  setComicReadByUser,
+  startStreamingComicBookFile,
+  fetchComicBooksByLetter,
 } from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
 
 const app = new Hono();
 
-
 /**
  * Get all comic books
  * ROUTE: GET /api/comic-books/all
- * 
+ *
  * This should return a list of all comic books in the database, with the option of pagination, sorting, and filtering
  * @return JSON array of comic books
  */
@@ -55,9 +55,15 @@ app.get(
   ),
   async (c: Context) => {
     const { page, limit, sort, filter, filter_property } = c.req.query();
-    
+
     try {
-      const serviceResult = await fetchAllComicBooksWithRelatedData(parseInt(page) || 1, parseInt(limit) || 20, sort, filter, filter_property);
+      const serviceResult = await fetchAllComicBooksWithRelatedData(
+        parseInt(page) || 1,
+        parseInt(limit) || 20,
+        sort,
+        filter,
+        filter_property,
+      );
 
       return c.json({
         data: serviceResult.comics,
@@ -80,7 +86,7 @@ app.get(
  * Search comic books by query
  *
  * GET /api/comic-books/search?q=searchTerm
- * 
+ *
  * This route allows users to search for comic books by a query string.
  * The query string should be passed as a parameter named 'q'.
  */
@@ -111,9 +117,9 @@ app.get(
 
 /**
  * Get comic book duplicates
- * 
+ *
  * GET /api/comic-books/duplicates
- * 
+ *
  * This route returns a list of duplicate comic books based on the unique hash generated for each comic book
  */
 app.get("/duplicates", async (c: Context) => {
@@ -123,11 +129,11 @@ app.get("/duplicates", async (c: Context) => {
     if (duplicates) {
       return c.json({
         duplicates: duplicates,
-        message: "Fetched comic book duplicates successfully"
+        message: "Fetched comic book duplicates successfully",
       });
     } else {
       return c.json({
-        message: "No duplicate comic books found"
+        message: "No duplicate comic books found",
       });
     }
   } catch (error) {
@@ -138,12 +144,13 @@ app.get("/duplicates", async (c: Context) => {
 
 /**
  * Get the latest comic books added to the database
- * 
+ *
  * GET /api/comic-books/latest
- * 
+ *
  * This route returns the latest comic books added to the database, sorted by the date they were added
  */
-app.get("/latest",
+app.get(
+  "/latest",
   zValidator(
     "query",
     z.object({
@@ -159,7 +166,12 @@ app.get("/latest",
     const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
 
     try {
-      const comicsResult = await fetchAllComicBooksWithRelatedData(page, limit, "created_at", "desc");
+      const comicsResult = await fetchAllComicBooksWithRelatedData(
+        page,
+        limit,
+        "created_at",
+        "desc",
+      );
       return c.json({
         data: comicsResult.comics,
         count: comicsResult.comics.length,
@@ -170,17 +182,18 @@ app.get("/latest",
       console.error("Error fetching latest comic books:", error);
       return c.json({ error: "Failed to fetch latest comic books" }, 500);
     }
-  }
+  },
 );
 
 /**
  * Get the newest comic books by publication date
- * 
+ *
  * GET /api/comic-books/newest
- * 
+ *
  * This route returns the newest comic books sorted by their publication date
  */
-app.get("/newest",
+app.get(
+  "/newest",
   zValidator(
     "query",
     z.object({
@@ -196,28 +209,33 @@ app.get("/newest",
     const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
 
     try {
-      const comicsResult = await fetchAllComicBooksWithRelatedData(page, limit, "publication_date", "desc");
+      const comicsResult = await fetchAllComicBooksWithRelatedData(
+        page,
+        limit,
+        "publication_date",
+        "desc",
+      );
       return c.json({
         data: comicsResult.comics,
         count: comicsResult.comics.length,
         currentPage: page,
         pageSize: limit,
-        hasNextPage: comicsResult.hasNextPage
+        hasNextPage: comicsResult.hasNextPage,
       });
     } catch (error) {
       console.error("Error fetching newest comic books:", error);
       return c.json({ error: "Failed to fetch newest comic books" }, 500);
     }
-  }
+  },
 );
 
 /**
  * Get a random comic book
- * 
+ *
  * GET /api/comic-books/random
- * 
+ *
  * This route returns a random comic book from the database
- * */
+ */
 app.get("/random", async (c: Context) => {
   try {
     const comic = await getRandomComicBook();
@@ -229,13 +247,34 @@ app.get("/random", async (c: Context) => {
 });
 
 app.get("/list", async (c: Context) => {
-  //TODO: implement comic book list retrieval logic
-  return c.json({ message: "Comic book list retrieval not implemented yet" }, 501);
+  const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
+  const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
+  const letter = c.req.query("letter") || "A";
+
+  try {
+    const comicsResult = await fetchComicBooksByLetter(
+      letter,
+      page,
+      limit,
+    );
+    return c.json({
+      data: comicsResult,
+      count: comicsResult.length,
+      currentPage: page,
+      pageSize: limit,
+    });
+  } catch (error) {
+    console.error("Error fetching comic book list:", error);
+    return c.json({ error: "Failed to fetch comic book list" }, 500);
+  }
 });
 
 app.get("/queue", async (c: Context) => {
   //TODO: implement comic book queue retrieval logic
-  return c.json({ message: "Comic book queue retrieval not implemented yet" }, 501);
+  return c.json(
+    { message: "Comic book queue retrieval not implemented yet" },
+    501,
+  );
 });
 
 // Note this should be a batch update of metadata for multiple comic books either adding or replacing existing metadata
@@ -253,11 +292,11 @@ app.get("/duplicates", async (c: Context) => {
     if (duplicates) {
       return c.json({
         duplicates: duplicates,
-        message: "Fetched comic book duplicates successfully"
+        message: "Fetched comic book duplicates successfully",
       });
     } else {
       return c.json({
-        message: "No duplicate comic books found"
+        message: "No duplicate comic books found",
       });
     }
   } catch (error) {
@@ -269,9 +308,9 @@ app.get("/duplicates", async (c: Context) => {
 /**
  * Get a comic book by ID
  * ROUTE: GET /api/comic-books/:id
- * 
+ *
  * This should return a single comic book by its ID
- * 
+ *
  * At the moment it only returns the basic comic book info, but it can be expanded to include related metadata as needed
  * or for now just use this to get a shallow copy of the comic book and then call /:id/metadata to get the full metadata
  * @param id - The ID of the comic book to retrieve
@@ -297,11 +336,10 @@ app.get(
   },
 );
 
-
 /**
  * Get a comic book with its full metadata by ID
  * ROUTE: GET /api/comic-books/:id/metadata
- * 
+ *
  * This should return a single comic book with its full metadata by its ID
  * @param id - The ID of the comic book to retrieve
  * @return JSON object of the comic book with its full metadata
@@ -323,18 +361,18 @@ app.get(
     } else {
       return c.notFound();
     }
-  }
+  },
 );
 
 /**
  * Download a comic book by ID
- * 
+ *
  * GET /api/comic-books/:id/download
- * 
+ *
  * This should return the comic book file as a download
  * @param id - The ID of the comic book to download
  * @return The comic book file as a download
- * 
+ *
  * TODO: TEST for large files
  */
 app.get("/:id/download", async (c: Context) => {
@@ -347,14 +385,14 @@ app.get("/:id/download", async (c: Context) => {
 
   const filePath = comic.file_path;
   const originalFileName = basename(filePath);
-  
+
   // Sanitize filename but preserve the original extension and more characters
   // Remove only problematic characters for file systems
   const sanitizedFileName = originalFileName.replace(/[<>:"/\\|?*]/g, "_");
-  
+
   // Handle comic book file types specifically
   // Force generic binary download to prevent browser interpretation
-  const comicContentType = 'application/octet-stream';
+  const comicContentType = "application/octet-stream";
 
   const fileOpen = await Deno.open(filePath, { read: true });
   const fileSize = (await Deno.stat(filePath)).size;
@@ -366,8 +404,8 @@ app.get("/:id/download", async (c: Context) => {
       "Content-Disposition": `attachment; filename="${sanitizedFileName}"`,
       "Content-Length": fileSize.toString(),
       "Cache-Control": "no-cache",
-      "X-Content-Type-Options": "nosniff"
-    }
+      "X-Content-Type-Options": "nosniff",
+    },
   });
 
   return response;
@@ -375,12 +413,12 @@ app.get("/:id/download", async (c: Context) => {
 
 /**
  * Stream a comic book page by page, this should be the first step in a reading session
- * 
+ *
  * GET /api/comic-books/:id/stream
- * 
+ *
  * This should return the first page of the comic book and a token to continue streaming:
  *  - Starts the preloading of the next comic book pages in the background
- *  - TODO: Set the progress of the reading session in the db 
+ *  - TODO: Set the progress of the reading session in the db
  *  - TODO: Look into adding a flag to set the request to private so we don't log the reading progress in the db
  */
 app.get(
@@ -397,17 +435,22 @@ app.get(
     const requestImageHeader = c.req.header("Accept") || "";
     console.log("Request Accept Header:", requestImageHeader);
 
-    const result = await startStreamingComicBookFile(parseInt(id, 10), 1, requestImageHeader, 10);
+    const result = await startStreamingComicBookFile(
+      parseInt(id, 10),
+      1,
+      requestImageHeader,
+      10,
+    );
 
     return c.json(result);
-  }
+  },
 );
 
 /**
  * Stream a specific page of a comic book by ID
- * 
+ *
  * GET /api/comic-books/:id/stream/:page
- * 
+ *
  * This should return the specified page of the comic book
  *  - Continues the preloading of the next comic book pages in the background
  *  - TODO: Either sets or updates the progress of the reading session in the db
@@ -428,29 +471,33 @@ app.get(
     try {
       const requestImageHeader = c.req.header("Accept") || "";
 
-      const result = await startStreamingComicBookFile(parseInt(id, 10), parseInt(page, 10), requestImageHeader, 10);
+      const result = await startStreamingComicBookFile(
+        parseInt(id, 10),
+        parseInt(page, 10),
+        requestImageHeader,
+        10,
+      );
 
       return c.json(result);
-
-    } catch (error) {    
+    } catch (error) {
       console.error("Error streaming comic book file:", error);
       return c.json({ error: "Failed to stream comic book file test" }, 500);
     }
-
-  }
+  },
 );
 
 /**
  * Get information about the pages of a comic book by ID
- * 
+ *
  * GET /api/comic-books/:id/pages
- * 
+ *
  * This should return information about the pages of the comic book such as:
  * - Total number of pages in the comic book according to the metadata
  * - Total number of pages actually extracted and stored in the database
  * - array of page numbers and their corresponding ids
  */
-app.get("/:id/pages",
+app.get(
+  "/:id/pages",
   zValidator(
     "param",
     z.object({
@@ -464,24 +511,23 @@ app.get("/:id/pages",
       const result = await getComicPagesInfo(parseInt(id, 10));
 
       return c.json(result);
-
-    } catch (error) {    
+    } catch (error) {
       console.error("Error fetching comic book pages info:", error);
       return c.json({ error: "Failed to fetch comic book pages info" }, 500);
     }
-  }
+  },
 );
 
 /**
  * Check if a comic book has been read by a user
- * 
+ *
  * GET /api/comic-books/:id/read
- * 
- * This should return whether the comic book has been marked as read by the user, with the user id being read from 
+ *
+ * This should return whether the comic book has been marked as read by the user, with the user id being read from
  * the jwt token provided in the Authorization header
  */
 app.get(
-  "/:id/read", 
+  "/:id/read",
   requireAuth,
   zValidator(
     "param",
@@ -495,11 +541,12 @@ app.get(
 
     const hasRead = await checkComicReadByUser(userId, parseInt(id, 10));
     return c.json({ hasRead });
-});
+  },
+);
 
 /**
  * Mark a comic book as read by a user
- * 
+ *
  * POST /api/comic-books/:id/read
  *
  * This should mark the comic book as read by the user, with the user id being read from the jwt token provided in the Authorization header
@@ -514,20 +561,21 @@ app.post(
     }),
   ),
   async (c: Context) => {
-  const id = c.req.param("id");
-  const userId = c.get("user").sub;
+    const id = c.req.param("id");
+    const userId = c.get("user").sub;
 
-  const success = await setComicReadByUser(userId, parseInt(id, 10), true);
-  if (success) {
-    return c.json({ message: "Comic book marked as read" });
-  } else {
-    return c.json({ error: "Failed to mark comic book as read" }, 500);
-  }
-});
+    const success = await setComicReadByUser(userId, parseInt(id, 10), true);
+    if (success) {
+      return c.json({ message: "Comic book marked as read" });
+    } else {
+      return c.json({ error: "Failed to mark comic book as read" }, 500);
+    }
+  },
+);
 
 /**
  * Update a comic book by ID, partial updates allowed
- * 
+ *
  * PUT /api/comic-books/:id/update
  *
  * This should allow partial updates to a comic book's metadata, specifically to certain fields:
@@ -547,7 +595,7 @@ app.post(
  * - age_rating
  * - community_rating
  * - file_size
- * 
+ *
  * TODO: Reconsider some fields like hash and file_size, should they be updatable?
  */
 app.put(
@@ -601,9 +649,9 @@ app.put(
 
 /**
  * Delete a comic book by ID
- * 
+ *
  * DELETE /api/comic-books/:id/delete
- * 
+ *
  * This should delete a comic book by its ID
  */
 app.delete(
@@ -635,9 +683,9 @@ app.delete(
 
 /**
  * Get the next comic book in the series, returning back the comic book of the next issue number
- * 
+ *
  * GET /api/comic-books/:id/next
- * 
+ *
  * This should return the next comic book in the same series based on the issue number
  */
 app.get(
@@ -651,29 +699,30 @@ app.get(
   async (c: Context) => {
     const id = c.req.param("id");
 
-  try {
-    const nextComic = await getNextComicBookId(parseInt(id, 10));
-    if (nextComic) {
-      return c.json({
-        nextComic: nextComic,
-        message: "Fetched next comic book successfully"
-      });
-    } else {
-      return c.json({
-        message: "No next comic book found"
-      });
+    try {
+      const nextComic = await getNextComicBookId(parseInt(id, 10));
+      if (nextComic) {
+        return c.json({
+          nextComic: nextComic,
+          message: "Fetched next comic book successfully",
+        });
+      } else {
+        return c.json({
+          message: "No next comic book found",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching next comic book:", error);
+      return c.json({ error: "Failed to fetch next comic book" }, 500);
     }
-  } catch (error) {
-    console.error("Error fetching next comic book:", error);
-    return c.json({ error: "Failed to fetch next comic book" }, 500);
-  }
-});
+  },
+);
 
 /**
  * Get the previous comic book in the series, returning back the comic book of the previous issue number
- * 
+ *
  * GET /api/comic-books/:id/previous
- * 
+ *
  * This should return the previous comic book in the same series based on the issue number
  */
 app.get(
@@ -685,31 +734,32 @@ app.get(
     }),
   ),
   async (c: Context) => {
-  const id = c.req.param("id");
+    const id = c.req.param("id");
 
-  try {
-    const previousComic = await getPreviousComicBookId(parseInt(id, 10));
-    if (previousComic) {
-      return c.json({
-        previousComic: previousComic,
-        message: "Fetched previous comic book successfully"
-      });
-    } else {
-      return c.json({
-        message: "No previous comic book found"
-      });
+    try {
+      const previousComic = await getPreviousComicBookId(parseInt(id, 10));
+      if (previousComic) {
+        return c.json({
+          previousComic: previousComic,
+          message: "Fetched previous comic book successfully",
+        });
+      } else {
+        return c.json({
+          message: "No previous comic book found",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching previous comic book:", error);
+      return c.json({ error: "Failed to fetch previous comic book" }, 500);
     }
-  } catch (error) {
-    console.error("Error fetching previous comic book:", error);
-    return c.json({ error: "Failed to fetch previous comic book" }, 500);
-  }
-});
+  },
+);
 
 /**
  * Get all thumbnails for a comic book by ID
- * 
+ *
  * GET /api/comic-books/:id/thumbnails
- * 
+ *
  * This should return all thumbnails for a comic book, both generated and custom ones
  */
 app.get("/:id/thumbnails", async (c: Context) => {
@@ -720,11 +770,11 @@ app.get("/:id/thumbnails", async (c: Context) => {
     if (thumbnails) {
       return c.json({
         thumbnails: thumbnails,
-        message: "Fetched comic book thumbnails successfully"
+        message: "Fetched comic book thumbnails successfully",
       });
     } else {
       return c.json({
-        message: "No thumbnails found for this comic book"
+        message: "No thumbnails found for this comic book",
       });
     }
   } catch (error) {
@@ -735,9 +785,9 @@ app.get("/:id/thumbnails", async (c: Context) => {
 
 /**
  * Get a specific thumbnail for a comic book by ID and thumbnail ID
- * 
+ *
  * GET /api/comic-books/:id/thumbnails/:thumbId
- * 
+ *
  * This should return a specific thumbnail for a comic book by its ID and the thumbnail ID
  */
 app.get("/:id/thumbnails/:thumbId", async (c: Context) => {
@@ -745,15 +795,19 @@ app.get("/:id/thumbnails/:thumbId", async (c: Context) => {
   const thumbId = c.req.param("thumbId");
 
   try {
-    const thumbnail = await getComicThumbnailByComicIdThumbnailId(parseInt(id, 10), parseInt(thumbId, 10));
+    const thumbnail = await getComicThumbnailByComicIdThumbnailId(
+      parseInt(id, 10),
+      parseInt(thumbId, 10),
+    );
     if (thumbnail) {
       return c.json({
         thumbnail: thumbnail,
-        message: "Fetched comic book thumbnail successfully"
+        message: "Fetched comic book thumbnail successfully",
       });
     } else {
       return c.json({
-        message: "No thumbnail found for this comic book with the provided thumbnail ID"
+        message:
+          "No thumbnail found for this comic book with the provided thumbnail ID",
       });
     }
   } catch (error) {
@@ -764,9 +818,9 @@ app.get("/:id/thumbnails/:thumbId", async (c: Context) => {
 
 /**
  * Delete a specific thumbnail for a comic book by ID and thumbnail ID
- * 
+ *
  * DELETE /api/comic-books/:id/thumbnails/:thumbId
- * 
+ *
  * This should delete a specific thumbnail for a comic book by its ID and the thumbnail ID,
  * the comic book id is provided for validation purposes so its a 2 point check
  */
@@ -785,9 +839,9 @@ app.delete("/:id/thumbnails/:thumbId", async (c: Context) => {
 
 /**
  * Create a custom thumbnail for a comic book by ID
- * 
+ *
  * POST /api/comic-books/:id/thumbnails
- * 
+ *
  * This should create a custom thumbnail for a comic book by its ID
  */
 app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
@@ -805,7 +859,7 @@ app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
 
     // Parse the multipart form data
     const body = await c.req.parseBody();
-    
+
     // Extract image file
     const imageFile = body.image;
     if (!imageFile || !(imageFile instanceof File)) {
@@ -817,10 +871,10 @@ app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
     const description = body.description as string | undefined;
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowedTypes.includes(imageFile.type)) {
-      return c.json({ 
-        error: "Invalid file type. Supported types: JPEG, PNG, WebP" 
+      return c.json({
+        error: "Invalid file type. Supported types: JPEG, PNG, WebP",
       }, 400);
     }
 
@@ -833,7 +887,7 @@ app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
       imageData,
       userId,
       name,
-      description
+      description,
     );
 
     return c.json({
@@ -843,32 +897,30 @@ app.post("/:id/thumbnails", requireAuth, async (c: Context) => {
         filePath: result.filePath,
         name: name,
         description: description,
-        type: "custom"
-      }
+        type: "custom",
+      },
     }, 201);
-
   } catch (error) {
     console.error("Error creating custom thumbnail:", error);
-    
+
     if (error instanceof Error) {
       if (error.message.includes("not found")) {
         return c.json({ error: error.message }, 404);
       }
     }
-    
+
     return c.json({ error: "Failed to create custom thumbnail" }, 500);
   }
 });
-
 
 //TODO: Updated parsing to actually read the readlists from the db, have the table and model ready
 app.get("/:id/readlists", async (c: Context) => {
   const id = c.req.param("id");
 
   //TODO: implement comic book readlists retrieval logic
-  return c.json({ message: "Comic book readlists retrieval not implemented yet" }, 501);
+  return c.json({
+    message: "Comic book readlists retrieval not implemented yet",
+  }, 501);
 });
-
-
 
 export default app;
