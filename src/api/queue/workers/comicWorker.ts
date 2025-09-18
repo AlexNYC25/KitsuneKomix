@@ -160,7 +160,7 @@ async function processNewComicFile(
       day: standardizedMetadata?.day || null,
       publisher: standardizedMetadata?.publisher?.[0] || null,
       publication_date: standardizedMetadata?.year
-        ? `${standardizedMetadata.year}`
+        ? `${standardizedMetadata.year}-${standardizedMetadata.month || "01"}-${standardizedMetadata.day || "01"}`
         : null,
       scan_info: standardizedMetadata?.scanInfo || null,
       language: standardizedMetadata?.language || null,
