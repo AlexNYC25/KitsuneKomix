@@ -3,7 +3,7 @@ import { getClient } from "../db/sqlite/client.ts";
 import { extractComicPage, extractComicBookByStreaming } from "../utilities/extract.ts";
 
 import { ComicBook, ComicPenciller, ComicWriter, ComicInker, ComicLetterer, ComicEditor, ComicColorist, ComicCoverArtist, ComicPublisher, ComicImprint, ComicGenre, ComicCharacter, ComicLocation, ComicTeam, ComicStoryArc, ComicSeriesGroup, ComicBookWithMetadata, ComicBookHistory, ComicBookThumbnail } from "../types/index.ts";
-import { getAllComicBooks, getComicBookById, getComicBooksByHash, getComicDuplicates } from "../db/sqlite/models/comicBooks.model.ts";
+import { getAllComicBooks, getComicBookById, getComicBooksByHash, getComicDuplicates, getAllComicBooksSortByDate, getRandomBook } from "../db/sqlite/models/comicBooks.model.ts";
 
 import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
 import { getColoristByComicBookId } from "../db/sqlite/models/comicColorists.model.ts";
@@ -113,6 +113,17 @@ export const fetchAllComicBooksWithRelatedData = async (page: number = 1, limit:
 		};
   } catch (error) {
     console.error("Error fetching all comic books:", error);
+    throw error;
+  }
+};
+
+export const fetchTheLatestsComicBooksAdded = async (offset: number = 0, limit: number = 10) => {
+
+  try {
+    const result = await getAllComicBooksSortByDate(offset, limit, "desc");
+    return result;
+  } catch (error) {
+    console.error("Error fetching the latest comic books added:", error);
     throw error;
   }
 };
@@ -596,6 +607,16 @@ export const setComicReadByUser = async (comicId: number, userId: number, read: 
     }
 
     return true;
+  }
+};
+
+export const getRandomComicBook = async (): Promise<ComicBook | null> => {
+  try {
+    const comicBook = await getRandomBook();
+    return comicBook;
+  } catch (error) {
+    console.error("Error fetching random comic book:", error);
+    throw error;
   }
 };
 
