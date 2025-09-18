@@ -8,12 +8,13 @@ app.get("/duplicates", async (c: Context) => {
   return c.json({ message: "Duplicate detection not implemented yet" }, 501);
 });
 
-
 app.get("/duplicates/:id", async (c: Context) => {
   const id = c.req.param("id");
 
   //TODO: implement duplicate detection logic for specific comic page
-  return c.json({ message: "Duplicate detection for comic page not implemented yet" }, 501);
+  return c.json({
+    message: "Duplicate detection for comic page not implemented yet",
+  }, 501);
 });
 
 app.post("/duplicates/:id/delete", async (c: Context) => {

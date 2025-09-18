@@ -11,7 +11,7 @@ export interface ThumbnailConfig {
   height?: number;
   quality?: number;
   preserveAspectRatio?: boolean;
-  outputFormat?: 'jpeg' | 'png' | 'webp'; // Sharp supports many formats
+  outputFormat?: "jpeg" | "png" | "webp"; // Sharp supports many formats
 }
 
 /**
@@ -35,7 +35,7 @@ const DEFAULT_THUMBNAIL_CONFIG: Required<ThumbnailConfig> = {
   height: 400,
   quality: 85,
   preserveAspectRatio: true,
-  outputFormat: 'jpeg', // JPEG for broad compatibility and good compression
+  outputFormat: "jpeg", // JPEG for broad compatibility and good compression
 };
 
 /**
@@ -43,31 +43,43 @@ const DEFAULT_THUMBNAIL_CONFIG: Required<ThumbnailConfig> = {
  * Sharp supports many more formats than imagescript
  */
 const SUPPORTED_FORMATS = [
-  '.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.tiff', '.tif',
-  '.svg', '.heic', '.heif', '.avif', '.jp2', '.jxl'
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".gif",
+  ".bmp",
+  ".tiff",
+  ".tif",
+  ".svg",
+  ".heic",
+  ".heif",
+  ".avif",
+  ".jp2",
+  ".jxl",
 ];
 
 /**
  * Creates a thumbnail version of an image and saves it to the cache directory
- * 
+ *
  * @param imagePath - Absolute path to the source image
  * @param config - Optional configuration for thumbnail generation
  * @returns Promise<ThumbnailResult> - Result containing success status and thumbnail path
  */
 export async function createImageThumbnail(
   imagePath: string,
-  config: ThumbnailConfig = {}
+  config: ThumbnailConfig = {},
 ): Promise<ThumbnailResult> {
   try {
     // Merge config with defaults
     const thumbnailConfig = { ...DEFAULT_THUMBNAIL_CONFIG, ...config };
-    
+
     // Validate input path
-    if (!imagePath || typeof imagePath !== 'string') {
+    if (!imagePath || typeof imagePath !== "string") {
       return {
         success: false,
         originalPath: imagePath,
-        error: 'Invalid image path provided',
+        error: "Invalid image path provided",
       };
     }
 
@@ -79,7 +91,7 @@ export async function createImageThumbnail(
       return {
         success: false,
         originalPath: imagePath,
-        error: 'Image file does not exist',
+        error: "Image file does not exist",
       };
     }
 
@@ -88,7 +100,7 @@ export async function createImageThumbnail(
       return {
         success: false,
         originalPath: imagePath,
-        error: 'Path is not a file',
+        error: "Path is not a file",
       };
     }
 
@@ -98,13 +110,18 @@ export async function createImageThumbnail(
       return {
         success: false,
         originalPath: imagePath,
-        error: `Unsupported image format: ${fileExtension}. Supported formats: ${SUPPORTED_FORMATS.join(', ')}`,
+        error:
+          `Unsupported image format: ${fileExtension}. Supported formats: ${
+            SUPPORTED_FORMATS.join(", ")
+          }`,
       };
     }
 
     // Generate unique thumbnail filename using hash
     const imageHash = await calculateFileHash(imagePath);
-    const outputExtension = thumbnailConfig.outputFormat === 'jpeg' ? 'jpg' : thumbnailConfig.outputFormat;
+    const outputExtension = thumbnailConfig.outputFormat === "jpeg"
+      ? "jpg"
+      : thumbnailConfig.outputFormat;
     const thumbnailFileName = `${imageHash}_thumb.${outputExtension}`;
     const thumbnailPath = `./cache/thumbnails/${thumbnailFileName}`;
 
@@ -142,16 +159,18 @@ export async function createImageThumbnail(
 
     // Use Sharp to process the image
     let sharpInstance = sharp(imagePath);
-    
+
     // Get original image metadata
     const metadata = await sharpInstance.metadata();
-    
+
     // Calculate dimensions
     let { width: targetWidth, height: targetHeight } = thumbnailConfig;
-    
-    if (thumbnailConfig.preserveAspectRatio && metadata.width && metadata.height) {
+
+    if (
+      thumbnailConfig.preserveAspectRatio && metadata.width && metadata.height
+    ) {
       const aspectRatio = metadata.width / metadata.height;
-      
+
       if (aspectRatio > 1) {
         // Landscape image - fit to width
         targetHeight = Math.round(targetWidth / aspectRatio);
@@ -163,27 +182,27 @@ export async function createImageThumbnail(
 
     // Configure Sharp processing pipeline
     sharpInstance = sharpInstance.resize(targetWidth, targetHeight, {
-      fit: thumbnailConfig.preserveAspectRatio ? 'inside' : 'fill',
+      fit: thumbnailConfig.preserveAspectRatio ? "inside" : "fill",
       withoutEnlargement: false, // Allow enlargement if needed
     });
 
     // Configure output format and quality
     switch (thumbnailConfig.outputFormat) {
-      case 'jpeg':
-        sharpInstance = sharpInstance.jpeg({ 
+      case "jpeg":
+        sharpInstance = sharpInstance.jpeg({
           quality: thumbnailConfig.quality,
           progressive: true,
           mozjpeg: true, // Use mozjpeg encoder for better compression
         });
         break;
-      case 'png':
-        sharpInstance = sharpInstance.png({ 
+      case "png":
+        sharpInstance = sharpInstance.png({
           quality: thumbnailConfig.quality,
           progressive: true,
         });
         break;
-      case 'webp':
-        sharpInstance = sharpInstance.webp({ 
+      case "webp":
+        sharpInstance = sharpInstance.webp({
           quality: thumbnailConfig.quality,
           effort: 4, // Balance between file size and encoding speed
         });
@@ -205,7 +224,6 @@ export async function createImageThumbnail(
       height: finalMetadata.height || targetHeight,
       fileSize: thumbnailStats.size,
     };
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     return {
@@ -218,52 +236,55 @@ export async function createImageThumbnail(
 
 /**
  * Creates thumbnails for multiple images in batch
- * 
+ *
  * @param imagePaths - Array of absolute paths to source images
  * @param config - Optional configuration for thumbnail generation
  * @returns Promise<ThumbnailResult[]> - Array of results for each image
  */
 export async function createBatchThumbnails(
   imagePaths: string[],
-  config: ThumbnailConfig = {}
+  config: ThumbnailConfig = {},
 ): Promise<ThumbnailResult[]> {
   const results: ThumbnailResult[] = [];
-  
+
   // Process images concurrently for better performance
-  const promises = imagePaths.map(imagePath => createImageThumbnail(imagePath, config));
+  const promises = imagePaths.map((imagePath) =>
+    createImageThumbnail(imagePath, config)
+  );
   const batchResults = await Promise.allSettled(promises);
-  
+
   for (const result of batchResults) {
-    if (result.status === 'fulfilled') {
+    if (result.status === "fulfilled") {
       results.push(result.value);
     } else {
       results.push({
         success: false,
-        originalPath: 'unknown',
+        originalPath: "unknown",
         error: `Batch processing failed: ${result.reason}`,
       });
     }
   }
-  
+
   return results;
 }
 
 /**
  * Gets the thumbnail path for an image if it exists
- * 
+ *
  * @param imagePath - Absolute path to the source image
  * @param outputFormat - Optional output format (defaults to 'jpeg')
  * @returns Promise<string | null> - Thumbnail path if exists, null otherwise
  */
 export async function getThumbnailPath(
-  imagePath: string, 
-  outputFormat: 'jpeg' | 'png' | 'webp' = 'jpeg'
+  imagePath: string,
+  outputFormat: "jpeg" | "png" | "webp" = "jpeg",
 ): Promise<string | null> {
   try {
     const imageHash = await calculateFileHash(imagePath);
-    const outputExtension = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
-    const thumbnailPath = `./cache/thumbnails/${imageHash}_thumb.${outputExtension}`;
-    
+    const outputExtension = outputFormat === "jpeg" ? "jpg" : outputFormat;
+    const thumbnailPath =
+      `./cache/thumbnails/${imageHash}_thumb.${outputExtension}`;
+
     const stats = await Deno.stat(thumbnailPath);
     if (stats.isFile) {
       return thumbnailPath;
@@ -271,20 +292,20 @@ export async function getThumbnailPath(
   } catch {
     // Thumbnail doesn't exist
   }
-  
+
   return null;
 }
 
 /**
  * Removes a thumbnail file if it exists
- * 
+ *
  * @param imagePath - Absolute path to the source image
  * @param outputFormat - Optional output format (defaults to 'jpeg')
  * @returns Promise<boolean> - True if thumbnail was removed, false otherwise
  */
 export async function removeThumbnail(
   imagePath: string,
-  outputFormat: 'jpeg' | 'png' | 'webp' = 'jpeg'
+  outputFormat: "jpeg" | "png" | "webp" = "jpeg",
 ): Promise<boolean> {
   try {
     const thumbnailPath = await getThumbnailPath(imagePath, outputFormat);
@@ -295,47 +316,51 @@ export async function removeThumbnail(
   } catch {
     // Failed to remove thumbnail
   }
-  
+
   return false;
 }
 
 /**
  * Cleans up old thumbnails that no longer have corresponding source images
- * 
+ *
  * @param sourceDirectory - Directory to check for source images
  * @returns Promise<number> - Number of orphaned thumbnails removed
  */
-export async function cleanupOrphanedThumbnails(sourceDirectory: string): Promise<number> {
+export async function cleanupOrphanedThumbnails(
+  sourceDirectory: string,
+): Promise<number> {
   let removedCount = 0;
-  
+
   try {
-    const thumbnailDir = './cache/thumbnails';
-    
+    const thumbnailDir = "./cache/thumbnails";
+
     // Check if thumbnail directory exists
     try {
       await Deno.stat(thumbnailDir);
     } catch {
       return 0; // No thumbnails directory
     }
-    
+
     // Get all thumbnail files (support multiple formats)
     const thumbnailFiles = [];
     for await (const entry of Deno.readDir(thumbnailDir)) {
-      if (entry.isFile && (
-        entry.name.endsWith('_thumb.jpg') || 
-        entry.name.endsWith('_thumb.png') || 
-        entry.name.endsWith('_thumb.webp')
-      )) {
+      if (
+        entry.isFile && (
+          entry.name.endsWith("_thumb.jpg") ||
+          entry.name.endsWith("_thumb.png") ||
+          entry.name.endsWith("_thumb.webp")
+        )
+      ) {
         thumbnailFiles.push(entry.name);
       }
     }
-    
+
     // Check each thumbnail for corresponding source file
     for (const thumbnailFile of thumbnailFiles) {
       // Extract hash from filename (remove _thumb.extension)
-      const hash = thumbnailFile.replace(/_thumb\.(jpg|png|webp)$/, '');
+      const hash = thumbnailFile.replace(/_thumb\.(jpg|png|webp)$/, "");
       let foundSource = false;
-      
+
       // Walk through source directory to find matching hash
       try {
         for await (const entry of Deno.readDir(sourceDirectory)) {
@@ -352,7 +377,7 @@ export async function cleanupOrphanedThumbnails(sourceDirectory: string): Promis
         // Error reading source directory
         continue;
       }
-      
+
       // Remove orphaned thumbnail
       if (!foundSource) {
         try {
@@ -366,6 +391,6 @@ export async function cleanupOrphanedThumbnails(sourceDirectory: string): Promis
   } catch {
     // Error during cleanup
   }
-  
+
   return removedCount;
 }

@@ -81,7 +81,7 @@ export const getStoryArcsByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_story_arc: comicStoryArcsTable
+        comic_story_arc: comicStoryArcsTable,
       })
       .from(comicStoryArcsTable)
       .innerJoin(
@@ -90,7 +90,7 @@ export const getStoryArcsByComicBookId = async (
       )
       .where(eq(comicBookStoryArcsTable.comic_book_id, comicBookId));
 
-    return result.map(row => row.comic_story_arc);
+    return result.map((row) => row.comic_story_arc);
   } catch (error) {
     console.error(
       `Error fetching story arcs for comic book ID ${comicBookId}:`,

@@ -90,16 +90,19 @@ export const getSeriesGroupsByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_series_group: comicSeriesGroupsTable
+        comic_series_group: comicSeriesGroupsTable,
       })
       .from(comicSeriesGroupsTable)
       .innerJoin(
         comicBookSeriesGroupsTable,
-        eq(comicSeriesGroupsTable.id, comicBookSeriesGroupsTable.comic_series_group_id),
+        eq(
+          comicSeriesGroupsTable.id,
+          comicBookSeriesGroupsTable.comic_series_group_id,
+        ),
       )
       .where(eq(comicBookSeriesGroupsTable.comic_book_id, comicBookId));
 
-    return result.map(row => row.comic_series_group);
+    return result.map((row) => row.comic_series_group);
   } catch (error) {
     console.error(
       `Error fetching series groups for comic book ID ${comicBookId}:`,

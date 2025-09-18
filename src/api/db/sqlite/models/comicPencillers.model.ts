@@ -83,7 +83,7 @@ export const getPencillersByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_penciller: comicPencillersTable
+        comic_penciller: comicPencillersTable,
       })
       .from(comicPencillersTable)
       .innerJoin(

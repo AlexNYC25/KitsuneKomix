@@ -87,7 +87,7 @@ export const getCoverArtistsByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_cover_artist: comicCoverArtistsTable
+        comic_cover_artist: comicCoverArtistsTable,
       })
       .from(comicCoverArtistsTable)
       .innerJoin(

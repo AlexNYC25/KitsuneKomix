@@ -1,16 +1,18 @@
 import sharp from "sharp";
 
-export async function getImageDimensions(imagePath: string): Promise<{ width: number; height: number } | null> {
+export async function getImageDimensions(
+  imagePath: string,
+): Promise<{ width: number; height: number } | null> {
   try {
     const metadata = await sharp(imagePath).metadata();
-    
+
     if (metadata.width && metadata.height) {
       return {
         width: metadata.width,
-        height: metadata.height
+        height: metadata.height,
       };
     }
-    
+
     return null;
   } catch (error) {
     console.error(`Error getting image dimensions for ${imagePath}:`, error);

@@ -5,7 +5,6 @@ import { getClient } from "../client.ts";
 import type { ComicPage } from "../../../types/index.ts";
 import { comicPagesTable } from "../schema.ts";
 
-
 export const insertComicPage = async (
   comicBookId: number,
   filePath: string,

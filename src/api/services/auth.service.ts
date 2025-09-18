@@ -14,4 +14,4 @@ export const authenticateUser = async (email: string, password: string) => {
   }
 
   return { id: user.id, email: user.email, admin: user.admin === 1 };
-}
+};

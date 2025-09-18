@@ -18,17 +18,19 @@ export const requireAuth = async (c: Context, next: Next) => {
 
   const token = authHeader.split(" ")[1];
 
-	try {
-		const payload = await verifyAccessToken(token);
-		c.set("user", payload);
-		return next();
-	} catch (error) {
-		apiLogger.error(`Token verification failed: ${error instanceof Error ? error.message : String(error)}`);
-		return c.json({ message: "Unauthorized" }, 401);
-	}
-
+  try {
+    const payload = await verifyAccessToken(token);
+    c.set("user", payload);
+    return next();
+  } catch (error) {
+    apiLogger.error(
+      `Token verification failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return c.json({ message: "Unauthorized" }, 401);
+  }
 };
-
 
 /** * Middleware to require admin role for a route.
  * @param c - The context object.
@@ -36,11 +38,11 @@ export const requireAuth = async (c: Context, next: Next) => {
  * @returns A response indicating whether the user has admin privileges.
  */
 export const requireAdmin = async (c: Context, next: Next) => {
-	const user = c.get("user") as { id: string; roles: string[] } | undefined;
-	if (!user || !user.roles || !user.roles.includes("admin")) {
-		return c.json({ message: "Forbidden" }, 403);
-	}
-	await next();
+  const user = c.get("user") as { id: string; roles: string[] } | undefined;
+  if (!user || !user.roles || !user.roles.includes("admin")) {
+    return c.json({ message: "Forbidden" }, 403);
+  }
+  await next();
 };
 
 /**
@@ -54,30 +56,34 @@ export const requireValidRefreshToken = async (c: Context, next: Next) => {
   try {
     const body = await c.req.json();
     const refreshToken = body.refreshToken;
-    
+
     if (!refreshToken) {
       return c.json({ message: "Refresh token is required" }, 400);
     }
 
     // Verify JWT signature and structure
     const payload = await verifyRefreshToken(refreshToken);
-    
+
     // Verify token exists and is valid in database
     const storedToken = await getValidRefreshToken(payload.jti);
     if (!storedToken) {
       return c.json({ message: "Invalid or expired refresh token" }, 401);
     }
-    
+
     // Set the verified payload in context for use in the route handler
     c.set("refreshTokenPayload", payload);
     c.set("storedRefreshToken", storedToken);
-    
+
     // Reset the body for the route handler to read
     c.req.bodyCache = body;
-    
+
     return next();
   } catch (error) {
-    apiLogger.error(`Refresh token validation failed: ${error instanceof Error ? error.message : String(error)}`);
+    apiLogger.error(
+      `Refresh token validation failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
     return c.json({ message: "Invalid refresh token" }, 401);
   }
 };

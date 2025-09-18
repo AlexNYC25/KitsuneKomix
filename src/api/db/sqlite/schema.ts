@@ -86,10 +86,10 @@ export const comicBooksTable = sqliteTable("comic_books", {
 export const comicBookHistoryTable = sqliteTable("comic_book_history", {
   id: int().primaryKey({ autoIncrement: true }),
   user_id: int().notNull().references(() => usersTable.id, {
-    onDelete: "cascade"
+    onDelete: "cascade",
   }),
   comic_book_id: int().notNull().references(() => comicBooksTable.id, {
-    onDelete: "cascade"
+    onDelete: "cascade",
   }),
   read: int().notNull().default(0),
   last_read_page: int(),
@@ -125,22 +125,22 @@ export const comicBookCovers = sqliteTable("comic_book_covers", {
 });
 
 export const comicBookThumbnails = sqliteTable("comic_book_thumbnails", {
-	id: int().primaryKey({ autoIncrement: true }),
-	comic_book_id: int().notNull().references(() => comicBooksTable.id, {
-		onDelete: "cascade",
-	}),
-	comic_book_cover_id: int().references(() => comicBookCovers.id, {
-		onDelete: "cascade",
-	}), // Optional - for thumbnails generated from existing pages
-	file_path: text().notNull(),
-	thumbnail_type: text().notNull().default("generated"), // "generated" or "custom"
-	name: text(), // Optional name for custom thumbnails
-	description: text(), // Optional description for custom thumbnails
-	uploaded_by: int().references(() => usersTable.id, {
-		onDelete: "set null",
-	}), // User who uploaded custom thumbnail
-	created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-	updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+  id: int().primaryKey({ autoIncrement: true }),
+  comic_book_id: int().notNull().references(() => comicBooksTable.id, {
+    onDelete: "cascade",
+  }),
+  comic_book_cover_id: int().references(() => comicBookCovers.id, {
+    onDelete: "cascade",
+  }), // Optional - for thumbnails generated from existing pages
+  file_path: text().notNull(),
+  thumbnail_type: text().notNull().default("generated"), // "generated" or "custom"
+  name: text(), // Optional name for custom thumbnails
+  description: text(), // Optional description for custom thumbnails
+  uploaded_by: int().references(() => usersTable.id, {
+    onDelete: "set null",
+  }), // User who uploaded custom thumbnail
+  created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+  updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const comicWebLinksTable = sqliteTable("comic_web_links", {

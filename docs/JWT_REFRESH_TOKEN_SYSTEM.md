@@ -1,10 +1,13 @@
 # JWT Refresh Token System
 
-This document explains how to use the JWT refresh token system implemented in KitsuneKomix API.
+This document explains how to use the JWT refresh token system implemented in
+KitsuneKomix API.
 
 ## Overview
 
-The refresh token system provides secure, long-lived authentication with the following benefits:
+The refresh token system provides secure, long-lived authentication with the
+following benefits:
+
 - **Short-lived access tokens** (15 minutes) for API requests
 - **Long-lived refresh tokens** (7 days) for obtaining new access tokens
 - **Token revocation** support for logout functionality
@@ -13,9 +16,11 @@ The refresh token system provides secure, long-lived authentication with the fol
 ## Authentication Flow
 
 ### 1. Login
+
 **Endpoint:** `POST /api/auth/login`
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -24,6 +29,7 @@ The refresh token system provides secure, long-lived authentication with the fol
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Login successful",
@@ -38,6 +44,7 @@ The refresh token system provides secure, long-lived authentication with the fol
 ```
 
 ### 2. Using Access Tokens
+
 Include the access token in the Authorization header for protected routes:
 
 ```bash
@@ -46,11 +53,14 @@ curl -H "Authorization: Bearer <accessToken>" \
 ```
 
 ### 3. Refreshing Tokens
-When the access token expires (401 response), use the refresh token to get new tokens:
+
+When the access token expires (401 response), use the refresh token to get new
+tokens:
 
 **Endpoint:** `POST /api/auth/refresh-token`
 
 **Request:**
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -58,6 +68,7 @@ When the access token expires (401 response), use the refresh token to get new t
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Token refreshed successfully",
@@ -67,9 +78,11 @@ When the access token expires (401 response), use the refresh token to get new t
 ```
 
 ### 4. Logout
+
 **Endpoint:** `POST /api/auth/logout`
 
 **Request:**
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -77,6 +90,7 @@ When the access token expires (401 response), use the refresh token to get new t
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Logout successful"
@@ -84,14 +98,17 @@ When the access token expires (401 response), use the refresh token to get new t
 ```
 
 ### 5. Logout from All Devices
+
 **Endpoint:** `POST /api/auth/logout-all` (requires active access token)
 
 **Headers:**
+
 ```
 Authorization: Bearer <accessToken>
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Logged out from all devices successfully",
@@ -109,34 +126,34 @@ class AuthService {
   private refreshToken: string | null = null;
 
   async login(email: string, password: string) {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
 
     if (response.ok) {
       const data = await response.json();
       this.accessToken = data.accessToken;
       this.refreshToken = data.refreshToken;
-      
+
       // Store in localStorage/sessionStorage if needed
-      localStorage.setItem('refreshToken', this.refreshToken);
+      localStorage.setItem("refreshToken", this.refreshToken);
       return data;
     }
-    throw new Error('Login failed');
+    throw new Error("Login failed");
   }
 
   async makeAuthenticatedRequest(url: string, options: RequestInit = {}) {
     // Try with current access token
     let response = await this.fetchWithAuth(url, options);
-    
+
     // If token expired, refresh and retry
     if (response.status === 401) {
       await this.refreshAccessToken();
       response = await this.fetchWithAuth(url, options);
     }
-    
+
     return response;
   }
 
@@ -145,46 +162,46 @@ class AuthService {
       ...options,
       headers: {
         ...options.headers,
-        'Authorization': `Bearer ${this.accessToken}`
-      }
+        "Authorization": `Bearer ${this.accessToken}`,
+      },
     });
   }
 
   private async refreshAccessToken() {
     if (!this.refreshToken) {
-      throw new Error('No refresh token available');
+      throw new Error("No refresh token available");
     }
 
-    const response = await fetch('/api/auth/refresh-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: this.refreshToken })
+    const response = await fetch("/api/auth/refresh-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: this.refreshToken }),
     });
 
     if (response.ok) {
       const data = await response.json();
       this.accessToken = data.accessToken;
       this.refreshToken = data.refreshToken;
-      localStorage.setItem('refreshToken', this.refreshToken);
+      localStorage.setItem("refreshToken", this.refreshToken);
     } else {
       // Refresh failed, redirect to login
       this.logout();
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   }
 
   async logout() {
     if (this.refreshToken) {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: this.refreshToken })
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken: this.refreshToken }),
       });
     }
-    
+
     this.accessToken = null;
     this.refreshToken = null;
-    localStorage.removeItem('refreshToken');
+    localStorage.removeItem("refreshToken");
   }
 }
 ```
@@ -192,16 +209,19 @@ class AuthService {
 ## Security Features
 
 ### Database Tracking
+
 - All refresh tokens are stored in the `refresh_tokens` table
 - Tokens can be revoked individually or in bulk
 - Expired tokens are automatically rejected
 
 ### Token Rotation
+
 - Each refresh operation provides a new refresh token
 - Old refresh tokens are immediately revoked
 - Prevents token replay attacks
 
 ### Automatic Cleanup
+
 - The system includes a `cleanupExpiredTokens()` function
 - Can be run as a scheduled job to remove expired tokens
 

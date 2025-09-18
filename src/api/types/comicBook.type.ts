@@ -1,22 +1,22 @@
 import {
   ComicBook,
   ComicBookWithRelations,
-  NewComicBook,
-  ComicWriter,
-  ComicPenciller,
-  ComicInker,
-  ComicLetterer,
-  ComicEditor,
+  ComicCharacter,
   ComicColorist,
   ComicCoverArtist,
-  ComicPublisher,
-  ComicImprint,
+  ComicEditor,
   ComicGenre,
-  ComicCharacter,
-  ComicTeam,
+  ComicImprint,
+  ComicInker,
+  ComicLetterer,
   ComicLocation,
+  ComicPenciller,
+  ComicPublisher,
+  ComicSeriesGroup,
   ComicStoryArc,
-  ComicSeriesGroup
+  ComicTeam,
+  ComicWriter,
+  NewComicBook,
 } from "./database.types.ts";
 
 // Re-export database types

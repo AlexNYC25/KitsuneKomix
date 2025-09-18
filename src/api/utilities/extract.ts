@@ -437,7 +437,9 @@ export async function extractComicBookByStreaming(
 
     // Validate page range
     if (pageStart < 0 || pageEnd < 0 || pageStart > pageEnd) {
-      throw new Error("Invalid page range: pageStart and pageEnd must be non-negative and pageStart <= pageEnd");
+      throw new Error(
+        "Invalid page range: pageStart and pageEnd must be non-negative and pageStart <= pageEnd",
+      );
     }
 
     // Capture file size
@@ -459,29 +461,53 @@ export async function extractComicBookByStreaming(
     switch (format) {
       case ".cbz":
       case ".zip":
-        extractedPages = await extractZipArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        extractedPages = await extractZipArchiveByRange(
+          comicPath,
+          targetPath,
+          pageStart,
+          pageEnd,
+        );
         break;
       case ".cbr":
       case ".rar":
-        extractedPages = await extractRarArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        extractedPages = await extractRarArchiveByRange(
+          comicPath,
+          targetPath,
+          pageStart,
+          pageEnd,
+        );
         break;
       case ".cb7":
       case ".7z":
-        extractedPages = await extract7zArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        extractedPages = await extract7zArchiveByRange(
+          comicPath,
+          targetPath,
+          pageStart,
+          pageEnd,
+        );
         break;
       case ".cbt":
       case ".tar":
-        extractedPages = await extractTarArchiveByRange(comicPath, targetPath, pageStart, pageEnd);
+        extractedPages = await extractTarArchiveByRange(
+          comicPath,
+          targetPath,
+          pageStart,
+          pageEnd,
+        );
         break;
       default:
-        throw new Error(`Streaming extraction not implemented for format: ${format}`);
+        throw new Error(
+          `Streaming extraction not implemented for format: ${format}`,
+        );
     }
 
     if (extractedPages.length === 0) {
       throw new Error("No pages extracted in the specified range");
     }
 
-    const coverImagePath = extractedPages.length > 0 ? extractedPages[0] : undefined;
+    const coverImagePath = extractedPages.length > 0
+      ? extractedPages[0]
+      : undefined;
 
     return {
       success: true,
@@ -528,10 +554,10 @@ async function extractZipArchiveByRange(
 
     const listOutput = new TextDecoder().decode(listResult.stdout);
     const imageFiles = extractImageFileNamesFromListing(listOutput);
-    
+
     // Calculate the range of files to extract
     const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
-    
+
     if (filesToExtract.length === 0) {
       return [];
     }
@@ -583,10 +609,10 @@ async function extractRarArchiveByRange(
 
     const listOutput = new TextDecoder().decode(listResult.stdout);
     const imageFiles = extractImageFileNamesFrom7zListing(listOutput);
-    
+
     // Calculate the range of files to extract
     const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
-    
+
     if (filesToExtract.length === 0) {
       return [];
     }
@@ -638,10 +664,10 @@ async function extract7zArchiveByRange(
 
     const listOutput = new TextDecoder().decode(listResult.stdout);
     const imageFiles = extractImageFileNamesFrom7zListing(listOutput);
-    
+
     // Calculate the range of files to extract
     const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
-    
+
     if (filesToExtract.length === 0) {
       return [];
     }
@@ -693,10 +719,10 @@ async function extractTarArchiveByRange(
 
     const listOutput = new TextDecoder().decode(listResult.stdout);
     const imageFiles = extractImageFileNamesFromTarListing(listOutput);
-    
+
     // Calculate the range of files to extract
     const filesToExtract = imageFiles.slice(pageStart, pageEnd + 1);
-    
+
     if (filesToExtract.length === 0) {
       return [];
     }
@@ -728,25 +754,28 @@ async function extractTarArchiveByRange(
  * Parse image file names from unzip listing output
  */
 function extractImageFileNamesFromListing(listOutput: string): string[] {
-  const lines = listOutput.split('\n');
+  const lines = listOutput.split("\n");
   const imageFiles: string[] = [];
-  
+
   for (const line of lines) {
     // Skip header and footer lines
-    if (line.includes('Archive:') || line.includes('Length') || line.includes('---') || line.trim() === '') {
+    if (
+      line.includes("Archive:") || line.includes("Length") ||
+      line.includes("---") || line.trim() === ""
+    ) {
       continue;
     }
-    
+
     // Extract filename from unzip -l output (filename is typically the last part)
     const parts = line.trim().split(/\s+/);
     if (parts.length >= 4) {
-      const fileName = parts.slice(3).join(' '); // Handle filenames with spaces
+      const fileName = parts.slice(3).join(" "); // Handle filenames with spaces
       if (isImageFile(fileName)) {
         imageFiles.push(fileName);
       }
     }
   }
-  
+
   // Sort files naturally
   imageFiles.sort((a, b) => {
     return a.localeCompare(b, undefined, {
@@ -754,7 +783,7 @@ function extractImageFileNamesFromListing(listOutput: string): string[] {
       sensitivity: "base",
     });
   });
-  
+
   return imageFiles;
 }
 
@@ -762,25 +791,28 @@ function extractImageFileNamesFromListing(listOutput: string): string[] {
  * Parse image file names from 7z listing output
  */
 function extractImageFileNamesFrom7zListing(listOutput: string): string[] {
-  const lines = listOutput.split('\n');
+  const lines = listOutput.split("\n");
   const imageFiles: string[] = [];
-  
+
   for (const line of lines) {
     // Skip header lines and look for file entries
-    if (line.includes('Date') || line.includes('---') || line.trim() === '' || line.includes('Listing archive')) {
+    if (
+      line.includes("Date") || line.includes("---") || line.trim() === "" ||
+      line.includes("Listing archive")
+    ) {
       continue;
     }
-    
+
     // 7z output format: Date Time Attr Size Compressed Name
     const parts = line.trim().split(/\s+/);
     if (parts.length >= 6) {
-      const fileName = parts.slice(5).join(' '); // Handle filenames with spaces
+      const fileName = parts.slice(5).join(" "); // Handle filenames with spaces
       if (isImageFile(fileName)) {
         imageFiles.push(fileName);
       }
     }
   }
-  
+
   // Sort files naturally
   imageFiles.sort((a, b) => {
     return a.localeCompare(b, undefined, {
@@ -788,7 +820,7 @@ function extractImageFileNamesFrom7zListing(listOutput: string): string[] {
       sensitivity: "base",
     });
   });
-  
+
   return imageFiles;
 }
 
@@ -796,16 +828,16 @@ function extractImageFileNamesFrom7zListing(listOutput: string): string[] {
  * Parse image file names from tar listing output
  */
 function extractImageFileNamesFromTarListing(listOutput: string): string[] {
-  const lines = listOutput.split('\n');
+  const lines = listOutput.split("\n");
   const imageFiles: string[] = [];
-  
+
   for (const line of lines) {
     const fileName = line.trim();
     if (fileName && isImageFile(fileName)) {
       imageFiles.push(fileName);
     }
   }
-  
+
   // Sort files naturally
   imageFiles.sort((a, b) => {
     return a.localeCompare(b, undefined, {
@@ -813,7 +845,6 @@ function extractImageFileNamesFromTarListing(listOutput: string): string[] {
       sensitivity: "base",
     });
   });
-  
+
   return imageFiles;
 }
-

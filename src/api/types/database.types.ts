@@ -6,6 +6,7 @@ import {
   comicBookCoverArtistsTable,
   comicBookEditorsTable,
   comicBookGenresTable,
+  comicBookHistoryTable,
   comicBookImprintsTable,
   comicBookInkersTable,
   comicBookLetterersTable,
@@ -14,29 +15,28 @@ import {
   comicBookPublishersTable,
   comicBookSeriesGroupsTable,
   comicBooksTable,
-  comicBookThumbnails,
   comicBookStoryArcsTable,
   comicBookTeamsTable,
+  comicBookThumbnails,
   comicBookWritersTable,
-  comicBookHistoryTable,
-  comicLibrariesTable,
-  comicPencillersTable,
-  comicSeriesTable,
-  comicWritersTable,
-  comicInkersTable,
-  comicLetterersTable,
-  comicEditorsTable,
+  comicCharactersTable,
   comicColoristsTable,
   comicCoverArtistsTable,
-  comicPublishersTable,
-  comicImprintsTable,
+  comicEditorsTable,
   comicGenresTable,
-  comicCharactersTable,
+  comicImprintsTable,
+  comicInkersTable,
+  comicLetterersTable,
+  comicLibrariesTable,
   comicLocationsTable,
-  comicTeamsTable,
-  comicStoryArcsTable,
-  comicSeriesGroupsTable,
   comicPagesTable,
+  comicPencillersTable,
+  comicPublishersTable,
+  comicSeriesGroupsTable,
+  comicSeriesTable,
+  comicStoryArcsTable,
+  comicTeamsTable,
+  comicWritersTable,
   usersTable,
 } from "../db/sqlite/schema.ts";
 
@@ -54,10 +54,14 @@ export type ComicBook = InferSelectModel<typeof comicBooksTable>;
 export type NewComicBook = InferInsertModel<typeof comicBooksTable>;
 
 export type ComicBookHistory = InferSelectModel<typeof comicBookHistoryTable>;
-export type NewComicBookHistory = InferInsertModel<typeof comicBookHistoryTable>;
+export type NewComicBookHistory = InferInsertModel<
+  typeof comicBookHistoryTable
+>;
 
 export type ComicBookThumbnail = InferSelectModel<typeof comicBookThumbnails>;
-export type NewComicBookThumbnail = InferInsertModel<typeof comicBookThumbnails>;
+export type NewComicBookThumbnail = InferInsertModel<
+  typeof comicBookThumbnails
+>;
 
 export type ComicSeries = InferSelectModel<typeof comicSeriesTable>;
 export type NewComicSeries = InferInsertModel<typeof comicSeriesTable>;
@@ -84,7 +88,9 @@ export type ComicColorist = InferSelectModel<typeof comicColoristsTable>;
 export type NewComicColorist = InferInsertModel<typeof comicColoristsTable>;
 
 export type ComicCoverArtist = InferSelectModel<typeof comicCoverArtistsTable>;
-export type NewComicCoverArtist = InferInsertModel<typeof comicCoverArtistsTable>;
+export type NewComicCoverArtist = InferInsertModel<
+  typeof comicCoverArtistsTable
+>;
 
 export type ComicPublisher = InferSelectModel<typeof comicPublishersTable>;
 export type NewComicPublisher = InferInsertModel<typeof comicPublishersTable>;
@@ -108,7 +114,9 @@ export type ComicStoryArc = InferSelectModel<typeof comicStoryArcsTable>;
 export type NewComicStoryArc = InferInsertModel<typeof comicStoryArcsTable>;
 
 export type ComicSeriesGroup = InferSelectModel<typeof comicSeriesGroupsTable>;
-export type NewComicSeriesGroup = InferInsertModel<typeof comicSeriesGroupsTable>;
+export type NewComicSeriesGroup = InferInsertModel<
+  typeof comicSeriesGroupsTable
+>;
 
 export type ComicPage = InferSelectModel<typeof comicPagesTable>;
 export type NewComicPage = InferInsertModel<typeof comicPagesTable>;

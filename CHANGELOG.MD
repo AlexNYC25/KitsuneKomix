@@ -16,7 +16,8 @@ and this project adheres to
 - Pino logger to output to files
 - Added drizzle for orm managment
 - Added zod for type validation
-- database.dbml file for easy visualization of tables and relationships between them
+- database.dbml file for easy visualization of tables and relationships between
+  them
 - drizzle migrations folder for schema changes and migrations
 - Added initial vue template to the project to server as the front end client
 - updated routing to server up the production version of the vue site
@@ -27,7 +28,8 @@ and this project adheres to
 - Migrated current code to archive location for deletion, in process of rewrite
 - deno.json has updated packages including zod, bullmq, pino
 - Updated models to return data using types generated from drizzle models
-- Migrated to using a chokidar + bullmq setup to process files as they are mounted to the app volumes
+- Migrated to using a chokidar + bullmq setup to process files as they are
+  mounted to the app volumes
 - Changed api framework from oak to hono
 - Updated app types to export from a single import, collecting all other types
 

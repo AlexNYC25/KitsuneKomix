@@ -5,7 +5,6 @@ import { getClient } from "../client.ts";
 import type { ComicPublisher } from "../../../types/index.ts";
 import { comicBookPublishersTable, comicPublishersTable } from "../schema.ts";
 
-
 export const insertComicPublisher = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -87,7 +86,10 @@ export const getPublishersByComicBookId = async (
       .from(comicPublishersTable)
       .innerJoin(
         comicBookPublishersTable,
-        eq(comicPublishersTable.id, comicBookPublishersTable.comic_publisher_id),
+        eq(
+          comicPublishersTable.id,
+          comicBookPublishersTable.comic_publisher_id,
+        ),
       )
       .where(eq(comicBookPublishersTable.comic_book_id, comicBookId));
 

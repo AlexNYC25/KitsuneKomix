@@ -5,7 +5,6 @@ import { getClient } from "../client.ts";
 import type { ComicGenre } from "../../../types/index.ts";
 import { comicBookGenresTable, comicGenresTable } from "../schema.ts";
 
-
 export const insertComicGenre = async (genreName: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -82,7 +81,7 @@ export const getGenresForComicBook = async (
   try {
     const result = await db
       .select({
-        comic_genre: comicGenresTable
+        comic_genre: comicGenresTable,
       })
       .from(comicGenresTable)
       .innerJoin(

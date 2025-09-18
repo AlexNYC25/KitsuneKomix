@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { comicSeriesTable, comicSeriesBooks } from "../schema.ts";
+import { comicSeriesBooks, comicSeriesTable } from "../schema.ts";
 import type { ComicSeries, NewComicSeries } from "../../../types/index.ts";
 
 export const insertComicSeries = async (
@@ -237,7 +237,7 @@ export const getComicBooksInSeries = async (
   if (!db || !client) {
     throw new Error("Database is not initialized.");
   }
-  
+
   try {
     const result = await db
       .select()

@@ -5,7 +5,6 @@ import { getClient } from "../client.ts";
 import { comicBookImprintsTable, comicImprintsTable } from "../schema.ts";
 import type { ComicImprint } from "../../../types/index.ts";
 
-
 export const insertComicImprint = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
