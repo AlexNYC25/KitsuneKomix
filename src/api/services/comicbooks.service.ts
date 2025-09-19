@@ -29,10 +29,10 @@ import {
 import {
   getAllComicBooks,
   getAllComicBooksSortByDate,
+  getAllComicBooksSortByFileName,
   getComicBookById,
   getComicDuplicates,
   getRandomBook,
-  getAllComicBooksSortByFileName,
 } from "../db/sqlite/models/comicBooks.model.ts";
 
 import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
@@ -203,11 +203,19 @@ export const fetchTheLatestsComicBooksAdded = async (
 };
 
 // we want to fetch comic books by the first letter of their title
-export const fetchComicBooksByLetter = async (letter: string, offset: number = 0, limit: number = 100): Promise<ComicBook[]> => {
+export const fetchComicBooksByLetter = async (
+  letter: string,
+  offset: number = 0,
+  limit: number = 100,
+): Promise<ComicBook[]> => {
   const letterFormatted = letter.toLowerCase().trim();
 
   try {
-    const books: ComicBook[] = await getAllComicBooksSortByFileName(letterFormatted, offset, limit);
+    const books: ComicBook[] = await getAllComicBooksSortByFileName(
+      letterFormatted,
+      offset,
+      limit,
+    );
 
     return books;
   } catch (error) {

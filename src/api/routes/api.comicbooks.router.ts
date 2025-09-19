@@ -16,6 +16,7 @@ import {
   deleteComicsThumbnailById,
   fetchAllComicBooksWithRelatedData,
   fetchComicBookMetadataById,
+  fetchComicBooksByLetter,
   getComicDuplicatesInTheDb,
   getComicPagesInfo,
   getComicThumbnailByComicIdThumbnailId,
@@ -25,7 +26,6 @@ import {
   getRandomComicBook,
   setComicReadByUser,
   startStreamingComicBookFile,
-  fetchComicBooksByLetter,
 } from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
 
