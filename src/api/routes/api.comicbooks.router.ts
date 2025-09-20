@@ -58,11 +58,19 @@ app.get(
 
     try {
       const serviceResult = await fetchAllComicBooksWithRelatedData(
-        parseInt(page) || 1,
-        parseInt(limit) || 20,
-        sort,
-        filter,
-        filter_property,
+        {
+          page: parseInt(page) || 1,
+          pageSize: parseInt(limit) || 20,
+        },
+        {
+          filter: filter,
+          filterProperty: filter_property,
+        },
+        {
+          sort: sort,
+          sortProperty: sort, // Use sort parameter for sortProperty
+          sortOrder: "asc",
+        },
       );
 
       return c.json({
@@ -167,10 +175,19 @@ app.get(
 
     try {
       const comicsResult = await fetchAllComicBooksWithRelatedData(
-        page,
-        limit,
-        "created_at",
-        "desc",
+        {
+          page: page,
+          pageSize: limit,
+        },
+        {
+          filter: undefined,
+          filterProperty: undefined,
+        },
+        {
+          sort: "created_at",
+          sortProperty: "created_at",
+          sortOrder: "desc",
+        },
       );
       return c.json({
         data: comicsResult.comics,
@@ -210,10 +227,19 @@ app.get(
 
     try {
       const comicsResult = await fetchAllComicBooksWithRelatedData(
-        page,
-        limit,
-        "publication_date",
-        "desc",
+        {
+          page: page,
+          pageSize: limit,
+        },
+        {
+          filter: undefined,
+          filterProperty: undefined,
+        },
+        {
+          sort: "publication_date",
+          sortProperty: "publication_year",
+          sortOrder: "desc",
+        },
       );
       return c.json({
         data: comicsResult.comics,
