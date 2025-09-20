@@ -457,7 +457,7 @@ export const deleteComicBook = async (id: number): Promise<boolean> => {
   }
 };
 
-export const getComicDuplicates = async (): Promise<ComicBook[]> => {
+export const getComicDuplicates = async (offset: number, limit: number): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -465,12 +465,13 @@ export const getComicDuplicates = async (): Promise<ComicBook[]> => {
   }
 
   try {
-    // This is a simplified example. Actual duplicate detection logic may vary.
     const result = await db
       .select()
       .from(comicBooksTable)
       .groupBy(comicBooksTable.hash)
-      .having(sql`COUNT(*) > 1`);
+      .having(sql`COUNT(*) > 1`)
+      .limit(limit)
+      .offset(offset);
     return result;
   } catch (error) {
     console.error("Error fetching duplicate comic books:", error);
