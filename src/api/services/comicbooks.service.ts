@@ -75,7 +75,7 @@ import {
   updateComicBookHistory,
 } from "../db/sqlite/models/comicBookHistory.model.ts";
 
-type requestQueryParameters = {
+type requestPaginationParameters = {
   page?: number;
   pageSize?: number;
 };
@@ -104,28 +104,28 @@ const DEFAULT_PAGE_SIZE = 20;
  * used by /api/comic-books/all
  */
 export const fetchAllComicBooksWithRelatedData = async (
-  requestQueryParameters: requestQueryParameters,
+  requestPaginationParameters: requestPaginationParameters,
   requestFilterParameters: requestFilterParameters,
   requestSortParameters: requestSortParameters,
 ) => {
   // Set default pagination values
-  if (!requestQueryParameters.page || requestQueryParameters.page < 1) {
-    requestQueryParameters.page = 1;
+  if (!requestPaginationParameters.page || requestPaginationParameters.page < 1) {
+    requestPaginationParameters.page = 1;
   }
 
-  if (!requestQueryParameters.pageSize || requestQueryParameters.pageSize < 1) {
-    requestQueryParameters.pageSize = DEFAULT_PAGE_SIZE;
+  if (!requestPaginationParameters.pageSize || requestPaginationParameters.pageSize < 1) {
+    requestPaginationParameters.pageSize = DEFAULT_PAGE_SIZE;
   }
 
   // Calculate offset for pagination
-  const offset = (requestQueryParameters.page - 1) *
-    requestQueryParameters.pageSize;
+  const offset = (requestPaginationParameters.page - 1) *
+    requestPaginationParameters.pageSize;
 
   try {
     // Build the query parameters for the new database function
     const queryParams: ComicBookQueryParams = {
       offset,
-      limit: requestQueryParameters.pageSize + 1, // +1 to check for next page
+      limit: requestPaginationParameters.pageSize + 1, // +1 to check for next page
     };
 
     // Map filter parameters
@@ -233,9 +233,9 @@ export const fetchAllComicBooksWithRelatedData = async (
     const comicsFromDb = await getComicBooksWithMetadata(queryParams);
 
     // Determine if there's a next page
-    const hasNextPage = comicsFromDb.length > requestQueryParameters.pageSize;
+    const hasNextPage = comicsFromDb.length > requestPaginationParameters.pageSize;
     const comics = hasNextPage
-      ? comicsFromDb.slice(0, requestQueryParameters.pageSize)
+      ? comicsFromDb.slice(0, requestPaginationParameters.pageSize)
       : comicsFromDb;
 
     // Convert to ComicBookWithMetadata by attaching all related data
@@ -249,8 +249,8 @@ export const fetchAllComicBooksWithRelatedData = async (
     return {
       comics: booksWithMetadata,
       hasNextPage,
-      currentPage: requestQueryParameters.page,
-      pageSize: requestQueryParameters.pageSize,
+      currentPage: requestPaginationParameters.page,
+      pageSize: requestPaginationParameters.pageSize,
       totalResults: comics.length,
       isFiltered: !!(requestFilterParameters.filterProperty &&
         requestFilterParameters.filter),
@@ -271,22 +271,22 @@ export const fetchAllComicBooksWithRelatedData = async (
  * 
  * used by /api/comic-books/duplicates
  */
-export const fetchComicDuplicatesInTheDb = async (requestQueryParameters: requestQueryParameters): Promise<ComicBook[]> => {
+export const fetchComicDuplicatesInTheDb = async (requestPaginationParameters: requestPaginationParameters): Promise<ComicBook[]> => {
   // Set default pagination values
-  if (!requestQueryParameters.page || requestQueryParameters.page < 1) {
-    requestQueryParameters.page = 1;
+  if (!requestPaginationParameters.page || requestPaginationParameters.page < 1) {
+    requestPaginationParameters.page = 1;
   }
 
-  if (!requestQueryParameters.pageSize || requestQueryParameters.pageSize < 1) {
-    requestQueryParameters.pageSize = DEFAULT_PAGE_SIZE;
+  if (!requestPaginationParameters.pageSize || requestPaginationParameters.pageSize < 1) {
+    requestPaginationParameters.pageSize = DEFAULT_PAGE_SIZE;
   }
 
   // Calculate offset for pagination
-  const offset = (requestQueryParameters.page - 1) *
-    requestQueryParameters.pageSize;
+  const offset = (requestPaginationParameters.page - 1) *
+    requestPaginationParameters.pageSize;
 
   try {
-    const duplicates = await getComicDuplicates(offset, requestQueryParameters.pageSize);
+    const duplicates = await getComicDuplicates(offset, requestPaginationParameters.pageSize);
 
     return duplicates;
   } catch (error) {
