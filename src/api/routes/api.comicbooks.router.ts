@@ -17,7 +17,7 @@ import {
   fetchAllComicBooksWithRelatedData,
   fetchComicBookMetadataById,
   fetchComicBooksByLetter,
-  getComicDuplicatesInTheDb,
+  fetchComicDuplicatesInTheDb,
   getComicPagesInfo,
   getComicThumbnailByComicIdThumbnailId,
   getComicThumbnails,
@@ -118,9 +118,27 @@ app.get(
  *
  * This route returns a list of duplicate comic books based on the unique hash generated for each comic book
  */
-app.get("/duplicates", async (c: Context) => {
-  try {
-    const duplicates = await getComicDuplicatesInTheDb();
+app.get(
+  "/duplicates",
+  zValidator(
+    "query",
+    z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
+      limit: z
+        .string()
+        .optional()
+        .transform((val) => (val ? parseInt(val) : 20)),
+    }),
+  ),
+  async (c: Context) => {
+    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
+    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
+
+    try {
+      const duplicates = await fetchComicDuplicatesInTheDb({
+        page: page,
+        pageSize: limit,
+      });
 
     if (duplicates) {
       return c.json({
@@ -297,26 +315,6 @@ app.post("/metadata-batch", async (c: Context) => {
 
   //TODO: implement metadata update logic
   return c.json({ message: "Metadata update not implemented yet" }, 501);
-});
-
-app.get("/duplicates", async (c: Context) => {
-  try {
-    const duplicates = await getComicDuplicatesInTheDb();
-
-    if (duplicates) {
-      return c.json({
-        duplicates: duplicates,
-        message: "Fetched comic book duplicates successfully",
-      });
-    } else {
-      return c.json({
-        message: "No duplicate comic books found",
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching comic book duplicates:", error);
-    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
-  }
 });
 
 /**
