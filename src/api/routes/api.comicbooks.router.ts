@@ -28,8 +28,23 @@ import {
   startStreamingComicBookFile,
 } from "../services/comicbooks.service.ts";
 import { ComicBook } from "../types/index.ts";
+import { ComicBookWithMetadata } from "../types/comicBook.type.ts";
 
 const app = new Hono();
+
+// This should be the expected json return type for routes that return multiple comic books with pagination info
+type multipleReturnResponse = {
+  data: ComicBook[]|ComicBookWithMetadata[];
+  count: number;
+  hasNextPage: boolean;
+  currentPage: number;
+  pageSize: number;
+  filter: string | null;
+  filterProperty: string | null;
+  sort: string | null;
+  sortProperty: string | null;
+  sortOrder?: string | null;
+};
 
 /**
  * Get all comic books
@@ -49,12 +64,14 @@ app.get(
         .optional()
         .transform((val) => (val ? parseInt(val) : 20)),
       sort: z.string().optional(),
+      sortProperty: z.string().optional(),
+      sortDirection: z.enum(["asc", "desc"]).optional(),
       filter: z.string().optional(),
-      filter_property: z.string().optional(),
+      filterProperty: z.string().optional(),
     }),
   ),
   async (c: Context) => {
-    const { page, limit, sort, filter, filter_property } = c.req.query();
+    const { page, limit, sort, sortProperty, sortDirection, filter, filterProperty } = c.req.query();
 
     try {
       const serviceResult = await fetchAllComicBooksWithRelatedData(
@@ -64,61 +81,32 @@ app.get(
         },
         {
           filter: filter,
-          filterProperty: filter_property,
+          filterProperty: filterProperty,
         },
         {
           sort: sort,
-          sortProperty: sort, // Use sort parameter for sortProperty
-          sortOrder: "asc",
+          sortProperty: sortProperty,
+          sortOrder: sortDirection === "desc" ? "desc" : "asc",
         },
       );
 
-      return c.json({
+      const returnObj: multipleReturnResponse = {
         data: serviceResult.comics,
         count: serviceResult.comics.length,
         hasNextPage: serviceResult.hasNextPage,
         currentPage: parseInt(page) || 1,
         pageSize: parseInt(limit) || 100,
         filter: filter || null,
-        filter_property: filter_property || null,
+        filterProperty: filterProperty || null,
         sort: sort || null,
-      });
+        sortProperty: sortProperty || null,
+        sortOrder: sortDirection === "desc" ? "desc" : "asc",
+      };
+
+      return c.json(returnObj);
     } catch (error) {
       console.error("API Route Error:", error);
       return c.json({ error: "Failed to fetch comic books" }, 500);
-    }
-  },
-);
-
-/**
- * Search comic books by query
- *
- * GET /api/comic-books/search?q=searchTerm
- *
- * This route allows users to search for comic books by a query string.
- * The query string should be passed as a parameter named 'q'.
- */
-// TODO: Re consider this route it may be redundant with the current filter implementation in /all
-app.get(
-  "/search",
-  zValidator(
-    "query",
-    z.object({
-      q: z.string().min(1, "Query parameter 'q' is required"),
-    }),
-  ),
-  async (c: Context) => {
-    const query = c.req.query("q");
-
-    if (!query) {
-      return c.json({ message: "Query parameter 'q' is required" }, 400);
-    }
-
-    const comics = await searchComicBooks(query);
-    if (comics) {
-      return c.json(comics);
-    } else {
-      return c.notFound();
     }
   },
 );
