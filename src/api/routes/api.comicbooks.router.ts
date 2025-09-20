@@ -23,7 +23,7 @@ import {
   getComicThumbnails,
   getNextComicBookId,
   getPreviousComicBookId,
-  getRandomComicBook,
+  fetchRandomComicBook,
   setComicReadByUser,
   startStreamingComicBookFile,
 } from "../services/comicbooks.service.ts";
@@ -280,7 +280,7 @@ app.get(
     const count = c.req.query("count") ? parseInt(c.req.query("count")!) : 1;
 
     try {
-      const comic = await getRandomComicBook(count);
+      const comic = await fetchRandomComicBook(count);
       return c.json(comic);
     } catch (error) {
       console.error("Error fetching random comic book:", error);
@@ -289,28 +289,38 @@ app.get(
   }
 );
 
-app.get("/list", async (c: Context) => {
-  const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
-  const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
-  const letter = c.req.query("letter") || "A";
+app.get(
+  "/list",
+  zValidator(
+    "query",
+    z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
+      limit: z.string().optional().transform((val) => (val ? parseInt(val) : 20)),
+      letter: z.string().optional().transform((val) => val || "A"),
+    }),
+  ),
+  async (c: Context) => {
+    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
+    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
+    const letter = c.req.query("letter") || "A";
 
-  try {
-    const comicsResult = await fetchComicBooksByLetter(
-      letter,
-      page,
-      limit,
-    );
-    return c.json({
-      data: comicsResult,
-      count: comicsResult.length,
-      currentPage: page,
-      pageSize: limit,
-    });
-  } catch (error) {
-    console.error("Error fetching comic book list:", error);
-    return c.json({ error: "Failed to fetch comic book list" }, 500);
+    try {
+      const comicsResult = await fetchComicBooksByLetter(
+        letter,
+        { page: page, pageSize: limit }
+      );
+      return c.json({
+        data: comicsResult,
+        count: comicsResult.length,
+        currentPage: page,
+        pageSize: limit,
+      });
+    } catch (error) {
+      console.error("Error fetching comic book list:", error);
+      return c.json({ error: "Failed to fetch comic book list" }, 500);
+    }
   }
-});
+);
 
 app.get("/queue", async (c: Context) => {
   //TODO: implement comic book queue retrieval logic
