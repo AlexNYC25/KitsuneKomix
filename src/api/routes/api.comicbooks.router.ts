@@ -177,7 +177,7 @@ app.get(
   ),
   async (c: Context) => {
     const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
-    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
+    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
 
     try {
       const comicsResult = await fetchAllComicBooksWithRelatedData(
@@ -229,7 +229,7 @@ app.get(
   ),
   async (c: Context) => {
     const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
-    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 10;
+    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
 
     try {
       const comicsResult = await fetchAllComicBooksWithRelatedData(
