@@ -101,7 +101,11 @@ const DEFAULT_PAGE_SIZE = 20;
  * @param requestSortParameters 
  * @returns A promise that resolves to an array of ComicBook objects with related metadata
  * 
- * used by /api/comic-books/all
+ * used by 
+ * -  /api/comic-books/all
+ * -  /api/comic-books/latest (sorting by the created_at date)
+ * -  /api/comic-books/newest (sorting by the publication_date)
+ * 
  */
 export const fetchAllComicBooksWithRelatedData = async (
   requestPaginationParameters: requestPaginationParameters,
@@ -294,6 +298,34 @@ export const fetchComicDuplicatesInTheDb = async (requestPaginationParameters: r
     throw error;
   }
 };
+
+/**
+ * Get random comic books from the database.
+ *
+ * @param count The number of random comic books to retrieve.
+ * @returns An array of random comic books with metadata or null if none found.
+ * 
+ * Used by 
+ * - /api/comic-books/random
+ */
+export const getRandomComicBook = async (count: number = 1): Promise<ComicBookWithMetadata[] | null> => {
+  try {
+    const randomComics: ComicBookWithMetadata[] = [];
+    for (let i = 0; i < count; i++) {
+      const comicBook = await getRandomBook();
+      if (comicBook) {
+        const comicWithMetadata = await attatchMetadataToComicBook(comicBook);
+        randomComics.push(comicWithMetadata);
+      }
+    }
+    return randomComics;
+  } catch (error) {
+    console.error("Error fetching random comic book:", error);
+    throw error;
+  }
+};
+
+
 
 
 export const fetchTheLatestsComicBooksAdded = async (
@@ -851,15 +883,7 @@ export const setComicReadByUser = async (
   }
 };
 
-export const getRandomComicBook = async (): Promise<ComicBook | null> => {
-  try {
-    const comicBook = await getRandomBook();
-    return comicBook;
-  } catch (error) {
-    console.error("Error fetching random comic book:", error);
-    throw error;
-  }
-};
+
 
 // ******************************************************************************
 // Helper functions
