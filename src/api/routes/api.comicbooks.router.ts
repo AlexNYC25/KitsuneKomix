@@ -268,15 +268,26 @@ app.get(
  *
  * This route returns a random comic book from the database
  */
-app.get("/random", async (c: Context) => {
-  try {
-    const comic = await getRandomComicBook();
-    return c.json(comic);
-  } catch (error) {
-    console.error("Error fetching random comic book:", error);
-    return c.json({ error: "Failed to fetch random comic book" }, 500);
+app.get(
+  "/random", 
+  zValidator(
+    "query",
+    z.object({
+      count: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
+    }),
+  ),
+  async (c: Context) => {
+    const count = c.req.query("count") ? parseInt(c.req.query("count")!) : 1;
+
+    try {
+      const comic = await getRandomComicBook(count);
+      return c.json(comic);
+    } catch (error) {
+      console.error("Error fetching random comic book:", error);
+      return c.json({ error: "Failed to fetch random comic book" }, 500);
+    }
   }
-});
+);
 
 app.get("/list", async (c: Context) => {
   const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
