@@ -27,7 +27,6 @@ import {
   ComicWriter,
 } from "../types/index.ts";
 import {
-  type ComicBookQueryParams,
   getAllComicBooksSortByDate,
   getAllComicBooksSortByFileName,
   getComicBookById,
@@ -35,6 +34,7 @@ import {
   getComicDuplicates,
   getRandomBook,
 } from "../db/sqlite/models/comicBooks.model.ts";
+import type { ComicBookQueryParams } from "../interfaces/RequestParams.interface.ts";
 
 import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
 import { getColoristByComicBookId } from "../db/sqlite/models/comicColorists.model.ts";

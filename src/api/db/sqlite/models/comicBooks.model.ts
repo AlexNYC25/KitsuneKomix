@@ -36,6 +36,7 @@ import {
   comicSeriesGroupsTable,
 } from "../schema.ts";
 import type { ComicBook, NewComicBook } from "../../../types/index.ts";
+import type { ComicBookQueryParams } from "../../../interfaces/RequestParams.interface.ts";
 
 export const getAllComicBooks = async (
   offset: number,
@@ -477,32 +478,12 @@ export const getComicDuplicates = async (): Promise<ComicBook[]> => {
   }
 };
 
-/**
- * Filter and Sort parameters for comprehensive comic book query
- */
-export interface ComicBookQueryParams {
-  // Pagination
-  offset?: number;
-  limit?: number;
-  
-  // Filtering
-  titleFilter?: string;
-  seriesFilter?: string;
-  writerFilter?: string;
-  artistFilter?: string; // Will search across pencillers, inkers, colorists, etc.
-  publisherFilter?: string;
-  genreFilter?: string;
-  characterFilter?: string;
-  yearFilter?: number;
-  generalFilter?: string; // Search across multiple fields
-  
-  // Sorting
-  sortBy?: 'title' | 'series' | 'issue_number' | 'publication_year' | 'created_at' | 'updated_at' | 'file_name' | 'writer' | 'publisher' | 'genre';
-  sortOrder?: 'asc' | 'desc';
-}
+
 
 /**
  * Comprehensive query that JOINs all related metadata tables for efficient filtering and sorting
+ * @param params Query parameters for filtering, sorting, and pagination
+ * @returns A promise that resolves to an array of ComicBook objects with metadata
  */
 export const getComicBooksWithMetadata = async (
   params: ComicBookQueryParams = {}
@@ -513,6 +494,7 @@ export const getComicBooksWithMetadata = async (
     throw new Error("Database is not initialized.");
   }
 
+  // Destructure and set default values for query parameters from params
   const {
     offset = 0,
     limit = 20,
@@ -530,7 +512,7 @@ export const getComicBooksWithMetadata = async (
   } = params;
 
   try {
-    // Build WHERE conditions
+    // Now we build up any where conditions we may have based on the filters provided
     const whereConditions = [];
 
     if (titleFilter) {
@@ -604,7 +586,7 @@ export const getComicBooksWithMetadata = async (
       );
     }
 
-    // Determine sorting
+    // Then we determine sorting similar to before instead we define the value of orderByColumn dynamically
     let orderByColumn;
     switch (sortBy) {
       case 'title':
@@ -641,7 +623,7 @@ export const getComicBooksWithMetadata = async (
         orderByColumn = comicBooksTable.created_at;
     }
 
-    // Build the complete query
+    // Now we build up the query, joining the comic book table with all relevant metadata tables
     const baseQuery = db
       .selectDistinct({
         id: comicBooksTable.id,
