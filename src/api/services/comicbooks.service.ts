@@ -93,6 +93,16 @@ type requestFilterParameters = {
 
 const DEFAULT_PAGE_SIZE = 20;
 
+// This should be the new main function to fetch comic books with all related data
+/**
+ * Fetch all comic books with related metadata.
+ * @param requestQueryParameters 
+ * @param requestFilterParameters 
+ * @param requestSortParameters 
+ * @returns A promise that resolves to an array of ComicBook objects with related metadata
+ * 
+ * used by /api/comic-books/all
+ */
 export const fetchAllComicBooksWithRelatedData = async (
   requestQueryParameters: requestQueryParameters,
   requestFilterParameters: requestFilterParameters,
@@ -252,6 +262,39 @@ export const fetchAllComicBooksWithRelatedData = async (
     throw error;
   }
 };
+
+/**
+ * Get comic book duplicates in the database.
+ *
+ * @param requestQueryParameters - The query parameters for pagination.
+ * @returns A promise that resolves to an array of duplicate comic books.
+ * 
+ * used by /api/comic-books/duplicates
+ */
+export const fetchComicDuplicatesInTheDb = async (requestQueryParameters: requestQueryParameters): Promise<ComicBook[]> => {
+  // Set default pagination values
+  if (!requestQueryParameters.page || requestQueryParameters.page < 1) {
+    requestQueryParameters.page = 1;
+  }
+
+  if (!requestQueryParameters.pageSize || requestQueryParameters.pageSize < 1) {
+    requestQueryParameters.pageSize = DEFAULT_PAGE_SIZE;
+  }
+
+  // Calculate offset for pagination
+  const offset = (requestQueryParameters.page - 1) *
+    requestQueryParameters.pageSize;
+
+  try {
+    const duplicates = await getComicDuplicates(offset, requestQueryParameters.pageSize);
+
+    return duplicates;
+  } catch (error) {
+    console.error("Error fetching comic duplicates:", error);
+    throw error;
+  }
+};
+
 
 export const fetchTheLatestsComicBooksAdded = async (
   offset: number = 0,
@@ -633,22 +676,7 @@ export const getPreviousComicBookId = async (
   }
 };
 
-export const getComicDuplicatesInTheDb = async (): Promise<ComicBook[]> => {
-  const { db, client } = getClient();
 
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const duplicates = await getComicDuplicates();
-
-    return duplicates;
-  } catch (error) {
-    console.error("Error fetching comic duplicates:", error);
-    throw error;
-  }
-};
 
 export const getComicThumbnails = async (
   comicId: number,
