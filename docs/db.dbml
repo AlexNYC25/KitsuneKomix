@@ -54,7 +54,7 @@ Table comic_series {
 Table comic_books {
   id integer [primary key]
   library_id integer [not null]
-  file_path text [not null]
+  file_path text [not null, unique]
   title text
   series text
   issue_number text
@@ -346,6 +346,7 @@ Table comic_book_locations {
   comicbook_id integer
   location_id integer
 }
+
 
 Ref users_refresh_tokens: refresh_tokens.user_id > users.id
 
