@@ -190,6 +190,8 @@ async function processNewComicFile(
       review: standardizedMetadata?.review || null,
       age_rating: standardizedMetadata?.ageRating || null,
       community_rating: standardizedMetadata?.communityRating || null,
+      story_arcs: standardizedMetadata?.storyArcs || null,
+      series_groups: standardizedMetadata?.seriesGroups || null,
     };
 
     let comicId: number;
