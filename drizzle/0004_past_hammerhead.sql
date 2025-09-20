@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `comic_books_file_path_unique` ON `comic_books` (`file_path`);

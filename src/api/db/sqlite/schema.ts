@@ -51,7 +51,7 @@ export const comicBooksTable = sqliteTable("comic_books", {
   library_id: int().notNull().references(() => comicLibrariesTable.id, {
     onDelete: "cascade",
   }),
-  file_path: text().notNull(),
+  file_path: text().notNull().unique(),
   hash: text().notNull(),
   title: text(),
   series: text(),
