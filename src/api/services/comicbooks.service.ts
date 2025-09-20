@@ -27,10 +27,11 @@ import {
   ComicWriter,
 } from "../types/index.ts";
 import {
-  getAllComicBooks,
+  type ComicBookQueryParams,
   getAllComicBooksSortByDate,
   getAllComicBooksSortByFileName,
   getComicBookById,
+  getComicBooksWithMetadata,
   getComicDuplicates,
   getRandomBook,
 } from "../db/sqlite/models/comicBooks.model.ts";
@@ -74,114 +75,177 @@ import {
   updateComicBookHistory,
 } from "../db/sqlite/models/comicBookHistory.model.ts";
 
-export const fetchAllComicBooksWithRelatedData = async (
-  page: number = 1,
-  limit: number = 100,
-  sort: string | undefined,
-  filter?: string | undefined,
-  filter_property?: string | undefined,
-) => {
-  const { db, client } = getClient();
+type requestQueryParameters = {
+  page?: number;
+  pageSize?: number;
+};
 
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
+type requestSortParameters = {
+  sort?: string;
+  sortProperty?: string;
+  sortOrder?: "asc" | "desc";
+};
+
+type requestFilterParameters = {
+  filter?: string;
+  filterProperty?: string;
+};
+
+const DEFAULT_PAGE_SIZE = 20;
+
+export const fetchAllComicBooksWithRelatedData = async (
+  requestQueryParameters: requestQueryParameters,
+  requestFilterParameters: requestFilterParameters,
+  requestSortParameters: requestSortParameters,
+) => {
+  // Set default pagination values
+  if (!requestQueryParameters.page || requestQueryParameters.page < 1) {
+    requestQueryParameters.page = 1;
   }
 
-  const offset = (page - 1) * limit;
-  const limitPlusOne = limit + 1; // Fetch one extra to check if there's a next page
-  const sortOrder = sort === "asc" ? "asc" : "desc";
+  if (!requestQueryParameters.pageSize || requestQueryParameters.pageSize < 1) {
+    requestQueryParameters.pageSize = DEFAULT_PAGE_SIZE;
+  }
 
-  // Basic filtering logic (can be expanded as needed)
-  const filterCondition = filter && filter_property
-    ? (book: ComicBook) =>
-      book[filter_property as keyof ComicBook] &&
-      book[filter_property as keyof ComicBook]?.toString().includes(filter)
-    : () => true;
+  // Calculate offset for pagination
+  const offset = (requestQueryParameters.page - 1) *
+    requestQueryParameters.pageSize;
 
   try {
-    const books: ComicBook[] = await getAllComicBooks(
+    // Build the query parameters for the new database function
+    const queryParams: ComicBookQueryParams = {
       offset,
-      limitPlusOne,
-      sortOrder,
-    );
+      limit: requestQueryParameters.pageSize + 1, // +1 to check for next page
+    };
 
-    const booksWithMetadata: ComicBookWithMetadata[] = [];
+    // Map filter parameters
+    if (
+      requestFilterParameters.filterProperty && requestFilterParameters.filter
+    ) {
+      const filterValue = requestFilterParameters.filter.trim();
+      const filterProperty = requestFilterParameters.filterProperty
+        .toLowerCase();
 
-    for (const book of books) {
-      const comicBookWithMetadata: ComicBookWithMetadata = {
-        ...book,
-      } as ComicBookWithMetadata;
-
-      // Fetch and attach related data (authors, artists, genres, etc.) here if needed
-      // This is a placeholder for actual implementation
-      const writers: ComicWriter[] = await getWritersByComicBookId(book.id);
-      const pencillers: ComicPenciller[] = await getPencillersByComicBookId(
-        book.id,
-      );
-      const inkers: ComicInker[] = await getInkersByComicBookId(book.id);
-      const letterers: ComicLetterer[] = await getLetterersByComicBookId(
-        book.id,
-      );
-      const editors: ComicEditor[] = await getEditorsByComicBookId(book.id);
-      const colorists: ComicColorist[] = await getColoristByComicBookId(
-        book.id,
-      );
-      const coverArtists: ComicCoverArtist[] =
-        await getCoverArtistsByComicBookId(book.id);
-
-      const publishers: ComicPublisher[] = await getPublishersByComicBookId(
-        book.id,
-      );
-      const imprints: ComicImprint[] = await getImprintsByComicBookId(book.id);
-
-      const genres: ComicGenre[] = await getGenresForComicBook(book.id);
-      const characters: ComicCharacter[] = await getCharactersByComicBookId(
-        book.id,
-      );
-      const teams: ComicTeam[] = await getTeamsByComicBookId(book.id);
-      const locations: ComicLocation[] = await getLocationsByComicBookId(
-        book.id,
-      );
-
-      const storyArcs: ComicStoryArc[] = await getStoryArcsByComicBookId(
-        book.id,
-      );
-      const seriesGroups: ComicSeriesGroup[] =
-        await getSeriesGroupsByComicBookId(book.id);
-
-      comicBookWithMetadata.writers = writers;
-      comicBookWithMetadata.pencillers = pencillers;
-      comicBookWithMetadata.inkers = inkers;
-      comicBookWithMetadata.letterers = letterers;
-      comicBookWithMetadata.editors = editors;
-      comicBookWithMetadata.colorists = colorists;
-      comicBookWithMetadata.coverArtists = coverArtists;
-      comicBookWithMetadata.publishers = publishers;
-      comicBookWithMetadata.imprints = imprints;
-      comicBookWithMetadata.genres = genres;
-      comicBookWithMetadata.characters = characters;
-      comicBookWithMetadata.teams = teams;
-      comicBookWithMetadata.locations = locations;
-      comicBookWithMetadata.storyArcs = storyArcs;
-      comicBookWithMetadata.seriesGroups = seriesGroups;
-
-      booksWithMetadata.push(comicBookWithMetadata);
+      switch (filterProperty) {
+        case "title":
+          queryParams.titleFilter = filterValue;
+          break;
+        case "series":
+        case "series_name":
+          queryParams.seriesFilter = filterValue;
+          break;
+        case "writer":
+        case "writers":
+          queryParams.writerFilter = filterValue;
+          break;
+        case "artist":
+        case "penciller":
+        case "inker":
+        case "colorist":
+        case "cover_artist":
+          queryParams.artistFilter = filterValue;
+          break;
+        case "publisher":
+        case "publishers":
+          queryParams.publisherFilter = filterValue;
+          break;
+        case "genre":
+        case "genres":
+          queryParams.genreFilter = filterValue;
+          break;
+        case "character":
+        case "characters":
+          queryParams.characterFilter = filterValue;
+          break;
+        case "year":
+        case "publication_year": {
+          const yearNum = parseInt(filterValue);
+          if (!isNaN(yearNum)) {
+            queryParams.yearFilter = yearNum;
+          }
+          break;
+        }
+        default:
+          // Use general filter for unrecognized properties
+          queryParams.generalFilter = filterValue;
+          break;
+      }
     }
 
-    // Apply filtering
-    const filteredBooks = booksWithMetadata.filter(filterCondition);
+    // Map sort parameters
+    if (requestSortParameters.sortProperty && requestSortParameters.sort) {
+      const sortProperty = requestSortParameters.sortProperty.toLowerCase();
 
-    console.log("Service Debug - After filtering:", {
-      filteredBooksLength: filteredBooks.length,
-      finalResult: filteredBooks.slice(0, limit).length,
-      filter,
-      filter_property,
-    });
+      // Map sort properties to the database function's expected values
+      switch (sortProperty) {
+        case "title":
+          queryParams.sortBy = "title";
+          break;
+        case "series":
+        case "series_name":
+          queryParams.sortBy = "series";
+          break;
+        case "issue_number":
+          queryParams.sortBy = "issue_number";
+          break;
+        case "publication_year":
+        case "year":
+          queryParams.sortBy = "publication_year";
+          break;
+        case "created_at":
+          queryParams.sortBy = "created_at";
+          break;
+        case "updated_at":
+          queryParams.sortBy = "updated_at";
+          break;
+        case "file_name":
+        case "file_path":
+          queryParams.sortBy = "file_name";
+          break;
+        case "writer":
+          queryParams.sortBy = "writer";
+          break;
+        case "publisher":
+          queryParams.sortBy = "publisher";
+          break;
+        case "genre":
+          queryParams.sortBy = "genre";
+          break;
+        default:
+          queryParams.sortBy = "created_at";
+          break;
+      }
 
-    // Return paginated and filtered results
+      queryParams.sortOrder = requestSortParameters.sortOrder || "asc";
+    }
+
+    // Execute the database query with efficient JOINs
+    const comicsFromDb = await getComicBooksWithMetadata(queryParams);
+
+    // Determine if there's a next page
+    const hasNextPage = comicsFromDb.length > requestQueryParameters.pageSize;
+    const comics = hasNextPage
+      ? comicsFromDb.slice(0, requestQueryParameters.pageSize)
+      : comicsFromDb;
+
+    // Convert to ComicBookWithMetadata by attaching all related data
+    const booksWithMetadata: ComicBookWithMetadata[] = [];
+
+    for (const comic of comics) {
+      const comicWithMetadata = await attatchMetadataToComicBook(comic);
+      booksWithMetadata.push(comicWithMetadata);
+    }
+
     return {
-      comics: filteredBooks.slice(0, limit), // Return only the requested limit
-      hasNextPage: filteredBooks.length > limit, // Indicate if there's a next page
+      comics: booksWithMetadata,
+      hasNextPage,
+      currentPage: requestQueryParameters.page,
+      pageSize: requestQueryParameters.pageSize,
+      totalResults: comics.length,
+      isFiltered: !!(requestFilterParameters.filterProperty &&
+        requestFilterParameters.filter),
+      isSorted:
+        !!(requestSortParameters.sortProperty && requestSortParameters.sort),
     };
   } catch (error) {
     console.error("Error fetching all comic books:", error);
@@ -904,3 +968,28 @@ async function convertImageForBrowser(
     return false;
   }
 }
+
+const attatchMetadataToComicBook = async (
+  comic: ComicBook,
+): Promise<ComicBookWithMetadata> => {
+  const metadata: ComicBookWithMetadata = {
+    ...comic,
+    writers: await getWritersByComicBookId(comic.id),
+    pencillers: await getPencillersByComicBookId(comic.id),
+    inkers: await getInkersByComicBookId(comic.id),
+    letterers: await getLetterersByComicBookId(comic.id),
+    editors: await getEditorsByComicBookId(comic.id),
+    colorists: await getColoristByComicBookId(comic.id),
+    coverArtists: await getCoverArtistsByComicBookId(comic.id),
+    publishers: await getPublishersByComicBookId(comic.id),
+    imprints: await getImprintsByComicBookId(comic.id),
+    genres: await getGenresForComicBook(comic.id),
+    characters: await getCharactersByComicBookId(comic.id),
+    teams: await getTeamsByComicBookId(comic.id),
+    locations: await getLocationsByComicBookId(comic.id),
+    storyArcs: await getStoryArcsByComicBookId(comic.id),
+    seriesGroups: await getSeriesGroupsByComicBookId(comic.id),
+  };
+
+  return metadata;
+};
