@@ -28,7 +28,11 @@ import { apiLogger, queueLogger } from "../../config/logger/loggers.ts";
 import { ComicMetadata } from "../../interfaces/ComicMetadata.interface.ts";
 
 // Database model imports - Core models
-import { insertComicBook } from "../../db/sqlite/models/comicBooks.model.ts";
+import { 
+  insertComicBook, 
+  getComicBookByFilePath, 
+  updateComicBook 
+} from "../../db/sqlite/models/comicBooks.model.ts";
 import {
   addComicBookToSeries,
   getComicSeriesByPath,
@@ -111,13 +115,26 @@ import { StandardizedComicMetadata } from "../../interfaces/StandardizedComicMet
 /**
  * Main comic file processing function
  * Handles metadata extraction, hash calculation, and initiates all follow-up jobs
+ * Only processes new files or files with changed hash values
  */
 async function processNewComicFile(
   job: { data: { filePath: string; metadata: object } },
 ): Promise<void> {
-  queueLogger.info(`Processing new comic file: ${job.data.filePath}`);
+  queueLogger.info(`Processing comic file: ${job.data.filePath}`);
 
   try {
+    // ============== CHECK IF FILE EXISTS AND COMPARE HASH ==============
+    const existingComic = await getComicBookByFilePath(job.data.filePath);
+    const fileHash = await calculateFileHash(job.data.filePath);
+    
+    // If comic exists and hash hasn't changed, skip processing
+    if (existingComic && existingComic.hash === fileHash) {
+      queueLogger.info(
+        `Skipping processing for ${job.data.filePath} - file unchanged (hash: ${fileHash})`
+      );
+      return;
+    }
+
     // ============== METADATA AND LIBRARY PROCESSING ==============
     const metadata: MetadataCompiled | null = await getMetadata(
       job.data.filePath,
@@ -136,7 +153,6 @@ async function processNewComicFile(
 
     const standardizedMetadata: StandardizedComicMetadata | null =
       await standardizeMetadata(job.data.filePath);
-    const fileHash = await calculateFileHash(job.data.filePath);
 
     // ============== COMIC BOOK DATA PREPARATION ==============
     const comicData = {
@@ -176,11 +192,22 @@ async function processNewComicFile(
       community_rating: standardizedMetadata?.communityRating || null,
     };
 
-    // ============== INSERT COMIC BOOK RECORD ==============
-    const comicId = await insertComicBook(comicData);
-    apiLogger.info(`Inserted new comic book with ID: ${comicId}`);
+    let comicId: number;
+
+    // ============== INSERT OR UPDATE COMIC BOOK RECORD ==============
+    if (existingComic) {
+      // Update existing record
+      await updateComicBook(existingComic.id, comicData);
+      comicId = existingComic.id;
+      apiLogger.info(`Updated existing comic book with ID: ${comicId} (hash changed)`);
+    } else {
+      // Insert new record
+      comicId = await insertComicBook(comicData);
+      apiLogger.info(`Inserted new comic book with ID: ${comicId}`);
+    }
 
     // ============== QUEUE FOLLOW-UP JOBS ==============
+    // Only queue follow-up jobs for new files or files with changed hash
 
     // Queue image processing
     await queueImageProcessing(comicId, job.data.filePath);
@@ -270,11 +297,11 @@ async function processComicFileImages(
       `Extracted ${extractionResult.pageCount} pages from comic file: ${job.data.filePath}`,
     );
 
-    const { pages: imagePaths, extractedPath, coverImagePath } =
+    const { pages: imagePaths, extractedPath, coverImagePath: _coverImagePath } =
       extractionResult;
 
     // ============== PROCESS INDIVIDUAL PAGES ==============
-    let coverPages: Array<
+    const coverPages: Array<
       { pageId: number; imagePath: string; pageNumber: number }
     > = [];
 
