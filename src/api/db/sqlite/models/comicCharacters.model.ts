@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
@@ -99,3 +99,33 @@ export const getCharactersByComicBookId = async (
     throw error;
   }
 };
+
+
+export const getCharactersIdsByFilter = async (
+  filter: string,
+): Promise<number[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    // Step 1: Find character IDs matching the filter
+    const matchingCharacters = await db
+      .select({ id: comicCharactersTable.id })
+      .from(comicCharactersTable)
+      .where(ilike(comicCharactersTable.name, `%${filter}%`));
+
+    if (matchingCharacters.length === 0) {
+      return [];
+    }
+
+    const characterIds = matchingCharacters.map((char) => char.id);
+
+    return characterIds;
+  } catch (error) {
+    console.error("Error fetching character IDs by filter:", error);
+    throw error;
+  }
+}
