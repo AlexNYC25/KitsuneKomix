@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
@@ -93,6 +93,28 @@ export const getEditorsByComicBookId = async (
     return result.map((row) => row.comic_editor);
   } catch (error) {
     console.error("Error fetching editors by comic book ID:", error);
+    throw error;
+  }
+};
+
+export const getComicEditorIdsByFilter = async (
+  filter: string,
+): Promise<number[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({ id: comicEditorsTable.id })
+      .from(comicEditorsTable)
+      .where(ilike(comicEditorsTable.name, `%${filter}%`));
+
+    return result.map((row) => row.id);
+  } catch (error) {
+    console.error("Error fetching comic editor IDs by filter:", error);
     throw error;
   }
 };
