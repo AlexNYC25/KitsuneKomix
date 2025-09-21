@@ -97,7 +97,7 @@ export const getGenresForComicBook = async (
   }
 };
 
-export const getComicGenreIdsByFilter = async (
+export const getGenreIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
   const { db, client } = getClient();

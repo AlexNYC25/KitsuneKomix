@@ -100,7 +100,7 @@ export const getTeamsByComicBookId = async (
   }
 };
 
-export const getComicTeamIdsByFilter = async (
+export const getTeamIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
   const { db, client } = getClient();

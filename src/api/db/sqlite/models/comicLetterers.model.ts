@@ -97,7 +97,7 @@ export const getLetterersByComicBookId = async (
   }
 };
 
-export const getComicLettererIdsByFilter = async (
+export const getLettererIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
   const { db, client } = getClient();

@@ -106,7 +106,7 @@ export const getCoverArtistsByComicBookId = async (
   }
 };
 
-export const getComicCoverArtistIdsByFilter = async (
+export const getCoverArtistIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
   const { db, client } = getClient();

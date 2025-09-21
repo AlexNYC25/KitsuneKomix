@@ -97,7 +97,7 @@ export const getImprintsByComicBookId = async (
   }
 };
 
-export const getComicImprintIdsByFilter = async (
+export const getImprintIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
   const { db, client } = getClient();
