@@ -25,32 +25,45 @@ import {
   ComicStoryArc,
   ComicTeam,
   ComicWriter,
+  // Request parameter types
+  RequestPaginationParameters,
+  RequestSortParameters,
+  RequestFilterParameters,
+  // Filter and sort types
+  ExternalFilterProperties,
+  AllowedSortProperties,
+  ComicBookFilterItem,
+  ComicBookExternalFilterItem,
+  ComicBookFiltersCheckList,
+  // Constants
+  COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
+  COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
 } from "../types/index.ts";
 import {
   getAllComicBooksSortByDate,
-  getAllComicBooksSortByFileName,
   getComicBookById,
   getComicBooksWithMetadata,
+  getComicBooksWithMetadataFilteringSoring,
   getComicDuplicates,
   getRandomBook,
 } from "../db/sqlite/models/comicBooks.model.ts";
 import type { ComicBookQueryParams } from "../interfaces/RequestParams.interface.ts";
 
-import { getWritersByComicBookId } from "../db/sqlite/models/comicWriters.model.ts";
-import { getColoristByComicBookId } from "../db/sqlite/models/comicColorists.model.ts";
-import { getPencillersByComicBookId } from "../db/sqlite/models/comicPencillers.model.ts";
-import { getInkersByComicBookId } from "../db/sqlite/models/comicInkers.model.ts";
-import { getLetterersByComicBookId } from "../db/sqlite/models/comicLetterers.model.ts";
-import { getEditorsByComicBookId } from "../db/sqlite/models/comicEditors.model.ts";
-import { getCoverArtistsByComicBookId } from "../db/sqlite/models/comicCoverArtists.model.ts";
+import { getWritersByComicBookId, getWriterIdsByFilter } from "../db/sqlite/models/comicWriters.model.ts";
+import { getColoristByComicBookId, getColoristIdsByFilter } from "../db/sqlite/models/comicColorists.model.ts";
+import { getPencillersByComicBookId, getPencillerIdsByFilter } from "../db/sqlite/models/comicPencillers.model.ts";
+import { getInkersByComicBookId, getInkerIdsByFilter } from "../db/sqlite/models/comicInkers.model.ts";
+import { getLetterersByComicBookId, getLettererIdsByFilter } from "../db/sqlite/models/comicLetterers.model.ts";
+import { getEditorsByComicBookId, getEditorIdsByFilter } from "../db/sqlite/models/comicEditors.model.ts";
+import { getCoverArtistsByComicBookId, getCoverArtistIdsByFilter } from "../db/sqlite/models/comicCoverArtists.model.ts";
 
-import { getPublishersByComicBookId } from "../db/sqlite/models/comicPublishers.model.ts";
-import { getImprintsByComicBookId } from "../db/sqlite/models/comicImprints.model.ts";
+import { getPublishersByComicBookId, getPublisherIdsByFilter } from "../db/sqlite/models/comicPublishers.model.ts";
+import { getImprintsByComicBookId, getImprintIdsByFilter } from "../db/sqlite/models/comicImprints.model.ts";
 
-import { getGenresForComicBook } from "../db/sqlite/models/comicGenres.model.ts";
-import { getCharactersByComicBookId } from "../db/sqlite/models/comicCharacters.model.ts";
-import { getTeamsByComicBookId } from "../db/sqlite/models/comicTeams.model.ts";
-import { getLocationsByComicBookId } from "../db/sqlite/models/comicLocations.model.ts";
+import { getGenresForComicBook, getGenreIdsByFilter } from "../db/sqlite/models/comicGenres.model.ts";
+import { getCharactersByComicBookId, getCharactersIdsByFilter } from "../db/sqlite/models/comicCharacters.model.ts";
+import { getTeamsByComicBookId, getTeamIdsByFilter } from "../db/sqlite/models/comicTeams.model.ts";
+import { getLocationsByComicBookId, getLocationIdsByFilter } from "../db/sqlite/models/comicLocations.model.ts";
 
 import { getStoryArcsByComicBookId } from "../db/sqlite/models/comicStoryArcs.model.ts";
 import { getSeriesGroupsByComicBookId } from "../db/sqlite/models/comicSeriesGroups.model.ts";
@@ -75,23 +88,118 @@ import {
   updateComicBookHistory,
 } from "../db/sqlite/models/comicBookHistory.model.ts";
 
-type requestPaginationParameters = {
-  page?: number;
-  pageSize?: number;
-};
-
-type requestSortParameters = {
-  sort?: string;
-  sortProperty?: string;
-  sortOrder?: "asc" | "desc";
-};
-
-type requestFilterParameters = {
-  filter?: string;
-  filterProperty?: string;
-};
-
 const DEFAULT_PAGE_SIZE = 20;
+
+export const getComicBooksWithRelatedMetadata = async (
+  filters: ComicBookFilterItem[] = [],
+  sortProperty: AllowedSortProperties = 'created_at',
+  sortOrder: 'asc' | 'desc' = 'desc',
+  offset: number = 0,
+  limit: number = 20
+): Promise<ComicBook[]> => {
+ 
+  try {
+    // first we determine what tables we need to filter on based on the filter properties
+    const filtersCheckList: ComicBookFiltersCheckList = {};
+    for (const filter of filters) {
+      if (COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(filter.filterProperty as ExternalFilterProperties)) {
+        filtersCheckList[filter.filterProperty as ExternalFilterProperties] = true;
+      }
+    }
+
+    // now for each external filter property we need to get the ids that match the filter value
+    const externalFilters: ComicBookExternalFilterItem[] = [];
+    for (const property in filtersCheckList) {
+      const filter = filters.find(f => f.filterProperty === property);
+      if (filter) {
+        const matchingIds = await getMatchingComicBookIdsByExternalFilter(property as ExternalFilterProperties, filter.filterValue);
+        if (matchingIds.length > 0) {
+          externalFilters.push({
+            filterProperty: property as ExternalFilterProperties,
+            filterIds: matchingIds
+          });
+        }
+      }
+    }
+
+    // separate internal filters from external filters
+    const internalFilters = filters.filter(f => 
+      f.filterProperty && COMIC_BOOK_INTERNAL_METADATA_PROPERTIES.includes(f.filterProperty as typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number])
+    );
+
+    // now we pass these filters + the sorting details to the new optimized database function
+    const comicsFromDb = await getComicBooksWithMetadataFilteringSoring({
+      internalFilters,
+      externalFilters,
+      sort: {
+        property: sortProperty,
+        order: sortOrder,
+      },
+      offset,
+      limit
+    });
+
+    return comicsFromDb;
+  } catch (error) {
+    console.error("Error fetching comic books with related metadata:", error);
+    throw error;
+  }
+};
+
+
+// helper function to get the actual filtering ids for each external property
+const getMatchingComicBookIdsByExternalFilter = async (
+  filterProperty: ExternalFilterProperties,
+  filterValue: string
+): Promise<number[]> => {
+  switch (filterProperty) {
+    case "characters": {
+      return await getCharactersIdsByFilter(filterValue);
+    }
+    case "colorists": {
+      return await getColoristIdsByFilter(filterValue);
+    }
+    case "cover_artists": {
+      return await getCoverArtistIdsByFilter(filterValue);
+    }
+    case "editors": {
+      return await getEditorIdsByFilter(filterValue);
+    }
+    case "inkers": {
+      return await getInkerIdsByFilter(filterValue);
+    }
+    case "letterers": {
+      return await getLettererIdsByFilter(filterValue);
+    }
+    case "publishers": {
+      return await getPublisherIdsByFilter(filterValue);
+    }
+    case "imprints": {
+      return await getImprintIdsByFilter(filterValue);
+    }
+    case "genres": {
+      return await getGenreIdsByFilter(filterValue);
+    }
+    case "teams": {
+      return await getTeamIdsByFilter(filterValue);
+    }
+    case "locations": {
+      return await getLocationIdsByFilter(filterValue);
+    }
+    case "pencillers": {
+      return await getPencillerIdsByFilter(filterValue);
+    }
+    case "writers": {
+      return await getWriterIdsByFilter(filterValue);
+    }
+    default: {
+      console.warn(`No handler for filter property: ${filterProperty}`);
+      return [];
+    }
+  }
+};
+
+// ----- END EXPERIMENTAL PROTOTYPE -----
 
 // This should be the new main function to fetch comic books with all related data
 /**
@@ -108,9 +216,9 @@ const DEFAULT_PAGE_SIZE = 20;
  * 
  */
 export const fetchAllComicBooksWithRelatedData = async (
-  requestPaginationParameters: requestPaginationParameters,
-  requestFilterParameters: requestFilterParameters,
-  requestSortParameters: requestSortParameters,
+  requestPaginationParameters: RequestPaginationParameters,
+  requestFilterParameters: RequestFilterParameters,
+  requestSortParameters: RequestSortParameters,
 ) => {
   // Set default pagination values
   if (!requestPaginationParameters.page || requestPaginationParameters.page < 1) {
@@ -275,7 +383,7 @@ export const fetchAllComicBooksWithRelatedData = async (
  * 
  * used by /api/comic-books/duplicates
  */
-export const fetchComicDuplicatesInTheDb = async (requestPaginationParameters: requestPaginationParameters): Promise<ComicBook[]> => {
+export const fetchComicDuplicatesInTheDb = async (requestPaginationParameters: RequestPaginationParameters): Promise<ComicBook[]> => {
   // Set default pagination values
   if (!requestPaginationParameters.page || requestPaginationParameters.page < 1) {
     requestPaginationParameters.page = 1;
@@ -328,7 +436,7 @@ export const fetchRandomComicBook = async (count: number = 1): Promise<ComicBook
 // we want to fetch comic books by the first letter of their title
 export const fetchComicBooksByLetter = async (
   letter: string,
-  requestPaginationParameters: requestPaginationParameters
+  requestPaginationParameters: RequestPaginationParameters
 ): Promise<ComicBookWithMetadata[]> => {
   const letterFormatted = letter.toLowerCase().trim();
   // Set default pagination values
