@@ -18,6 +18,7 @@ import {
   fetchComicBookMetadataById,
   fetchComicBooksByLetter,
   fetchComicDuplicatesInTheDb,
+  getComicBooksWithRelatedMetadata,
   getComicPagesInfo,
   getComicThumbnailByComicIdThumbnailId,
   getComicThumbnails,
@@ -27,7 +28,7 @@ import {
   setComicReadByUser,
   startStreamingComicBookFile,
 } from "../services/comicbooks.service.ts";
-import { ComicBook } from "../types/index.ts";
+import { ComicBook, ComicBookFilterItem, AllowedSortProperties, AllowedFilterProperties } from "../types/index.ts";
 import { ComicBookWithMetadata } from "../types/comicBook.type.ts";
 
 const app = new Hono();
@@ -74,28 +75,38 @@ app.get(
     const { page, limit, sort, sortProperty, sortDirection, filter, filterProperty } = c.req.query();
 
     try {
-      const serviceResult = await fetchAllComicBooksWithRelatedData(
-        {
-          page: parseInt(page) || 1,
-          pageSize: parseInt(limit) || 20,
-        },
-        {
-          filter: filter,
-          filterProperty: filterProperty,
-        },
-        {
-          sort: sort,
-          sortProperty: sortProperty,
-          sortOrder: sortDirection === "desc" ? "desc" : "asc",
-        },
+      // Convert query parameters to the new service function format
+      const filters: ComicBookFilterItem[] = [];
+      if (filter && filterProperty) {
+        filters.push({
+          filterProperty: filterProperty as AllowedFilterProperties,
+          filterValue: filter
+        });
+      }
+
+      const pageNum = parseInt(page) || 1;
+      const pageSize = parseInt(limit) || 20;
+      const offset = (pageNum - 1) * pageSize;
+
+      // Use the new optimized service function
+      const comics = await getComicBooksWithRelatedMetadata(
+        filters,
+        (sortProperty as AllowedSortProperties) || 'created_at',
+        sortDirection === "desc" ? "desc" : "asc",
+        offset,
+        pageSize + 1 // +1 to check for next page
       );
 
+      // Check if there's a next page
+      const hasNextPage = comics.length > pageSize;
+      const resultComics = hasNextPage ? comics.slice(0, pageSize) : comics;
+
       const returnObj: multipleReturnResponse = {
-        data: serviceResult.comics,
-        count: serviceResult.comics.length,
-        hasNextPage: serviceResult.hasNextPage,
-        currentPage: parseInt(page) || 1,
-        pageSize: parseInt(limit) || 100,
+        data: resultComics,
+        count: resultComics.length,
+        hasNextPage,
+        currentPage: pageNum,
+        pageSize: pageSize,
         filter: filter || null,
         filterProperty: filterProperty || null,
         sort: sort || null,
