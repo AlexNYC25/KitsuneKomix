@@ -31,6 +31,21 @@ EXPOSE 8000 9229
 # Development command with hot reloading
 CMD ["task", "dev"]
 
+# Web client development stage
+FROM base AS web-client-dev
+# Copy web client files
+COPY web/kitsune-web-client ./web/kitsune-web-client
+WORKDIR /app/web/kitsune-web-client
+# Change ownership to deno user
+RUN chown -R deno:deno /app
+USER deno
+# Install dependencies (Deno will handle npm packages)
+RUN deno install
+# Expose Vite dev server port
+EXPOSE 5173
+# Web client development command
+CMD ["deno", "run", "-A", "npm:vite", "--host", "0.0.0.0"]
+
 # Production stage
 FROM base AS production
 # Copy all source code for production
