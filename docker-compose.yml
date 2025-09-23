@@ -15,12 +15,9 @@ services:
       - ./config:/app/config
       - ./logs:/app/logs
       # Mount source code for development hot reloading
-      # These will be ignored in production due to target stage
-      - ${SOURCE_MOUNT:-./src}:/app/src
-      - ${CONFIG_MOUNT:-./deno.json}:/app/deno.json
-      # Don't mount deno.lock to avoid write conflicts
-      # - ${LOCK_MOUNT:-./deno.lock}:/app/deno.lock
-      - ${DRIZZLE_CONFIG_MOUNT:-./drizzle.config.ts}:/app/drizzle.config.ts
+      - ./src:/app/src
+      - ./deno.json:/app/deno.json
+      - ./drizzle.config.ts:/app/drizzle.config.ts
       # Mount drizzle migrations for development
       - ./drizzle:/app/drizzle
     environment:
@@ -32,6 +29,30 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - kitsune_network
+
+  # Web client service (only runs in development)
+  web-client:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: web-client-dev
+    container_name: kitsunekomix_web_client
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount web client source for hot reloading
+      - ./web/kitsune-web-client:/app/web/kitsune-web-client
+      # Mount node_modules as named volume for performance
+      - web_client_node_modules:/app/web/kitsune-web-client/node_modules
+    environment:
+      NODE_ENV: development
+      # API endpoint for the web client
+      VITE_API_BASE_URL: "http://localhost:8000"
+    depends_on:
+      - app
     restart: unless-stopped
     networks:
       - kitsune_network
@@ -53,6 +74,7 @@ services:
 
 volumes:
   redis_data:
+  web_client_node_modules:
 
 networks:
   kitsune_network:
