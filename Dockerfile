@@ -1,47 +1,33 @@
-# Base image with tools
-FROM denoland/deno:2.4.5 AS base
+# Use a Debian base image for glibc compatibility
+FROM node:latest
 
-USER root
 
-# Install archive extraction tools
+# Install necessary Linux packages and Deno dependencies
 RUN apt-get update && apt-get install -y \
+    curl \
     unzip \
     p7zip-full \
+    ca-certificates \
+    gnupg \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# -----------------------------------------
-# DEVELOPMENT STAGE
-# -----------------------------------------
-FROM base AS development
 
-# Switch to deno user
-USER deno
+# Install pnpm globally
+RUN npm install -g pnpm
 
+# Set working directory
 WORKDIR /app
 
-# Copy source code as deno user
-COPY --chown=deno:deno . .
+# Copy your Nuxt project files
+COPY . .
 
-# Expose dev and vite ports
-EXPOSE 8000 5173
+# Cache dependencies (optional: adjust based on your project structure)
+# RUN npm run build
+RUN pnpm install
 
-# Run dev script
-CMD ["task", "dev"]
+# Expose default Nuxt port
+EXPOSE 3000
 
-# -----------------------------------------
-# PRODUCTION STAGE
-# -----------------------------------------
-FROM base AS production
-
-USER deno
-
-WORKDIR /app
-
-# Copy source code as deno user
-COPY --chown=deno:deno . .
-
-# Expose production port
-EXPOSE 8000 9229
-
-# Run main script in production
-CMD ["deno", "run", "-A", "--unstable", "src/main.ts"]
+# Run the Nuxt app using Deno
+CMD ["npm", "run", "dev"]

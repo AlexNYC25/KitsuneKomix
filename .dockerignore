@@ -11,9 +11,18 @@ comics/*
 .git/
 .gitignore
 
-# Node modules (handled by Deno)
+# Node modules (let Deno handle this automatically)
 node_modules/
+.deno/
 npm-debug.log*
+
+# Deno lock file (can cause container/host conflicts)
+deno.lock
+
+# Nuxt build directories
+.nuxt/
+.output/
+dist/
 
 # Environment files
 .env

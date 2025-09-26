@@ -1,36 +1,32 @@
 services:
+  # Nuxt Application Service (Development)
   app:
     build:
       context: .
       dockerfile: ./Dockerfile
-      target: ${BUILD_TARGET:-production}
-    container_name: kitsunekomix_app
+    container_name: kitsunekomix_nuxt_app
     ports:
-      - "5173:5173"
-      # Debug port (only used in development)
-      # - "${DEBUG_PORT:-9229}:9229"
+      - "3000:3000"  # Nuxt app port
+      - "24678:24678"  # Nuxt debug port
     volumes:
-      - ./cache:/app/cache
-      - ./comics:/app/comics
-      - ./config:/app/config
-      - ./logs:/app/logs
-      # Mount source code for development hot reloading
-      - .:/app
-      - web_client_node_modules:/app/node_modules
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/cache
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/comics
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/config:/app/config
     environment:
-      ENV: ${NODE_ENV:-production}
-      PORT: 5173
+      ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
       REDIS_HOST: "redis"
       REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET}
+      NUXT_DEV_TOOLS: "true"
     depends_on:
       redis:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - kitsune_network
-
-
+    # Dockerfile handles the command, no need to override
+    # command: ["deno", "task", "dev"]
   redis:
     image: redis:8.2.1-alpine
     container_name: kitsune_redis
@@ -48,7 +44,8 @@ services:
 
 volumes:
   redis_data:
-  web_client_node_modules:
+  nuxt_build_cache:
+  nuxt_output_cache:
 
 networks:
   kitsune_network:
