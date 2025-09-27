@@ -1,17 +1,18 @@
 # ========== Base image ==========
-FROM denoland/deno:alpine AS base
+FROM denoland/deno:debian AS base
 WORKDIR /app
 
 USER root
 
 # Install extra packages
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
-    p7zip \
+    p7zip-full \
     ca-certificates \
     gnupg \
-    git
+    git && \
+    rm -rf /var/lib/apt/lists/*
 
 USER deno
 
