@@ -1,32 +1,4 @@
 services:
-  # Nuxt Application Service (Development)
-  app:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    container_name: kitsunekomix_nuxt_app
-    ports:
-      - "3000:3000"  # Nuxt app port
-      - "24678:24678"  # Nuxt debug port
-    volumes:
-      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/cache
-      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/comics
-      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/config:/app/config
-    environment:
-      ENV: development
-      PORT: 3000
-      HOST: 0.0.0.0
-      REDIS_HOST: "redis"
-      REDIS_PORT: 6379
-      NUXT_DEV_TOOLS: "true"
-    depends_on:
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - kitsune_network
-    # Dockerfile handles the command, no need to override
-    # command: ["deno", "task", "dev"]
   redis:
     image: redis:8.2.1-alpine
     container_name: kitsune_redis
@@ -42,10 +14,56 @@ services:
     networks:
       - kitsune_network
 
+  api:
+    build:
+      context: ./kitsume-komix-api
+      dockerfile: ./Dockerfile
+    container_name: kitsunekomix_api
+    ports:
+      - "8000:8000"  # API port
+    volumes:
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/cache
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/comics
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/config:/app/config
+      - ./kitsume-komix-api:/app  # For hot-reload in dev
+      - client_node_modules:/app/node_modules
+    environment:
+      ENV: development
+      PORT: 8000
+      HOST: 0.0.0.0
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - kitsune_network
+  
+  client:
+    build:
+      context: ./kitsume-komix-client
+      target: dev
+    container_name: kitsunekomix_client
+    environment:
+      # In dev, browser hits API on the host port mapping:
+      VITE_API_BASE_URL: http://localhost:3000
+      # Helpful for file watching on macOS/docker
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./kitsume-komix-client:/app
+      - client_node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+      - "24678:24678" # HMR (vite sometimes uses this)
+    depends_on:
+      api:
+        condition: service_started
+
 volumes:
   redis_data:
-  nuxt_build_cache:
-  nuxt_output_cache:
+  client_node_modules:
+  api_denocache:
 
 networks:
   kitsune_network:
