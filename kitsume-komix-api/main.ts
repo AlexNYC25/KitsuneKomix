@@ -1,9 +1,13 @@
-import { Hono } from 'hono'
+import app from "./api/app.ts";
+import { getWatcherManager } from "./fileWatchers/watcherManager.ts";
+import "./queue/workers/comicWorker.ts";
 
-const app = new Hono()
+import { runMigrations } from "./db/migrate.ts";
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+await runMigrations();
 
-Deno.serve(app.fetch)
+const _watchManager = getWatcherManager();
+
+const port = parseInt(Deno.env.get("PORT") ?? "3000", 10);
+
+Deno.serve({ port: port }, app.fetch);
