@@ -61,6 +61,8 @@ services:
     depends_on:
       api:
         condition: service_started
+    networks:
+      - kitsune_network
 
 volumes:
   redis_data:
