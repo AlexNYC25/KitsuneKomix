@@ -5,8 +5,9 @@ import * as bcrypt from "bcrypt";
  * @param plain - the user-provided password
  * @returns hashed password string (including salt & cost)
  */
+const saltRounds = 10; // Number of salt rounds for bcrypt
 export async function hashPassword(plain: string): Promise<string> {
-  return await bcrypt.hash(plain);
+  return await bcrypt.hash(plain, saltRounds);
 }
 
 /**
