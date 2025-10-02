@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
+import SideBar from './components/SideBar.vue';
 </script>
 
 <template>
   <header>
   </header>
-  <nav>
-    <RouterLink to="/">Home</RouterLink> |
-    <RouterLink to="/Login">Login</RouterLink> |
-  </nav>
-  <main>
-    <RouterView />
+
+  
+  <main class="flex h-screen w-screen">
+    <SideBar />
+    <div class="flex-1 bg-gray-100 p-4">
+      <RouterView />
+    </div>
   </main>
+    
 </template>
 
 <style scoped>
