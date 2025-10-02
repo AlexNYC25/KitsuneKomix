@@ -30,7 +30,7 @@ const loginFormSubmit = (event: FormSubmitEvent) => {
 </script>
 
 <template>
-  <div class="login">
+  <div class="login flex-1 bg-gray-100 p-4">
     <h1>Login</h1>
     <Form v-slot="$form" :formData="initialFormData" :resolver="validateForm" @submit="loginFormSubmit" class="flex justify-center flex-col gap-4">
         <div class="flex flex-col gap-1">
