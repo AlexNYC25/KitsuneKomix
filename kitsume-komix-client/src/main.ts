@@ -5,6 +5,9 @@ import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import PrimeVue from 'primevue/config';
 
+import { OhVueIcon, addIcons } from "oh-vue-icons";
+import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp } from "oh-vue-icons/icons";
+
 import { useAuthStore } from './stores/auth'
 
 import App from './App.vue';
@@ -14,6 +17,10 @@ import Login from './pages/Login.vue'
 const app = createApp(App)
 
 app.use(createPinia())
+
+addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp);
+app.component("v-icon", OhVueIcon);
+
 app.use(PrimeVue)
 
 const router = createRouter({
@@ -32,6 +39,8 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+
 
 app.use(router)
 app.mount('#app')
