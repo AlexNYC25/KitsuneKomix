@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicLibrariesTable } from "../schema.ts";
+import { comicLibrariesTable, userComicLibrariesTable} from "../schema.ts";
 import type {
   ComicLibrary,
   LibraryRegistrationInput,
@@ -221,6 +221,76 @@ export const deleteComicLibrary = async (id: number): Promise<boolean> => {
     return result.length > 0;
   } catch (error) {
     console.error("Error deleting comic library:", error);
+    throw error;
+  }
+};
+
+
+/**
+ * Get all comic libraries for a specific user.
+ * @param userId - ID of the user
+ * @returns Array of comic libraries (type ComicLibrary[]) associated with the user
+ */
+export const getUsersComicLibraries = async (
+  userId: number,
+): Promise<ComicLibrary[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select(
+        { id: comicLibrariesTable.id,
+          name: comicLibrariesTable.name,
+          description: comicLibrariesTable.description,
+          path: comicLibrariesTable.path,
+          enabled: comicLibrariesTable.enabled,
+          changed_at: comicLibrariesTable.changed_at,
+          created_at: comicLibrariesTable.created_at,
+          updated_at: comicLibrariesTable.updated_at
+        }
+      )
+      .from(comicLibrariesTable)
+      .innerJoin(userComicLibrariesTable, eq(comicLibrariesTable.id, userComicLibrariesTable.library_id))
+      .where(eq(userComicLibrariesTable.user_id, userId))
+      .groupBy(comicLibrariesTable.id);
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching user's comic libraries:", error);
+    throw error;
+  }
+};
+
+/**
+ * Assign a comic library to a user by creating an entry in the user_comic_libraries table.
+ * 
+ * @param userId - ID of the user
+ * @param libraryId - ID of the comic library to assign
+ */
+export const assignLibraryToUser = async (
+  userId: number,
+  libraryId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .insert(userComicLibrariesTable)
+      .values({
+        user_id: userId,
+        library_id: libraryId,
+      });
+
+  } catch (error) {
+    console.error("Error assigning library to user:", error);
     throw error;
   }
 };
