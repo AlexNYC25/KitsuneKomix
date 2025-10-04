@@ -42,6 +42,14 @@ Table comic_libraries {
   updated_at date
 }
 
+Table comic_users_libraries {
+  id integer [primary key]
+  user_id integer
+  library_id integer
+  changed_at date
+  updated_at date
+}
+
 Table comic_series {
   id integer [primary key]
   name text [not null]
@@ -350,6 +358,9 @@ Table comic_book_locations {
 
 Ref users_refresh_tokens: refresh_tokens.user_id > users.id
 
+Ref comic_user_libraries: comic_users_libraries.library_id > comic_libraries.id
+Ref comic_libraries_users_allowed: comic_users_libraries.user_id > users.id
+
 Ref library_books: comic_libraries.id < comic_books.library_id
 
 Ref comic_series_books_series: comic_series_books.comic_series_id > comic_series.id
@@ -357,8 +368,6 @@ Ref comic_series_books_book: comic_series_books.comic_book_id - comic_books.id
 
 Ref comic_book_history_users: comic_book_history.user_id > users.id
 Ref comic_book_history_books: comic_book_history.comicbook_id > comic_books.id
-
-
 
 ref comic_book_web_links: comic_web_links.comicbook_id > comic_books.id
 
