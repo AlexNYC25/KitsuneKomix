@@ -4,14 +4,15 @@ WORKDIR /app
 
 USER root
 
-# Install extra packages
+# Install extra packages including su-exec for user switching
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
     p7zip-full \
     ca-certificates \
     gnupg \
-    git && \
+    git \
+    su-exec && \
     rm -rf /var/lib/apt/lists/*
 
 USER deno
@@ -29,11 +30,23 @@ RUN deno cache main.ts || true
 FROM base AS dev
 WORKDIR /app
 
+# Create necessary directories and set permissions
+USER root
+RUN mkdir -p /app/node_modules /app/cache /app/comics /app/config && \
+    chown -R deno:deno /app
+
+# Copy entrypoint script
+COPY --chown=root:root docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER deno
+
 # Install dev dependencies if needed
-COPY . .
+COPY --chown=deno:deno . .
 
 # Mount volumes in compose for hot reload
 EXPOSE 8000
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["deno", "task", "dev"]
 
 # ========== Builder (optional bundle step) ==========
