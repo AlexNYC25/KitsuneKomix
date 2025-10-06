@@ -1,25 +1,78 @@
-import { Context, Hono } from "hono";
-import { z } from "zod";
+import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-const app = new Hono();
+const app = new OpenAPIHono();
 
-app.get("/duplicates", async (c: Context) => {
-  //TODO: implement duplicate detection logic
-  return c.json({ message: "Duplicate detection not implemented yet" }, 501);
+const MessageResponseSchema = z.object({
+  message: z.string(),
 });
 
-app.get("/duplicates/:id", async (c: Context) => {
-  const id = c.req.param("id");
+const ParamIdSchema = z.object({
+  id: z.string().openapi({
+    param: { name: 'id', in: 'path' },
+    example: '1',
+  }),
+});
 
+// Get duplicates
+const getDuplicatesRoute = createRoute({
+  method: "get",
+  path: "/duplicates",
+  summary: "Get duplicate comic pages",
+  description: "Detect duplicate comic pages in the system",
+  tags: ["Comic Pages"],
+  responses: {
+    501: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Not implemented",
+    },
+  },
+});
+
+app.openapi(getDuplicatesRoute, (_c) => {
+  //TODO: implement duplicate detection logic
+  return _c.json({ message: "Duplicate detection not implemented yet" }, 501);
+});
+
+// Get duplicates by ID
+const getDuplicateByIdRoute = createRoute({
+  method: "get",
+  path: "/duplicates/{id}",
+  summary: "Get duplicate for specific comic page",
+  tags: ["Comic Pages"],
+  request: { params: ParamIdSchema },
+  responses: {
+    501: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Not implemented",
+    },
+  },
+});
+
+app.openapi(getDuplicateByIdRoute, (_c) => {
   //TODO: implement duplicate detection logic for specific comic page
-  return c.json({
+  return _c.json({
     message: "Duplicate detection for comic page not implemented yet",
   }, 501);
 });
 
-app.post("/duplicates/:id/delete", async (c: Context) => {
-  const body = await c.req.json();
-
-  //TODO: implement duplicate deletion logic
-  return c.json({ message: "Duplicate deletion not implemented yet" }, 501);
+// Delete duplicate
+const deleteDuplicateRoute = createRoute({
+  method: "post",
+  path: "/duplicates/{id}/delete",
+  summary: "Delete a duplicate comic page",
+  tags: ["Comic Pages"],
+  request: { params: ParamIdSchema },
+  responses: {
+    501: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Not implemented",
+    },
+  },
 });
+
+app.openapi(deleteDuplicateRoute, (_c) => {
+  //TODO: implement duplicate deletion logic
+  return _c.json({ message: "Duplicate deletion not implemented yet" }, 501);
+});
+
+export default app;
