@@ -16,10 +16,8 @@ app.route("/api", apiRouter);
 app.route("/health", rootRouter);
 
 // Vue.js SPA (catch-all for everything else)
-// @ts-ignore: Type compatibility issue between Hono versions  
 app.route("/", webRouter);
 
-// @ts-ignore: Type compatibility issue with middleware
 app.use('*', cors({
   origin: 'http://localhost:5173', // Replace with your frontend's origin
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
