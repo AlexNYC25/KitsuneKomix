@@ -1,121 +1,346 @@
-import { Context, Hono } from "hono";
-import { z } from "zod";
+import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-const app = new Hono();
+const app = new OpenAPIHono();
 
-app.get("/", async (c: Context) => {
-  // TODO: use the model/service to get the series from the database
-  return c.json({ message: "Comic Series API is running" }, 200);
+const MessageResponseSchema = z.object({
+  message: z.string(),
 });
 
-app.get("/:id", async (c: Context) => {
-  const id = c.req.param("id");
-  // TODO: use the model/service to get the series with the given ID from the database
+const ParamIdSchema = z.object({
+  id: z.string().openapi({
+    param: { name: 'id', in: 'path' },
+    example: '1',
+  }),
+});
+
+const ParamIdThumbIdSchema = z.object({
+  id: z.string().openapi({
+    param: { name: 'id', in: 'path' },
+    example: '1',
+  }),
+  thumbId: z.string().openapi({
+    param: { name: 'thumbId', in: 'path' },
+    example: '1',
+  }),
+});
+
+const ParamLetterSchema = z.object({
+  letter: z.string().openapi({
+    param: { name: 'letter', in: 'path' },
+    example: 'A',
+  }),
+});
+
+// Get all series
+const getAllSeriesRoute = createRoute({
+  method: "get",
+  path: "/",
+  summary: "Get all comic series",
+  description: "Retrieve all comic series from the database",
+  tags: ["Comic Series"],
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Series retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getAllSeriesRoute, (_c) => {
+  // TODO: use the model/service to get the series from the database
+  return _c.json({ message: "Comic Series API is running" }, 200);
+});
+
+// Get series by ID
+const getSeriesByIdRoute = createRoute({
+  method: "get",
+  path: "/{id}",
+  summary: "Get a comic series by ID",
+  tags: ["Comic Series"],
+  request: { params: ParamIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Series retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getSeriesByIdRoute, (c) => {
+  const { id } = c.req.valid("param");
   return c.json({ message: `Comic Series API is running for ID ${id}` }, 200);
 });
 
-app.get("/:id/analyse", async (c: Context) => {
-  const id = c.req.param("id");
-  // TODO: use the model/service to analyze the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Analysis`,
-  }, 200);
+// Analyze series
+const analyzeSeriesRoute = createRoute({
+  method: "get",
+  path: "/{id}/analyse",
+  summary: "Analyze a comic series",
+  tags: ["Comic Series"],
+  request: { params: ParamIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Series analysis started",
+    },
+  },
 });
 
-app.get("/:id/download", async (c: Context) => {
-  const id = c.req.param("id");
-  // TODO: use the model/service to download the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Download`,
-  }, 200);
+app.openapi(analyzeSeriesRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Analysis` }, 200);
 });
 
-app.patch("/:id/metadata", async (c: Context) => {
-  const id = c.req.param("id");
-  // TODO: use the model/service to update the metadata for the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Metadata Update`,
-  }, 200);
+// Download series
+const downloadSeriesRoute = createRoute({
+  method: "get",
+  path: "/{id}/download",
+  summary: "Download a comic series",
+  tags: ["Comic Series"],
+  request: { params: ParamIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Series download started",
+    },
+  },
 });
 
-app.post("/:id/progress", async (c: Context) => {
-  const id = c.req.param("id");
-  // TODO: use the model/service to update the progress for the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Progress Update`,
-  }, 200);
+app.openapi(downloadSeriesRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Download` }, 200);
 });
 
-app.get("/:id/thumbnails", async (c: Context) => {
-  const id = c.req.param("id");
-  // TODO: use the model/service to get the thumbnails for the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnails`,
-  }, 200);
+// Update series metadata
+const updateMetadataRoute = createRoute({
+  method: "patch",
+  path: "/{id}/metadata",
+  summary: "Update series metadata",
+  tags: ["Comic Series"],
+  request: { params: ParamIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Metadata updated successfully",
+    },
+  },
 });
 
-app.post("/:id/thumbnail", async (c: Context) => {
-  const id = c.req.param("id");
-  // TODO: use the model/service to create a thumbnail for the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnail Creation`,
-  }, 200);
+app.openapi(updateMetadataRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Metadata Update` }, 200);
 });
 
-app.delete("/:id/thumbnail/:thumbId", async (c: Context) => {
-  const id = c.req.param("id");
-  const thumbId = c.req.param("thumbId");
-  // TODO: use the model/service to delete the thumbnail for the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnail Deletion`,
-  }, 200);
+// Update series progress
+const updateProgressRoute = createRoute({
+  method: "post",
+  path: "/{id}/progress",
+  summary: "Update series progress",
+  tags: ["Comic Series"],
+  request: { params: ParamIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Progress updated successfully",
+    },
+  },
 });
 
-app.get("/:id/thumbnails/:thumbId", async (c: Context) => {
-  const id = c.req.param("id");
-  const thumbId = c.req.param("thumbId");
-  // TODO: use the model/service to get the thumbnail for the series with the given ID
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnail Retrieval`,
-  }, 200);
+app.openapi(updateProgressRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Progress Update` }, 200);
 });
 
-app.put("/:id/thumbnail/:thumbId/cover", async (c: Context) => {
-  const id = c.req.param("id");
-  const thumbId = c.req.param("thumbId");
-  // TODO: use the model/service to update the cover for the thumbnail with the given ID
-  return c.json({
-    message:
-      `Comic Series API is running for ID ${id} - Thumbnail Cover Update`,
-  }, 200);
+// Get series thumbnails
+const getThumbnailsRoute = createRoute({
+  method: "get",
+  path: "/{id}/thumbnails",
+  summary: "Get series thumbnails",
+  tags: ["Comic Series"],
+  request: { params: ParamIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Thumbnails retrieved successfully",
+    },
+  },
 });
 
-app.get("/latest", async (c: Context) => {
-  // TODO: use the model/service to get the latest series from the database
-  return c.json({ message: "Latest Comic Series API is running" }, 200);
+app.openapi(getThumbnailsRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnails` }, 200);
 });
 
-app.get("/alphabetical", async (c: Context) => {
-  // TODO: use the model/service to get the alphabetical series from the database
-  return c.json({ message: "Alphabetical Comic Series API is running" }, 200);
+// Create series thumbnail
+const createThumbnailRoute = createRoute({
+  method: "post",
+  path: "/{id}/thumbnail",
+  summary: "Create series thumbnail",
+  tags: ["Comic Series"],
+  request: { params: ParamIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Thumbnail created successfully",
+    },
+  },
 });
 
-app.get("/alphabetical/:letter", async (c: Context) => {
-  const letter = c.req.param("letter");
-  // TODO: use the model/service to get the series starting with the given letter from the database
-  return c.json({
-    message: `Alphabetical Comic Series API is running for letter ${letter}`,
-  }, 200);
+app.openapi(createThumbnailRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Creation` }, 200);
 });
 
-app.get("/new", async (c: Context) => {
-  // TODO: use the model/service to get the new series from the database
-  return c.json({ message: "New Comic Series API is running" }, 200);
+// Delete series thumbnail
+const deleteThumbnailRoute = createRoute({
+  method: "delete",
+  path: "/{id}/thumbnail/{thumbId}",
+  summary: "Delete series thumbnail",
+  tags: ["Comic Series"],
+  request: { params: ParamIdThumbIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Thumbnail deleted successfully",
+    },
+  },
 });
 
-app.get("/updated", async (c: Context) => {
-  // TODO: use the model/service to get the updated series from the database
-  return c.json({ message: "Updated Comic Series API is running" }, 200);
+app.openapi(deleteThumbnailRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Deletion` }, 200);
+});
+
+// Get specific thumbnail
+const getThumbnailByIdRoute = createRoute({
+  method: "get",
+  path: "/{id}/thumbnails/{thumbId}",
+  summary: "Get specific thumbnail",
+  tags: ["Comic Series"],
+  request: { params: ParamIdThumbIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Thumbnail retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getThumbnailByIdRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Retrieval` }, 200);
+});
+
+// Update thumbnail cover
+const updateThumbnailCoverRoute = createRoute({
+  method: "put",
+  path: "/{id}/thumbnail/{thumbId}/cover",
+  summary: "Update thumbnail cover",
+  tags: ["Comic Series"],
+  request: { params: ParamIdThumbIdSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Thumbnail cover updated successfully",
+    },
+  },
+});
+
+app.openapi(updateThumbnailCoverRoute, (c) => {
+  const { id } = c.req.valid("param");
+  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Cover Update` }, 200);
+});
+
+// Get latest series
+const getLatestRoute = createRoute({
+  method: "get",
+  path: "/latest",
+  summary: "Get latest comic series",
+  tags: ["Comic Series"],
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Latest series retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getLatestRoute, (_c) => {
+  return _c.json({ message: "Latest Comic Series API is running" }, 200);
+});
+
+// Get alphabetical series
+const getAlphabeticalRoute = createRoute({
+  method: "get",
+  path: "/alphabetical",
+  summary: "Get series alphabetically",
+  tags: ["Comic Series"],
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Alphabetical series retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getAlphabeticalRoute, (_c) => {
+  return _c.json({ message: "Alphabetical Comic Series API is running" }, 200);
+});
+
+// Get series by letter
+const getByLetterRoute = createRoute({
+  method: "get",
+  path: "/alphabetical/{letter}",
+  summary: "Get series by starting letter",
+  tags: ["Comic Series"],
+  request: { params: ParamLetterSchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Series retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getByLetterRoute, (c) => {
+  const { letter } = c.req.valid("param");
+  return c.json({ message: `Alphabetical Comic Series API is running for letter ${letter}` }, 200);
+});
+
+// Get new series
+const getNewRoute = createRoute({
+  method: "get",
+  path: "/new",
+  summary: "Get new comic series",
+  tags: ["Comic Series"],
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "New series retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getNewRoute, (_c) => {
+  return _c.json({ message: "New Comic Series API is running" }, 200);
+});
+
+// Get updated series
+const getUpdatedRoute = createRoute({
+  method: "get",
+  path: "/updated",
+  summary: "Get updated comic series",
+  tags: ["Comic Series"],
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Updated series retrieved successfully",
+    },
+  },
+});
+
+app.openapi(getUpdatedRoute, (_c) => {
+  return _c.json({ message: "Updated Comic Series API is running" }, 200);
 });
 
 export default app;
