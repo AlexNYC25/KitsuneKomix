@@ -1,4 +1,4 @@
-import { Context, Hono } from "hono";
+import { Hono } from "hono";
 import { serveStatic } from "hono/deno";
 
 // Router to serve the Vue.js production build from dist folder
