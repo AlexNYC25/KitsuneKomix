@@ -1,6 +1,6 @@
 import { hashPassword } from "../../utilities/hash.ts";
 import { UserRegistrationInput } from "../../types/index.ts";
-import { createUser, getUserByEmail, getUserById } from "../../db/sqlite/models/users.model.ts";
+import { createUser, getUserByEmail, getUserById, deleteUser } from "../../db/sqlite/models/users.model.ts";
 import { assignLibraryToUser, getComicLibraryById } from "../../db/sqlite/models/comicLibraries.model.ts";
 
 export async function createUserService(
@@ -34,6 +34,35 @@ export async function createUserService(
   });
 
   return newUserId;
+}
+
+/**
+ * @param userId ID of the user to delete
+ * @returns True if the user was deleted, false otherwise.
+ */
+export const deleteUserService = async (userId: number): Promise<boolean> => {
+  // First, check if the user exists
+  try {
+    const user = await getUserById(userId);
+    if (!user) {
+      throw new Error("User does not exist");
+    }
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    throw new Error("Internal server error");
+  }
+
+  // Proceed to delete the user
+  try {
+    const deleted = await deleteUser(userId);
+    if (!deleted) {
+      throw new Error("Failed to delete user");
+    }
+    return true;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw new Error("Internal server error");
+  }
 }
 
 /**
