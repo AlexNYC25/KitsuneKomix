@@ -140,6 +140,11 @@ export const updateUser = async (
   }
 };
 
+/**
+ * Deletes a user by ID.
+ * @param id The ID of the user to delete.
+ * @returns True if the user was deleted, false otherwise.
+ */
 export const deleteUser = async (id: number): Promise<boolean> => {
   const { db, client } = getClient();
 
