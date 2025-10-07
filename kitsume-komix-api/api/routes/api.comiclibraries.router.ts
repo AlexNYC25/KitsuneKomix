@@ -1,20 +1,14 @@
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { getComicLibrariesAvailableToUser } from "../services/comicLibraries.service.ts";
-import { ComicLibrarySchema } from "../../schemas/comicLibrary.schema.ts";
-import { createComicLibrary } from "../../db/sqlite/models/comicLibraries.model.ts";
-import { LibraryRegistrationInput } from "../../types/index.ts";
 import { requireAuth } from "../middleware/authChecks.ts";
 
-// Define a custom Env type for context extensions
+import { createComicLibrary } from "../../db/sqlite/models/comicLibraries.model.ts";
+import { getComicLibrariesAvailableToUser } from "../services/comicLibraries.service.ts";
 
-import type { AccessClaims } from "../../auth/auth.ts";
-import type { JWTPayload } from "jose";
-type AppEnv = {
-  Variables: {
-    user?: AccessClaims & JWTPayload;
-  };
-};
+import { ComicLibrarySchema } from "../../schemas/comicLibrary.schema.ts";
+import { LibraryResponseSchema, ErrorResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
+import type { LibraryRegistrationInput, AppEnv } from "../../types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -29,16 +23,6 @@ const MessageResponseSchema = z.object({
   message: z.string(),
 });
 
-const LibraryResponseSchema = z.object({
-  message: z.string(),
-  libraryId: z.number(),
-});
-
-const ErrorResponseSchema = z.object({
-  message: z.string(),
-  errors: z.record(z.string(), z.any()).optional(),
-});
-
 const ParamIdSchema = z.object({
   id: z.string().openapi({
     param: {
@@ -49,12 +33,6 @@ const ParamIdSchema = z.object({
   }),
 });
 
-const AuthHeaderSchema = z.object({
-  authorization: z.string().openapi({ 
-    example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    description: "Bearer token for authentication"
-  }),
-});
 
 /**
  * GET /api/comic-libraries/
@@ -80,7 +58,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: MessageResponseSchema,
+            schema: LibraryResponseSchema,
           },
         },
         description: "Comic Libraries retrieved successfully",
@@ -98,13 +76,19 @@ app.openapi(
   async (c) => {
     const user = c.get('user');
     if (!user) {
-      return c.json({ message: "Unauthorized" }, 401);
+      return c.json(
+        { message: "Unauthorized" }, 
+        401
+      );
     }
     const userId = parseInt(user.sub, 10);
 
     // Get the libraries for the user from the database
     const libraries = await getComicLibrariesAvailableToUser(userId);
-    return c.json({ message: "Comic Libraries retrieved successfully", libraries }, 200);
+    return c.json(
+      { message: "Comic Libraries retrieved successfully", libraries },
+      200
+    );
   }
 );
 
