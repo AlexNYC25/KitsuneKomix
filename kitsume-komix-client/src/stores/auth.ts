@@ -5,7 +5,7 @@ import { useLibrariesStore } from './libraries';
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null as string | null,
-	refreshToken: null as string | null,
+		refreshToken: null as string | null,
     user: null as { id: number; email: string, admin: boolean } | null,
     loading: false,
     error: null as string | null,
@@ -28,21 +28,25 @@ export const useAuthStore = defineStore('auth', {
 				if (!response.ok) {
 					throw new Error('Network response was not ok');
 				}
+
 				const data = await response.json();
 				this.token = data.accessToken;
 				this.refreshToken = data.refreshToken;
 				this.user = { id: data.user.id, email: data.user.email, admin: data.user.admin };
+
+				const librariesStore = useLibrariesStore();
+				await librariesStore.requestUsersLibraries();
+
+				return true;
 			} catch (error) {
 				if (error instanceof Error){
 					this.error = error.message
 				} else {
 					this.error = String(error)
 				}
+				return false;
 			} finally {
 				this.loading = false;
-
-				const librariesStore = useLibrariesStore();
-				await librariesStore.requestUsersLibraries();
 			}
 		},
 		async refresh() {
