@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { FormFieldState, FormSubmitEvent } from '@primevue/forms';
 
+
 import { reactive } from 'vue';
 import { z } from 'zod';
 import { Form } from '@primevue/forms';
 import { zodResolver } from '@primevue/forms/resolvers/zod';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter, useRoute } from 'vue-router';
 
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
@@ -24,9 +26,17 @@ const validateForm = zodResolver(
   })
 );
 
-const loginFormSubmit = (event: FormSubmitEvent) => {
-    useAuthStore().login({username: event.states.email.value, password: event.states.password.value});
-};  
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+
+const loginFormSubmit = async (event: FormSubmitEvent) => {
+  const success = await authStore.login({username: event.states.email.value, password: event.states.password.value});
+  if (success) {
+    const redirect = (route.query.redirect as string) || '/';
+    router.push(redirect);
+  }
+};
 </script>
 
 <template>
