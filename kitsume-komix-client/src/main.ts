@@ -7,7 +7,7 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 
 import { OhVueIcon, addIcons } from "oh-vue-icons";
-import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp } from "oh-vue-icons/icons";
+import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp, MdManageaccounts, MdLogout } from "oh-vue-icons/icons";
 
 import { useAuthStore } from './stores/auth'
 
@@ -19,7 +19,7 @@ const app = createApp(App)
 
 app.use(createPinia())
 
-addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp);
+addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp, MdManageaccounts, MdLogout);
 app.component("v-icon", OhVueIcon);
 
 app.use(PrimeVue, {
