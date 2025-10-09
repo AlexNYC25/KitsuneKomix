@@ -28,14 +28,14 @@ const libraries = computed(() => {
 </script>
 
 <template>
-  <div id="sidebar">
+  <div id="sidebar" class="flex flex-col h-full">
     <div id="sidebar-header">
       <h2 class="text-2xl font-bold mx-2" style="color: var(--p-secondary-color)">
 				Kitsume Komix
 			</h2>
     </div>
 
-		<div id="sidebar-content">
+		<div id="sidebar-content" class="flex-1 overflow-y-auto">
 			<div id="sidebar-home-section" class="sidebar-section mb-2 mt-2">
 				<Button variant="text" class="w-full flex !justify-start items-center">
 					<v-icon name="la-home-solid" class="ml-2"/>
@@ -74,7 +74,7 @@ const libraries = computed(() => {
 		</div>
 
 
-		<div id="sidebar-user-info" class="flex items-center my-2">
+		<div id="sidebar-user-info" class="flex items-center my-2 mt-auto">
 			<div id="sidebar-user-avatar" class="ml-2">
 				<img src="https://www.gravatar.com/avatar?d=mp&s=40" alt="User Avatar" class="rounded-full block" />
 			</div>
@@ -96,8 +96,11 @@ const libraries = computed(() => {
 			
 		</div>
 
-		<div id="sidebar-footer">
+		<div id="sidebar-footer" class="mt-auto">
 			<p>&copy; 2024 Kitsume Komix</p>
 		</div>
   </div>
 </template>
+
+<style scoped>
+</style>
