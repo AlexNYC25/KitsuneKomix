@@ -45,7 +45,7 @@ libraries.value = libraries.value.map((library) => ({
 </script>
 
 <template>
-  <div id="sidebar" class="	bg-sky-950 text-white w-64 h-screen">
+  <div id="sidebar">
     <div id="sidebar-header">
       <h2>Kitsume Komix</h2>
     </div>
