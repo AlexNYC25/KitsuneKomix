@@ -3,13 +3,13 @@
 </script>
 
 <template>
-	<header class="flex justify-between items-center mb-4 bg-amber-400">
+	<header class="flex justify-between items-center p-4 bg-amber-400">
 		<div id="top-bar-left">
 			<div>
 				<p>Welcome, User!</p>
 			</div>
 		</div>
-		<div id="top-bar-right" class="flex-grow ml-auto max-w-lg">
+		<div id="top-bar-right" class="flex-shrink ml-auto max-w-lg">
 			<InputGroup class="bg-blue-100">
 				<InputText placeholder="Keyword" />
 				<InputGroupAddon>
