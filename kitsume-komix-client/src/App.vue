@@ -7,14 +7,11 @@ import TopBar from './components/TopBar.vue';
 
 <template>
 
-  <main class="flex h-screen w-screen">
-    <SideBar />
-    <div id="top-bar" class="flex-1 bg-gray-100 p-4">
-      <div class="flex flex-col h-full">
-        <TopBar />
-        <RouterView />
-      </div>
-      
+  <main class="flex flex-row h-screen w-full overflow-hidden">
+    <SideBar class="w-64 bg-sky-950 text-white flex-shrink-0"/>
+    <div class="flex-1 flex flex-col min-w-0">
+      <TopBar />
+      <RouterView class="flex-1 overflow-auto" />
     </div>
   </main>
     
