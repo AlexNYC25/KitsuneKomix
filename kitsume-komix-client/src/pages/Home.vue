@@ -124,5 +124,47 @@ const demoCarouselItems = ref([
           </template>
       </Carousel>
     </div>
+
+    <div class="card w-full">
+      <Carousel :value="demoCarouselItems" :numVisible="4" :numScroll="1" :circular="true" :autoplayInterval="3000"
+          :responsiveOptions="demoCarouselResponsiveOptions">
+          <template #item="slotProps">
+              <div class="product-item">
+                  <div class="product-item-content">
+                      <div class="mb-3">
+                          <img src="https://placehold.co/400x400/purple/white" :alt="slotProps.data.name" class="product-image" />
+                      </div>
+                      <div>
+                          <h4 class="mb-1">{{ slotProps.data.name }}</h4>
+                          <h6 class="mt-0 mb-3">{{ slotProps.data.category }}</h6>
+                          <span class="product-badge status-instock">In Stock</span>
+                          <span class="product-price">$ {{ slotProps.data.price }}</span>
+                      </div>
+                  </div>
+              </div>
+          </template>
+      </Carousel>
+    </div>
+
+    <div class="card w-full">
+      <Carousel :value="demoCarouselItems" :numVisible="4" :numScroll="1" :circular="true" :autoplayInterval="3000"
+          :responsiveOptions="demoCarouselResponsiveOptions">
+          <template #item="slotProps">
+              <div class="product-item">
+                  <div class="product-item-content">
+                      <div class="mb-3">
+                          <img src="https://placehold.co/400x400/orange/white" :alt="slotProps.data.name" class="product-image" />
+                      </div>
+                      <div>
+                          <h4 class="mb-1">{{ slotProps.data.name }}</h4>
+                          <h6 class="mt-0 mb-3">{{ slotProps.data.category }}</h6>
+                          <span class="product-badge status-instock">In Stock</span>
+                          <span class="product-price">$ {{ slotProps.data.price }}</span>
+                      </div>
+                  </div>
+              </div>
+          </template>
+      </Carousel>
+    </div>
   </div>
 </template>
