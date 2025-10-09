@@ -71,24 +71,33 @@ const libraries = computed(() => {
 				</PanelMenu>
 			</div>
 
+		</div>
+
+
+		<div id="sidebar-user-info" class="flex items-center my-2">
+			<div id="sidebar-user-avatar" class="ml-2">
+				<img src="https://www.gravatar.com/avatar?d=mp&s=40" alt="User Avatar" class="rounded-full block" />
+			</div>
+			<div id="sidebar-user-details" class="ml-3 mr-2">
+				<div id="sidebar-user-name" class="font-bold">John Doe</div>
+				<div id="sidebar-user-email" class="text-sm text-gray-500">
+					johndoe@example.com
+				</div>
+				<div id="sidebar-user-actions" class="mt-2 flex space-x-2">
+					<Button severity="info" class="p-button-text p-button-sm grow" rounded>
+						<v-icon name="md-manageaccounts" class="mr-1" />
+					</Button>
+
+					<Button severity="info" class="p-button-text p-button-sm grow" rounded>
+						<v-icon name="md-logout" class="mr-1" />
+					</Button>
+				</div>
+			</div>
 			
 		</div>
 
 		<div id="sidebar-footer">
-			<Button label="Account Settings" variant="text" class="w-full justify-start" />
-			<div id="sidebar-footer-user-info" class="flex flex-col items-start mt-2 mb-2">
-				<div id="sidebar-footer-user-avatar" class="mb-1">
-					<img src="https://www.gravatar.com/avatar?d=mp&s=40" alt="User Avatar" class="rounded-full" />
-				</div>
-				<div id="sidebar-footer-user-name" class="font-bold">John Doe</div>
-				<div id="sidebar-footer-user-email" class="text-sm text-gray-500">
-					johndoe@example.com
-				</div>
-			</div>
 			<p>&copy; 2024 Kitsume Komix</p>
 		</div>
   </div>
 </template>
-
-<style scoped>
-</style>
