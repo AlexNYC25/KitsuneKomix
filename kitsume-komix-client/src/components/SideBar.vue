@@ -1,53 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+
+import { useLibrariesStore } from '@/stores/libraries';
 
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import PanelMenu from 'primevue/panelmenu';
 
+const librariesStore = useLibrariesStore();
+
 const bookmarks = ref([
-	{ label: 'Latest Comics' },
-	{ label: 'Latest Series' },
-	{ label: 'All Comics' },
-	{ label: 'All Comic Series'},
-	{ label: 'All Comic Series Groups'},
-	{ label: 'All Comic Readlists'}
+	{ label: 'Latest Comics', icon: 'md-menubook-sharp' },
+	{ label: 'Latest Series', icon: 'io-library-sharp' },
+	{ label: 'All Comics', icon: 'md-menubook-sharp' },
+	{ label: 'All Comic Series', icon: 'io-library-sharp' },
+	{ label: 'All Comic Series Groups', icon: 'hi-solid-library' },
+	{ label: 'All Comic Readlists', icon: 'md-librarybooks-sharp' }
 ]);
 
-const libraries = ref([
-	{
-		label: 'DC Comics',
-		items: bookmarks
-	},
-	{
-		label: 'Marvel Comics',
-		items: bookmarks
-	}
-]);
-
-const iconLookup: Record<string, string> = {
-  'Latest Comics': 'md-menubook-sharp',
-  'Latest Series': 'io-library-sharp',
-  'All Comics': 'md-menubook-sharp',
-  'All Comic Series': 'io-library-sharp',
-  'All Comic Series Groups': 'hi-solid-library',
-  'All Comic Readlists': 'md-librarybooks-sharp',
-};
-
-// Add icons to the libraries structure dynamically
-libraries.value = libraries.value.map((library) => ({
-  ...library,
-  items: library.items.map((item) => ({
-    ...item,
-    icon: iconLookup[item.label] || '', // Add icon if it exists in the lookup
-  })),
-}));
+// Updated computed property to align with the new `libraries` state structure
+const libraries = computed(() => {
+  return librariesStore.sidePanelLibraries.map((library) => ({
+    label: library.label,
+		items: library.items
+  }));
+});
 </script>
 
 <template>
   <div id="sidebar">
     <div id="sidebar-header">
-      <h2>Kitsume Komix</h2>
+      <h2 class="text-2xl font-bold mx-2" style="color: var(--p-secondary-color)">
+				Kitsume Komix
+			</h2>
     </div>
 
 		<div id="sidebar-content">
@@ -60,20 +45,23 @@ libraries.value = libraries.value.map((library) => ({
 				</Button>
 			</div>
 			
-
 			<div id="sidebar-bookmarks-section" >
-				<h3>Bookmarks</h3>
+				<h3 class="text-lg font-semibold mb-2 mx-2" style="color: var(--p-secondary-color)">
+					Bookmarks
+				</h3>
 				<div v-for="bookmark in bookmarks" :key="bookmark.label" class="flex items-center">
 				  <Button :label="bookmark.label" variant="text" class="w-full flex !justify-start items-center">
-					<v-icon v-if="iconLookup[bookmark.label]" :name="iconLookup[bookmark.label]" class="ml-2" />
+					<v-icon v-if="bookmark.icon" :name="bookmark.icon" class="ml-2" />
 					<p class="ml-2">{{ bookmark.label }}</p>
 				  </Button>
 				</div>
 			</div>
 
 			<div id="sidebar-libraries">
-				<h3>Libraries</h3>
-				<PanelMenu :model="libraries" class="">
+				<h3 class="text-lg font-semibold mb-2 mx-2" style="color: var(--p-secondary-color)">
+					Libraries
+				</h3>
+				<PanelMenu :model="libraries" class="mx-2">
 					<template #item="{ item }">
 						<div class="card flex items-center">
 							<v-icon v-if="item.icon" :name="item.icon" class="ml-2" />
