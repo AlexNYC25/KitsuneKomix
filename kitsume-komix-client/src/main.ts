@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
 
 import { OhVueIcon, addIcons } from "oh-vue-icons";
 import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp } from "oh-vue-icons/icons";
@@ -21,7 +22,17 @@ app.use(createPinia())
 addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp);
 app.component("v-icon", OhVueIcon);
 
-app.use(PrimeVue)
+app.use(PrimeVue, {
+    // Default theme configuration
+    theme: {
+        preset: Aura,
+        options: {
+            prefix: 'p',
+            darkModeSelector: 'system',
+            cssLayer: false
+        }
+    }
+ });
 
 const router = createRouter({
   history: createMemoryHistory(),
