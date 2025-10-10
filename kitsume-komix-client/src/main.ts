@@ -37,8 +37,8 @@ app.use(PrimeVue, {
 const router = createRouter({
   history: createMemoryHistory(),
   routes: [
-    { path: '/', component: Home, meta: { requiresAuth: true } },
-    { path: '/login', component: Login, meta: { requiresAuth: false } },
+    { path: '/', component: Home, meta: { requiresAuth: true, layout: 'default' } },
+    { path: '/login', component: Login, meta: { requiresAuth: false, layout: 'auth' } },
   ],
 })
 
