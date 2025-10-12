@@ -4,7 +4,7 @@ WORKDIR /app
 
 USER root
 
-# Install extra packages including su-exec for user switching
+# Install extra packages including gosu for user switching
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     gnupg \
     git \
-    su-exec && \
+    gosu && \
     rm -rf /var/lib/apt/lists/*
 
 USER deno
@@ -69,4 +69,4 @@ ENV DENO_DIR=/deno-dir
 COPY . .
 
 EXPOSE 3000
-CMD ["deno", "run", "--allow-net", "--allow-env", "main.ts"]
+CMD ["deno", "run", "--allow-run=unzip,7z,7za", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "--allow-ffi", "--allow-sys", "main.ts"]
