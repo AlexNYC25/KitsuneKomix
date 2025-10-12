@@ -1,6 +1,15 @@
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { requireAuth } from "../middleware/authChecks.ts";
+import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
+import type { AppEnv } from "../../types/index.ts";
+import { getLatestComicSeriesUserCanAccess } from "../services/comicSeries.service.ts";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono<AppEnv>();
+
+app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', {
+  type: 'http',
+  scheme: 'bearer',
+});
 
 const MessageResponseSchema = z.object({
   message: z.string(),
@@ -31,6 +40,27 @@ const ParamLetterSchema = z.object({
   }),
 });
 
+const ComicSeriesResponseSchema = z.object({
+  data: z.array(
+    z.object({
+      id: z.number(),
+      name: z.string(),
+      description: z.string().nullable(),
+      folderPath: z.string(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      thumbnailUrl: z.string().nullable(),
+    })
+  ),
+  meta: z.object({
+    total: z.number(),
+    page: z.number(),
+    pageSize: z.number(),
+    hasNextPage: z.boolean(),
+  }),
+  message: z.string(),
+});
+
 // Get all series
 const getAllSeriesRoute = createRoute({
   method: "get",
@@ -50,6 +80,63 @@ app.openapi(getAllSeriesRoute, (_c) => {
   // TODO: use the model/service to get the series from the database
   return _c.json({ message: "Comic Series API is running" }, 200);
 });
+
+/**
+ * GET /api/comic-series/latest
+ * 
+ * Get the latest comic series that the current user has access to.
+ * Admins can see all series, regular users only those they have been granted access to.
+ */
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/latest",
+    summary: "Get latest comic series",
+    tags: ["Comic Series"],
+    middleware: [requireAuth],
+    request: { headers: AuthHeaderSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: ComicSeriesResponseSchema } },
+        description: "Latest series retrieved successfully",
+      },
+      400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
+      401: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Unauthorized" },
+      500: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Internal Server Error" },
+    },
+  }),
+  async (c) => {
+    const user = c.get("user");
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    const latestSeries = await getLatestComicSeriesUserCanAccess(userId);
+
+    // Map snake_case properties to camelCase as expected by the schema
+    const mappedSeries = latestSeries.map((series: any) => ({
+      id: series.id,
+      name: series.name,
+      description: series.description,
+      folderPath: series.folder_path ?? "",
+      createdAt: series.created_at,
+      updatedAt: series.updated_at,
+      thumbnailUrl: series.thumbnailUrl ?? null,
+    }));
+
+    return c.json({ 
+      data: mappedSeries,
+      meta: { total: mappedSeries.length, page: 1, pageSize: 10, hasNextPage: false },
+      message: "Latest Comic Series API is running" 
+    }, 200);
+  }
+);
+
 
 // Get series by ID
 const getSeriesByIdRoute = createRoute({
@@ -249,24 +336,6 @@ const updateThumbnailCoverRoute = createRoute({
 app.openapi(updateThumbnailCoverRoute, (c) => {
   const { id } = c.req.valid("param");
   return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Cover Update` }, 200);
-});
-
-// Get latest series
-const getLatestRoute = createRoute({
-  method: "get",
-  path: "/latest",
-  summary: "Get latest comic series",
-  tags: ["Comic Series"],
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Latest series retrieved successfully",
-    },
-  },
-});
-
-app.openapi(getLatestRoute, (_c) => {
-  return _c.json({ message: "Latest Comic Series API is running" }, 200);
 });
 
 // Get alphabetical series
