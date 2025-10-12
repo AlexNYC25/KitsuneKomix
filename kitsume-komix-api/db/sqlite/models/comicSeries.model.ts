@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { comicSeriesBooks, comicSeriesTable } from "../schema.ts";
+import { comicSeriesBooks, comicSeriesTable, comicLibrariesTable, comicLibrariesSeriesTable } from "../schema.ts";
 import type { ComicSeries, NewComicSeries } from "../../../types/index.ts";
 
 export const insertComicSeries = async (
@@ -68,6 +68,34 @@ export const insertComicSeries = async (
     throw error;
   }
 };
+
+export const insertComicSeriesIntoLibrary = async (
+  seriesId: number,
+  libraryId: number,
+): Promise<boolean> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .insert(comicLibrariesSeriesTable)
+      .values({
+        comic_series_id: seriesId,
+        library_id: libraryId,
+      })
+      .onConflictDoNothing()
+      .returning({ id: comicLibrariesSeriesTable.id });
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error inserting comic series into library:", error);
+    throw error;
+  }
+};
+
 
 export const getComicSeriesById = async (
   id: number,
@@ -141,6 +169,48 @@ export const getAllComicSeries = async (): Promise<ComicSeries[]> => {
     return result;
   } catch (error) {
     console.error("Error fetching all comic series:", error);
+    throw error;
+  }
+};
+
+export const getLatestComicSeries = async (
+  limit: number,
+  offset: number = 0,
+  libraryIds?: number[],
+): Promise<ComicSeries[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select(
+        { 
+          id: comicSeriesTable.id,
+          name: comicSeriesTable.name,
+          description: comicSeriesTable.description,
+          folder_path: comicSeriesTable.folder_path,
+          created_at: comicSeriesTable.created_at,
+          updated_at: comicSeriesTable.updated_at,
+        }
+      )
+      .from(comicSeriesTable)
+      .leftJoin(comicLibrariesSeriesTable, eq(comicSeriesTable.id, comicLibrariesSeriesTable.comic_series_id))
+      .leftJoin(comicLibrariesTable, eq(comicLibrariesSeriesTable.library_id, comicLibrariesTable.id))
+      .where(
+        libraryIds && libraryIds.length > 0
+          ? eq(comicLibrariesTable.id, libraryIds[0]) // Simplified for single library ID; extend as needed
+          : undefined,
+      )
+      .groupBy(comicSeriesTable.id)
+      .orderBy(desc(comicSeriesTable.created_at))
+      .limit(limit)
+      .offset(offset);
+    return result;
+  } catch (error) {
+    console.error("Error fetching latest comic series:", error);
     throw error;
   }
 };
