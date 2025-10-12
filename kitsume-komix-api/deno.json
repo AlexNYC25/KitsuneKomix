@@ -20,8 +20,8 @@
     "zod": "npm:zod@^4.1.11"
   },
   "tasks": {
-    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-sys --watch main.ts",
-    "start": "deno run --allow-net main.ts",
+    "dev": "deno run --allow-run=unzip,7z,7za --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-sys --watch main.ts",
+    "start": "deno run --allow-run=unzip,7z,7za --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-sys main.ts",
     "db:generate": "deno run drizzle-kit generate"
   },
   "compilerOptions": {
