@@ -248,6 +248,7 @@ const createLibraryRoute = createRoute({
   summary: "Create a new comic library",
   description: "Create a new comic library in the system",
   tags: ["Comic Libraries"],
+  middleware: [requireAuth],
   request: {
     body: {
       content: {
@@ -256,6 +257,7 @@ const createLibraryRoute = createRoute({
         },
       },
     },
+    headers: AuthHeaderSchema,
   },
   security: [
     { Bearer: [] },
