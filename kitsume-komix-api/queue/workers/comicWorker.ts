@@ -37,6 +37,7 @@ import {
   addComicBookToSeries,
   getComicSeriesByPath,
   insertComicSeries,
+  insertComicSeriesIntoLibrary
 } from "../../db/sqlite/models/comicSeries.model.ts";
 import { getLibraryContainingPath } from "../../db/sqlite/models/comicLibraries.model.ts";
 import { insertComicPage } from "../../db/sqlite/models/comicPages.model.ts";
@@ -495,6 +496,26 @@ async function processComicSeries(
     apiLogger.info(
       `Inserted new comic series with ID: ${seriesId} for path: ${job.data.seriesPath}`,
     );
+
+    // Get the library that contains this series path
+    const library = await getLibraryContainingPath(job.data.seriesPath);
+    if (library) {
+      try {
+        await insertComicSeriesIntoLibrary(seriesId, library.id);
+        apiLogger.info(
+          `Successfully linked comic series ${seriesId} to library ${library.id}`,
+        );
+      } catch (libraryLinkError) {
+        queueLogger.error(
+          `Error linking comic series ${seriesId} to library ${library.id}: ${libraryLinkError}`,
+        );
+        // Don't throw here as the series was successfully created
+      }
+    } else {
+      queueLogger.warn(
+        `No library found containing path: ${job.data.seriesPath}`,
+      );
+    }
 
     // Link the comic book to the newly created series
     try {
