@@ -6,6 +6,8 @@ import type { ComicSeries } from "../../types/index.ts";
 
 type ComicSeriesWithThumbnail = ComicSeries & { thumbnailUrl?: string };
 
+const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
+
 export const getLatestComicSeriesUserCanAccess = async (
   userId: number,
   limit: number = 10,
@@ -29,8 +31,8 @@ export const getLatestComicSeriesUserCanAccess = async (
     const thumbnails = await getThumbnailsByComicBookId(series.id);
     if (thumbnails && thumbnails.length > 0) {
 			const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      // Assuming the first thumbnail is the one we want
-      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path; // Add a thumbnailUrl property to the series
+      // Assuming the first thumbnail is the one we want TODO: improve this logic as we need to sort by some criteria so its not just the first record
+      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
       latestSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     }
 		// TODO: handle case where no thumbnails are found, ideally we should have a default "no cover" image
