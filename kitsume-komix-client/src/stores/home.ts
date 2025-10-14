@@ -1,12 +1,22 @@
 import { defineStore } from 'pinia'
 import { useAuthStore } from './auth'
 
+type SeriesData = {
+  id: number;
+  name: string;
+  description: string | null;
+  folderPath: string;
+  created_at: string;
+  updated_at: string;
+  thumbnailUrl?: string;
+}
+
 export const useHomeStore = defineStore('home', {
   state: () => ({
-    latestSeries: []
+    latestSeries: [] as SeriesData[]
   }),
   getters: {
-    // define your getters here
+    getLatestSeries: (state) => state.latestSeries,
   },
   actions: {
     async fetchLatestSeries() {
@@ -20,9 +30,7 @@ export const useHomeStore = defineStore('home', {
         if (!authStore.token) {
           throw new Error('No authentication token available');
         }
-        
-        console.log('Fetching latest series with token:', authStore.token ? 'Token exists' : 'No token');
-        
+                
         const response = await authStore.apiFetch('http://localhost:8000/api/comic-series/latest');
         
         if (!response.ok) {
@@ -30,7 +38,12 @@ export const useHomeStore = defineStore('home', {
         }
         
         const responseData = await response.json();
-        this.latestSeries = responseData.data;
+
+        // We need to append the full URL to the thumbnail path to make it accessible
+        this.latestSeries = responseData.data.map((series: SeriesData) => ({
+          ...series,
+          thumbnailUrl: 'http://localhost:8000' + series.thumbnailUrl || 'https://placehold.co/400x400/gray/white'
+        }));
       } catch (error) {
         console.error('Error fetching latest series:', error);
         throw error;
