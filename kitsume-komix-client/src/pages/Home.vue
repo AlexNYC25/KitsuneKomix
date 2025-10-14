@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useHomeStore } from '@/stores/home';
 import { useAuthStore } from '@/stores/auth';
 
@@ -19,6 +19,8 @@ onMounted(async () => {
     }
   }
 });
+
+const latestSeries = computed(() => homeStore.getLatestSeries);
 
 const responsiveOptions = ref([
     {
@@ -121,20 +123,18 @@ const demoCarouselItems = ref([
         </Galleria>
     </div>
 
-    <div class="card w-full">
-      <Carousel :value="demoCarouselItems" :numVisible="4" :numScroll="1" :circular="true" :autoplayInterval="3000"
+    <div id="home-latest-series" class="card w-full">
+      <Carousel :value="latestSeries" :numVisible="4" :numScroll="1" :circular="true" :autoplayInterval="3000"
           :responsiveOptions="demoCarouselResponsiveOptions">
           <template #item="slotProps">
               <div class="product-item">
                   <div class="product-item-content">
                       <div class="mb-3">
-                          <img src="https://placehold.co/400x400/blue/white" :alt="slotProps.data.name" class="product-image" />
+                          <img :src="slotProps.data.thumbnailUrl" :alt="slotProps.data.name" class="product-image" />
                       </div>
                       <div>
-                          <h4 class="mb-1">{{ slotProps.data.name }}</h4>
-                          <h6 class="mt-0 mb-3">{{ slotProps.data.category }}</h6>
-                          <span class="product-badge status-instock">In Stock</span>
-                          <span class="product-price">$ {{ slotProps.data.price }}</span>
+                          <h4 class="mb-1">{{ slotProps.data.name  }}</h4>
+                          <h6 class="mt-0 mb-3">{{ slotProps.data.description }}</h6>
                       </div>
                   </div>
               </div>
