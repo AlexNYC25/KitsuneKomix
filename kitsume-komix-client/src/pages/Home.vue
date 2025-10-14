@@ -1,7 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useHomeStore } from '@/stores/home';
+import { useAuthStore } from '@/stores/auth';
+
 import { Galleria } from 'primevue';
 import Carousel from 'primevue/carousel';
+
+const homeStore = useHomeStore();
+const authStore = useAuthStore();
+
+// Fetch data after component is mounted to ensure auth store is ready
+onMounted(async () => {
+  if (authStore.isAuthenticated) {
+    try {
+      await homeStore.fetchLatestSeries();
+    } catch (error) {
+      console.error('Failed to fetch latest series on home page:', error);
+    }
+  }
+});
 
 const responsiveOptions = ref([
     {
