@@ -1,6 +1,5 @@
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
-import { id } from "zod/v4/locales";
 
 export const usersTable = sqliteTable("users", {
   id: int().primaryKey({ autoIncrement: true }),
@@ -182,7 +181,7 @@ export const comicSeriesTable = sqliteTable("comic_series", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
   description: text(),
-  folder_path: text().unique(),
+  folder_path: text().unique().notNull(),
   created_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   updated_at: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
