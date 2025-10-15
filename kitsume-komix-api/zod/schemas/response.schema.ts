@@ -1,5 +1,29 @@
 import { z } from "@hono/zod-openapi";
 
+import { comicSeriesWithThumbnailsSchema } from "./data/comic-series.schema.ts";
+
+export const MessageResponseSchema = z.object({
+  message: z.string(),
+});
+
+export const ErrorResponseSchema = z.object({
+  message: z.string(),
+  errors: z.record(z.string(), z.any()).optional(),
+});
+
+export const ComicSeriesResponseSchema = z.object({
+  data: z.array(
+    comicSeriesWithThumbnailsSchema
+  ),
+  meta: z.object({
+    total: z.number(),
+    page: z.number(),
+    pageSize: z.number(),
+    hasNextPage: z.boolean(),
+  }),
+  message: z.string(),
+});
+
 const librarySchema = z.object({
 	id: z.number(),
 	name: z.string().min(1).max(255),
@@ -18,7 +42,3 @@ export const LibraryResponseSchema = z.object({
   data: librariesSchema.optional().or(librarySchema.optional()),
 });
 
-export const ErrorResponseSchema = z.object({
-  message: z.string(),
-  errors: z.record(z.string(), z.any()).optional(),
-});
