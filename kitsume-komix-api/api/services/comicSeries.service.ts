@@ -10,15 +10,9 @@ const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache d
 
 export const getLatestComicSeriesUserCanAccess = async (
   userId: number,
-  limit: number = 10,
+  limit: number = 20,
   offset: number = 0,
 ): Promise<Array<ComicSeriesWithThumbnail>> => {
-  // Placeholder implementation
-  // In a real implementation, you would check the user's permissions and fetch the latest comic series accordingly
-  console.log(
-    `Fetching latest comic series for user ID: ${userId}, limit: ${limit}, offset: ${offset}`,
-  );
-
   // Get the libraries the user has access to
   const userLibraries = await getUsersComicLibraries(userId);
 
