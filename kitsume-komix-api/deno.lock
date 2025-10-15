@@ -13,6 +13,7 @@
     "npm:@types/node@*": "24.2.0",
     "npm:bcrypt@6": "6.0.0",
     "npm:bullmq@^5.58.9": "5.60.0",
+    "npm:camelcase-keys@10": "10.0.0",
     "npm:chokidar@^4.0.3": "4.0.3",
     "npm:comic-metadata-tool@^1.2.0": "1.2.0",
     "npm:drizzle-kit@~0.31.5": "0.31.5_esbuild@0.25.10",
@@ -646,6 +647,18 @@
         "uuid"
       ]
     },
+    "camelcase-keys@10.0.0": {
+      "integrity": "sha512-dzb1nrmD6llsF6eMZWSpQjVfe1FX4WOkR7HPdX1sMxM5u+1MlnbXodNJ/E6NRArYgMtcwMhiqqemGp/QJV/vrw==",
+      "dependencies": [
+        "camelcase",
+        "map-obj",
+        "quick-lru",
+        "type-fest"
+      ]
+    },
+    "camelcase@8.0.0": {
+      "integrity": "sha512-8WB3Jcas3swSvjIeA2yvCJ+Miyz5l1ZmB6HFb9R1317dt9LCQoswg/BGrmAmkWVEszSrrg4RwmO46qIm2OEnSA=="
+    },
     "chokidar@4.0.3": {
       "integrity": "sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==",
       "dependencies": [
@@ -901,6 +914,9 @@
     "luxon@3.7.2": {
       "integrity": "sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew=="
     },
+    "map-obj@5.0.2": {
+      "integrity": "sha512-K6K2NgKnTXimT3779/4KxSvobxOtMmx1LBZ3NwRxT/MDIR3Br/fQ4Q+WCX5QxjyUR8zg5+RV9Tbf2c5pAWTD2A=="
+    },
     "minimist@1.2.8": {
       "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA=="
     },
@@ -1052,6 +1068,9 @@
     "quick-format-unescaped@4.0.4": {
       "integrity": "sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg=="
     },
+    "quick-lru@7.3.0": {
+      "integrity": "sha512-k9lSsjl36EJdK7I06v7APZCbyGT2vMTsYSRX1Q2nbYmnkBqgUhRkAuzH08Ciotteu/PLJmIF2+tti7o3C/ts2g=="
+    },
     "readdirp@4.1.2": {
       "integrity": "sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg=="
     },
@@ -1150,6 +1169,9 @@
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
     },
+    "type-fest@4.41.0": {
+      "integrity": "sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA=="
+    },
     "undici-types@7.10.0": {
       "integrity": "sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag=="
     },
@@ -1184,6 +1206,7 @@
       "npm:@libsql/client@~0.15.15",
       "npm:bcrypt@6",
       "npm:bullmq@^5.58.9",
+      "npm:camelcase-keys@10",
       "npm:chokidar@^4.0.3",
       "npm:comic-metadata-tool@^1.2.0",
       "npm:drizzle-kit@~0.31.5",

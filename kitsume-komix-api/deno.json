@@ -8,6 +8,7 @@
     "@std/path": "jsr:@std/path@^1.1.2",
     "bcrypt": "npm:bcrypt@^6.0.0",
     "bullmq": "npm:bullmq@^5.58.9",
+    "camelcase-keys": "npm:camelcase-keys@^10.0.0",
     "chokidar": "npm:chokidar@^4.0.3",
     "comic-metadata-tool": "npm:comic-metadata-tool@^1.2.0",
     "drizzle-kit": "npm:drizzle-kit@^0.31.5",
