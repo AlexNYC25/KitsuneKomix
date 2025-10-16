@@ -34,6 +34,7 @@ import {
   comicStoryArcsTable,
   comicBookSeriesGroupsTable,
   comicSeriesGroupsTable,
+  comicSeriesBooksTable
 } from "../schema.ts";
 import type { 
   ComicBook, 
@@ -48,7 +49,6 @@ import {
 import type { ComicBookQueryParams } from "../../../interfaces/RequestParams.interface.ts";
 
 
-// TODO: METADATA loading 
 export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: ComicBookFilteringAndSortingParams): Promise<ComicBook[]> => {
 
   const { db, client } = getClient();
@@ -872,8 +872,8 @@ export const getComicBooksByLibrary = async (
   }
 };
 
-export const getComicBooksBySeries = async (
-  series: string,
+export const getComicBooksBySeriesId = async (
+  seriesId: number,
 ): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
@@ -882,9 +882,47 @@ export const getComicBooksBySeries = async (
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).where(
-      eq(comicBooksTable.series, series),
-    );
+    const result = 
+      await db
+      .select(
+        { id: comicBooksTable.id,
+          library_id: comicBooksTable.library_id,
+          file_path: comicBooksTable.file_path,
+          hash: comicBooksTable.hash,
+          title: comicBooksTable.title,
+          series: comicBooksTable.series,
+          issue_number: comicBooksTable.issue_number,
+          count: comicBooksTable.count,
+          volume: comicBooksTable.volume,
+          alternate_series: comicBooksTable.alternate_series,
+          alternate_issue_number: comicBooksTable.alternate_issue_number,
+          alternate_count: comicBooksTable.alternate_count,
+          page_count: comicBooksTable.page_count,
+          file_size: comicBooksTable.file_size,
+          summary: comicBooksTable.summary,
+          notes: comicBooksTable.notes,
+          year: comicBooksTable.year,
+          month: comicBooksTable.month,
+          day: comicBooksTable.day,
+          publisher: comicBooksTable.publisher,
+          publication_date: comicBooksTable.publication_date,
+          scan_info: comicBooksTable.scan_info,
+          languge: comicBooksTable.languge,
+          format: comicBooksTable.format,
+          black_and_white: comicBooksTable.black_and_white,
+          manga: comicBooksTable.manga,
+          reading_direction: comicBooksTable.reading_direction,
+          review: comicBooksTable.review,
+          age_rating: comicBooksTable.age_rating,
+          community_rating: comicBooksTable.community_rating,
+          created_at: comicBooksTable.created_at,
+          updated_at: comicBooksTable.updated_at }
+      )
+      .from(comicBooksTable)
+      .innerJoin(comicSeriesBooksTable, eq(comicBooksTable.id, comicSeriesBooksTable.comic_book_id))
+      .where(eq(comicSeriesBooksTable.comic_series_id, seriesId))
+      .orderBy(asc(comicBooksTable.issue_number));
+      
     return result;
   } catch (error) {
     console.error("Error fetching comic books by series:", error);
