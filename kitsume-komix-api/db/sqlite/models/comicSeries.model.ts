@@ -2,7 +2,7 @@ import { eq, desc } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { comicSeriesBooks, comicSeriesTable, comicLibrariesTable, comicLibrariesSeriesTable } from "../schema.ts";
+import { comicSeriesBooksTable, comicSeriesTable, comicLibrariesTable, comicLibrariesSeriesTable } from "../schema.ts";
 import type { ComicSeries, NewComicSeries } from "../../../types/index.ts";
 
 export const insertComicSeries = async (
@@ -284,13 +284,13 @@ export const addComicBookToSeries = async (
 
   try {
     const result = await db
-      .insert(comicSeriesBooks)
+      .insert(comicSeriesBooksTable)
       .values({
         comic_series_id: seriesId,
         comic_book_id: comicBookId,
       })
       .onConflictDoNothing()
-      .returning({ id: comicSeriesBooks.id });
+      .returning({ id: comicSeriesBooksTable.id });
 
     return result.length > 0;
   } catch (error) {
@@ -311,8 +311,8 @@ export const getComicBooksInSeries = async (
   try {
     const result = await db
       .select()
-      .from(comicSeriesBooks)
-      .where(eq(comicSeriesBooks.comic_series_id, seriesId));
+      .from(comicSeriesBooksTable)
+      .where(eq(comicSeriesBooksTable.comic_series_id, seriesId));
 
     return result.map((row) => row.id);
   } catch (error) {
@@ -333,8 +333,8 @@ export const getSeriesIdFromComicBook = async (
   try {
     const result = await db
       .select()
-      .from(comicSeriesBooks)
-      .where(eq(comicSeriesBooks.comic_book_id, comicBookId));
+      .from(comicSeriesBooksTable)
+      .where(eq(comicSeriesBooksTable.comic_book_id, comicBookId));
 
     return result.length > 0 ? result[0].comic_series_id : null;
   } catch (error) {
