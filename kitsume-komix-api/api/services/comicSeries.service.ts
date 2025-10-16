@@ -1,6 +1,7 @@
 
 import { getUsersComicLibraries } from "../../db/sqlite/models/comicLibraries.model.ts";
 import { getLatestComicSeries } from "../../db/sqlite/models/comicSeries.model.ts";
+import { getComicBooksBySeriesId } from "../../db/sqlite/models/comicBooks.model.ts";
 import { getThumbnailsByComicBookId } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
 import type { ComicSeries } from "../../types/index.ts";
 
@@ -13,25 +14,28 @@ export const getLatestComicSeriesUserCanAccess = async (
   limit: number = 20,
   offset: number = 0,
 ): Promise<Array<ComicSeriesWithThumbnail>> => {
-  // Get the libraries the user has access to
   const userLibraries = await getUsersComicLibraries(userId);
 
-  // pass the library IDs to the comic series query to filter results
   const libraryIds = userLibraries.map(lib => lib.id);
   const latestSeries = await getLatestComicSeries(limit, offset, libraryIds);
+
 	const latestSeriesWithThumbnails: Array<ComicSeriesWithThumbnail> = [];
-  // for the resulting series we then need to get the "first" comic in each series to get the cover image
+  
   for (const series of latestSeries) {
-    const thumbnails = await getThumbnailsByComicBookId(series.id);
+    const comicBooksForCurrentSeries = await getComicBooksBySeriesId(series.id);
+    if (comicBooksForCurrentSeries.length === 0) {
+      // No comic books in this series, skip to next series
+      continue;
+    }
+
+    const firstComicBook = comicBooksForCurrentSeries[0];
+
+    const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
 			const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      // Assuming the first thumbnail is the one we want TODO: improve this logic as we need to sort by some criteria so its not just the first record
       seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
       latestSeriesWithThumbnails.push(seriesWithThumbnailUrl);
-    }
-		// TODO: handle case where no thumbnails are found, ideally we should have a default "no cover" image
-		// If no thumbnails found, we can still push the series without a thumbnailUrl
-		else {
+    } else {
 			latestSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
 		}
 	}
