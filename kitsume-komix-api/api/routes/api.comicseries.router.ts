@@ -3,7 +3,7 @@ import camelcasekeys from "camelcase-keys";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
-import { getLatestComicSeriesUserCanAccess } from "../services/comicSeries.service.ts";
+import { getLatestComicSeriesUserCanAccess, getUpdatedComicSeriesUserCanAccess } from "../services/comicSeries.service.ts";
 
 import type { AppEnv } from "../../types/index.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
@@ -124,16 +124,50 @@ app.openapi(
     path: "/updated",
     summary: "Get updated comic series",
     tags: ["Comic Series"],
+    middleware: [requireAuth],
+    request: { headers: AuthHeaderSchema, query: PaginationQuerySchema },
     responses: {
       200: {
-        content: { "application/json": { schema: MessageResponseSchema } },
-        description: "Updated series retrieved successfully",
+        content: { "application/json": { schema: ComicSeriesResponseSchema } },
+        description: "Latest series retrieved successfully",
       },
+      400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
+      401: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Unauthorized" },
+      500: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Internal Server Error" },
     },
   }), 
-  (_c) => {
-    // TODO: use the model/service to get the series from the database
-    return _c.json({ message: "Updated Comic Series API is running" }, 200);
+  async (c) => {
+    const user = c.get("user");
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    const { page = 1, pageSize = 20 } = c.req.valid("query");
+
+    const offset = (page - 1) * pageSize;
+    const limit = pageSize;
+
+    const latestSeries = await getUpdatedComicSeriesUserCanAccess(userId, limit, offset);
+
+    // Convert keys to camelCase and ensure correct types for folderPath and thumbnailUrl
+    const formatedLatestSeries = latestSeries.map((series) => {
+      const camel = camelcasekeys(series, { deep: true });
+      return {
+        ...camel,
+        thumbnailUrl: camel.thumbnailUrl ?? null,
+      };
+    });
+
+    return c.json({ 
+      data: formatedLatestSeries,
+      meta: { total: formatedLatestSeries.length, page: 1, pageSize: 10, hasNextPage: false },
+      message: "Latest Comic Series API is running" 
+    }, 200);
   }
 );
 
