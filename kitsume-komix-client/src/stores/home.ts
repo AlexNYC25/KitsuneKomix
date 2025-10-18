@@ -13,10 +13,12 @@ type SeriesData = {
 
 export const useHomeStore = defineStore('home', {
   state: () => ({
-    latestSeries: [] as SeriesData[]
+    latestSeries: [] as SeriesData[],
+    updatedSeries: [] as SeriesData[],
   }),
   getters: {
     getLatestSeries: (state) => state.latestSeries,
+    getUpdatedSeries: (state) => state.updatedSeries,
   },
   actions: {
     async fetchLatestSeries() {
@@ -48,6 +50,36 @@ export const useHomeStore = defineStore('home', {
         console.error('Error fetching latest series:', error);
         throw error;
       }
-    }
+    },
+    async fetchUpdatedSeries() {
+      try {
+        const authStore = useAuthStore();
+        
+        if (!authStore.isAuthenticated) {
+          throw new Error('User is not authenticated');
+        }
+
+        if (!authStore.token) {
+          throw new Error('No authentication token available');
+        }
+                
+        const response = await authStore.apiFetch('http://localhost:8000/api/comic-series/updated');
+        
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+        }
+        
+        const responseData = await response.json();
+
+        // We need to append the full URL to the thumbnail path to make it accessible
+        this.updatedSeries = responseData.data.map((series: SeriesData) => ({
+          ...series,
+          thumbnailUrl: 'http://localhost:8000' + series.thumbnailUrl || 'https://placehold.co/400x400/gray/white'
+        }));
+      } catch (error) {
+        console.error('Error fetching updated series:', error);
+        throw error;
+      }
+    },
   }
 })
