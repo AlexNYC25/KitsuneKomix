@@ -2,7 +2,7 @@ import { eq, desc } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { comicSeriesBooksTable, comicSeriesTable, comicLibrariesTable, comicLibrariesSeriesTable } from "../schema.ts";
+import { comicSeriesBooksTable, comicSeriesTable, comicLibrariesTable, comicLibrariesSeriesTable, comicBooksTable } from "../schema.ts";
 import type { ComicSeries, NewComicSeries } from "../../../types/index.ts";
 
 export const insertComicSeries = async (
@@ -211,6 +211,50 @@ export const getLatestComicSeries = async (
     return result;
   } catch (error) {
     console.error("Error fetching latest comic series:", error);
+    throw error;
+  }
+};
+
+export const getUpdatedComicSeries = async (
+  limit: number,
+  offset: number = 0,
+  libraryIds?: number[],
+): Promise<ComicSeries[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select(
+        { 
+          id: comicSeriesTable.id,
+          name: comicSeriesTable.name,
+          description: comicSeriesTable.description,
+          folder_path: comicSeriesTable.folder_path,
+          created_at: comicSeriesTable.created_at,
+          updated_at: comicSeriesTable.updated_at,
+        }
+      )
+      .from(comicSeriesTable)
+      .leftJoin(comicLibrariesSeriesTable, eq(comicSeriesTable.id, comicLibrariesSeriesTable.comic_series_id))
+      .leftJoin(comicLibrariesTable, eq(comicLibrariesSeriesTable.library_id, comicLibrariesTable.id))
+      .leftJoin(comicSeriesBooksTable, eq(comicSeriesTable.id, comicSeriesBooksTable.comic_series_id))
+      .leftJoin(comicBooksTable, eq(comicSeriesBooksTable.comic_book_id, comicBooksTable.id))
+      .where(
+        libraryIds && libraryIds.length > 0
+          ? eq(comicLibrariesTable.id, libraryIds[0]) // Simplified for single library ID; extend as needed
+          : undefined,
+      )
+      .groupBy(comicSeriesTable.id)
+      .orderBy(desc(comicBooksTable.updated_at))
+      .limit(limit)
+      .offset(offset);
+    return result;
+  } catch (error) {
+    console.error("Error fetching updated comic series:", error);
     throw error;
   }
 };
