@@ -7,6 +7,8 @@ import { Galleria } from 'primevue';
 import Carousel from 'primevue/carousel';
 import Button from 'primevue/button';
 
+import ComicSeriesCarousel from '@/components/ComicSeriesCarousel.vue';
+
 const homeStore = useHomeStore();
 const authStore = useAuthStore();
 
@@ -127,87 +129,14 @@ const demoCarouselItems = ref([
 		</div>
 
 		<div id="home-latest-series" class="card w-full">
-			<Carousel 
-				:value="latestSeries" 
-				:numVisible="4" 
-				:numScroll="1" 
-				:circular="true" 
-				:autoplayInterval="3000"
-				:responsiveOptions="demoCarouselResponsiveOptions" 
-				class="py-3"
-				:pt="{
-					contentContainer: () => ({
-						class: 'flex'
-					}),
-					content: () => ({
-						class: 'flex w-full max-w-none'
-					}),
-					itemList: () => ({
-						class: 'flex'
-					}),
-					pcNextButton: () => ({
-						root: 'ml-auto'
-					})
-				}"
-				unstyled
-			>
-				<template #item="slotProps">
-					<div class="comic-series-card px-4 py-2">
-						<div class="comic-series-card-image-container mb-3">
-							<img :src="slotProps.data.thumbnailUrl" :alt="slotProps.data.name"
-								class="h-80 object-contain" />
-						</div>
-						<div class="comic-series-card-details">
-							<h4 class="mb-1">{{ slotProps.data.name }}</h4>
-						</div>
-						<div class="comic-series-card-actions flex justify-end">
-							<Button label="View" class="w-20" />
-
-						</div>
-					</div>
-				</template>
-			</Carousel>
+			<ComicSeriesCarousel :comicSeriesData="latestSeries" />
 		</div>
 
 		<div id="home-updated-series" class="card w-full">
-			<Carousel :value="updatedSeries" :numVisible="4" :numScroll="1" :circular="true" :autoplayInterval="3000"
-				:responsiveOptions="demoCarouselResponsiveOptions">
-				<template #item="slotProps">
-					<div class="product-item">
-						<div class="product-item-content">
-							<div class="mb-3">
-								<img :src="slotProps.data.thumbnailUrl" :alt="slotProps.data.name" class="product-image" />
-							</div>
-							<div>
-								<h4 class="mb-1">{{ slotProps.data.name }}</h4>
-								<h6 class="mt-0 mb-3">{{ slotProps.data.description }}</h6>
-							</div>
-						</div>
-					</div>
-				</template>
-			</Carousel>
+			<ComicSeriesCarousel :comicSeriesData="updatedSeries" />
 		</div>
 
-		<div class="card w-full">
-			<Carousel :value="demoCarouselItems" :numVisible="4" :numScroll="1" :circular="true" :autoplayInterval="3000"
-				:responsiveOptions="demoCarouselResponsiveOptions">
-				<template #item="slotProps">
-					<div class="product-item">
-						<div class="product-item-content">
-							<div class="mb-3">
-								<img src="https://placehold.co/400x400/orange/white" :alt="slotProps.data.name" class="product-image" />
-							</div>
-							<div>
-								<h4 class="mb-1">{{ slotProps.data.name }}</h4>
-								<h6 class="mt-0 mb-3">{{ slotProps.data.category }}</h6>
-								<span class="product-badge status-instock">In Stock</span>
-								<span class="product-price">$ {{ slotProps.data.price }}</span>
-							</div>
-						</div>
-					</div>
-				</template>
-			</Carousel>
-		</div>
+
 	</div>
 </template>
 
