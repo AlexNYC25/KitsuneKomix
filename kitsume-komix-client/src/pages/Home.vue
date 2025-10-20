@@ -99,11 +99,11 @@ const images = ref(
 		</div>
 
 		<div id="home-latest-series" class="card w-full">
-			<ComicSeriesCarousel :comicSeriesData="latestSeries" />
+			<ComicSeriesCarousel :comicSeriesData="latestSeries" labelText="Latest Series" />
 		</div>
 
 		<div id="home-updated-series" class="card w-full">
-			<ComicSeriesCarousel :comicSeriesData="updatedSeries" />
+			<ComicSeriesCarousel :comicSeriesData="updatedSeries" labelText="Updated Series" />
 		</div>
 
 
