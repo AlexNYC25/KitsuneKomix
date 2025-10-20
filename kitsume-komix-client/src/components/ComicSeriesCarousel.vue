@@ -27,7 +27,7 @@ const scrollRight = () => {
       <Button
         @click="scrollLeft"
         unstyled
-        class="absolute left-0 top-1/2 -translate-y-1/2 shadow px-2 py-1 z-20 hover:bg-slate-600/50"
+        class="left-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-20 hover:bg-slate-600/50"
       >
         <
       </Button>
@@ -63,7 +63,7 @@ const scrollRight = () => {
       <Button
         @click="scrollRight"
         unstyled
-        class="absolute right-0 top-1/2 -translate-y-1/2 shadow px-2 py-1 z-10"
+        class="right-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-10 hover:bg-slate-600/50"
       >
         >
       </Button>
