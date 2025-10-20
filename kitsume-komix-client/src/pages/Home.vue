@@ -82,36 +82,6 @@ const images = ref(
 	]
 )
 
-const demoCarouselResponsiveOptions = ref([
-	{
-		breakpoint: '991px',
-		numVisible: 4,
-		numScroll: 1
-	},
-	{
-		breakpoint: '767px',
-		numVisible: 3,
-		numScroll: 1
-	},
-	{
-		breakpoint: '575px',
-		numVisible: 1,
-		numScroll: 1
-	}
-]);
-const demoCarouselItems = ref([
-	{ name: 'Product 1', category: 'Category 1', price: 10.00 },
-	{ name: 'Product 2', category: 'Category 2', price: 20.00 },
-	{ name: 'Product 3', category: 'Category 3', price: 30.00 },
-	{ name: 'Product 4', category: 'Category 4', price: 40.00 },
-	{ name: 'Product 5', category: 'Category 5', price: 50.00 },
-	{ name: 'Product 6', category: 'Category 6', price: 60.00 },
-	{ name: 'Product 7', category: 'Category 7', price: 70.00 },
-	{ name: 'Product 8', category: 'Category 8', price: 80.00 },
-	{ name: 'Product 9', category: 'Category 9', price: 90.00 },
-	{ name: 'Product 10', category: 'Category 10', price: 100.00 }
-])
-
 </script>
 
 <template>
