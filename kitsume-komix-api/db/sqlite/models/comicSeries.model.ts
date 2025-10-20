@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
@@ -201,7 +201,7 @@ export const getLatestComicSeries = async (
       .leftJoin(comicLibrariesTable, eq(comicLibrariesSeriesTable.library_id, comicLibrariesTable.id))
       .where(
         libraryIds && libraryIds.length > 0
-          ? eq(comicLibrariesTable.id, libraryIds[0]) // Simplified for single library ID; extend as needed
+          ? inArray(comicLibrariesTable.id, libraryIds)
           : undefined,
       )
       .groupBy(comicSeriesTable.id)
@@ -245,7 +245,7 @@ export const getUpdatedComicSeries = async (
       .leftJoin(comicBooksTable, eq(comicSeriesBooksTable.comic_book_id, comicBooksTable.id))
       .where(
         libraryIds && libraryIds.length > 0
-          ? eq(comicLibrariesTable.id, libraryIds[0]) // Simplified for single library ID; extend as needed
+          ? inArray(comicLibrariesTable.id, libraryIds)
           : undefined,
       )
       .groupBy(comicSeriesTable.id)
