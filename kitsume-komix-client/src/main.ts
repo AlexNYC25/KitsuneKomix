@@ -14,6 +14,7 @@ import { useAuthStore } from './stores/auth'
 import App from './App.vue';
 import Home from './pages/Home.vue';
 import Login from './pages/Login.vue'
+import ComicSeries from './pages/ComicSeries.vue';
 
 const app = createApp(App)
 
@@ -39,6 +40,7 @@ const router = createRouter({
   routes: [
     { path: '/', component: Home, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/login', component: Login, meta: { requiresAuth: false, layout: 'auth' } },
+    { path: '/comic-series/:id', component: ComicSeries, meta: { requiresAuth: true, layout: 'default' } }
   ],
 })
 
