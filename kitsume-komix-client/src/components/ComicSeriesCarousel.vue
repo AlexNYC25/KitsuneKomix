@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 import Button from 'primevue/button';
 
@@ -12,6 +15,10 @@ const scrollLeft = () => {
 
 const scrollRight = () => {
   carousel.value?.scrollBy({ left: 300, behavior: 'smooth' })
+}
+
+const goToComicSeries = (id: string) => {
+	router.push(`/comic-series/${id}`);
 }
 </script>
 
@@ -53,7 +60,10 @@ const scrollRight = () => {
 
           <!-- Footer -->
           <div class="relative w-full h-12 p-2 my-5 ">
-            <button class="absolute bottom-0 right-0 bg-blue-500 text-white px-4 py-2 mr-3 rounded hover:bg-blue-600">
+            <button 
+							@click="goToComicSeries(item.id)"
+							class="absolute bottom-0 right-0 bg-blue-500 text-white px-4 py-2 mr-3 rounded hover:bg-blue-600"
+						>
               Read
             </button>
           </div>
