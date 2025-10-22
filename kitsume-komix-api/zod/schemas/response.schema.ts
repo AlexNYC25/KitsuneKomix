@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 
-import { comicSeriesWithThumbnailsSchema } from "./data/comic-series.schema.ts";
+import { comicSeriesWithMetadataAndThumbnailsSchema, comicSeriesWithThumbnailsSchema } from "./data/comic-series.schema.ts";
 
 export const MessageResponseSchema = z.object({
   message: z.string(),
@@ -21,6 +21,11 @@ export const ComicSeriesResponseSchema = z.object({
     pageSize: z.number(),
     hasNextPage: z.boolean(),
   }),
+  message: z.string(),
+});
+
+export const ComicSeriesWithMetadataAndThumbnailsResponseSchema = z.object({
+  data: comicSeriesWithMetadataAndThumbnailsSchema,
   message: z.string(),
 });
 
