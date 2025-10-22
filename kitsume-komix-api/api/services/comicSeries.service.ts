@@ -1,11 +1,17 @@
 
 import { getUsersComicLibraries } from "../../db/sqlite/models/comicLibraries.model.ts";
-import { getLatestComicSeries, getUpdatedComicSeries } from "../../db/sqlite/models/comicSeries.model.ts";
+import { getLatestComicSeries, getUpdatedComicSeries, getComicSeriesById, getComicSeriesMetadataById } from "../../db/sqlite/models/comicSeries.model.ts";
 import { getComicBooksBySeriesId } from "../../db/sqlite/models/comicBooks.model.ts";
 import { getThumbnailsByComicBookId } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
-import type { ComicSeries } from "../../types/index.ts";
+import type { ComicSeries, ComicSeriesWithMetadata } from "../../types/index.ts";
 
+// Extended type including optional thumbnail URL
 type ComicSeriesWithThumbnail = ComicSeries & { thumbnailUrl?: string };
+
+// Extended type including thumbnail URL and metadata object who may be empty or be a full metadata record
+type ComicSeriesWithMetadataAndThumbnail = ComicSeriesWithThumbnail & {
+  metadata: ComicSeriesWithMetadata | Record<PropertyKey, never>;
+};
 
 const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
 
@@ -75,4 +81,35 @@ export const getUpdatedComicSeriesUserCanAccess = async (
   }
 
   return updatedSeriesWithThumbnails;
+}
+
+export const getSelectedComicSeriesDetails = async (
+  seriesId: number,
+): Promise<ComicSeriesWithMetadataAndThumbnail | null> => {
+  const series = await getComicSeriesById(seriesId);
+  if (!series) {
+    return null;
+  }
+
+  const comicBooksForCurrentSeries = await getComicBooksBySeriesId(series.id);
+  if (comicBooksForCurrentSeries.length === 0) {
+    return null;
+  }
+
+  const firstComicBook = comicBooksForCurrentSeries[0];
+  const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
+
+  const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
+  if (thumbnails && thumbnails.length > 0) {
+    seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
+  }
+
+  const metadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
+
+  const seriesWithMetadataAndThumbnail = {
+    ...seriesWithThumbnailUrl,
+    metadata: metadata ? { ...metadata } : {},
+  };
+
+  return seriesWithMetadataAndThumbnail;
 }
