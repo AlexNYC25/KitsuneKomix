@@ -3,12 +3,16 @@ import camelcasekeys from "camelcase-keys";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
-import { getLatestComicSeriesUserCanAccess, getUpdatedComicSeriesUserCanAccess } from "../services/comicSeries.service.ts";
+import { 
+  getLatestComicSeriesUserCanAccess, 
+  getUpdatedComicSeriesUserCanAccess, 
+  getSelectedComicSeriesDetails 
+} from "../services/comicSeries.service.ts";
 
 import type { AppEnv } from "../../types/index.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import { ParamIdSchema, ParamLetterSchema, ParamIdThumbnailIdSchema, PaginationQuerySchema } from "../../zod/schemas/request.schema.ts";
-import { MessageResponseSchema, ComicSeriesResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { MessageResponseSchema, ComicSeriesResponseSchema, ComicSeriesWithMetadataAndThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
 
 
 const app = new OpenAPIHono<AppEnv>();
@@ -172,25 +176,61 @@ app.openapi(
 );
 
 
-// Get series by ID
-const getSeriesByIdRoute = createRoute({
-  method: "get",
-  path: "/{id}",
-  summary: "Get a comic series by ID",
-  tags: ["Comic Series"],
-  request: { params: ParamIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Series retrieved successfully",
+/**
+ * GET /api/comic-series/{id}
+ * 
+ * Get a comic series by ID.
+ */
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}",
+    summary: "Get a comic series by ID",
+    tags: ["Comic Series"],
+    middleware: [requireAuth],
+    request: { params: ParamIdSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: ComicSeriesWithMetadataAndThumbnailsResponseSchema } },
+        description: "Series retrieved successfully",
+      },
+      400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
+      401: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Unauthorized" },
+      404: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Not Found" },
+      500: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Internal Server Error" },
     },
-  },
-});
+  }), 
+  async (c) => {
+    const user = c.get("user");
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
 
-app.openapi(getSeriesByIdRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id}` }, 200);
-});
+    const { id } = c.req.valid("param");
+    if (!id) {
+      return c.json({ message: "Invalid series ID" }, 400);
+    }
+
+    try {
+      const series = await getSelectedComicSeriesDetails(parseInt(id, 10));
+      if (!series) {
+        return c.json({ message: "Comic series not found" }, 404);
+      }
+      const camel = camelcasekeys(series, { deep: true });
+      const comicSeriesData = { 
+        ...camel, 
+        thumbnailUrl: camel.thumbnailUrl ?? null,
+      };
+      return c.json({ 
+        data: comicSeriesData,
+        message: "Selected Comic Series API is running" 
+      }, 200);
+    } catch (error) {
+      return c.json({ message: "Internal Server Error" + error }, 500);
+    }
+
+  }
+);
 
 // Analyze series
 const analyzeSeriesRoute = createRoute({
