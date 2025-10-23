@@ -46,7 +46,10 @@ onMounted(async () => {
 				class="comic-series-page-details-info h-full m-6"
 			>
 				<div class="comic-series-page-details-title text-shadow-lg font-bold text-4xl">
-					{{ comicSeriesData?.name || 'Comic Series Title' }}
+					{{ comicSeriesData?.name }}
+				</div>
+				<div class="comic-series-page-details-description mt-4 text-lg">
+					{{ comicSeriesData?.description }}
 				</div>
 			</div>
 		</div>
