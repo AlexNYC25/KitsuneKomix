@@ -1,4 +1,28 @@
 <script setup lang="ts">
+import { onMounted, ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useComicSeriesStore } from '@/stores/comic-series';
+
+const comicSeriesStore = useComicSeriesStore();
+const comicSeriesData = ref<any | null>(null);
+
+onMounted(async () => {
+	const route = useRoute();
+	const id = route.params.id;
+	const idStr = Array.isArray(id) ? id[0] : id;
+	const idNum = parseInt(idStr, 10);
+	if (isNaN(idNum)) {
+		// Handle invalid ID, e.g., redirect or show error
+		return;
+	}
+	const lookupResult = await comicSeriesStore.lookupComicSeriesById(idNum);
+	if (lookupResult) {
+		comicSeriesData.value = lookupResult;
+	} else {
+		// Handle not found, e.g., redirect or show error
+		console.log('Comic series not found');
+	}
+});
 
 </script>
 
@@ -22,7 +46,7 @@
 				class="comic-series-page-details-info h-full m-6"
 			>
 				<div class="comic-series-page-details-title text-shadow-lg font-bold text-4xl">
-					Comic Series Title
+					{{ comicSeriesData?.name || 'Comic Series Title' }}
 				</div>
 			</div>
 		</div>
