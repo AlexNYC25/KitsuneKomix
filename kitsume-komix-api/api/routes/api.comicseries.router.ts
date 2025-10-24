@@ -12,7 +12,7 @@ import {
 import type { AppEnv } from "../../types/index.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import { ParamIdSchema, ParamLetterSchema, ParamIdThumbnailIdSchema, PaginationQuerySchema } from "../../zod/schemas/request.schema.ts";
-import { MessageResponseSchema, ComicSeriesResponseSchema, ComicSeriesWithMetadataAndThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { MessageResponseSchema, ComicSeriesResponseSchema, ComicSeriesWithMetadataAndThumbnailsResponseSchema, ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
 
 
 const app = new OpenAPIHono<AppEnv>();
@@ -191,7 +191,7 @@ app.openapi(
     request: { params: ParamIdSchema },
     responses: {
       200: {
-        content: { "application/json": { schema: ComicSeriesWithMetadataAndThumbnailsResponseSchema } },
+        content: { "application/json": { schema: ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema } },
         description: "Series retrieved successfully",
       },
       400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
@@ -217,12 +217,20 @@ app.openapi(
         return c.json({ message: "Comic series not found" }, 404);
       }
       const camel = camelcasekeys(series, { deep: true });
+      // Ensure every comic book object has thumbnailUrl explicitly set to string | null
+      camel.comics = {
+        ...camel.comics,
+        books: (camel.comics?.books || []).map((element: any) => ({
+          ...element,
+          thumbnailUrl: element.thumbnailUrl ?? null,
+        })),
+      };
       const comicSeriesData = { 
         ...camel, 
-        thumbnailUrl: camel.thumbnailUrl ?? null,
+        thumbnailUrl: camel.thumbnailUrl ?? null
       };
       return c.json({ 
-        data: comicSeriesData,
+        data: comicSeriesData as any,
         message: "Selected Comic Series API is running" 
       }, 200);
     } catch (error) {
