@@ -94,7 +94,7 @@ export const comicBooksTable = sqliteTable("comic_books", {
   publisher: text(),
   publication_date: text(),
   scan_info: text(),
-  languge: text(),
+  language: text(),
   format: text(),
   black_and_white: int(),
   manga: int(),
