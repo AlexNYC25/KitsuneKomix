@@ -32,7 +32,7 @@ onMounted(async () => {
 		class="comic-series-page flex flex-col w-full h-full p-4 overflow-auto"
 	>
 		<div
-			class="comic-series-page-details bg-cyan-800 h-120 w-full rounded-2xl flex"
+			class="comic-series-page-details bg-cyan-800 h-auto w-full rounded-2xl flex object-cover"
 		>
 			<!-- Placeholder for ComicSeries details -->
 			<div class="comic-series-page-details-thumbnail h-full rounded-l-2xl ">
@@ -67,14 +67,14 @@ onMounted(async () => {
 					class="comic-series-page-details-contents mt-4"
 				>
 					<div
-						class="comic-series-page-detail-contents-characters flex flex-wrap w-full"
+						class="comic-series-page-detail-contents-characters"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Characters'" :comicMetadataDetails="comicSeriesData?.metadata.characters" />
 					</div>
 
 
 					<div
-						class="comic-series-page-detail-contents-teams flex flex-wrap w-full"
+						class="comic-series-page-detail-contents-teams"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Teams'" :comicMetadataDetails="comicSeriesData?.metadata.teams" />
 					</div>
@@ -84,39 +84,39 @@ onMounted(async () => {
 					class="comic-series-page-detail-credits mt-4"
 				>
 					<div
-						class="comic-series-page-detail-credits-writers flex flex-wrap"
+						class="comic-series-page-detail-credits-writers"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Writers'" :comicMetadataDetails="comicSeriesData?.metadata.writers" />
 					</div>
 						
 
 					<div
-						class="comic-series-page-detail-credits-colorists flex"
+						class="comic-series-page-detail-credits-colorists"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Colorists'" :comicMetadataDetails="comicSeriesData?.metadata.colorists" />
 					</div>
 
 					<div
-						class="comic-series-page-detail-credits-cover-artists flex flex-wrap"
+						class="comic-series-page-detail-credits-cover-artists"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Cover Artists'" :comicMetadataDetails="comicSeriesData?.metadata.coverArtists" />
 					</div>
 
 
 					<div
-						class="comic-series-page-detail-credits-inkers flex"
+						class="comic-series-page-detail-credits-inkers"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Inkers'" :comicMetadataDetails="comicSeriesData?.metadata.inkers" />
 					</div>
 
 					<div
-						class="comic-series-page-detail-credits-letterers flex"
+						class="comic-series-page-detail-credits-letterers"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Letterers'" :comicMetadataDetails="comicSeriesData?.metadata.letterers" />
 					</div>
 
 					<div
-						class="comic-series-page-detail-credits-editors flex"
+						class="comic-series-page-detail-credits-editors"
 					>
 						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Editors'" :comicMetadataDetails="comicSeriesData?.metadata.editors" />
 					</div>
