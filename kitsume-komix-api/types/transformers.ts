@@ -65,7 +65,7 @@ export function comicBookToDomain(book: ComicBook): ComicBookDomain {
     publisher: book.publisher || undefined,
     publicationDate: book.publication_date || undefined,
     scanInfo: book.scan_info || undefined,
-    language: book.languge || undefined, // Note: correcting schema typo in domain
+    language: book.language || undefined,
     format: book.format || undefined,
     blackAndWhite: Boolean(book.black_and_white),
     manga: Boolean(book.manga),
