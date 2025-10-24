@@ -254,7 +254,7 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     publisher: comicBooksTable.publisher,
     publication_date: comicBooksTable.publication_date,
     scan_info: comicBooksTable.scan_info,
-    languge: comicBooksTable.languge,
+    language: comicBooksTable.language,
     format: comicBooksTable.format,
     black_and_white: comicBooksTable.black_and_white,
     manga: comicBooksTable.manga,
@@ -813,7 +813,7 @@ export const updateComicBook = async (
     if (updates.scan_info !== undefined) {
       updateData.scan_info = updates.scan_info;
     }
-    if (updates.languge !== undefined) updateData.languge = updates.languge; // Note: keeping schema typo
+    if (updates.language !== undefined) updateData.language = updates.language; // Note: keeping schema typo
     if (updates.format !== undefined) updateData.format = updates.format;
     if (updates.black_and_white !== undefined) {
       updateData.black_and_white = updates.black_and_white;
@@ -907,7 +907,7 @@ export const getComicBooksBySeriesId = async (
           publisher: comicBooksTable.publisher,
           publication_date: comicBooksTable.publication_date,
           scan_info: comicBooksTable.scan_info,
-          languge: comicBooksTable.languge,
+          language: comicBooksTable.language,
           format: comicBooksTable.format,
           black_and_white: comicBooksTable.black_and_white,
           manga: comicBooksTable.manga,
@@ -1227,7 +1227,7 @@ export const getComicBooksWithMetadata = async (
         publisher: comicBooksTable.publisher,
         publication_date: comicBooksTable.publication_date,
         scan_info: comicBooksTable.scan_info,
-        languge: comicBooksTable.languge,
+        language: comicBooksTable.language,
         format: comicBooksTable.format,
         black_and_white: comicBooksTable.black_and_white,
         manga: comicBooksTable.manga,
