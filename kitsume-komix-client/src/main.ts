@@ -2,7 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { createMemoryHistory, createRouter } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 
@@ -36,7 +36,7 @@ app.use(PrimeVue, {
  });
 
 const router = createRouter({
-  history: createMemoryHistory(),
+  history: createWebHistory(),
   routes: [
     { path: '/', component: Home, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/login', component: Login, meta: { requiresAuth: false, layout: 'auth' } },
