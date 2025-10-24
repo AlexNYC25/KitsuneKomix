@@ -3,14 +3,23 @@ import { getUsersComicLibraries } from "../../db/sqlite/models/comicLibraries.mo
 import { getLatestComicSeries, getUpdatedComicSeries, getComicSeriesById, getComicSeriesMetadataById } from "../../db/sqlite/models/comicSeries.model.ts";
 import { getComicBooksBySeriesId } from "../../db/sqlite/models/comicBooks.model.ts";
 import { getThumbnailsByComicBookId } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
-import type { ComicSeries, ComicSeriesWithMetadata } from "../../types/index.ts";
+import type { ComicSeries, ComicBook, ComicSeriesWithMetadata } from "../../types/index.ts";
 
 // Extended type including optional thumbnail URL
 type ComicSeriesWithThumbnail = ComicSeries & { thumbnailUrl?: string };
 
+type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
+
 // Extended type including thumbnail URL and metadata object who may be empty or be a full metadata record
 type ComicSeriesWithMetadataAndThumbnail = ComicSeriesWithThumbnail & {
   metadata: ComicSeriesWithMetadata | Record<PropertyKey, never>;
+};
+
+type ComicSeriesWithComicsMetadataAndThumbnail = ComicSeriesWithMetadataAndThumbnail & {
+  comics: {
+    total: number;
+    books: Array<ComicBookWithThumbnail>;
+  };
 };
 
 const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
@@ -85,19 +94,28 @@ export const getUpdatedComicSeriesUserCanAccess = async (
 
 export const getSelectedComicSeriesDetails = async (
   seriesId: number,
-): Promise<ComicSeriesWithMetadataAndThumbnail | null> => {
+): Promise<ComicSeriesWithComicsMetadataAndThumbnail | null> => {
   const series = await getComicSeriesById(seriesId);
   if (!series) {
     return null;
   }
 
-  const comicBooksForCurrentSeries = await getComicBooksBySeriesId(series.id);
+  const comicBooksForCurrentSeries: Array<ComicBook> = await getComicBooksBySeriesId(series.id);
+  const comicBooksForCurrentSeriesWithThumbnails: Array<ComicBookWithThumbnail> = [];
   if (comicBooksForCurrentSeries.length === 0) {
     return null;
   }
 
   const firstComicBook = comicBooksForCurrentSeries[0];
   const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
+
+  for (const book of comicBooksForCurrentSeries) {
+    const bookThumbnails = await getThumbnailsByComicBookId(book.id);
+    if (bookThumbnails && bookThumbnails.length > 0) {
+      (book as ComicBookWithThumbnail).thumbnailUrl = bookThumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
+    }
+    comicBooksForCurrentSeriesWithThumbnails.push(book as ComicBookWithThumbnail);
+  }
 
   const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
   if (thumbnails && thumbnails.length > 0) {
@@ -106,10 +124,11 @@ export const getSelectedComicSeriesDetails = async (
 
   const metadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
 
-  const seriesWithMetadataAndThumbnail = {
+  const seriesWithComicsMetadataAndThumbnail = {
     ...seriesWithThumbnailUrl,
     metadata: metadata ? { ...metadata } : {},
+    comics: { total: comicBooksForCurrentSeries.length, books: comicBooksForCurrentSeriesWithThumbnails },
   };
 
-  return seriesWithMetadataAndThumbnail;
+  return seriesWithComicsMetadataAndThumbnail;
 }
