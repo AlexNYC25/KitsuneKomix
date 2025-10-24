@@ -32,23 +32,19 @@ onMounted(async () => {
 		class="comic-series-page flex flex-col w-full h-full p-4 overflow-auto"
 	>
 		<div
-			class="comic-series-page-details bg-cyan-800 h-auto w-full rounded-2xl flex object-cover"
+			class="comic-series-page-details bg-cyan-800 h-auto w-full rounded-2xl object-cover grid grid-cols-4"
 		>
 			<!-- Placeholder for ComicSeries details -->
-			<div class="comic-series-page-details-thumbnail h-full rounded-l-2xl ">
+			<div class="comic-series-page-details-thumbnail col-span-1 h-full flex items-center justify-center">
 				<img
 					:src="'http://localhost:8000' + comicSeriesData?.thumbnailUrl || 'https://via.placeholder.com/300x450?text=No+Image'"
 					alt="Comic Series Thumbnail"
-					class="object-contain h-full pl-5 py-5"
+					class="object-contain h-full px-5 py-5"
 				/>
 			</div>
 
-			<div class="comic-series-page-details-content-details">
-
-			</div>
-
 			<div 
-				class="comic-series-page-details-info h-full m-6"
+				class="comic-series-page-details-info h-full m-6 col-span-3"
 			>
 				<div class="comic-series-page-details-title text-shadow-lg font-bold text-4xl">
 					{{ comicSeriesData?.name }}
