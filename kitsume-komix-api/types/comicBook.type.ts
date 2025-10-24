@@ -47,7 +47,7 @@ export type ComicBookDomain = {
   publisher?: string;
   publicationDate?: string;
   scanInfo?: string;
-  language?: string; // Note: corrected from schema typo
+  language?: string | null; // Note: corrected from schema typo
   format?: string;
   blackAndWhite?: boolean;
   manga?: boolean;
