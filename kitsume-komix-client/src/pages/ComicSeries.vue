@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useComicSeriesStore } from '@/stores/comic-series';
+import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
 
 const comicSeriesStore = useComicSeriesStore();
 const comicSeriesData = ref<any | null>(null);
@@ -63,33 +64,19 @@ onMounted(async () => {
 				</div>
 
 				<div
-					class="comic-series-page-details-contents"
+					class="comic-series-page-details-contents mt-4"
 				>
 					<div
 						class="comic-series-page-detail-contents-characters flex flex-wrap w-full"
 					>
-						<div class="font-bold">Characters:&nbsp;</div>
-						<div 
-							v-for="(value, index) in comicSeriesData?.metadata.characters.split(',')" 
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Characters'" :comicMetadataDetails="comicSeriesData?.metadata.characters" />
 					</div>
 
 
 					<div
 						class="comic-series-page-detail-contents-teams flex flex-wrap w-full"
 					>
-						<div class="font-bold">Teams:&nbsp;</div>
-						<div 
-							v-for="(value, index) in comicSeriesData?.metadata.teams.split(',')" 
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Teams'" :comicMetadataDetails="comicSeriesData?.metadata.teams" />
 					</div>
 				</div>
 
@@ -99,81 +86,39 @@ onMounted(async () => {
 					<div
 						class="comic-series-page-detail-credits-writers flex flex-wrap"
 					>
-						<div class="font-bold">Writers:&nbsp;</div>
-						<div 
-							v-for="(value, index) in comicSeriesData?.metadata.writers.split(',')" 
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Writers'" :comicMetadataDetails="comicSeriesData?.metadata.writers" />
 					</div>
 						
 
 					<div
 						class="comic-series-page-detail-credits-colorists flex"
 					>
-						<div class="font-bold">Colorists:&nbsp;</div>
-						<div
-							v-for="(value, index) in comicSeriesData?.metadata.colorists.split(',')"
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Colorists'" :comicMetadataDetails="comicSeriesData?.metadata.colorists" />
 					</div>
 
 					<div
 						class="comic-series-page-detail-credits-cover-artists flex flex-wrap"
 					>
-						<div class="font-bold overflow-auto">Cover Artists:&nbsp;</div>
-						<div
-							v-for="(value, index) in comicSeriesData?.metadata.coverArtists.split(',')"
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Cover Artists'" :comicMetadataDetails="comicSeriesData?.metadata.coverArtists" />
 					</div>
 
 
 					<div
 						class="comic-series-page-detail-credits-inkers flex"
 					>
-						<div class="font-bold">Inkers:&nbsp;</div>
-						<div
-							v-for="(value, index) in comicSeriesData?.metadata.inkers.split(',')"
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Inkers'" :comicMetadataDetails="comicSeriesData?.metadata.inkers" />
 					</div>
 
 					<div
 						class="comic-series-page-detail-credits-letterers flex"
 					>
-						<div class="font-bold">Letterers:&nbsp;</div>
-						<div
-							v-for="(value, index) in comicSeriesData?.metadata.letterers.split(',')"
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Letterers'" :comicMetadataDetails="comicSeriesData?.metadata.letterers" />
 					</div>
 
 					<div
 						class="comic-series-page-detail-credits-editors flex"
 					>
-						<div class="font-bold">Editors:&nbsp;</div>
-						<div
-							v-for="(value, index) in comicSeriesData?.metadata.editors.split(',')"
-							:key="index"
-							class="comic-series-page-detail-credit-item"
-						>
-							<div>{{ value }},&nbsp;</div>
-						</div>
+						<ComicSeriesPageDetails :comicMetadataDetailsLabel="'Editors'" :comicMetadataDetails="comicSeriesData?.metadata.editors" />
 					</div>
 				</div>
 			</div>
