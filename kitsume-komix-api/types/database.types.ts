@@ -54,14 +54,10 @@ export type ComicBook = InferSelectModel<typeof comicBooksTable>;
 export type NewComicBook = InferInsertModel<typeof comicBooksTable>;
 
 export type ComicBookHistory = InferSelectModel<typeof comicBookHistoryTable>;
-export type NewComicBookHistory = InferInsertModel<
-  typeof comicBookHistoryTable
->;
+export type NewComicBookHistory = InferInsertModel<typeof comicBookHistoryTable>;
 
 export type ComicBookThumbnail = InferSelectModel<typeof comicBookThumbnails>;
-export type NewComicBookThumbnail = InferInsertModel<
-  typeof comicBookThumbnails
->;
+export type NewComicBookThumbnail = InferInsertModel<typeof comicBookThumbnails>;
 
 export type ComicSeries = InferSelectModel<typeof comicSeriesTable>;
 export type NewComicSeries = InferInsertModel<typeof comicSeriesTable>;
@@ -88,9 +84,7 @@ export type ComicColorist = InferSelectModel<typeof comicColoristsTable>;
 export type NewComicColorist = InferInsertModel<typeof comicColoristsTable>;
 
 export type ComicCoverArtist = InferSelectModel<typeof comicCoverArtistsTable>;
-export type NewComicCoverArtist = InferInsertModel<
-  typeof comicCoverArtistsTable
->;
+export type NewComicCoverArtist = InferInsertModel<typeof comicCoverArtistsTable>;
 
 export type ComicPublisher = InferSelectModel<typeof comicPublishersTable>;
 export type NewComicPublisher = InferInsertModel<typeof comicPublishersTable>;
@@ -161,13 +155,6 @@ export type NewComicBookStoryArc = InferInsertModel<typeof comicBookStoryArcsTab
 export type ComicBookSeriesGroup = InferSelectModel<typeof comicBookSeriesGroupsTable>;
 export type NewComicBookSeriesGroup = InferInsertModel<typeof comicBookSeriesGroupsTable>;
 
-// Extended types with relationships
-export type ComicBookWithRelations = ComicBook & {
-  library?: ComicLibrary;
-  writers?: ComicWriter[];
-  pencillers?: ComicPenciller[];
-  series?: ComicSeries;
-};
 
 export type ComicSeriesWithMetadata = ComicSeries & {
   writers?: string,
@@ -184,24 +171,4 @@ export type ComicSeriesWithMetadata = ComicSeries & {
   locations?: string,
   story_arcs?: string,
   series_groups?: string,
-};
-
-export type ComicLibraryWithBooks = ComicLibrary & {
-  books?: ComicBook[];
-  bookCount?: number;
-};
-
-export type ComicSeriesWithBooks = ComicSeries & {
-  books?: ComicBook[];
-  bookCount?: number;
-};
-
-export type ComicWriterWithBooks = ComicWriter & {
-  books?: ComicBook[];
-  bookCount?: number;
-};
-
-export type ComicPencillerWithBooks = ComicPenciller & {
-  books?: ComicBook[];
-  bookCount?: number;
 };
