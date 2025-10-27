@@ -18,6 +18,7 @@
     "npm:comic-metadata-tool@^1.2.0": "1.2.0",
     "npm:drizzle-kit@~0.31.5": "0.31.5_esbuild@0.25.10",
     "npm:drizzle-orm@~0.44.6": "0.44.6_@libsql+client@0.15.15",
+    "npm:drizzle-zod@~0.8.3": "0.8.3_drizzle-orm@0.44.6__@libsql+client@0.15.15_zod@4.1.11_@libsql+client@0.15.15",
     "npm:hono@^4.9.10": "4.9.10",
     "npm:jose@^6.1.0": "6.1.0",
     "npm:pino-pretty@^13.1.1": "13.1.1",
@@ -731,6 +732,13 @@
         "@libsql/client"
       ]
     },
+    "drizzle-zod@0.8.3_drizzle-orm@0.44.6__@libsql+client@0.15.15_zod@4.1.11_@libsql+client@0.15.15": {
+      "integrity": "sha512-66yVOuvGhKJnTdiqj1/Xaaz9/qzOdRJADpDa68enqS6g3t0kpNkwNYjUuaeXgZfO/UWuIM9HIhSlJ6C5ZraMww==",
+      "dependencies": [
+        "drizzle-orm@0.44.6_@libsql+client@0.15.15",
+        "zod"
+      ]
+    },
     "end-of-stream@1.4.5": {
       "integrity": "sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==",
       "dependencies": [
@@ -1211,6 +1219,7 @@
       "npm:comic-metadata-tool@^1.2.0",
       "npm:drizzle-kit@~0.31.5",
       "npm:drizzle-orm@~0.44.6",
+      "npm:drizzle-zod@~0.8.3",
       "npm:hono@^4.9.10",
       "npm:jose@^6.1.0",
       "npm:pino-pretty@^13.1.1",
