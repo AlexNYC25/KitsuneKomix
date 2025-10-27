@@ -10,21 +10,7 @@ import {
   ComicBookHistory,
   ComicBookThumbnail,
   ComicBookWithMetadata,
-  ComicCharacter,
-  ComicColorist,
-  ComicCoverArtist,
-  ComicEditor,
-  ComicGenre,
-  ComicImprint,
-  ComicInker,
-  ComicLetterer,
-  ComicLocation,
-  ComicPenciller,
-  ComicPublisher,
-  ComicSeriesGroup,
-  ComicStoryArc,
-  ComicTeam,
-  ComicWriter,
+  ComicBookWithThumbnail,
   // Request parameter types
   RequestPaginationParameters,
   RequestSortParameters,
@@ -1010,6 +996,25 @@ export const setComicReadByUser = async (
     return true;
   }
 };
+
+const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
+
+export const attachThumbnailToComicBook = async (
+  comicId: number
+): Promise<ComicBookWithThumbnail | null> => {
+  const comic: ComicBook | null = await getComicBookById(comicId);
+  if (!comic) {
+    return null;
+  }
+
+  const thumbnails: Array<ComicBookThumbnail> | null = await getThumbnailsByComicBookId(comicId);
+  const comicWithThumbnail: ComicBookWithThumbnail = {
+    ...comic,
+    thumbnailUrl: thumbnails && thumbnails.length > 0 ? thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image") : undefined
+  };
+
+  return comicWithThumbnail;
+}
 
 
 
