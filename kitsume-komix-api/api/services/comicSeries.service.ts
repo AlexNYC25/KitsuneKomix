@@ -3,12 +3,13 @@ import { getUsersComicLibraries } from "../../db/sqlite/models/comicLibraries.mo
 import { getLatestComicSeries, getUpdatedComicSeries, getComicSeriesById, getComicSeriesMetadataById } from "../../db/sqlite/models/comicSeries.model.ts";
 import { getComicBooksBySeriesId } from "../../db/sqlite/models/comicBooks.model.ts";
 import { getThumbnailsByComicBookId } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
-import type { ComicSeries, ComicBook, ComicSeriesWithMetadata } from "../../types/index.ts";
+
+import type { ComicSeries, ComicBook, ComicSeriesWithMetadata, ComicBookWithThumbnail } from "../../types/index.ts";
+
+import { attachThumbnailToComicBook } from "./comicbooks.service.ts";
 
 // Extended type including optional thumbnail URL
 type ComicSeriesWithThumbnail = ComicSeries & { thumbnailUrl?: string };
-
-type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
 
 // Extended type including thumbnail URL and metadata object who may be empty or be a full metadata record
 type ComicSeriesWithMetadataAndThumbnail = ComicSeriesWithThumbnail & {
@@ -110,11 +111,10 @@ export const getSelectedComicSeriesDetails = async (
   const comicBooksForCurrentSeriesWithThumbnails: Array<ComicBookWithThumbnail> = [];
 
   for (const book of comicBooksForCurrentSeries) {
-    const bookThumbnails = await getThumbnailsByComicBookId(book.id);
-    if (bookThumbnails && bookThumbnails.length > 0) {
-      (book as ComicBookWithThumbnail).thumbnailUrl = bookThumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
+    const comicBookWithThumbnail = await attachThumbnailToComicBook(book.id);
+    if (comicBookWithThumbnail) {
+      comicBooksForCurrentSeriesWithThumbnails.push(comicBookWithThumbnail);
     }
-    comicBooksForCurrentSeriesWithThumbnails.push(book as ComicBookWithThumbnail);
   }
 
   const seriesWithThumbnailUrl = comicSeriesInfo as ComicSeriesWithThumbnail;
@@ -122,11 +122,11 @@ export const getSelectedComicSeriesDetails = async (
     seriesWithThumbnailUrl.thumbnailUrl = comicBooksForCurrentSeriesWithThumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
   }
 
-  const metadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
+  const comicSeriesMetadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
 
   const seriesWithComicsMetadataAndThumbnail = {
     ...seriesWithThumbnailUrl,
-    metadata: metadata ? { ...metadata } : {},
+    metadata: comicSeriesMetadata ? { ...comicSeriesMetadata } : {},
     comics: { total: comicBooksForCurrentSeries.length, books: comicBooksForCurrentSeriesWithThumbnails },
   };
 
