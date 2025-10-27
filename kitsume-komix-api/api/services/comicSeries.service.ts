@@ -95,19 +95,19 @@ export const getUpdatedComicSeriesUserCanAccess = async (
 export const getSelectedComicSeriesDetails = async (
   seriesId: number,
 ): Promise<ComicSeriesWithComicsMetadataAndThumbnail | null> => {
-  const series = await getComicSeriesById(seriesId);
-  if (!series) {
+  const comicSeriesInfo: ComicSeries | null = await getComicSeriesById(seriesId);
+  if (!comicSeriesInfo) {
     return null;
   }
 
-  const comicBooksForCurrentSeries: Array<ComicBook> = await getComicBooksBySeriesId(series.id);
-  const comicBooksForCurrentSeriesWithThumbnails: Array<ComicBookWithThumbnail> = [];
+  const comicBooksForCurrentSeries: Array<ComicBook> = await getComicBooksBySeriesId(comicSeriesInfo.id);
   if (comicBooksForCurrentSeries.length === 0) {
     return null;
   }
 
-  const firstComicBook = comicBooksForCurrentSeries[0];
-  const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
+  // TODO: Move this section to a helper function to reduce code duplication
+  // NOTE: this needs to be sorted by issue number, double check this later
+  const comicBooksForCurrentSeriesWithThumbnails: Array<ComicBookWithThumbnail> = [];
 
   for (const book of comicBooksForCurrentSeries) {
     const bookThumbnails = await getThumbnailsByComicBookId(book.id);
@@ -117,9 +117,9 @@ export const getSelectedComicSeriesDetails = async (
     comicBooksForCurrentSeriesWithThumbnails.push(book as ComicBookWithThumbnail);
   }
 
-  const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-  if (thumbnails && thumbnails.length > 0) {
-    seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
+  const seriesWithThumbnailUrl = comicSeriesInfo as ComicSeriesWithThumbnail;
+  if (comicBooksForCurrentSeriesWithThumbnails && comicBooksForCurrentSeriesWithThumbnails.length > 0) {
+    seriesWithThumbnailUrl.thumbnailUrl = comicBooksForCurrentSeriesWithThumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
   }
 
   const metadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
