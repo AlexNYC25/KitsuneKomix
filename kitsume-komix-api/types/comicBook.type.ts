@@ -17,6 +17,8 @@ import {
   ComicWriter,
 } from "./database.types.ts";
 
+export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
+
 export type ComicBookWithMetadata = ComicBook & {
   writers?: ComicWriter[];
   pencillers?: ComicPenciller[];
