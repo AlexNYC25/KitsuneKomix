@@ -101,17 +101,16 @@ export const getSelectedComicSeriesDetails = async (
     return null;
   }
 
+  const comicSeriesMetadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
+
   const comicBooksForCurrentSeries: Array<ComicBook> = await getComicBooksBySeriesId(comicSeriesInfo.id);
   if (comicBooksForCurrentSeries.length === 0) {
     return null;
   }
 
-  // TODO: Move this section to a helper function to reduce code duplication
-  // NOTE: this needs to be sorted by issue number, double check this later
   const comicBooksForCurrentSeriesWithThumbnails: Array<ComicBookWithThumbnail> = [];
-
   for (const book of comicBooksForCurrentSeries) {
-    const comicBookWithThumbnail = await attachThumbnailToComicBook(book.id);
+    const comicBookWithThumbnail: ComicBookWithThumbnail | null = await attachThumbnailToComicBook(book.id);
     if (comicBookWithThumbnail) {
       comicBooksForCurrentSeriesWithThumbnails.push(comicBookWithThumbnail);
     }
@@ -121,8 +120,6 @@ export const getSelectedComicSeriesDetails = async (
   if (comicBooksForCurrentSeriesWithThumbnails && comicBooksForCurrentSeriesWithThumbnails.length > 0) {
     seriesWithThumbnailUrl.thumbnailUrl = comicBooksForCurrentSeriesWithThumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
   }
-
-  const comicSeriesMetadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
 
   const seriesWithComicsMetadataAndThumbnail = {
     ...seriesWithThumbnailUrl,
