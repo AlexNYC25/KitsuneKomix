@@ -1,4 +1,4 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 const app = new OpenAPIHono();
 
@@ -13,25 +13,25 @@ const ErrorResponseSchema = z.object({
 
 const ParamIdSchema = z.object({
   id: z.string().openapi({
-    param: { name: 'id', in: 'path' },
-    example: '1',
+    param: { name: "id", in: "path" },
+    example: "1",
   }),
 });
 
 const ParamIdThumbIdSchema = z.object({
   id: z.string().openapi({
-    param: { name: 'id', in: 'path' },
-    example: '1',
+    param: { name: "id", in: "path" },
+    example: "1",
   }),
   thumbId: z.string().openapi({
-    param: { name: 'thumbId', in: 'path' },
-    example: '1',
+    param: { name: "thumbId", in: "path" },
+    example: "1",
   }),
 });
 
 const AddCollectionSchema = z.object({
   name: z.string().min(2).max(100).openapi({
-    example: "My Collection"
+    example: "My Collection",
   }),
 });
 
@@ -43,7 +43,11 @@ const getAllCollectionsRoute = createRoute({
   tags: ["Collections"],
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({ id: z.number(), name: z.string() })) } },
+      content: {
+        "application/json": {
+          schema: z.array(z.object({ id: z.number(), name: z.string() })),
+        },
+      },
       description: "Collections retrieved successfully",
     },
   },
@@ -64,7 +68,11 @@ const getCollectionByIdRoute = createRoute({
   request: { params: ParamIdSchema },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ id: z.string(), name: z.string() }) } },
+      content: {
+        "application/json": {
+          schema: z.object({ id: z.string(), name: z.string() }),
+        },
+      },
       description: "Collection retrieved successfully",
     },
   },
@@ -106,7 +114,11 @@ const getCollectionSeriesRoute = createRoute({
   request: { params: ParamIdSchema },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({ id: z.number(), title: z.string() })) } },
+      content: {
+        "application/json": {
+          schema: z.array(z.object({ id: z.number(), title: z.string() })),
+        },
+      },
       description: "Series retrieved successfully",
     },
   },
@@ -127,7 +139,11 @@ const getCollectionThumbnailsRoute = createRoute({
   request: { params: ParamIdSchema },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({ id: z.number(), url: z.string() })) } },
+      content: {
+        "application/json": {
+          schema: z.array(z.object({ id: z.number(), url: z.string() })),
+        },
+      },
       description: "Thumbnails retrieved successfully",
     },
   },
@@ -148,7 +164,11 @@ const getCollectionThumbnailByIdRoute = createRoute({
   request: { params: ParamIdThumbIdSchema },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ id: z.string(), url: z.string() }) } },
+      content: {
+        "application/json": {
+          schema: z.object({ id: z.string(), url: z.string() }),
+        },
+      },
       description: "Thumbnail retrieved successfully",
     },
   },

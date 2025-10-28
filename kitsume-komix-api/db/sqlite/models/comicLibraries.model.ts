@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicLibrariesTable, userComicLibrariesTable} from "../schema.ts";
+import { comicLibrariesTable, userComicLibrariesTable } from "../schema.ts";
 import type {
   ComicLibrary,
   LibraryRegistrationInput,
@@ -225,7 +225,6 @@ export const deleteComicLibrary = async (id: number): Promise<boolean> => {
   }
 };
 
-
 /**
  * Get all comic libraries for a specific user.
  * @param userId - ID of the user
@@ -243,18 +242,22 @@ export const getUsersComicLibraries = async (
   try {
     const result = await db
       .select(
-        { id: comicLibrariesTable.id,
+        {
+          id: comicLibrariesTable.id,
           name: comicLibrariesTable.name,
           description: comicLibrariesTable.description,
           path: comicLibrariesTable.path,
           enabled: comicLibrariesTable.enabled,
           changed_at: comicLibrariesTable.changed_at,
           created_at: comicLibrariesTable.created_at,
-          updated_at: comicLibrariesTable.updated_at
-        }
+          updated_at: comicLibrariesTable.updated_at,
+        },
       )
       .from(comicLibrariesTable)
-      .innerJoin(userComicLibrariesTable, eq(comicLibrariesTable.id, userComicLibrariesTable.library_id))
+      .innerJoin(
+        userComicLibrariesTable,
+        eq(comicLibrariesTable.id, userComicLibrariesTable.library_id),
+      )
       .where(eq(userComicLibrariesTable.user_id, userId))
       .groupBy(comicLibrariesTable.id);
 
@@ -267,7 +270,7 @@ export const getUsersComicLibraries = async (
 
 /**
  * Assign a comic library to a user by creating an entry in the user_comic_libraries table.
- * 
+ *
  * @param userId - ID of the user
  * @param libraryId - ID of the comic library to assign
  */
@@ -288,7 +291,6 @@ export const assignLibraryToUser = async (
         user_id: userId,
         library_id: libraryId,
       });
-
   } catch (error) {
     console.error("Error assigning library to user:", error);
     throw error;

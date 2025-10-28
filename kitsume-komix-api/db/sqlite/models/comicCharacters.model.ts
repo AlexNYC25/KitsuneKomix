@@ -100,7 +100,6 @@ export const getCharactersByComicBookId = async (
   }
 };
 
-
 export const getCharactersIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -128,4 +127,4 @@ export const getCharactersIdsByFilter = async (
     console.error("Error fetching character IDs by filter:", error);
     throw error;
   }
-}
+};

@@ -28,16 +28,16 @@ import { apiLogger, queueLogger } from "../../logger/loggers.ts";
 import { ComicMetadata } from "../../interfaces/ComicMetadata.interface.ts";
 
 // Database model imports - Core models
-import { 
-  insertComicBook, 
-  getComicBookByFilePath, 
-  updateComicBook 
+import {
+  getComicBookByFilePath,
+  insertComicBook,
+  updateComicBook,
 } from "../../db/sqlite/models/comicBooks.model.ts";
 import {
   addComicBookToSeries,
   getComicSeriesByPath,
   insertComicSeries,
-  insertComicSeriesIntoLibrary
+  insertComicSeriesIntoLibrary,
 } from "../../db/sqlite/models/comicSeries.model.ts";
 import { getLibraryContainingPath } from "../../db/sqlite/models/comicLibraries.model.ts";
 import { insertComicPage } from "../../db/sqlite/models/comicPages.model.ts";
@@ -127,11 +127,11 @@ async function processNewComicFile(
     // ============== CHECK IF FILE EXISTS AND COMPARE HASH ==============
     const existingComic = await getComicBookByFilePath(job.data.filePath);
     const fileHash = await calculateFileHash(job.data.filePath);
-    
+
     // If comic exists and hash hasn't changed, skip processing
     if (existingComic && existingComic.hash === fileHash) {
       queueLogger.info(
-        `Skipping processing for ${job.data.filePath} - file unchanged (hash: ${fileHash})`
+        `Skipping processing for ${job.data.filePath} - file unchanged (hash: ${fileHash})`,
       );
       return;
     }
@@ -178,9 +178,9 @@ async function processNewComicFile(
       day: standardizedMetadata?.day || null,
       publisher: standardizedMetadata?.publisher?.[0] || null,
       publication_date: standardizedMetadata?.year
-        ? `${standardizedMetadata.year}-${String(standardizedMetadata.month || 1).padStart(2, "0")}-${
-          String(standardizedMetadata.day || 1).padStart(2, "0")
-        }`
+        ? `${standardizedMetadata.year}-${
+          String(standardizedMetadata.month || 1).padStart(2, "0")
+        }-${String(standardizedMetadata.day || 1).padStart(2, "0")}`
         : null,
       scan_info: standardizedMetadata?.scanInfo || null,
       language: standardizedMetadata?.language || null,
@@ -202,7 +202,9 @@ async function processNewComicFile(
       // Update existing record
       await updateComicBook(existingComic.id, comicData);
       comicId = existingComic.id;
-      apiLogger.info(`Updated existing comic book with ID: ${comicId} (hash changed)`);
+      apiLogger.info(
+        `Updated existing comic book with ID: ${comicId} (hash changed)`,
+      );
     } else {
       // Insert new record
       comicId = await insertComicBook(comicData);
@@ -300,8 +302,11 @@ async function processComicFileImages(
       `Extracted ${extractionResult.pageCount} pages from comic file: ${job.data.filePath}`,
     );
 
-    const { pages: imagePaths, extractedPath, coverImagePath: _coverImagePath } =
-      extractionResult;
+    const {
+      pages: imagePaths,
+      extractedPath,
+      coverImagePath: _coverImagePath,
+    } = extractionResult;
 
     // ============== PROCESS INDIVIDUAL PAGES ==============
     const coverPages: Array<

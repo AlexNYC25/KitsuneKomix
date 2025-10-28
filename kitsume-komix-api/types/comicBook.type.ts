@@ -87,15 +87,16 @@ export const COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES = [
   "writers",
 ] as const;
 
-export type AllowedFilterProperties = 
-  typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number] | 
+export type AllowedFilterProperties =
+  | typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number]
+  | typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
+
+export type ExternalFilterProperties =
   typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
 
-export type ExternalFilterProperties = typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
-
-export type AllowedSortProperties = 
-  typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number] | 
-  typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
+export type AllowedSortProperties =
+  | typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number]
+  | typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
 
 // Filter types for advanced comic book querying
 export type ComicBookFilterItem = {
@@ -111,7 +112,6 @@ export type ComicBookExternalFilterItem = {
 export type ComicBookFiltersCheckList = {
   [key in ExternalFilterProperties]?: boolean;
 };
-
 
 // Service function parameter types
 export type ComicBookFilteringAndSortingParams = {

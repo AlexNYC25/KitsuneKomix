@@ -1,10 +1,19 @@
-
 import { getUsersComicLibraries } from "../../db/sqlite/models/comicLibraries.model.ts";
-import { getLatestComicSeries, getUpdatedComicSeries, getComicSeriesById, getComicSeriesMetadataById } from "../../db/sqlite/models/comicSeries.model.ts";
+import {
+  getComicSeriesById,
+  getComicSeriesMetadataById,
+  getLatestComicSeries,
+  getUpdatedComicSeries,
+} from "../../db/sqlite/models/comicSeries.model.ts";
 import { getComicBooksBySeriesId } from "../../db/sqlite/models/comicBooks.model.ts";
 import { getThumbnailsByComicBookId } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
 
-import type { ComicSeries, ComicBook, ComicSeriesWithMetadata, ComicBookWithThumbnail } from "../../types/index.ts";
+import type {
+  ComicBook,
+  ComicBookWithThumbnail,
+  ComicSeries,
+  ComicSeriesWithMetadata,
+} from "../../types/index.ts";
 
 import { attachThumbnailToComicBook } from "./comicbooks.service.ts";
 
@@ -16,9 +25,11 @@ type ComicSeriesWithMetadataAndThumbnail = ComicSeriesWithThumbnail & {
   metadata: ComicSeriesWithMetadata | Record<PropertyKey, never>;
 };
 
-type ComicSeriesWithComicsMetadataAndThumbnail = ComicSeriesWithMetadataAndThumbnail & {
-  comics: Array<ComicBookWithThumbnail>;
-};
+type ComicSeriesWithComicsMetadataAndThumbnail =
+  & ComicSeriesWithMetadataAndThumbnail
+  & {
+    comics: Array<ComicBookWithThumbnail>;
+  };
 
 const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
 
@@ -29,11 +40,11 @@ export const getLatestComicSeriesUserCanAccess = async (
 ): Promise<Array<ComicSeriesWithThumbnail>> => {
   const userLibraries = await getUsersComicLibraries(userId);
 
-  const libraryIds = userLibraries.map(lib => lib.id);
+  const libraryIds = userLibraries.map((lib) => lib.id);
   const latestSeries = await getLatestComicSeries(limit, offset, libraryIds);
 
-	const latestSeriesWithThumbnails: Array<ComicSeriesWithThumbnail> = [];
-  
+  const latestSeriesWithThumbnails: Array<ComicSeriesWithThumbnail> = [];
+
   for (const series of latestSeries) {
     const comicBooksForCurrentSeries = await getComicBooksBySeriesId(series.id);
     if (comicBooksForCurrentSeries.length === 0) {
@@ -45,16 +56,19 @@ export const getLatestComicSeriesUserCanAccess = async (
 
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
-			const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
+      const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
+      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(
+        CACHE_DIRECTORY,
+        "/api/image",
+      );
       latestSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
-			latestSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
-		}
-	}
+      latestSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
+    }
+  }
 
   return latestSeriesWithThumbnails;
-}
+};
 
 export const getUpdatedComicSeriesUserCanAccess = async (
   userId: number,
@@ -63,7 +77,7 @@ export const getUpdatedComicSeriesUserCanAccess = async (
 ): Promise<Array<ComicSeriesWithThumbnail>> => {
   const userLibraries = await getUsersComicLibraries(userId);
 
-  const libraryIds = userLibraries.map(lib => lib.id);
+  const libraryIds = userLibraries.map((lib) => lib.id);
   const updatedSeries = await getUpdatedComicSeries(limit, offset, libraryIds);
 
   const updatedSeriesWithThumbnails: Array<ComicSeriesWithThumbnail> = [];
@@ -80,7 +94,10 @@ export const getUpdatedComicSeriesUserCanAccess = async (
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
       const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
+      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(
+        CACHE_DIRECTORY,
+        "/api/image",
+      );
       updatedSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
       updatedSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
@@ -88,34 +105,48 @@ export const getUpdatedComicSeriesUserCanAccess = async (
   }
 
   return updatedSeriesWithThumbnails;
-}
+};
 
 export const getSelectedComicSeriesDetails = async (
   seriesId: number,
 ): Promise<ComicSeriesWithComicsMetadataAndThumbnail | null> => {
-  const comicSeriesInfo: ComicSeries | null = await getComicSeriesById(seriesId);
+  const comicSeriesInfo: ComicSeries | null = await getComicSeriesById(
+    seriesId,
+  );
   if (!comicSeriesInfo) {
     return null;
   }
 
-  const comicSeriesMetadata: ComicSeriesWithMetadata | null = await getComicSeriesMetadataById(seriesId);
+  const comicSeriesMetadata: ComicSeriesWithMetadata | null =
+    await getComicSeriesMetadataById(seriesId);
 
-  const comicBooksForCurrentSeries: Array<ComicBook> = await getComicBooksBySeriesId(comicSeriesInfo.id);
+  const comicBooksForCurrentSeries: Array<ComicBook> =
+    await getComicBooksBySeriesId(comicSeriesInfo.id);
   if (comicBooksForCurrentSeries.length === 0) {
     return null;
   }
 
-  const comicBooksForCurrentSeriesWithThumbnails: Array<ComicBookWithThumbnail> = [];
+  const comicBooksForCurrentSeriesWithThumbnails: Array<
+    ComicBookWithThumbnail
+  > = [];
   for (const book of comicBooksForCurrentSeries) {
-    const comicBookWithThumbnail: ComicBookWithThumbnail | null = await attachThumbnailToComicBook(book.id);
+    const comicBookWithThumbnail: ComicBookWithThumbnail | null =
+      await attachThumbnailToComicBook(book.id);
     if (comicBookWithThumbnail) {
       comicBooksForCurrentSeriesWithThumbnails.push(comicBookWithThumbnail);
     }
   }
 
   const seriesWithThumbnailUrl = comicSeriesInfo as ComicSeriesWithThumbnail;
-  if (comicBooksForCurrentSeriesWithThumbnails && comicBooksForCurrentSeriesWithThumbnails.length > 0) {
-    seriesWithThumbnailUrl.thumbnailUrl = comicBooksForCurrentSeriesWithThumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image");
+  if (
+    comicBooksForCurrentSeriesWithThumbnails &&
+    comicBooksForCurrentSeriesWithThumbnails.length > 0
+  ) {
+    seriesWithThumbnailUrl.thumbnailUrl =
+      comicBooksForCurrentSeriesWithThumbnails[0].file_path.replace(
+        CACHE_DIRECTORY,
+        "/api/image",
+      );
   }
 
   const seriesWithComicsMetadataAndThumbnail = {
@@ -125,4 +156,4 @@ export const getSelectedComicSeriesDetails = async (
   };
 
   return seriesWithComicsMetadataAndThumbnail;
-}
+};

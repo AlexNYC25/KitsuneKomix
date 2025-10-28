@@ -1,5 +1,7 @@
-
-import { getUsersComicLibraries, getAllComicLibraries } from "../../db/sqlite/models/comicLibraries.model.ts";
+import {
+  getAllComicLibraries,
+  getUsersComicLibraries,
+} from "../../db/sqlite/models/comicLibraries.model.ts";
 import { getUserById } from "../../db/sqlite/models/users.model.ts";
 import type { ComicLibrary } from "../../types/index.ts";
 
@@ -8,7 +10,9 @@ import type { ComicLibrary } from "../../types/index.ts";
  * @param userId - ID of the user
  * @returns An array of comic libraries available to the user
  */
-export const getComicLibrariesAvailableToUser = async (userId: number): Promise<Array<ComicLibrary>> => {
+export const getComicLibrariesAvailableToUser = async (
+  userId: number,
+): Promise<Array<ComicLibrary>> => {
   try {
     const user = await getUserById(userId);
     if (!user) {

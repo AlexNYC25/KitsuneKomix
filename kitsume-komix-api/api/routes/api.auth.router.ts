@@ -1,4 +1,4 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { authenticateUser } from "../services/auth.service.ts";
 import {
@@ -47,7 +47,9 @@ const LogoutResponseSchema = z.object({
 });
 
 const LogoutAllResponseSchema = z.object({
-  message: z.string().openapi({ example: "Logged out from all devices successfully" }),
+  message: z.string().openapi({
+    example: "Logged out from all devices successfully",
+  }),
   revokedTokens: z.number().openapi({ example: 3 }),
 });
 
@@ -56,9 +58,9 @@ const ErrorResponseSchema = z.object({
 });
 
 const AuthHeaderSchema = z.object({
-  authorization: z.string().openapi({ 
+  authorization: z.string().openapi({
     example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    description: "Bearer token for authentication"
+    description: "Bearer token for authentication",
   }),
 });
 
@@ -312,7 +314,10 @@ app.openapi(logoutAllRoute, async (c) => {
       revokedTokens: revokedCount,
     }, 200);
   } catch (error) {
-    if ((error as Error).message.includes("verify") || (error as Error).message.includes("token")) {
+    if (
+      (error as Error).message.includes("verify") ||
+      (error as Error).message.includes("token")
+    ) {
       return c.json({ message: "Unauthorized" }, 401);
     }
     return c.json({

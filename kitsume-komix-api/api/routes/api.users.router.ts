@@ -1,19 +1,22 @@
 import { ZodSafeParseResult } from "zod";
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { requireAuth } from "../middleware/authChecks.ts";
-import { createUserService, deleteUserService, assignLibraryToUserService } from "../services/users.service.ts";
+import {
+  assignLibraryToUserService,
+  createUserService,
+  deleteUserService,
+} from "../services/users.service.ts";
 import { UserSchema } from "../../schemas/user.schema.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
-import { UserRegistrationInput, AppEnv } from "../../types/index.ts";
-
+import { AppEnv, UserRegistrationInput } from "../../types/index.ts";
 
 const apiUsersRouter = new OpenAPIHono<AppEnv>();
 
 // Register Bearer Auth security scheme for OpenAPI
-apiUsersRouter.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', {
-  type: 'http',
-  scheme: 'bearer',
+apiUsersRouter.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
 });
 
 apiUsersRouter.openapi(
@@ -106,7 +109,8 @@ apiUsersRouter.openapi(
     method: "post",
     path: "/assign-library",
     summary: "Assign library to user",
-    description: "Endpoint to assign a library to a user. Requires authentication.",
+    description:
+      "Endpoint to assign a library to a user. Requires authentication.",
     tags: ["Users"],
     request: {
       body: {
@@ -201,7 +205,8 @@ apiUsersRouter.openapi(
     method: "post",
     path: "/assign-library/:id",
     summary: "Assign library to authenticated user",
-    description: "Assign a comic library to the authenticated user. Requires authentication.",
+    description:
+      "Assign a comic library to the authenticated user. Requires authentication.",
     tags: ["Users"],
     request: {
       params: z.object({
@@ -361,13 +366,13 @@ apiUsersRouter.openapi(
     }
 
     return c.json({ message: "User deleted successfully" }, 200);
-  }
+  },
 );
 
 /**
  * DELETE /api/delete-user/:id
  * Deletes a user by ID. Requires admin privileges or the user themselves.
- * 
+ *
  * Ideally should just be for the admin user to delete other users, but allowing
  * users to delete their own account for now.
  */
@@ -461,7 +466,7 @@ apiUsersRouter.openapi(
     }
 
     return c.json({ message: "User deleted successfully" }, 200);
-  }
+  },
 );
 
 export default apiUsersRouter;

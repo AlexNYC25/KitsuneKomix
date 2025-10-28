@@ -1,4 +1,4 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
@@ -6,16 +6,19 @@ import { createComicLibrary } from "../../db/sqlite/models/comicLibraries.model.
 import { getComicLibrariesAvailableToUser } from "../services/comicLibraries.service.ts";
 
 import { ComicLibrarySchema } from "../../schemas/comicLibrary.schema.ts";
-import { LibraryResponseSchema, ErrorResponseSchema } from "../../zod/schemas/response.schema.ts";
+import {
+  ErrorResponseSchema,
+  LibraryResponseSchema,
+} from "../../zod/schemas/response.schema.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
-import type { LibraryRegistrationInput, AppEnv } from "../../types/index.ts";
+import type { AppEnv, LibraryRegistrationInput } from "../../types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
 // Register Bearer Auth security scheme for OpenAPI
-app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', {
-  type: 'http',
-  scheme: 'bearer',
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
 });
 
 // Response Schemas
@@ -26,17 +29,16 @@ const MessageResponseSchema = z.object({
 const ParamIdSchema = z.object({
   id: z.string().openapi({
     param: {
-      name: 'id',
-      in: 'path',
+      name: "id",
+      in: "path",
     },
-    example: '1',
+    example: "1",
   }),
 });
 
-
 /**
  * GET /api/comic-libraries/
- * 
+ *
  * Get the comic libraries that are in the system but that the current user has access to.
  * admins can see all libraries, regular users only those they have been granted access to.
  */
@@ -45,7 +47,8 @@ app.openapi(
     method: "get",
     path: "/",
     summary: "Get all comic libraries",
-    description: "Get the comic libraries that the current user has access to. Admins can see all libraries, regular users only those they have been granted access to.",
+    description:
+      "Get the comic libraries that the current user has access to. Admins can see all libraries, regular users only those they have been granted access to.",
     tags: ["Comic Libraries"],
     request: {
       headers: AuthHeaderSchema,
@@ -72,13 +75,13 @@ app.openapi(
         description: "Unauthorized",
       },
     },
-  }), 
+  }),
   async (c) => {
-    const user = c.get('user');
+    const user = c.get("user");
     if (!user) {
       return c.json(
-        { message: "Unauthorized" }, 
-        401
+        { message: "Unauthorized" },
+        401,
       );
     }
     const userId = parseInt(user.sub, 10);
@@ -87,14 +90,14 @@ app.openapi(
     const libraries = await getComicLibrariesAvailableToUser(userId);
     return c.json(
       { message: "Comic Libraries retrieved successfully", libraries },
-      200
+      200,
     );
-  }
+  },
 );
 
 /**
  * GET /api/comic-libraries/{id}
- * 
+ *
  * Get a specific comic library by its ID.
  * The user must have access to the library.
  */
@@ -132,17 +135,19 @@ const getLibraryRoute = createRoute({
 
 app.openapi(getLibraryRoute, (c) => {
   const { id } = c.req.valid("param");
-  const user = c.get('user');
+  const user = c.get("user");
   if (!user) {
     return c.json({ message: "Unauthorized" }, 401);
   }
   // TODO: use user.id and id to get the library from the database
-  return c.json({ message: `Library[${id}] for user ${user.id} retrieved successfully` }, 200);
+  return c.json({
+    message: `Library[${id}] for user ${user.id} retrieved successfully`,
+  }, 200);
 });
 
 /**
  * PATCH /api/comic-libraries/{id}/analyze
- * 
+ *
  * Start analysis of a comic library.
  */
 const analyzeLibraryRoute = createRoute({
@@ -179,7 +184,7 @@ const analyzeLibraryRoute = createRoute({
 
 app.openapi(analyzeLibraryRoute, (c) => {
   const { id } = c.req.valid("param");
-  const user = c.get('user');
+  const user = c.get("user");
   if (!user) {
     return c.json({ message: "Unauthorized" }, 401);
   }
@@ -192,7 +197,7 @@ app.openapi(analyzeLibraryRoute, (c) => {
 
 /**
  * POST /api/comic-libraries/{id}/empty-trash
- * 
+ *
  * Empty the trash for a specific comic library.
  */
 const emptyTrashRoute = createRoute({
@@ -229,17 +234,20 @@ const emptyTrashRoute = createRoute({
 
 app.openapi(emptyTrashRoute, (c) => {
   const { id } = c.req.valid("param");
-  const user = c.get('user');
+  const user = c.get("user");
   if (!user) {
     return c.json({ message: "Unauthorized" }, 401);
   }
   // TODO: use user.id and id to empty the trash for the library
-  return c.json({ message: `Library[${id}] trash emptied for user ${user.id}` }, 200);
+  return c.json(
+    { message: `Library[${id}] trash emptied for user ${user.id}` },
+    200,
+  );
 });
 
 /**
  * POST /api/comic-libraries/create-library
- * 
+ *
  * Create a new comic library in the system.
  */
 const createLibraryRoute = createRoute({
@@ -299,7 +307,7 @@ const createLibraryRoute = createRoute({
 });
 
 app.openapi(createLibraryRoute, async (c) => {
-  const user = c.get('user');
+  const user = c.get("user");
   if (!user) {
     return c.json({ message: "Unauthorized" }, 401);
   }
@@ -342,7 +350,7 @@ app.openapi(createLibraryRoute, async (c) => {
 
 /**
  * DELETE /api/comic-libraries/delete-library/{id}
- * 
+ *
  * Delete a comic library from the system.
  */
 const deleteLibraryRoute = createRoute({
@@ -379,7 +387,7 @@ const deleteLibraryRoute = createRoute({
 
 app.openapi(deleteLibraryRoute, (c) => {
   const { id } = c.req.valid("param");
-  const user = c.get('user');
+  const user = c.get("user");
   if (!user) {
     return c.json({ message: "Unauthorized" }, 401);
   }

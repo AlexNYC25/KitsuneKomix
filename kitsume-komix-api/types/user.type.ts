@@ -1,4 +1,3 @@
-
 export type UserRegistrationInput = {
   username: string;
   email: string;

@@ -54,10 +54,14 @@ export type ComicBook = InferSelectModel<typeof comicBooksTable>;
 export type NewComicBook = InferInsertModel<typeof comicBooksTable>;
 
 export type ComicBookHistory = InferSelectModel<typeof comicBookHistoryTable>;
-export type NewComicBookHistory = InferInsertModel<typeof comicBookHistoryTable>;
+export type NewComicBookHistory = InferInsertModel<
+  typeof comicBookHistoryTable
+>;
 
 export type ComicBookThumbnail = InferSelectModel<typeof comicBookThumbnails>;
-export type NewComicBookThumbnail = InferInsertModel<typeof comicBookThumbnails>;
+export type NewComicBookThumbnail = InferInsertModel<
+  typeof comicBookThumbnails
+>;
 
 export type ComicSeries = InferSelectModel<typeof comicSeriesTable>;
 export type NewComicSeries = InferInsertModel<typeof comicSeriesTable>;
@@ -84,7 +88,9 @@ export type ComicColorist = InferSelectModel<typeof comicColoristsTable>;
 export type NewComicColorist = InferInsertModel<typeof comicColoristsTable>;
 
 export type ComicCoverArtist = InferSelectModel<typeof comicCoverArtistsTable>;
-export type NewComicCoverArtist = InferInsertModel<typeof comicCoverArtistsTable>;
+export type NewComicCoverArtist = InferInsertModel<
+  typeof comicCoverArtistsTable
+>;
 
 export type ComicPublisher = InferSelectModel<typeof comicPublishersTable>;
 export type NewComicPublisher = InferInsertModel<typeof comicPublishersTable>;
@@ -108,67 +114,106 @@ export type ComicStoryArc = InferSelectModel<typeof comicStoryArcsTable>;
 export type NewComicStoryArc = InferInsertModel<typeof comicStoryArcsTable>;
 
 export type ComicSeriesGroup = InferSelectModel<typeof comicSeriesGroupsTable>;
-export type NewComicSeriesGroup = InferInsertModel<typeof comicSeriesGroupsTable>;
+export type NewComicSeriesGroup = InferInsertModel<
+  typeof comicSeriesGroupsTable
+>;
 
 export type ComicPage = InferSelectModel<typeof comicPagesTable>;
 export type NewComicPage = InferInsertModel<typeof comicPagesTable>;
 
-export type ComicBookPenciller = InferSelectModel<typeof comicBookPencillersTable>;
-export type NewComicBookPenciller = InferInsertModel<typeof comicBookPencillersTable>;
+export type ComicBookPenciller = InferSelectModel<
+  typeof comicBookPencillersTable
+>;
+export type NewComicBookPenciller = InferInsertModel<
+  typeof comicBookPencillersTable
+>;
 
 export type ComicBookInker = InferSelectModel<typeof comicBookInkersTable>;
 export type NewComicBookInker = InferInsertModel<typeof comicBookInkersTable>;
 
-export type ComicBookColorist = InferSelectModel<typeof comicBookColoristsTable>;
-export type NewComicBookColorist = InferInsertModel<typeof comicBookColoristsTable>;
+export type ComicBookColorist = InferSelectModel<
+  typeof comicBookColoristsTable
+>;
+export type NewComicBookColorist = InferInsertModel<
+  typeof comicBookColoristsTable
+>;
 
-export type ComicBookLetterer = InferSelectModel<typeof comicBookLetterersTable>;
-export type NewComicBookLetterer = InferInsertModel<typeof comicBookLetterersTable>;
+export type ComicBookLetterer = InferSelectModel<
+  typeof comicBookLetterersTable
+>;
+export type NewComicBookLetterer = InferInsertModel<
+  typeof comicBookLetterersTable
+>;
 
 export type ComicBookEditor = InferSelectModel<typeof comicBookEditorsTable>;
 export type NewComicBookEditor = InferInsertModel<typeof comicBookEditorsTable>;
 
-export type ComicBookCoverArtist = InferSelectModel<typeof comicBookCoverArtistsTable>;
-export type NewComicBookCoverArtist = InferInsertModel<typeof comicBookCoverArtistsTable>;
+export type ComicBookCoverArtist = InferSelectModel<
+  typeof comicBookCoverArtistsTable
+>;
+export type NewComicBookCoverArtist = InferInsertModel<
+  typeof comicBookCoverArtistsTable
+>;
 
-export type ComicBookPublisher = InferSelectModel<typeof comicBookPublishersTable>;
-export type NewComicBookPublisher = InferInsertModel<typeof comicBookPublishersTable>;
+export type ComicBookPublisher = InferSelectModel<
+  typeof comicBookPublishersTable
+>;
+export type NewComicBookPublisher = InferInsertModel<
+  typeof comicBookPublishersTable
+>;
 
 export type ComicBookImprint = InferSelectModel<typeof comicBookImprintsTable>;
-export type NewComicBookImprint = InferInsertModel<typeof comicBookImprintsTable>;
+export type NewComicBookImprint = InferInsertModel<
+  typeof comicBookImprintsTable
+>;
 
 export type ComicBookGenre = InferSelectModel<typeof comicBookGenresTable>;
 export type NewComicBookGenre = InferInsertModel<typeof comicBookGenresTable>;
 
-export type ComicBookCharacter = InferSelectModel<typeof comicBookCharactersTable>;
-export type NewComicBookCharacter = InferInsertModel<typeof comicBookCharactersTable>;
+export type ComicBookCharacter = InferSelectModel<
+  typeof comicBookCharactersTable
+>;
+export type NewComicBookCharacter = InferInsertModel<
+  typeof comicBookCharactersTable
+>;
 
-export type ComicBookLocation = InferSelectModel<typeof comicBookLocationsTable>;
-export type NewComicBookLocation = InferInsertModel<typeof comicBookLocationsTable>;
+export type ComicBookLocation = InferSelectModel<
+  typeof comicBookLocationsTable
+>;
+export type NewComicBookLocation = InferInsertModel<
+  typeof comicBookLocationsTable
+>;
 
 export type ComicBookTeam = InferSelectModel<typeof comicBookTeamsTable>;
 export type NewComicBookTeam = InferInsertModel<typeof comicBookTeamsTable>;
 
-export type ComicBookStoryArc = InferSelectModel<typeof comicBookStoryArcsTable>;
-export type NewComicBookStoryArc = InferInsertModel<typeof comicBookStoryArcsTable>;
+export type ComicBookStoryArc = InferSelectModel<
+  typeof comicBookStoryArcsTable
+>;
+export type NewComicBookStoryArc = InferInsertModel<
+  typeof comicBookStoryArcsTable
+>;
 
-export type ComicBookSeriesGroup = InferSelectModel<typeof comicBookSeriesGroupsTable>;
-export type NewComicBookSeriesGroup = InferInsertModel<typeof comicBookSeriesGroupsTable>;
-
+export type ComicBookSeriesGroup = InferSelectModel<
+  typeof comicBookSeriesGroupsTable
+>;
+export type NewComicBookSeriesGroup = InferInsertModel<
+  typeof comicBookSeriesGroupsTable
+>;
 
 export type ComicSeriesWithMetadata = ComicSeries & {
-  writers?: string,
-  pencillers?: string,
-  inkers?: string,
-  letterers?: string,
-  editors?: string,
-  cover_artists?: string,
-  publishers?: string,
-  imprints?: string,
-  genres?: string,
-  characters?: string,
-  teams?: string,
-  locations?: string,
-  story_arcs?: string,
-  series_groups?: string,
+  writers?: string;
+  pencillers?: string;
+  inkers?: string;
+  letterers?: string;
+  editors?: string;
+  cover_artists?: string;
+  publishers?: string;
+  imprints?: string;
+  genres?: string;
+  characters?: string;
+  teams?: string;
+  locations?: string;
+  story_arcs?: string;
+  series_groups?: string;
 };

@@ -1,4 +1,4 @@
 import { z } from "@hono/zod-openapi";
-import { createSchemaFactory } from 'drizzle-zod';
+import { createSchemaFactory } from "drizzle-zod";
 
-export const { createSelectSchema } = createSchemaFactory({zodInstance: z})
+export const { createSelectSchema } = createSchemaFactory({ zodInstance: z });

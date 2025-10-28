@@ -16,24 +16,29 @@ import {
   fetchComicBookMetadataById,
   fetchComicBooksByLetter,
   fetchComicDuplicatesInTheDb,
+  fetchRandomComicBook,
   getComicBooksWithRelatedMetadata,
   getComicPagesInfo,
   getComicThumbnailByComicIdThumbnailId,
   getComicThumbnails,
   getNextComicBookId,
   getPreviousComicBookId,
-  fetchRandomComicBook,
   setComicReadByUser,
   startStreamingComicBookFile,
 } from "../services/comicbooks.service.ts";
-import { ComicBook, ComicBookFilterItem, AllowedSortProperties, AllowedFilterProperties } from "../../types/index.ts";
+import {
+  AllowedFilterProperties,
+  AllowedSortProperties,
+  ComicBook,
+  ComicBookFilterItem,
+} from "../../types/index.ts";
 import { ComicBookWithMetadata } from "../../types/comicBook.type.ts";
 
 const app = new OpenAPIHono();
 
 // This should be the expected json return type for routes that return multiple comic books with pagination info
 type multipleReturnResponse = {
-  data: ComicBook[]|ComicBookWithMetadata[];
+  data: ComicBook[] | ComicBookWithMetadata[];
   count: number;
   hasNextPage: boolean;
   currentPage: number;
@@ -70,7 +75,15 @@ app.get(
     }),
   ),
   async (c) => {
-    const { page, limit, sort, sortProperty, sortDirection, filter, filterProperty } = c.req.query();
+    const {
+      page,
+      limit,
+      sort,
+      sortProperty,
+      sortDirection,
+      filter,
+      filterProperty,
+    } = c.req.query();
 
     try {
       // Convert query parameters to the new service function format
@@ -78,7 +91,7 @@ app.get(
       if (filter && filterProperty) {
         filters.push({
           filterProperty: filterProperty as AllowedFilterProperties,
-          filterValue: filter
+          filterValue: filter,
         });
       }
 
@@ -89,10 +102,10 @@ app.get(
       // Use the new optimized service function
       const comics = await getComicBooksWithRelatedMetadata(
         filters,
-        (sortProperty as AllowedSortProperties) || 'created_at',
+        (sortProperty as AllowedSortProperties) || "created_at",
         sortDirection === "desc" ? "desc" : "asc",
         offset,
-        pageSize + 1 // +1 to check for next page
+        pageSize + 1, // +1 to check for next page
       );
 
       // Check if there's a next page
@@ -149,21 +162,22 @@ app.get(
         pageSize: limit,
       });
 
-    if (duplicates) {
-      return c.json({
-        duplicates: duplicates,
-        message: "Fetched comic book duplicates successfully",
-      });
-    } else {
-      return c.json({
-        message: "No duplicate comic books found",
-      });
+      if (duplicates) {
+        return c.json({
+          duplicates: duplicates,
+          message: "Fetched comic book duplicates successfully",
+        });
+      } else {
+        return c.json({
+          message: "No duplicate comic books found",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching comic book duplicates:", error);
+      return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
     }
-  } catch (error) {
-    console.error("Error fetching comic book duplicates:", error);
-    return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
-  }
-});
+  },
+);
 
 /**
  * Get the latest comic books added to the database
@@ -278,11 +292,13 @@ app.get(
  * This route returns a random comic book from the database
  */
 app.get(
-  "/random", 
+  "/random",
   zValidator(
     "query",
     z.object({
-      count: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
+      count: z.string().optional().transform((
+        val,
+      ) => (val ? parseInt(val) : 1)),
     }),
   ),
   async (c) => {
@@ -295,7 +311,7 @@ app.get(
       console.error("Error fetching random comic book:", error);
       return c.json({ error: "Failed to fetch random comic book" }, 500);
     }
-  }
+  },
 );
 
 app.get(
@@ -304,7 +320,9 @@ app.get(
     "query",
     z.object({
       page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
-      limit: z.string().optional().transform((val) => (val ? parseInt(val) : 20)),
+      limit: z.string().optional().transform((
+        val,
+      ) => (val ? parseInt(val) : 20)),
       letter: z.string().optional().transform((val) => val || "A"),
     }),
   ),
@@ -316,7 +334,7 @@ app.get(
     try {
       const comicsResult = await fetchComicBooksByLetter(
         letter,
-        { page: page, pageSize: limit }
+        { page: page, pageSize: limit },
       );
       return c.json({
         data: comicsResult,
@@ -328,7 +346,7 @@ app.get(
       console.error("Error fetching comic book list:", error);
       return c.json({ error: "Failed to fetch comic book list" }, 500);
     }
-  }
+  },
 );
 
 app.get("/queue", (_c) => {
@@ -919,7 +937,12 @@ app.post(
       const description = body.description as string | undefined;
 
       // Validate file type
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/webp",
+      ];
       if (!allowedTypes.includes(imageFile.type)) {
         return c.json({
           error: "Invalid file type. Supported types: JPEG, PNG, WebP",

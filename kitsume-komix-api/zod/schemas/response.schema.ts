@@ -1,6 +1,10 @@
 import { z } from "@hono/zod-openapi";
 
-import { comicSeriesSelectJoinedWithThumbnailSchema, comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema, comicSeriesSelectJoinedWithThumbnailAndMetadataSchema } from "./data/comic-series.schema.ts";
+import {
+  comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema,
+  comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
+  comicSeriesSelectJoinedWithThumbnailSchema,
+} from "./data/comic-series.schema.ts";
 
 export const MessageResponseSchema = z.object({
   message: z.string(),
@@ -13,7 +17,7 @@ export const ErrorResponseSchema = z.object({
 
 export const ComicSeriesResponseSchema = z.object({
   data: z.array(
-    comicSeriesSelectJoinedWithThumbnailSchema
+    comicSeriesSelectJoinedWithThumbnailSchema,
   ),
   meta: z.object({
     total: z.number(),
@@ -29,20 +33,21 @@ export const ComicSeriesWithMetadataAndThumbnailsResponseSchema = z.object({
   message: z.string(),
 });
 
-export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema = z.object({
-  data: comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema,
-  message: z.string(),
-});
+export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema = z
+  .object({
+    data: comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema,
+    message: z.string(),
+  });
 
 const librarySchema = z.object({
-	id: z.number(),
-	name: z.string().min(1).max(255),
-	path: z.string().min(1).max(1024),
-	description: z.string().max(1024).nullable(),
-	enabled: z.boolean(),
-	changed_at: z.date(),
-	created_at: z.date(),
-	updated_at: z.date(),
+  id: z.number(),
+  name: z.string().min(1).max(255),
+  path: z.string().min(1).max(1024),
+  description: z.string().max(1024).nullable(),
+  enabled: z.boolean(),
+  changed_at: z.date(),
+  created_at: z.date(),
+  updated_at: z.date(),
 });
 
 const librariesSchema = z.array(librarySchema);
@@ -51,4 +56,3 @@ export const LibraryResponseSchema = z.object({
   message: z.string(),
   data: librariesSchema.optional().or(librarySchema.optional()),
 });
-

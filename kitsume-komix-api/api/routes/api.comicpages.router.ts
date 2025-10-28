@@ -1,4 +1,4 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 const app = new OpenAPIHono();
 
@@ -8,8 +8,8 @@ const MessageResponseSchema = z.object({
 
 const ParamIdSchema = z.object({
   id: z.string().openapi({
-    param: { name: 'id', in: 'path' },
-    example: '1',
+    param: { name: "id", in: "path" },
+    example: "1",
   }),
 });
 

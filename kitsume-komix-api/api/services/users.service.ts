@@ -1,7 +1,15 @@
 import { hashPassword } from "../../utilities/hash.ts";
 import { UserRegistrationInput } from "../../types/index.ts";
-import { createUser, getUserByEmail, getUserById, deleteUser } from "../../db/sqlite/models/users.model.ts";
-import { assignLibraryToUser, getComicLibraryById } from "../../db/sqlite/models/comicLibraries.model.ts";
+import {
+  createUser,
+  deleteUser,
+  getUserByEmail,
+  getUserById,
+} from "../../db/sqlite/models/users.model.ts";
+import {
+  assignLibraryToUser,
+  getComicLibraryById,
+} from "../../db/sqlite/models/comicLibraries.model.ts";
 
 export async function createUserService(
   user: UserRegistrationInput,
@@ -63,12 +71,12 @@ export const deleteUserService = async (userId: number): Promise<boolean> => {
     console.error("Error deleting user:", error);
     throw new Error("Internal server error");
   }
-}
+};
 
 /**
  * Assign a comic library to a user
- * @param userId 
- * @param libraryId 
+ * @param userId
+ * @param libraryId
  */
 export async function assignLibraryToUserService(
   userId: number,
@@ -94,7 +102,6 @@ export async function assignLibraryToUserService(
     console.error("Error fetching library by ID:", error);
     throw new Error("Internal server error");
   }
-
 
   try {
     await assignLibraryToUser(userId, libraryId);

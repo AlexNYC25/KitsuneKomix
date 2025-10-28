@@ -1,4 +1,3 @@
-
 export type LibraryRegistrationInput = {
   name: string;
   description?: string;

@@ -1,42 +1,51 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import camelcasekeys from "camelcase-keys";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
-import { 
-  getLatestComicSeriesUserCanAccess, 
-  getUpdatedComicSeriesUserCanAccess, 
-  getSelectedComicSeriesDetails 
+import {
+  getLatestComicSeriesUserCanAccess,
+  getSelectedComicSeriesDetails,
+  getUpdatedComicSeriesUserCanAccess,
 } from "../services/comicSeries.service.ts";
 
-import type { AppEnv} from "../../types/index.ts";
+import type { AppEnv } from "../../types/index.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
-import { ParamIdSchema, ParamLetterSchema, ParamIdThumbnailIdSchema, PaginationQuerySchema } from "../../zod/schemas/request.schema.ts";
-import { MessageResponseSchema, ComicSeriesResponseSchema, ComicSeriesWithMetadataAndThumbnailsResponseSchema, ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
-
+import {
+  PaginationQuerySchema,
+  ParamIdSchema,
+  ParamIdThumbnailIdSchema,
+  ParamLetterSchema,
+} from "../../zod/schemas/request.schema.ts";
+import {
+  ComicSeriesResponseSchema,
+  ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema,
+  ComicSeriesWithMetadataAndThumbnailsResponseSchema,
+  MessageResponseSchema,
+} from "../../zod/schemas/response.schema.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
-app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', {
-  type: 'http',
-  scheme: 'bearer',
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
 });
 
 // TODO: Depreate this and use the one from response.schema.ts: ParamIdThumbnailIdSchema
 const ParamIdThumbIdSchema = z.object({
   id: z.string().openapi({
-    param: { name: 'id', in: 'path' },
-    example: '1',
+    param: { name: "id", in: "path" },
+    example: "1",
   }),
   thumbId: z.string().openapi({
-    param: { name: 'thumbId', in: 'path' },
-    example: '1',
+    param: { name: "thumbId", in: "path" },
+    example: "1",
   }),
 });
 
 /**
  * GET /api/comic-series/
- * 
+ *
  * Basic route to get all comic series.
  */
 app.openapi(
@@ -56,12 +65,12 @@ app.openapi(
   (_c) => {
     // TODO: use the model/service to get the series from the database
     return _c.json({ message: "Comic Series API is running" }, 200);
-  }
+  },
 );
 
 /**
  * GET /api/comic-series/latest
- * 
+ *
  * Get the latest comic series that the current user has access to.
  * Admins can see all series, regular users only those they have been granted access to.
  */
@@ -75,14 +84,27 @@ app.openapi(
     request: { headers: AuthHeaderSchema, query: PaginationQuerySchema },
     responses: {
       200: {
-        content: { "application/json": { 
-          schema: ComicSeriesResponseSchema.transform((data) => camelcasekeys(data, { deep: true } )) 
-        }},
+        content: {
+          "application/json": {
+            schema: ComicSeriesResponseSchema.transform((data) =>
+              camelcasekeys(data, { deep: true })
+            ),
+          },
+        },
         description: "Latest series retrieved successfully",
       },
-      400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
-      401: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Unauthorized" },
-      500: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Internal Server Error" },
+      400: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Bad Request",
+      },
+      401: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Unauthorized",
+      },
+      500: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Internal Server Error",
+      },
     },
   }),
   async (c) => {
@@ -101,7 +123,11 @@ app.openapi(
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
 
-    const latestSeries = await getLatestComicSeriesUserCanAccess(userId, limit, offset);
+    const latestSeries = await getLatestComicSeriesUserCanAccess(
+      userId,
+      limit,
+      offset,
+    );
 
     // Convert keys to camelCase and ensure correct types for folderPath and thumbnailUrl
     const formatedLatestSeries = latestSeries.map((series) => {
@@ -112,14 +138,18 @@ app.openapi(
       };
     });
 
-    return c.json({ 
+    return c.json({
       data: formatedLatestSeries,
-      meta: { total: formatedLatestSeries.length, page: 1, pageSize: 10, hasNextPage: false },
-      message: "Latest Comic Series API is running" 
+      meta: {
+        total: formatedLatestSeries.length,
+        page: 1,
+        pageSize: 10,
+        hasNextPage: false,
+      },
+      message: "Latest Comic Series API is running",
     }, 200);
-  }
+  },
 );
-
 
 /**
  * GET /api/comic-series/updated
@@ -134,16 +164,29 @@ app.openapi(
     request: { headers: AuthHeaderSchema, query: PaginationQuerySchema },
     responses: {
       200: {
-        content: { "application/json": { 
-          schema: ComicSeriesResponseSchema.transform((data) => camelcasekeys(data, { deep: true } )) 
-        }},
+        content: {
+          "application/json": {
+            schema: ComicSeriesResponseSchema.transform((data) =>
+              camelcasekeys(data, { deep: true })
+            ),
+          },
+        },
         description: "Latest series retrieved successfully",
       },
-      400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
-      401: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Unauthorized" },
-      500: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Internal Server Error" },
+      400: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Bad Request",
+      },
+      401: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Unauthorized",
+      },
+      500: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Internal Server Error",
+      },
     },
-  }), 
+  }),
   async (c) => {
     const user = c.get("user");
     if (!user || !user.sub) {
@@ -160,7 +203,11 @@ app.openapi(
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
 
-    const latestSeries = await getUpdatedComicSeriesUserCanAccess(userId, limit, offset);
+    const latestSeries = await getUpdatedComicSeriesUserCanAccess(
+      userId,
+      limit,
+      offset,
+    );
 
     // Convert keys to camelCase and ensure correct types for folderPath and thumbnailUrl
     const formatedLatestSeries = latestSeries.map((series) => {
@@ -171,18 +218,22 @@ app.openapi(
       };
     });
 
-    return c.json({ 
+    return c.json({
       data: formatedLatestSeries,
-      meta: { total: formatedLatestSeries.length, page: 1, pageSize: 10, hasNextPage: false },
-      message: "Latest Comic Series API is running" 
+      meta: {
+        total: formatedLatestSeries.length,
+        page: 1,
+        pageSize: 10,
+        hasNextPage: false,
+      },
+      message: "Latest Comic Series API is running",
     }, 200);
-  }
+  },
 );
-
 
 /**
  * GET /api/comic-series/{id}
- * 
+ *
  * Get a comic series by ID.
  */
 app.openapi(
@@ -195,17 +246,32 @@ app.openapi(
     request: { params: ParamIdSchema },
     responses: {
       200: {
-        content: { "application/json": { 
-          schema: ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema.transform((data) => camelcasekeys(data, { deep: true } )) 
-        }},
+        content: {
+          "application/json": {
+            schema: ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema
+              .transform((data) => camelcasekeys(data, { deep: true })),
+          },
+        },
         description: "Series retrieved successfully",
       },
-      400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
-      401: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Unauthorized" },
-      404: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Not Found" },
-      500: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Internal Server Error" },
+      400: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Bad Request",
+      },
+      401: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Unauthorized",
+      },
+      404: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Not Found",
+      },
+      500: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Internal Server Error",
+      },
     },
-  }), 
+  }),
   async (c) => {
     const user = c.get("user");
     if (!user || !user.sub) {
@@ -226,18 +292,17 @@ app.openapi(
 
       const comicSeriesData = {
         ...seriesDataCamel,
-        thumbnailUrl: seriesDataCamel.thumbnailUrl ?? null
+        thumbnailUrl: seriesDataCamel.thumbnailUrl ?? null,
       };
 
-      return c.json({ 
+      return c.json({
         data: comicSeriesData,
-        message: "Selected Comic Series API is running" 
+        message: "Selected Comic Series API is running",
       }, 200);
     } catch (error) {
       return c.json({ message: "Internal Server Error" + error }, 500);
     }
-
-  }
+  },
 );
 
 // Analyze series
@@ -257,7 +322,9 @@ const analyzeSeriesRoute = createRoute({
 
 app.openapi(analyzeSeriesRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Analysis` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Analysis`,
+  }, 200);
 });
 
 // Download series
@@ -277,7 +344,9 @@ const downloadSeriesRoute = createRoute({
 
 app.openapi(downloadSeriesRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Download` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Download`,
+  }, 200);
 });
 
 // Update series metadata
@@ -297,7 +366,9 @@ const updateMetadataRoute = createRoute({
 
 app.openapi(updateMetadataRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Metadata Update` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Metadata Update`,
+  }, 200);
 });
 
 // Update series progress
@@ -317,7 +388,9 @@ const updateProgressRoute = createRoute({
 
 app.openapi(updateProgressRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Progress Update` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Progress Update`,
+  }, 200);
 });
 
 // Get series thumbnails
@@ -337,7 +410,9 @@ const getThumbnailsRoute = createRoute({
 
 app.openapi(getThumbnailsRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnails` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Thumbnails`,
+  }, 200);
 });
 
 // Create series thumbnail
@@ -357,7 +432,9 @@ const createThumbnailRoute = createRoute({
 
 app.openapi(createThumbnailRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Creation` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Thumbnail Creation`,
+  }, 200);
 });
 
 // Delete series thumbnail
@@ -377,7 +454,9 @@ const deleteThumbnailRoute = createRoute({
 
 app.openapi(deleteThumbnailRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Deletion` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Thumbnail Deletion`,
+  }, 200);
 });
 
 // Get specific thumbnail
@@ -397,7 +476,9 @@ const getThumbnailByIdRoute = createRoute({
 
 app.openapi(getThumbnailByIdRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Retrieval` }, 200);
+  return c.json({
+    message: `Comic Series API is running for ID ${id} - Thumbnail Retrieval`,
+  }, 200);
 });
 
 // Update thumbnail cover
@@ -417,7 +498,10 @@ const updateThumbnailCoverRoute = createRoute({
 
 app.openapi(updateThumbnailCoverRoute, (c) => {
   const { id } = c.req.valid("param");
-  return c.json({ message: `Comic Series API is running for ID ${id} - Thumbnail Cover Update` }, 200);
+  return c.json({
+    message:
+      `Comic Series API is running for ID ${id} - Thumbnail Cover Update`,
+  }, 200);
 });
 
 // Get alphabetical series
@@ -455,10 +539,9 @@ const getByLetterRoute = createRoute({
 
 app.openapi(getByLetterRoute, (c) => {
   const { letter } = c.req.valid("param");
-  return c.json({ message: `Alphabetical Comic Series API is running for letter ${letter}` }, 200);
+  return c.json({
+    message: `Alphabetical Comic Series API is running for letter ${letter}`,
+  }, 200);
 });
-
-
-
 
 export default app;

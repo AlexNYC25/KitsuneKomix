@@ -1,4 +1,4 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { purgeAllData } from "../../db/sqlite/models/admin.model.ts";
 

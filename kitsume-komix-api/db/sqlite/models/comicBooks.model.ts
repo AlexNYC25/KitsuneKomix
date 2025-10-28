@@ -1,56 +1,56 @@
-import { asc, desc, eq, sql, and, or, ilike, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { 
-  comicBooksTable,
-  comicBookWritersTable,
-  comicWritersTable,
-  comicBookPencillersTable,
-  comicPencillersTable,
-  comicBookInkersTable,
-  comicInkersTable,
-  comicBookColoristsTable,
-  comicColoristsTable,
-  comicBookLetterersTable,
-  comicLetterersTable,
-  comicBookEditorsTable,
-  comicEditorsTable,
-  comicBookCoverArtistsTable,
-  comicCoverArtistsTable,
-  comicBookPublishersTable,
-  comicPublishersTable,
-  comicBookImprintsTable,
-  comicImprintsTable,
-  comicBookGenresTable,
-  comicGenresTable,
+import {
   comicBookCharactersTable,
-  comicCharactersTable,
-  comicBookTeamsTable,
-  comicTeamsTable,
+  comicBookColoristsTable,
+  comicBookCoverArtistsTable,
+  comicBookEditorsTable,
+  comicBookGenresTable,
+  comicBookImprintsTable,
+  comicBookInkersTable,
+  comicBookLetterersTable,
   comicBookLocationsTable,
-  comicLocationsTable,
-  comicBookStoryArcsTable,
-  comicStoryArcsTable,
+  comicBookPencillersTable,
+  comicBookPublishersTable,
   comicBookSeriesGroupsTable,
+  comicBooksTable,
+  comicBookStoryArcsTable,
+  comicBookTeamsTable,
+  comicBookWritersTable,
+  comicCharactersTable,
+  comicColoristsTable,
+  comicCoverArtistsTable,
+  comicEditorsTable,
+  comicGenresTable,
+  comicImprintsTable,
+  comicInkersTable,
+  comicLetterersTable,
+  comicLocationsTable,
+  comicPencillersTable,
+  comicPublishersTable,
+  comicSeriesBooksTable,
   comicSeriesGroupsTable,
-  comicSeriesBooksTable
+  comicStoryArcsTable,
+  comicTeamsTable,
+  comicWritersTable,
 } from "../schema.ts";
-import type { 
-  ComicBook, 
-  NewComicBook,
+import type {
+  ComicBook,
   ComicBookFilteringAndSortingParams,
+  NewComicBook,
 } from "../../../types/index.ts";
-import { 
+import {
+  COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
   // Constants (imported as values since they're used at runtime)
   COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
-  COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
 } from "../../../types/index.ts";
 import type { ComicBookQueryParams } from "../../../interfaces/RequestParams.interface.ts";
 
-
-export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: ComicBookFilteringAndSortingParams): Promise<ComicBook[]> => {
-
+export const getComicBooksWithMetadataFilteringSoring = async (
+  serviceDetails: ComicBookFilteringAndSortingParams,
+): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -58,104 +58,108 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
   }
 
   const whereConditions = [];
-  
+
   // Determine which tables we need to join based on filters and sorting
   const requiredJoins = new Set<string>();
-  
+
   // Check external filters to see which tables we need
   if (serviceDetails.externalFilters) {
     for (const filter of serviceDetails.externalFilters) {
       requiredJoins.add(filter.filterProperty);
-      
+
       if (filter.filterProperty === "characters") {
         whereConditions.push(
-          inArray(comicCharactersTable.id, filter.filterIds)
+          inArray(comicCharactersTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "colorists") {
         whereConditions.push(
-          inArray(comicColoristsTable.id, filter.filterIds)
+          inArray(comicColoristsTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "cover_artists") {
         whereConditions.push(
-          inArray(comicCoverArtistsTable.id, filter.filterIds)
+          inArray(comicCoverArtistsTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "editors") {
         whereConditions.push(
-          inArray(comicEditorsTable.id, filter.filterIds)
+          inArray(comicEditorsTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "genres") {
         whereConditions.push(
-          inArray(comicGenresTable.id, filter.filterIds)
+          inArray(comicGenresTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "imprints") {
         whereConditions.push(
-          inArray(comicImprintsTable.id, filter.filterIds)
+          inArray(comicImprintsTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "inkers") {
         whereConditions.push(
-          inArray(comicInkersTable.id, filter.filterIds)
+          inArray(comicInkersTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "letterers") {
         whereConditions.push(
-          inArray(comicLetterersTable.id, filter.filterIds)
+          inArray(comicLetterersTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "locations") {
         whereConditions.push(
-          inArray(comicLocationsTable.id, filter.filterIds)
+          inArray(comicLocationsTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "pencillers") {
         whereConditions.push(
-          inArray(comicPencillersTable.id, filter.filterIds)
+          inArray(comicPencillersTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "publishers") {
         whereConditions.push(
-          inArray(comicPublishersTable.id, filter.filterIds)
+          inArray(comicPublishersTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "story_arcs") {
         whereConditions.push(
-          inArray(comicStoryArcsTable.id, filter.filterIds)
+          inArray(comicStoryArcsTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "teams") {
         whereConditions.push(
-          inArray(comicTeamsTable.id, filter.filterIds)
+          inArray(comicTeamsTable.id, filter.filterIds),
         );
       }
 
       if (filter.filterProperty === "writers") {
         whereConditions.push(
-          inArray(comicWritersTable.id, filter.filterIds)
+          inArray(comicWritersTable.id, filter.filterIds),
         );
       }
     }
   }
 
   // Check sort property to see if we need additional joins
-  const sortProperty = serviceDetails.sort?.property || 'created_at';
-  if (COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(sortProperty as typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number])) {
+  const sortProperty = serviceDetails.sort?.property || "created_at";
+  if (
+    COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(
+      sortProperty as typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number],
+    )
+  ) {
     requiredJoins.add(sortProperty);
   }
 
@@ -164,67 +168,70 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     for (const filter of serviceDetails.internalFilters) {
       if (filter.filterProperty === "id") {
         whereConditions.push(
-          eq(comicBooksTable.id, parseInt(filter.filterValue))
+          eq(comicBooksTable.id, parseInt(filter.filterValue)),
         );
       }
 
       if (filter.filterProperty === "title") {
         whereConditions.push(
-          ilike(comicBooksTable.title, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.title, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "issue_number") {
         whereConditions.push(
-          ilike(comicBooksTable.issue_number, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.issue_number, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "volume") {
         whereConditions.push(
-          ilike(comicBooksTable.volume, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.volume, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "summary") {
         whereConditions.push(
-          ilike(comicBooksTable.summary, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.summary, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "series") {
         whereConditions.push(
-          ilike(comicBooksTable.series, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.series, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "alternate_series") {
         whereConditions.push(
-          ilike(comicBooksTable.alternate_series, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.alternate_series, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "alternate_issue_number") {
         whereConditions.push(
-          ilike(comicBooksTable.alternate_issue_number, `%${filter.filterValue}%`)
+          ilike(
+            comicBooksTable.alternate_issue_number,
+            `%${filter.filterValue}%`,
+          ),
         );
       }
 
       if (filter.filterProperty === "publication_date") {
         whereConditions.push(
-          ilike(comicBooksTable.publication_date, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.publication_date, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "created_at") {
         whereConditions.push(
-          ilike(comicBooksTable.created_at, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.created_at, `%${filter.filterValue}%`),
         );
       }
 
       if (filter.filterProperty === "updated_at") {
         whereConditions.push(
-          ilike(comicBooksTable.updated_at, `%${filter.filterValue}%`)
+          ilike(comicBooksTable.updated_at, `%${filter.filterValue}%`),
         );
       }
     }
@@ -275,11 +282,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookWritersTable,
-        eq(comicBooksTable.id, comicBookWritersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookWritersTable.comic_book_id),
       )
       .leftJoin(
         comicWritersTable,
-        eq(comicBookWritersTable.comic_writer_id, comicWritersTable.id)
+        eq(comicBookWritersTable.comic_writer_id, comicWritersTable.id),
       );
   }
 
@@ -287,11 +294,14 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookPencillersTable,
-        eq(comicBooksTable.id, comicBookPencillersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookPencillersTable.comic_book_id),
       )
       .leftJoin(
         comicPencillersTable,
-        eq(comicBookPencillersTable.comic_penciller_id, comicPencillersTable.id)
+        eq(
+          comicBookPencillersTable.comic_penciller_id,
+          comicPencillersTable.id,
+        ),
       );
   }
 
@@ -299,11 +309,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookInkersTable,
-        eq(comicBooksTable.id, comicBookInkersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookInkersTable.comic_book_id),
       )
       .leftJoin(
         comicInkersTable,
-        eq(comicBookInkersTable.comic_inker_id, comicInkersTable.id)
+        eq(comicBookInkersTable.comic_inker_id, comicInkersTable.id),
       );
   }
 
@@ -311,11 +321,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookColoristsTable,
-        eq(comicBooksTable.id, comicBookColoristsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookColoristsTable.comic_book_id),
       )
       .leftJoin(
         comicColoristsTable,
-        eq(comicBookColoristsTable.comic_colorist_id, comicColoristsTable.id)
+        eq(comicBookColoristsTable.comic_colorist_id, comicColoristsTable.id),
       );
   }
 
@@ -323,11 +333,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookLetterersTable,
-        eq(comicBooksTable.id, comicBookLetterersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookLetterersTable.comic_book_id),
       )
       .leftJoin(
         comicLetterersTable,
-        eq(comicBookLetterersTable.comic_letterer_id, comicLetterersTable.id)
+        eq(comicBookLetterersTable.comic_letterer_id, comicLetterersTable.id),
       );
   }
 
@@ -335,11 +345,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookEditorsTable,
-        eq(comicBooksTable.id, comicBookEditorsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookEditorsTable.comic_book_id),
       )
       .leftJoin(
         comicEditorsTable,
-        eq(comicBookEditorsTable.comic_editor_id, comicEditorsTable.id)
+        eq(comicBookEditorsTable.comic_editor_id, comicEditorsTable.id),
       );
   }
 
@@ -347,11 +357,14 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookCoverArtistsTable,
-        eq(comicBooksTable.id, comicBookCoverArtistsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookCoverArtistsTable.comic_book_id),
       )
       .leftJoin(
         comicCoverArtistsTable,
-        eq(comicBookCoverArtistsTable.comic_cover_artist_id, comicCoverArtistsTable.id)
+        eq(
+          comicBookCoverArtistsTable.comic_cover_artist_id,
+          comicCoverArtistsTable.id,
+        ),
       );
   }
 
@@ -359,11 +372,14 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookPublishersTable,
-        eq(comicBooksTable.id, comicBookPublishersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookPublishersTable.comic_book_id),
       )
       .leftJoin(
         comicPublishersTable,
-        eq(comicBookPublishersTable.comic_publisher_id, comicPublishersTable.id)
+        eq(
+          comicBookPublishersTable.comic_publisher_id,
+          comicPublishersTable.id,
+        ),
       );
   }
 
@@ -371,11 +387,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookImprintsTable,
-        eq(comicBooksTable.id, comicBookImprintsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookImprintsTable.comic_book_id),
       )
       .leftJoin(
         comicImprintsTable,
-        eq(comicBookImprintsTable.comic_imprint_id, comicImprintsTable.id)
+        eq(comicBookImprintsTable.comic_imprint_id, comicImprintsTable.id),
       );
   }
 
@@ -383,11 +399,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookGenresTable,
-        eq(comicBooksTable.id, comicBookGenresTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookGenresTable.comic_book_id),
       )
       .leftJoin(
         comicGenresTable,
-        eq(comicBookGenresTable.comic_genre_id, comicGenresTable.id)
+        eq(comicBookGenresTable.comic_genre_id, comicGenresTable.id),
       );
   }
 
@@ -395,11 +411,14 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookCharactersTable,
-        eq(comicBooksTable.id, comicBookCharactersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookCharactersTable.comic_book_id),
       )
       .leftJoin(
         comicCharactersTable,
-        eq(comicBookCharactersTable.comic_character_id, comicCharactersTable.id)
+        eq(
+          comicBookCharactersTable.comic_character_id,
+          comicCharactersTable.id,
+        ),
       );
   }
 
@@ -407,11 +426,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookTeamsTable,
-        eq(comicBooksTable.id, comicBookTeamsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookTeamsTable.comic_book_id),
       )
       .leftJoin(
         comicTeamsTable,
-        eq(comicBookTeamsTable.comic_team_id, comicTeamsTable.id)
+        eq(comicBookTeamsTable.comic_team_id, comicTeamsTable.id),
       );
   }
 
@@ -419,11 +438,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookLocationsTable,
-        eq(comicBooksTable.id, comicBookLocationsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookLocationsTable.comic_book_id),
       )
       .leftJoin(
         comicLocationsTable,
-        eq(comicBookLocationsTable.comic_location_id, comicLocationsTable.id)
+        eq(comicBookLocationsTable.comic_location_id, comicLocationsTable.id),
       );
   }
 
@@ -431,11 +450,11 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookStoryArcsTable,
-        eq(comicBooksTable.id, comicBookStoryArcsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookStoryArcsTable.comic_book_id),
       )
       .leftJoin(
         comicStoryArcsTable,
-        eq(comicBookStoryArcsTable.comic_story_arc_id, comicStoryArcsTable.id)
+        eq(comicBookStoryArcsTable.comic_story_arc_id, comicStoryArcsTable.id),
       );
   }
 
@@ -443,140 +462,181 @@ export const getComicBooksWithMetadataFilteringSoring = async (serviceDetails: C
     dynamicQuery = dynamicQuery
       .leftJoin(
         comicBookSeriesGroupsTable,
-        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comic_book_id),
       )
       .leftJoin(
         comicSeriesGroupsTable,
-        eq(comicBookSeriesGroupsTable.comic_series_group_id, comicSeriesGroupsTable.id)
+        eq(
+          comicBookSeriesGroupsTable.comic_series_group_id,
+          comicSeriesGroupsTable.id,
+        ),
       );
   }
 
-    // Apply WHERE conditions if any exist  
-    let finalQuery: typeof dynamicQuery;
-    if (whereConditions.length > 0) {
-      finalQuery = dynamicQuery.where(and(...whereConditions));
-    } else {
-      finalQuery = dynamicQuery;
+  // Apply WHERE conditions if any exist
+  let finalQuery: typeof dynamicQuery;
+  if (whereConditions.length > 0) {
+    finalQuery = dynamicQuery.where(and(...whereConditions));
+  } else {
+    finalQuery = dynamicQuery;
+  }
+
+  // Handle sorting
+  let orderByColumn;
+  const sortOrder = serviceDetails.sort?.order || "desc";
+
+  // Determine the column to sort by based on property type
+  if (
+    COMIC_BOOK_INTERNAL_METADATA_PROPERTIES.includes(
+      sortProperty as typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number],
+    )
+  ) {
+    // Internal properties - sort directly on comic_books table
+    switch (sortProperty) {
+      case "id":
+        orderByColumn = comicBooksTable.id;
+        break;
+      case "title":
+        orderByColumn = comicBooksTable.title;
+        break;
+      case "issue_number":
+        orderByColumn = comicBooksTable.issue_number;
+        break;
+      case "volume":
+        orderByColumn = comicBooksTable.volume;
+        break;
+      case "summary":
+        orderByColumn = comicBooksTable.summary;
+        break;
+      case "series":
+        orderByColumn = comicBooksTable.series;
+        break;
+      case "alternate_series":
+        orderByColumn = comicBooksTable.alternate_series;
+        break;
+      case "alternate_issue_number":
+        orderByColumn = comicBooksTable.alternate_issue_number;
+        break;
+      case "publication_date":
+        orderByColumn = comicBooksTable.publication_date;
+        break;
+      case "created_at":
+        orderByColumn = comicBooksTable.created_at;
+        break;
+      case "updated_at":
+        orderByColumn = comicBooksTable.updated_at;
+        break;
+      default:
+        orderByColumn = comicBooksTable.created_at;
     }
-
-    // Handle sorting
-    let orderByColumn;
-    const sortOrder = serviceDetails.sort?.order || 'desc';
-
-    // Determine the column to sort by based on property type
-    if (COMIC_BOOK_INTERNAL_METADATA_PROPERTIES.includes(sortProperty as typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number])) {
-      // Internal properties - sort directly on comic_books table
-      switch (sortProperty) {
-        case 'id':
-          orderByColumn = comicBooksTable.id;
-          break;
-        case 'title':
-          orderByColumn = comicBooksTable.title;
-          break;
-        case 'issue_number':
-          orderByColumn = comicBooksTable.issue_number;
-          break;
-        case 'volume':
-          orderByColumn = comicBooksTable.volume;
-          break;
-        case 'summary':
-          orderByColumn = comicBooksTable.summary;
-          break;
-        case 'series':
-          orderByColumn = comicBooksTable.series;
-          break;
-        case 'alternate_series':
-          orderByColumn = comicBooksTable.alternate_series;
-          break;
-        case 'alternate_issue_number':
-          orderByColumn = comicBooksTable.alternate_issue_number;
-          break;
-        case 'publication_date':
-          orderByColumn = comicBooksTable.publication_date;
-          break;
-        case 'created_at':
-          orderByColumn = comicBooksTable.created_at;
-          break;
-        case 'updated_at':
-          orderByColumn = comicBooksTable.updated_at;
-          break;
-        default:
-          orderByColumn = comicBooksTable.created_at;
-      }
-    } else if (COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(sortProperty as typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number])) {
-      // External properties - sort on joined table columns (only if we actually joined the table)
-      switch (sortProperty) {
-        case 'characters':
-          orderByColumn = requiredJoins.has('characters') ? comicCharactersTable.name : comicBooksTable.created_at;
-          break;
-        case 'colorists':
-          orderByColumn = requiredJoins.has('colorists') ? comicColoristsTable.name : comicBooksTable.created_at;
-          break;
-        case 'cover_artists':
-          orderByColumn = requiredJoins.has('cover_artists') ? comicCoverArtistsTable.name : comicBooksTable.created_at;
-          break;
-        case 'editors':
-          orderByColumn = requiredJoins.has('editors') ? comicEditorsTable.name : comicBooksTable.created_at;
-          break;
-        case 'genres':
-          orderByColumn = requiredJoins.has('genres') ? comicGenresTable.name : comicBooksTable.created_at;
-          break;
-        case 'imprints':
-          orderByColumn = requiredJoins.has('imprints') ? comicImprintsTable.name : comicBooksTable.created_at;
-          break;
-        case 'inkers':
-          orderByColumn = requiredJoins.has('inkers') ? comicInkersTable.name : comicBooksTable.created_at;
-          break;
-        case 'letterers':
-          orderByColumn = requiredJoins.has('letterers') ? comicLetterersTable.name : comicBooksTable.created_at;
-          break;
-        case 'locations':
-          orderByColumn = requiredJoins.has('locations') ? comicLocationsTable.name : comicBooksTable.created_at;
-          break;
-        case 'pencillers':
-          orderByColumn = requiredJoins.has('pencillers') ? comicPencillersTable.name : comicBooksTable.created_at;
-          break;
-        case 'publishers':
-          orderByColumn = requiredJoins.has('publishers') ? comicPublishersTable.name : comicBooksTable.created_at;
-          break;
-        case 'story_arcs':
-          orderByColumn = requiredJoins.has('story_arcs') ? comicStoryArcsTable.name : comicBooksTable.created_at;
-          break;
-        case 'teams':
-          orderByColumn = requiredJoins.has('teams') ? comicTeamsTable.name : comicBooksTable.created_at;
-          break;
-        case 'writers':
-          orderByColumn = requiredJoins.has('writers') ? comicWritersTable.name : comicBooksTable.created_at;
-          break;
-        default:
-          orderByColumn = comicBooksTable.created_at;
-      }
-    } else {
-      // Fallback to default
-      orderByColumn = comicBooksTable.created_at;
+  } else if (
+    COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(
+      sortProperty as typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number],
+    )
+  ) {
+    // External properties - sort on joined table columns (only if we actually joined the table)
+    switch (sortProperty) {
+      case "characters":
+        orderByColumn = requiredJoins.has("characters")
+          ? comicCharactersTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "colorists":
+        orderByColumn = requiredJoins.has("colorists")
+          ? comicColoristsTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "cover_artists":
+        orderByColumn = requiredJoins.has("cover_artists")
+          ? comicCoverArtistsTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "editors":
+        orderByColumn = requiredJoins.has("editors")
+          ? comicEditorsTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "genres":
+        orderByColumn = requiredJoins.has("genres")
+          ? comicGenresTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "imprints":
+        orderByColumn = requiredJoins.has("imprints")
+          ? comicImprintsTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "inkers":
+        orderByColumn = requiredJoins.has("inkers")
+          ? comicInkersTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "letterers":
+        orderByColumn = requiredJoins.has("letterers")
+          ? comicLetterersTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "locations":
+        orderByColumn = requiredJoins.has("locations")
+          ? comicLocationsTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "pencillers":
+        orderByColumn = requiredJoins.has("pencillers")
+          ? comicPencillersTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "publishers":
+        orderByColumn = requiredJoins.has("publishers")
+          ? comicPublishersTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "story_arcs":
+        orderByColumn = requiredJoins.has("story_arcs")
+          ? comicStoryArcsTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "teams":
+        orderByColumn = requiredJoins.has("teams")
+          ? comicTeamsTable.name
+          : comicBooksTable.created_at;
+        break;
+      case "writers":
+        orderByColumn = requiredJoins.has("writers")
+          ? comicWritersTable.name
+          : comicBooksTable.created_at;
+        break;
+      default:
+        orderByColumn = comicBooksTable.created_at;
     }
+  } else {
+    // Fallback to default
+    orderByColumn = comicBooksTable.created_at;
+  }
 
-    // Apply pagination defaults
-    const offset = serviceDetails.offset || 0;
-    const limit = serviceDetails.limit || 20;
+  // Apply pagination defaults
+  const offset = serviceDetails.offset || 0;
+  const limit = serviceDetails.limit || 20;
 
-    try {
-      // Execute the query with sorting and pagination
-      // Use selectDistinct to ensure one row per comic book ID
-      const result = await finalQuery
-        .orderBy(sortOrder === 'asc' ? asc(orderByColumn) : desc(orderByColumn))
-        .limit(limit)
-        .offset(offset);
+  try {
+    // Execute the query with sorting and pagination
+    // Use selectDistinct to ensure one row per comic book ID
+    const result = await finalQuery
+      .orderBy(sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn))
+      .limit(limit)
+      .offset(offset);
 
+    // TODO: here is where we attatch the metadata + convert the comicBook to comicBookWithMetadata
 
-      // TODO: here is where we attatch the metadata + convert the comicBook to comicBookWithMetadata
-
-      return result;
-    } catch (error) {
-      console.error("Error fetching comic books with metadata filtering and sorting:", error);
-      throw error;
-    }
-}
+    return result;
+  } catch (error) {
+    console.error(
+      "Error fetching comic books with metadata filtering and sorting:",
+      error,
+    );
+    throw error;
+  }
+};
 
 export const getAllComicBooks = async (
   offset: number,
@@ -882,10 +942,10 @@ export const getComicBooksBySeriesId = async (
   }
 
   try {
-    const result = 
-      await db
+    const result = await db
       .select(
-        { id: comicBooksTable.id,
+        {
+          id: comicBooksTable.id,
           library_id: comicBooksTable.library_id,
           file_path: comicBooksTable.file_path,
           hash: comicBooksTable.hash,
@@ -916,13 +976,17 @@ export const getComicBooksBySeriesId = async (
           age_rating: comicBooksTable.age_rating,
           community_rating: comicBooksTable.community_rating,
           created_at: comicBooksTable.created_at,
-          updated_at: comicBooksTable.updated_at }
+          updated_at: comicBooksTable.updated_at,
+        },
       )
       .from(comicBooksTable)
-      .innerJoin(comicSeriesBooksTable, eq(comicBooksTable.id, comicSeriesBooksTable.comic_book_id))
+      .innerJoin(
+        comicSeriesBooksTable,
+        eq(comicBooksTable.id, comicSeriesBooksTable.comic_book_id),
+      )
       .where(eq(comicSeriesBooksTable.comic_series_id, seriesId))
       .orderBy(asc(comicBooksTable.issue_number));
-      
+
     return result;
   } catch (error) {
     console.error("Error fetching comic books by series:", error);
@@ -1035,7 +1099,10 @@ export const deleteComicBook = async (id: number): Promise<boolean> => {
   }
 };
 
-export const getComicDuplicates = async (offset: number, limit: number): Promise<ComicBook[]> => {
+export const getComicDuplicates = async (
+  offset: number,
+  limit: number,
+): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -1057,15 +1124,13 @@ export const getComicDuplicates = async (offset: number, limit: number): Promise
   }
 };
 
-
-
 /**
  * Comprehensive query that JOINs all related metadata tables for efficient filtering and sorting
  * @param params Query parameters for filtering, sorting, and pagination
  * @returns A promise that resolves to an array of ComicBook objects with metadata
  */
 export const getComicBooksWithMetadata = async (
-  params: ComicBookQueryParams = {}
+  params: ComicBookQueryParams = {},
 ): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
@@ -1086,8 +1151,8 @@ export const getComicBooksWithMetadata = async (
     characterFilter,
     yearFilter,
     generalFilter,
-    sortBy = 'created_at',
-    sortOrder = 'desc'
+    sortBy = "created_at",
+    sortOrder = "desc",
   } = params;
 
   try {
@@ -1096,19 +1161,19 @@ export const getComicBooksWithMetadata = async (
 
     if (titleFilter) {
       whereConditions.push(
-        ilike(comicBooksTable.title, `%${titleFilter}%`)
+        ilike(comicBooksTable.title, `%${titleFilter}%`),
       );
     }
 
     if (seriesFilter) {
       whereConditions.push(
-        ilike(comicBooksTable.series, `%${seriesFilter}%`)
+        ilike(comicBooksTable.series, `%${seriesFilter}%`),
       );
     }
 
     if (writerFilter) {
       whereConditions.push(
-        ilike(comicWritersTable.name, `%${writerFilter}%`)
+        ilike(comicWritersTable.name, `%${writerFilter}%`),
       );
     }
 
@@ -1118,8 +1183,8 @@ export const getComicBooksWithMetadata = async (
           ilike(comicPencillersTable.name, `%${artistFilter}%`),
           ilike(comicInkersTable.name, `%${artistFilter}%`),
           ilike(comicColoristsTable.name, `%${artistFilter}%`),
-          ilike(comicCoverArtistsTable.name, `%${artistFilter}%`)
-        )
+          ilike(comicCoverArtistsTable.name, `%${artistFilter}%`),
+        ),
       );
     }
 
@@ -1127,26 +1192,26 @@ export const getComicBooksWithMetadata = async (
       whereConditions.push(
         or(
           ilike(comicBooksTable.publisher, `%${publisherFilter}%`),
-          ilike(comicPublishersTable.name, `%${publisherFilter}%`)
-        )
+          ilike(comicPublishersTable.name, `%${publisherFilter}%`),
+        ),
       );
     }
 
     if (genreFilter) {
       whereConditions.push(
-        ilike(comicGenresTable.name, `%${genreFilter}%`)
+        ilike(comicGenresTable.name, `%${genreFilter}%`),
       );
     }
 
     if (characterFilter) {
       whereConditions.push(
-        ilike(comicCharactersTable.name, `%${characterFilter}%`)
+        ilike(comicCharactersTable.name, `%${characterFilter}%`),
       );
     }
 
     if (yearFilter) {
       whereConditions.push(
-        eq(comicBooksTable.year, yearFilter)
+        eq(comicBooksTable.year, yearFilter),
       );
     }
 
@@ -1160,42 +1225,42 @@ export const getComicBooksWithMetadata = async (
           ilike(comicPencillersTable.name, `%${generalFilter}%`),
           ilike(comicPublishersTable.name, `%${generalFilter}%`),
           ilike(comicGenresTable.name, `%${generalFilter}%`),
-          ilike(comicCharactersTable.name, `%${generalFilter}%`)
-        )
+          ilike(comicCharactersTable.name, `%${generalFilter}%`),
+        ),
       );
     }
 
     // Then we determine sorting similar to before instead we define the value of orderByColumn dynamically
     let orderByColumn;
     switch (sortBy) {
-      case 'title':
+      case "title":
         orderByColumn = comicBooksTable.title;
         break;
-      case 'series':
+      case "series":
         orderByColumn = comicBooksTable.series;
         break;
-      case 'issue_number':
+      case "issue_number":
         orderByColumn = comicBooksTable.issue_number;
         break;
-      case 'publication_year':
+      case "publication_year":
         orderByColumn = comicBooksTable.year;
         break;
-      case 'file_name':
+      case "file_name":
         orderByColumn = comicBooksTable.file_path;
         break;
-      case 'writer':
+      case "writer":
         orderByColumn = comicWritersTable.name;
         break;
-      case 'publisher':
+      case "publisher":
         orderByColumn = comicPublishersTable.name;
         break;
-      case 'genre':
+      case "genre":
         orderByColumn = comicGenresTable.name;
         break;
-      case 'created_at':
+      case "created_at":
         orderByColumn = comicBooksTable.created_at;
         break;
-      case 'updated_at':
+      case "updated_at":
         orderByColumn = comicBooksTable.updated_at;
         break;
       default:
@@ -1242,148 +1307,163 @@ export const getComicBooksWithMetadata = async (
       // Writers
       .leftJoin(
         comicBookWritersTable,
-        eq(comicBooksTable.id, comicBookWritersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookWritersTable.comic_book_id),
       )
       .leftJoin(
         comicWritersTable,
-        eq(comicBookWritersTable.comic_writer_id, comicWritersTable.id)
+        eq(comicBookWritersTable.comic_writer_id, comicWritersTable.id),
       )
       // Pencillers
       .leftJoin(
         comicBookPencillersTable,
-        eq(comicBooksTable.id, comicBookPencillersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookPencillersTable.comic_book_id),
       )
       .leftJoin(
         comicPencillersTable,
-        eq(comicBookPencillersTable.comic_penciller_id, comicPencillersTable.id)
+        eq(
+          comicBookPencillersTable.comic_penciller_id,
+          comicPencillersTable.id,
+        ),
       )
       // Inkers
       .leftJoin(
         comicBookInkersTable,
-        eq(comicBooksTable.id, comicBookInkersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookInkersTable.comic_book_id),
       )
       .leftJoin(
         comicInkersTable,
-        eq(comicBookInkersTable.comic_inker_id, comicInkersTable.id)
+        eq(comicBookInkersTable.comic_inker_id, comicInkersTable.id),
       )
       // Colorists
       .leftJoin(
         comicBookColoristsTable,
-        eq(comicBooksTable.id, comicBookColoristsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookColoristsTable.comic_book_id),
       )
       .leftJoin(
         comicColoristsTable,
-        eq(comicBookColoristsTable.comic_colorist_id, comicColoristsTable.id)
+        eq(comicBookColoristsTable.comic_colorist_id, comicColoristsTable.id),
       )
       // Letterers
       .leftJoin(
         comicBookLetterersTable,
-        eq(comicBooksTable.id, comicBookLetterersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookLetterersTable.comic_book_id),
       )
       .leftJoin(
         comicLetterersTable,
-        eq(comicBookLetterersTable.comic_letterer_id, comicLetterersTable.id)
+        eq(comicBookLetterersTable.comic_letterer_id, comicLetterersTable.id),
       )
       // Editors
       .leftJoin(
         comicBookEditorsTable,
-        eq(comicBooksTable.id, comicBookEditorsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookEditorsTable.comic_book_id),
       )
       .leftJoin(
         comicEditorsTable,
-        eq(comicBookEditorsTable.comic_editor_id, comicEditorsTable.id)
+        eq(comicBookEditorsTable.comic_editor_id, comicEditorsTable.id),
       )
       // Cover Artists
       .leftJoin(
         comicBookCoverArtistsTable,
-        eq(comicBooksTable.id, comicBookCoverArtistsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookCoverArtistsTable.comic_book_id),
       )
       .leftJoin(
         comicCoverArtistsTable,
-        eq(comicBookCoverArtistsTable.comic_cover_artist_id, comicCoverArtistsTable.id)
+        eq(
+          comicBookCoverArtistsTable.comic_cover_artist_id,
+          comicCoverArtistsTable.id,
+        ),
       )
       // Publishers
       .leftJoin(
         comicBookPublishersTable,
-        eq(comicBooksTable.id, comicBookPublishersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookPublishersTable.comic_book_id),
       )
       .leftJoin(
         comicPublishersTable,
-        eq(comicBookPublishersTable.comic_publisher_id, comicPublishersTable.id)
+        eq(
+          comicBookPublishersTable.comic_publisher_id,
+          comicPublishersTable.id,
+        ),
       )
       // Imprints
       .leftJoin(
         comicBookImprintsTable,
-        eq(comicBooksTable.id, comicBookImprintsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookImprintsTable.comic_book_id),
       )
       .leftJoin(
         comicImprintsTable,
-        eq(comicBookImprintsTable.comic_imprint_id, comicImprintsTable.id)
+        eq(comicBookImprintsTable.comic_imprint_id, comicImprintsTable.id),
       )
       // Genres
       .leftJoin(
         comicBookGenresTable,
-        eq(comicBooksTable.id, comicBookGenresTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookGenresTable.comic_book_id),
       )
       .leftJoin(
         comicGenresTable,
-        eq(comicBookGenresTable.comic_genre_id, comicGenresTable.id)
+        eq(comicBookGenresTable.comic_genre_id, comicGenresTable.id),
       )
       // Characters
       .leftJoin(
         comicBookCharactersTable,
-        eq(comicBooksTable.id, comicBookCharactersTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookCharactersTable.comic_book_id),
       )
       .leftJoin(
         comicCharactersTable,
-        eq(comicBookCharactersTable.comic_character_id, comicCharactersTable.id)
+        eq(
+          comicBookCharactersTable.comic_character_id,
+          comicCharactersTable.id,
+        ),
       )
       // Teams
       .leftJoin(
         comicBookTeamsTable,
-        eq(comicBooksTable.id, comicBookTeamsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookTeamsTable.comic_book_id),
       )
       .leftJoin(
         comicTeamsTable,
-        eq(comicBookTeamsTable.comic_team_id, comicTeamsTable.id)
+        eq(comicBookTeamsTable.comic_team_id, comicTeamsTable.id),
       )
       // Locations
       .leftJoin(
         comicBookLocationsTable,
-        eq(comicBooksTable.id, comicBookLocationsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookLocationsTable.comic_book_id),
       )
       .leftJoin(
         comicLocationsTable,
-        eq(comicBookLocationsTable.comic_location_id, comicLocationsTable.id)
+        eq(comicBookLocationsTable.comic_location_id, comicLocationsTable.id),
       )
       // Story Arcs
       .leftJoin(
         comicBookStoryArcsTable,
-        eq(comicBooksTable.id, comicBookStoryArcsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookStoryArcsTable.comic_book_id),
       )
       .leftJoin(
         comicStoryArcsTable,
-        eq(comicBookStoryArcsTable.comic_story_arc_id, comicStoryArcsTable.id)
+        eq(comicBookStoryArcsTable.comic_story_arc_id, comicStoryArcsTable.id),
       )
       // Series Groups
       .leftJoin(
         comicBookSeriesGroupsTable,
-        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comic_book_id)
+        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comic_book_id),
       )
       .leftJoin(
         comicSeriesGroupsTable,
-        eq(comicBookSeriesGroupsTable.comic_series_group_id, comicSeriesGroupsTable.id)
+        eq(
+          comicBookSeriesGroupsTable.comic_series_group_id,
+          comicSeriesGroupsTable.id,
+        ),
       )
       .$dynamic();
 
     // Apply WHERE conditions if any
-    const finalQuery = whereConditions.length > 0 
+    const finalQuery = whereConditions.length > 0
       ? baseQuery.where(and(...whereConditions))
       : baseQuery;
 
     // Apply ordering and pagination
     const result = await finalQuery
-      .orderBy(sortOrder === 'asc' ? asc(orderByColumn) : desc(orderByColumn))
+      .orderBy(sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn))
       .limit(limit)
       .offset(offset);
 

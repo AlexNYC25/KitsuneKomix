@@ -1,4 +1,4 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 const app = new OpenAPIHono();
 
@@ -13,14 +13,14 @@ const ErrorResponseSchema = z.object({
 
 const ParamIdSchema = z.object({
   id: z.string().openapi({
-    param: { name: 'id', in: 'path' },
-    example: '1',
+    param: { name: "id", in: "path" },
+    example: "1",
   }),
 });
 
 const AddReadlistSchema = z.object({
   name: z.string().min(2).max(100).openapi({
-    example: "My Readlist"
+    example: "My Readlist",
   }),
 });
 
@@ -32,7 +32,11 @@ const getAllReadlistsRoute = createRoute({
   tags: ["Readlists"],
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(z.object({ id: z.number(), name: z.string() })) } },
+      content: {
+        "application/json": {
+          schema: z.array(z.object({ id: z.number(), name: z.string() })),
+        },
+      },
       description: "Readlists retrieved successfully",
     },
   },
@@ -53,7 +57,11 @@ const getReadlistByIdRoute = createRoute({
   request: { params: ParamIdSchema },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ id: z.string(), name: z.string() }) } },
+      content: {
+        "application/json": {
+          schema: z.object({ id: z.string(), name: z.string() }),
+        },
+      },
       description: "Readlist retrieved successfully",
     },
   },
