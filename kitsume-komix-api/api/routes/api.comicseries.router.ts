@@ -9,7 +9,7 @@ import {
   getSelectedComicSeriesDetails 
 } from "../services/comicSeries.service.ts";
 
-import type { AppEnv } from "../../types/index.ts";
+import type { AppEnv} from "../../types/index.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import { ParamIdSchema, ParamLetterSchema, ParamIdThumbnailIdSchema, PaginationQuerySchema } from "../../zod/schemas/request.schema.ts";
 import { MessageResponseSchema, ComicSeriesResponseSchema, ComicSeriesWithMetadataAndThumbnailsResponseSchema, ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
@@ -75,7 +75,9 @@ app.openapi(
     request: { headers: AuthHeaderSchema, query: PaginationQuerySchema },
     responses: {
       200: {
-        content: { "application/json": { schema: ComicSeriesResponseSchema } },
+        content: { "application/json": { 
+          schema: ComicSeriesResponseSchema.transform((data) => camelcasekeys(data, { deep: true } )) 
+        }},
         description: "Latest series retrieved successfully",
       },
       400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
@@ -132,7 +134,9 @@ app.openapi(
     request: { headers: AuthHeaderSchema, query: PaginationQuerySchema },
     responses: {
       200: {
-        content: { "application/json": { schema: ComicSeriesResponseSchema } },
+        content: { "application/json": { 
+          schema: ComicSeriesResponseSchema.transform((data) => camelcasekeys(data, { deep: true } )) 
+        }},
         description: "Latest series retrieved successfully",
       },
       400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
@@ -191,7 +195,9 @@ app.openapi(
     request: { params: ParamIdSchema },
     responses: {
       200: {
-        content: { "application/json": { schema: ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema } },
+        content: { "application/json": { 
+          schema: ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema.transform((data) => camelcasekeys(data, { deep: true } )) 
+        }},
         description: "Series retrieved successfully",
       },
       400: { content: { "application/json": { schema: MessageResponseSchema } }, description: "Bad Request" },
@@ -216,21 +222,15 @@ app.openapi(
       if (!series) {
         return c.json({ message: "Comic series not found" }, 404);
       }
-      const camel = camelcasekeys(series, { deep: true });
-      // Ensure every comic book object has thumbnailUrl explicitly set to string | null
-      camel.comics = {
-        ...camel.comics,
-        books: (camel.comics?.books || []).map((element: any) => ({
-          ...element,
-          thumbnailUrl: element.thumbnailUrl ?? null,
-        })),
+      const seriesDataCamel = camelcasekeys(series, { deep: true });
+
+      const comicSeriesData = {
+        ...seriesDataCamel,
+        thumbnailUrl: seriesDataCamel.thumbnailUrl ?? null
       };
-      const comicSeriesData = { 
-        ...camel, 
-        thumbnailUrl: camel.thumbnailUrl ?? null
-      };
+
       return c.json({ 
-        data: comicSeriesData as any,
+        data: comicSeriesData,
         message: "Selected Comic Series API is running" 
       }, 200);
     } catch (error) {
