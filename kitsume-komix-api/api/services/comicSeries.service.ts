@@ -17,10 +17,7 @@ type ComicSeriesWithMetadataAndThumbnail = ComicSeriesWithThumbnail & {
 };
 
 type ComicSeriesWithComicsMetadataAndThumbnail = ComicSeriesWithMetadataAndThumbnail & {
-  comics: {
-    total: number;
-    books: Array<ComicBookWithThumbnail>;
-  };
+  comics: Array<ComicBookWithThumbnail>;
 };
 
 const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
@@ -124,7 +121,7 @@ export const getSelectedComicSeriesDetails = async (
   const seriesWithComicsMetadataAndThumbnail = {
     ...seriesWithThumbnailUrl,
     metadata: comicSeriesMetadata ? { ...comicSeriesMetadata } : {},
-    comics: { total: comicBooksForCurrentSeries.length, books: comicBooksForCurrentSeriesWithThumbnails },
+    comics: comicBooksForCurrentSeriesWithThumbnails,
   };
 
   return seriesWithComicsMetadataAndThumbnail;
