@@ -11,7 +11,7 @@ export const comicBookSelectSchema: z.ZodObject =
 export const comicBookSelectJoinedWithThumbnailSchema =
 	createSelectSchema(comicBooksTable)
 		.extend({
-			thumbnailUrl: z.string().nullable(),
+			thumbnailUrl: z.string().nullable().optional(),
 		})
 		.openapi("ComicBookSelectJoinedWithThumbnailSchema");
 
