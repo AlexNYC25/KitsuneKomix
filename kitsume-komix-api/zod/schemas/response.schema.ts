@@ -1,6 +1,6 @@
 import { z } from "@hono/zod-openapi";
 
-import { comicSeriesWithComicsMetadataAndThumbnailsSchema, comicSeriesWithMetadataAndThumbnailsSchema, comicSeriesWithThumbnailsSchema } from "./data/comic-series.schema.ts";
+import { comicSeriesSelectJoinedWithThumbnailSchema, comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema, comicSeriesSelectJoinedWithThumbnailAndMetadataSchema } from "./data/comic-series.schema.ts";
 
 export const MessageResponseSchema = z.object({
   message: z.string(),
@@ -13,7 +13,7 @@ export const ErrorResponseSchema = z.object({
 
 export const ComicSeriesResponseSchema = z.object({
   data: z.array(
-    comicSeriesWithThumbnailsSchema
+    comicSeriesSelectJoinedWithThumbnailSchema
   ),
   meta: z.object({
     total: z.number(),
@@ -25,12 +25,12 @@ export const ComicSeriesResponseSchema = z.object({
 });
 
 export const ComicSeriesWithMetadataAndThumbnailsResponseSchema = z.object({
-  data: comicSeriesWithMetadataAndThumbnailsSchema,
+  data: comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
   message: z.string(),
 });
 
 export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema = z.object({
-  data: comicSeriesWithComicsMetadataAndThumbnailsSchema,
+  data: comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema,
   message: z.string(),
 });
 
