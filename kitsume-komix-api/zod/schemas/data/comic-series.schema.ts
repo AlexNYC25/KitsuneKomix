@@ -6,16 +6,22 @@ import { createSelectSchema } from "../../factory.ts";
 
 export const comicSeriesSelectSchema: z.ZodObject = createSelectSchema(
   comicSeriesTable,
-)
-  .openapi("ComicSeriesSelectSchema");
+).openapi({
+	title: "ComicSeriesSelectSchema",
+	description: "A schema representing a comic series with its basic fields.",
+	type: "object",
+});
 
 export const comicSeriesSelectJoinedWithThumbnailSchema = createSelectSchema(
   comicSeriesTable,
-)
-  .extend({
+).extend({
     thumbnailUrl: z.string().nullable().optional(),
   })
-  .openapi("ComicSeriesSelectJoinedWithThumbnailSchema");
+  .openapi({
+		title: "ComicSeriesSelectJoinedWithThumbnailSchema",
+		description: "A schema representing a comic series with its thumbnail URL.",
+		type: "object",
+	});
 
 export const comicSeriesSelectJoinedWithThumbnailAndMetadataSchema =
   comicSeriesSelectJoinedWithThumbnailSchema.extend({
@@ -35,9 +41,13 @@ export const comicSeriesSelectJoinedWithThumbnailAndMetadataSchema =
       locations: z.string().nullable(),
       storyArcs: z.string().nullable(),
       seriesGroups: z.string().nullable(),
-    }).or(z.record(z.string(), z.never())), // Allow either full metadata object or an empty object
+    }).or(z.record(z.string(), z.undefined())), // Replace `z.never()` with `z.undefined()`
   })
-    .openapi("ComicSeriesSelectJoinedWithThumbnailAndMetadataSchema");
+	.openapi({
+		title: "ComicSeriesSelectJoinedWithThumbnailAndMetadataSchema",
+		description: "A schema representing a comic series with its thumbnail URL and metadata.",
+		type: "object",
+	});
 
 export const comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema =
   comicSeriesSelectJoinedWithThumbnailAndMetadataSchema.extend({
@@ -45,7 +55,11 @@ export const comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema =
       comicBookSelectJoinedWithThumbnailSchema,
     ),
   })
-    .openapi("ComicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema");
+	.openapi({
+		title: "ComicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema",
+		description: "A schema representing a comic series with its thumbnail URL, metadata, and associated comics.",
+		type: "object",
+	});
 
 /**
  * Schema representing a comic series with its thumbnail URL.
