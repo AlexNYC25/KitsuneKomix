@@ -4,10 +4,12 @@ import "./queue/workers/comicWorker.ts";
 
 import { runMigrations } from "./db/migrate.ts";
 
+import { API_PORT } from "./config/enviorement.ts";
+
 await runMigrations();
 
 const _watchManager = getWatcherManager();
 
-const port = parseInt(Deno.env.get("PORT") ?? "3000", 10);
+const port = parseInt(API_PORT, 10);
 
 Deno.serve({ port: port }, app.fetch);
