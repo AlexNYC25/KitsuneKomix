@@ -30,6 +30,7 @@ apiRouter.get("/ui", swaggerUI({
 	url: "/api/doc",
 }));
 
+// Sub-routers for separate API functionalities
 apiRouter.route("/users", apiUsersRouter);
 apiRouter.route("/comic-libraries", comicLibraryRouter);
 apiRouter.route("/auth", authRouter);

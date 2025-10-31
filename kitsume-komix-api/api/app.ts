@@ -1,10 +1,13 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import rootRouter from "./routes/root.router.ts";
+
 import apiRouter from "./routes/api.router.ts";
 import webRouter from "./routes/web.router.ts";
+import healthRouter from "./routes/health.router.ts";
 
 import { apiLogger } from "../logger/loggers.ts";
+
+import { CLIENT_URL } from "../config/enviorement.ts";
 
 const app = new OpenAPIHono();
 
@@ -12,7 +15,7 @@ const app = new OpenAPIHono();
 app.route("/api", apiRouter);
 
 // Health and system routes
-app.route("/health", rootRouter);
+app.route("/health", healthRouter);
 
 // Vue.js SPA (catch-all for everything else)
 app.route("/", webRouter);
@@ -20,7 +23,7 @@ app.route("/", webRouter);
 app.use(
   "*",
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend's origin
+    origin: CLIENT_URL,
     allowMethods: ["GET", "POST", "PUT", "DELETE"],
     allowHeaders: ["Content-Type", "Authorization"],
   }),
