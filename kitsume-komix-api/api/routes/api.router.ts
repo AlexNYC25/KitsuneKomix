@@ -10,7 +10,25 @@ import collectionsRouter from "./api.collections.router.ts";
 import readlistsRouter from "./api.readlists.router.ts";
 import imageRouter from "./image.router.ts";
 
+import { swaggerUI } from "@hono/swagger-ui";
+
 const apiRouter = new OpenAPIHono();
+
+// OpenAPI documentation endpoint
+apiRouter.doc("/doc", {
+  openapi: "3.0.0",
+  info: {
+    version: "1.0.0",
+    title: "KitsuneKomix API",
+    description:
+      "API documentation for KitsuneKomix comic book management system",
+  },
+});
+
+// Swagger UI for API documentation
+apiRouter.get("/ui", swaggerUI({
+	url: "/api/doc",
+}));
 
 apiRouter.route("/users", apiUsersRouter);
 apiRouter.route("/comic-libraries", comicLibraryRouter);
