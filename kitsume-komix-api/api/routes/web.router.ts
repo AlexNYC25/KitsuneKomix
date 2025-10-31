@@ -1,9 +1,28 @@
 import { serveStatic } from "hono/deno";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { MessageResponseSchema } from "../../zod/schemas/response.schema.ts";
 
 // Router to serve the Vue.js production build from dist folder
 
 const app = new OpenAPIHono();
+
+// just a simple welcome route to verify the web router is working
+const welcomeRoute = createRoute({
+  method: "get",
+  path: "/welcome",
+  summary: "Welcome message",
+  tags: ["Root"],
+  responses: {
+    200: {
+      content: { "application/json": { schema: MessageResponseSchema } },
+      description: "Welcome message",
+    },
+  },
+});
+
+app.openapi(welcomeRoute, (_c) => {
+  return _c.json({ message: "Welcome to the API" });
+});
 
 // Serve static assets (CSS, JS, images) with proper cache headers
 // This uses standard middleware since static assets don't need OpenAPI documentation
