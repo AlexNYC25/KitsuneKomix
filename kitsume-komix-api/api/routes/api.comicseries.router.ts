@@ -14,13 +14,11 @@ import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import {
   PaginationQuerySchema,
   ParamIdSchema,
-  ParamIdThumbnailIdSchema,
   ParamLetterSchema,
 } from "../../zod/schemas/request.schema.ts";
 import {
   ComicSeriesResponseSchema,
   ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema,
-  ComicSeriesWithMetadataAndThumbnailsResponseSchema,
   MessageResponseSchema,
 } from "../../zod/schemas/response.schema.ts";
 
@@ -129,19 +127,23 @@ app.openapi(
       offset,
     );
 
-    // Convert keys to camelCase and ensure correct types for folderPath and thumbnailUrl
-    const formatedLatestSeries = latestSeries.map((series) => {
-      const camel = camelcasekeys(series, { deep: true });
-      return {
-        ...camel,
-        thumbnailUrl: camel.thumbnailUrl ?? null,
-      };
+    // Convert keys to snake_case
+    const formattedLatestSeries = latestSeries.map((series) => {
+      return camelcasekeys({
+        id: series.id,
+        name: series.name,
+        description: series.description,
+        folder_path: series.folder_path, // Fixed property name
+        created_at: series.created_at,   // Fixed property name
+        updated_at: series.updated_at,   // Fixed property name
+        thumbnailUrl: series.thumbnailUrl ?? null,
+      }, { deep: true });
     });
 
     return c.json({
-      data: formatedLatestSeries,
+      data: formattedLatestSeries,
       meta: {
-        total: formatedLatestSeries.length,
+        total: formattedLatestSeries.length,
         page: 1,
         pageSize: 10,
         hasNextPage: false,
@@ -305,94 +307,6 @@ app.openapi(
   },
 );
 
-// Analyze series
-const analyzeSeriesRoute = createRoute({
-  method: "get",
-  path: "/{id}/analyse",
-  summary: "Analyze a comic series",
-  tags: ["Comic Series"],
-  request: { params: ParamIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Series analysis started",
-    },
-  },
-});
-
-app.openapi(analyzeSeriesRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Analysis`,
-  }, 200);
-});
-
-// Download series
-const downloadSeriesRoute = createRoute({
-  method: "get",
-  path: "/{id}/download",
-  summary: "Download a comic series",
-  tags: ["Comic Series"],
-  request: { params: ParamIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Series download started",
-    },
-  },
-});
-
-app.openapi(downloadSeriesRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Download`,
-  }, 200);
-});
-
-// Update series metadata
-const updateMetadataRoute = createRoute({
-  method: "patch",
-  path: "/{id}/metadata",
-  summary: "Update series metadata",
-  tags: ["Comic Series"],
-  request: { params: ParamIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Metadata updated successfully",
-    },
-  },
-});
-
-app.openapi(updateMetadataRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Metadata Update`,
-  }, 200);
-});
-
-// Update series progress
-const updateProgressRoute = createRoute({
-  method: "post",
-  path: "/{id}/progress",
-  summary: "Update series progress",
-  tags: ["Comic Series"],
-  request: { params: ParamIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Progress updated successfully",
-    },
-  },
-});
-
-app.openapi(updateProgressRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Progress Update`,
-  }, 200);
-});
-
 // Get series thumbnails
 const getThumbnailsRoute = createRoute({
   method: "get",
@@ -543,5 +457,14 @@ app.openapi(getByLetterRoute, (c) => {
     message: `Alphabetical Comic Series API is running for letter ${letter}`,
   }, 200);
 });
+
+// Define a minimal custom `Context` type
+interface Context<T = unknown> {
+  req: {
+    valid: (key: string) => T;
+  };
+  get: (key: string) => Record<string, unknown> | undefined;
+  json: (data: Record<string, unknown>, status: number) => void;
+}
 
 export default app;
