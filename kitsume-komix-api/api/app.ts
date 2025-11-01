@@ -7,7 +7,7 @@ import healthRouter from "./routes/health.router.ts";
 
 import { apiLogger } from "../logger/loggers.ts";
 
-import { CLIENT_URL } from "../config/enviorement.ts";
+import { CLIENT_URL } from "../utilities/environment.ts";
 
 const app = new OpenAPIHono();
 

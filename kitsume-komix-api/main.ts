@@ -4,7 +4,7 @@ import "./queue/workers/comicWorker.ts";
 
 import { runMigrations } from "./db/migrate.ts";
 
-import { API_PORT } from "./config/enviorement.ts";
+import { API_PORT } from "./utilities/environment.ts";
 
 await runMigrations();
 
