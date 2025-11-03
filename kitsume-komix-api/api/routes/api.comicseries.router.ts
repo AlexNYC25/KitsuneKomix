@@ -18,7 +18,7 @@ import {
 } from "../../zod/schemas/request.schema.ts";
 import {
   ComicSeriesResponseSchema,
-  ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema,
+  ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema,
   MessageResponseSchema,
 } from "../../zod/schemas/response.schema.ts";
 
@@ -84,9 +84,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicSeriesResponseSchema.transform((data) =>
-              camelcasekeys(data, { deep: true })
-            ),
+            schema: ComicSeriesResponseSchema,
           },
         },
         description: "Latest series retrieved successfully",
@@ -168,9 +166,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicSeriesResponseSchema.transform((data) =>
-              camelcasekeys(data, { deep: true })
-            ),
+            schema: ComicSeriesResponseSchema,
           },
         },
         description: "Latest series retrieved successfully",
@@ -250,8 +246,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema
-              .transform((data) => camelcasekeys(data, { deep: true })),
+            schema: ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema,
           },
         },
         description: "Series retrieved successfully",
