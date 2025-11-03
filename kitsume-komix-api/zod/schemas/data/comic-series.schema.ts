@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import camelcasekeys from "camelcase-keys";
 import { comicBookSelectJoinedWithThumbnailSchema } from "./comic-books.schema.ts";
 
 import { comicSeriesTable } from "../../../db/sqlite/schema.ts";
@@ -9,7 +10,6 @@ export const comicSeriesSelectSchema: z.ZodObject = createSelectSchema(
 ).openapi({
 	title: "ComicSeriesSelectSchema",
 	description: "A schema representing a comic series with its basic fields.",
-	type: "object",
 });
 
 export const comicSeriesSelectJoinedWithThumbnailSchema = createSelectSchema(
@@ -20,33 +20,43 @@ export const comicSeriesSelectJoinedWithThumbnailSchema = createSelectSchema(
   .openapi({
 		title: "ComicSeriesSelectJoinedWithThumbnailSchema",
 		description: "A schema representing a comic series with its thumbnail URL.",
-		type: "object",
 	});
+
+// CamelCase version for API responses - derived from base schema with key transformation
+export const comicSeriesSelectJoinedWithThumbnailCamelCaseSchema =
+  comicSeriesSelectJoinedWithThumbnailSchema
+    .transform((data) => camelcasekeys(data, { deep: true }))
+    .openapi({
+      title: "ComicSeriesSelectJoinedWithThumbnailCamelCaseSchema",
+      description: "A schema representing a comic series with its thumbnail URL (camelCase).",
+    });
 
 export const comicSeriesSelectJoinedWithThumbnailAndMetadataSchema =
   comicSeriesSelectJoinedWithThumbnailSchema.extend({
-    metadata: z.object({
-      writers: z.string().nullable(),
-      pencillers: z.string().nullable(),
-      inkers: z.string().nullable(),
-      colorists: z.string().nullable(),
-      letterers: z.string().nullable(),
-      editors: z.string().nullable(),
-      coverArtists: z.string().nullable(),
-      publishers: z.string().nullable(),
-      imprints: z.string().nullable(),
-      genres: z.string().nullable(),
-      characters: z.string().nullable(),
-      teams: z.string().nullable(),
-      locations: z.string().nullable(),
-      storyArcs: z.string().nullable(),
-      seriesGroups: z.string().nullable(),
-    }).or(z.record(z.string(), z.undefined())), // Replace `z.never()` with `z.undefined()`
+    metadata: z.union([
+      z.object({
+        writers: z.string().nullable(),
+        pencillers: z.string().nullable(),
+        inkers: z.string().nullable(),
+        colorists: z.string().nullable(),
+        letterers: z.string().nullable(),
+        editors: z.string().nullable(),
+        coverArtists: z.string().nullable(),
+        publishers: z.string().nullable(),
+        imprints: z.string().nullable(),
+        genres: z.string().nullable(),
+        characters: z.string().nullable(),
+        teams: z.string().nullable(),
+        locations: z.string().nullable(),
+        storyArcs: z.string().nullable(),
+        seriesGroups: z.string().nullable(),
+      }),
+      z.record(z.string(), z.undefined()),
+    ]),
   })
 	.openapi({
 		title: "ComicSeriesSelectJoinedWithThumbnailAndMetadataSchema",
 		description: "A schema representing a comic series with its thumbnail URL and metadata.",
-		type: "object",
 	});
 
 export const comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema =
@@ -58,7 +68,6 @@ export const comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema =
 	.openapi({
 		title: "ComicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema",
 		description: "A schema representing a comic series with its thumbnail URL, metadata, and associated comics.",
-		type: "object",
 	});
 
 /**
