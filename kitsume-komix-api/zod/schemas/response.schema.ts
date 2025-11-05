@@ -1,11 +1,11 @@
 import { z } from "@hono/zod-openapi";
-import camelcasekeys from "camelcase-keys";
 
 import {
   comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema,
   comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
   comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
 } from "./data/comic-series.schema.ts";
+import { comicBookSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comic-books.schema.ts";
 
 export const MessageResponseSchema = z.object({
   message: z.string(),
@@ -40,40 +40,48 @@ export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema = z
     message: z.string(),
   });
 
-// CamelCase version for API responses - reuse base schema with key transformation
-export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema =
-  ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema
-    .transform((data) => ({
-      data: camelcasekeys(data.data, { deep: true }),
-      message: data.message,
-    }))
-    .openapi({
-      title: "ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponse",
-      description: "A camelCase response containing a comic series with its metadata, thumbnail, and associated comic books.",
-      example: {
-        data: {
-          id: 1,
-          name: "Example Series",
-          description: "A comic series",
-          folderPath: "/path/to/series",
-          createdAt: "2024-01-01T00:00:00Z",
-          updatedAt: "2024-01-01T00:00:00Z",
-          thumbnailUrl: "/api/image/thumbnail.jpg",
-          metadata: {
-            writers: "Writer Name",
-            genres: "Action",
-          },
-          comics: [
-            {
-              id: 1,
-              title: "Issue 1",
-              issueNumber: "1",
-            },
-          ],
-        },
-        message: "Series retrieved successfully",
-      },
-    });
+// CamelCase version for API responses - explicitly defined schema for OpenAPI compatibility
+export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema = z.object({
+  message: z.string().openapi({ example: "Series retrieved successfully" }),
+  data: z.object({
+    id: z.number().openapi({ example: 1 }),
+    name: z.string().openapi({ example: "Example Series" }),
+    description: z.string().nullable().openapi({ example: "A comic series" }),
+    folderPath: z.string().openapi({ example: "/path/to/series" }),
+    createdAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
+    updatedAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
+    thumbnailUrl: z.string().nullable().optional().openapi({ example: "/api/image/thumbnail.jpg" }),
+    metadata: z.object({
+      writers: z.string().nullable().optional(),
+      pencillers: z.string().nullable().optional(),
+      inkers: z.string().nullable().optional(),
+      colorists: z.string().nullable().optional(),
+      letterers: z.string().nullable().optional(),
+      editors: z.string().nullable().optional(),
+      coverArtists: z.string().nullable().optional(),
+      publishers: z.string().nullable().optional(),
+      imprints: z.string().nullable().optional(),
+      genres: z.string().nullable().optional(),
+      characters: z.string().nullable().optional(),
+      teams: z.string().nullable().optional(),
+      locations: z.string().nullable().optional(),
+      storyArcs: z.string().nullable().optional(),
+      seriesGroups: z.string().nullable().optional(),
+    }).optional().openapi({
+      title: "ComicSeriesMetadata",
+      description: "Metadata for a comic series",
+    }),
+    comics: z.array(comicBookSelectJoinedWithThumbnailCamelCaseSchema).openapi({
+      description: "Array of comic books in this series",
+    }),
+  }).openapi({
+    title: "ComicSeriesWithComicsMetadataAndThumbnailsData",
+    description: "The data object containing series details",
+  }),
+}).openapi({
+  title: "ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponse",
+  description: "A camelCase response containing a comic series with its metadata, thumbnail, and associated comic books.",
+});
 
 const librarySchema = z.object({
   id: z.number(),
