@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import {
-  comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema,
+  comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
   comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
   comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
 } from "./data/comic-series.schema.ts";
@@ -36,7 +36,7 @@ export const ComicSeriesWithMetadataAndThumbnailsResponseSchema = z.object({
 
 export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema = z
   .object({
-    data: comicSeriesSelectJoinedWithThubnailsMetadataAndComicsSchema,
+    data: comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
     message: z.string(),
   });
 
