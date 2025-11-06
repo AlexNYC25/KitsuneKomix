@@ -21,11 +21,11 @@ export function toCamelCaseSchema<T extends ZodRawShape>(
     title?: string;
     description?: string;
   }
-  // deno-lint-ignore no-explicit-any
-): z.ZodObject<any> {
-  // deno-lint-ignore no-explicit-any
-  const def = schema._def as any;
-  const shape = typeof def.shape === "function" ? def.shape() : def.shape;
+): z.ZodObject<Record<string, ZodTypeAny>> {
+  // Access the shape directly - it's available on ZodObject
+  // The shape can be either a function or an object depending on Zod version
+  const shapeOrGetter = (schema as unknown as { _def: { shape: () => T } | { shape: T } })._def.shape;
+  const shape = typeof shapeOrGetter === "function" ? shapeOrGetter() : shapeOrGetter;
   const camelShape: Record<string, ZodTypeAny> = {};
   
   for (const [key, value] of Object.entries(shape)) {
