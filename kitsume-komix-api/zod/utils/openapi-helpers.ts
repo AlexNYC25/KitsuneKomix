@@ -8,6 +8,9 @@ import type { ZodTypeAny, ZodRawShape } from "zod";
  * Note: This does NOT use .transform() so it's fully OpenAPI compatible.
  * It creates a new static schema definition with camelCase field names.
  * 
+ * @param schema - The original Zod object schema with snake_case keys
+ * @param openapiConfig - Optional OpenAPI configuration (title, description)
+ * 
  * @example
  * const userSchema = createSelectSchema(usersTable);
  * const userCamelCase = toCamelCaseSchema(userSchema, {
