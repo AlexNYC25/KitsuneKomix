@@ -6,7 +6,9 @@ import {
   comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
 } from "./data/comic-series.schema.ts";
 import { comicBookSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comic-books.schema.ts";
+import { comicLibrariesArraySelectSchema, comicLibrariesSelectSchema } from "./data/comic-libraries.schema.ts";
 
+// **** Basic response schemas **** //
 export const MessageResponseSchema = z.object({
   message: z.string(),
 });
@@ -16,6 +18,9 @@ export const ErrorResponseSchema = z.object({
   errors: z.record(z.string(), z.any().openapi({ type: "object" })).optional(),
 });
 
+/**
+ * Schema for paginated comic series response
+ */
 export const ComicSeriesResponseSchema = z.object({
   data: z.array(
     comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
@@ -29,13 +34,19 @@ export const ComicSeriesResponseSchema = z.object({
   message: z.string(),
 });
 
+/**
+ * Schema for single comic series with metadata and thumbnails response
+ */
 export const ComicSeriesWithMetadataAndThumbnailsResponseSchema = z.object({
   data: comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
   message: z.string(),
 });
 
-export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema = z
-  .object({
+/**
+ * Schema for single comic series with comics, metadata, and thumbnails response
+ */
+export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema =
+  z.object({
     data: comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
     message: z.string(),
   });
@@ -83,20 +94,7 @@ export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema =
   description: "A camelCase response containing a comic series with its metadata, thumbnail, and associated comic books.",
 });
 
-const librarySchema = z.object({
-  id: z.number(),
-  name: z.string().min(1).max(255),
-  path: z.string().min(1).max(1024),
-  description: z.string().max(1024).nullable(),
-  enabled: z.boolean(),
-  changed_at: z.string().datetime().openapi({ type: "string", format: "date-time" }),
-  created_at: z.string().datetime().openapi({ type: "string", format: "date-time" }),
-  updated_at: z.string().datetime().openapi({ type: "string", format: "date-time" }),
-});
-
-const librariesSchema = z.array(librarySchema);
-
 export const LibraryResponseSchema = z.object({
   message: z.string(),
-  data: z.union([librariesSchema, librarySchema]).optional(),
+  data: z.union([comicLibrariesArraySelectSchema, comicLibrariesSelectSchema]).optional(),
 });
