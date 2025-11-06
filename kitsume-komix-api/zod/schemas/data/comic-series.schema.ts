@@ -72,6 +72,8 @@ export const comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema =
  * 
  * manual copy of the comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema schema with camelCase keys due
  * to complexity in converting the properties from snake_case to camelCase automatically
+ * 
+ * TODO: Consider deleting this if not used
  */
 export const comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsCamelCaseSchema = z.object({
   id: z.number().openapi({ example: 1 }),
