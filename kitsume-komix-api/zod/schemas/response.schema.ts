@@ -5,6 +5,8 @@ import {
   comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
   comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
 } from "./data/comic-series.schema.ts";
+
+import { metadataSchema } from "./data/comic-metadata.schema.ts";
 import { comicBookSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comic-books.schema.ts";
 import { comicLibrariesArraySelectSchema, comicLibrariesSelectSchema } from "./data/comic-libraries.schema.ts";
 
@@ -62,23 +64,7 @@ export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema =
     createdAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
     updatedAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
     thumbnailUrl: z.string().nullable().optional().openapi({ example: "/api/image/thumbnail.jpg" }),
-    metadata: z.object({
-      writers: z.string().nullable().optional(),
-      pencillers: z.string().nullable().optional(),
-      inkers: z.string().nullable().optional(),
-      colorists: z.string().nullable().optional(),
-      letterers: z.string().nullable().optional(),
-      editors: z.string().nullable().optional(),
-      coverArtists: z.string().nullable().optional(),
-      publishers: z.string().nullable().optional(),
-      imprints: z.string().nullable().optional(),
-      genres: z.string().nullable().optional(),
-      characters: z.string().nullable().optional(),
-      teams: z.string().nullable().optional(),
-      locations: z.string().nullable().optional(),
-      storyArcs: z.string().nullable().optional(),
-      seriesGroups: z.string().nullable().optional(),
-    }).optional().openapi({
+    metadata: metadataSchema.optional().openapi({
       title: "ComicSeriesMetadata",
       description: "Metadata for a comic series",
     }),
