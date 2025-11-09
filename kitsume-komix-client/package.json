@@ -7,7 +7,8 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "dev": "vite --host",
+    "dev": "npx openapi-typescript ${OPENAPI_URL:-http://localhost:8000}/api/doc --output src/openapi/openapi-schema.ts && vite --host",
+    "generate-api-types": "npx openapi-typescript ${OPENAPI_URL:-http://localhost:8000}/api/doc --output src/openapi/openapi-schema.ts",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
