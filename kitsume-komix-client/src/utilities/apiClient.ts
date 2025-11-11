@@ -3,27 +3,23 @@ import type { paths } from "@/openapi/openapi-schema";
 
 const apiClientBaseURL = "http://localhost:8000";
 
-// Token management - will be updated by the auth store
 let authToken: string | null = null;
 let refreshToken: string | null = null;
 let onTokenRefresh: (() => Promise<boolean>) | null = null;
 
-// Function to set the auth token
 export function setAuthToken(token: string | null) {
   authToken = token;
 }
 
-// Function to set the refresh token
 export function setRefreshToken(token: string | null) {
   refreshToken = token;
 }
 
-// Function to set the token refresh callback
 export function setTokenRefreshCallback(callback: (() => Promise<boolean>) | null) {
   onTokenRefresh = callback;
 }
 
-// Middleware to add Authorization header
+// Client middleware to handle authentication
 const authMiddleware: Middleware = {
   async onRequest({ request }) {
     if (authToken) {
