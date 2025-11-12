@@ -1,16 +1,11 @@
 import { defineStore } from 'pinia'
+
 import { loadFromStorage, saveToStorage } from '../utilities/storage';
 import { apiClient, setAuthToken, setRefreshToken, setTokenRefreshCallback } from '../utilities/apiClient';
+import { useLibrariesStore } from './libraries';
+import type { PersistedAuth } from '../interfaces/auth.interfaces';
 
 const AUTH_STORAGE_KEY = 'kitsune_auth';
-
-interface PersistedAuth {
-  token: string | null;
-  refreshToken: string | null;
-  user: { id: number; email: string; admin: boolean } | null;
-}
-
-import { useLibrariesStore } from './libraries';
 
 export const useAuthStore = defineStore('auth', {
 	state: () => {
@@ -23,7 +18,6 @@ export const useAuthStore = defineStore('auth', {
 			error: null as string | null,
 		};
 
-		// Initialize the apiClient with the persisted tokens
 		if (state.token) {
 			setAuthToken(state.token);
 		}
@@ -31,13 +25,13 @@ export const useAuthStore = defineStore('auth', {
 			setRefreshToken(state.refreshToken);
 		}
 
+		// TODO: Refactor to avoid circular dependency, update docs
 		if (state.token && state.user) {
 			// Trigger post-login actions if user data exists
 			setTimeout(async () => {
 				const authStore = useAuthStore();
-				// Set up the token refresh callback
 				setTokenRefreshCallback(() => authStore.refresh());
-				await authStore.postLoginActions();
+					await authStore.postLoginActions();
 			}, 0);
 		}
 
@@ -53,13 +47,15 @@ export const useAuthStore = defineStore('auth', {
 				refreshToken: this.refreshToken,
 				user: this.user,
 			});
-			// Sync tokens with apiClient
+			
+			// Update the openapi-fetch client with the latest tokens
 			setAuthToken(this.token);
 			setRefreshToken(this.refreshToken);
 		},
 		async login({ username, password }: { username: string, password: string }) {
 			this.loading = true;
 			this.error = null;
+
 			try {
 				const { data, error } = await apiClient.POST('/auth/login', {
 					body: {
@@ -75,6 +71,7 @@ export const useAuthStore = defineStore('auth', {
 				this.token = data.accessToken;
 				this.refreshToken = data.refreshToken;
 				this.user = { id: data.user.id, email: data.user.email, admin: data.user.admin };
+				
 				this.persist();
 
 				// Set up the token refresh callback after successful login
