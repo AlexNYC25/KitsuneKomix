@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { useAuthStore } from './auth'
+import { apiClient } from '../utilities/apiClient'
 
 export type LibraryData = {
 	id: number;
@@ -33,19 +33,38 @@ export const useLibrariesStore = defineStore('libraries', {
 	}),
 	getters: {
 		getLibraries: (state) => state.libraries,
-    sidePanelLibraries: (state) => transformToMenuItems(state.libraries), // Dynamically generate side panel data
+    	sidePanelLibraries: (state) => transformToMenuItems(state.libraries), // Dynamically generate side panel data
 	},
 	actions: {
 		setLibraries(libraries: Array<LibraryData>) {
 			this.libraries = libraries;
 		},
 		async requestUsersLibraries() {
-			const authStore = useAuthStore();
-			const response = await authStore.apiFetch(
-				'http://localhost:8000/api/comic-libraries'
-			);
-			const data = await response.json();
-			const libraries: Array<LibraryData> = data.libraries;
+			// The authorization header is automatically added by the apiClient middleware
+			const { data, error } = await apiClient.GET('/comic-libraries', {
+				params: {
+					header: {
+						authorization: '' // Will be overridden by middleware
+					}
+				}
+			});
+
+			if (error || !data) {
+				throw new Error(error?.message || 'Failed to fetch libraries');
+			}
+
+			// Handle the response data which could be an array or single object
+			const libraries: Array<LibraryData> = Array.isArray(data.data) 
+				? data.data.map(lib => ({
+					...lib,
+					enabled: Boolean(lib.enabled) // Convert number to boolean
+				}))
+				: data.data 
+					? [{
+						...data.data,
+						enabled: Boolean(data.data.enabled)
+					}]
+					: [];
 
 			this.setLibraries(libraries);
 		}
