@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
-import { useAuthStore } from './auth'
+import { apiClient } from '../utilities/apiClient'
 
 type SeriesData = {
   id: number;
   name: string;
   description: string | null;
   folderPath: string;
-  created_at: string;
-  updated_at: string;
-  thumbnailUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  thumbnailUrl?: string | null;
 }
 
 export const useHomeStore = defineStore('home', {
@@ -23,28 +23,24 @@ export const useHomeStore = defineStore('home', {
   actions: {
     async fetchLatestSeries() {
       try {
-        const authStore = useAuthStore();
-        
-        if (!authStore.isAuthenticated) {
-          throw new Error('User is not authenticated');
-        }
+        const { data, error } = await apiClient.GET('/comic-series/latest', {
+          params: {
+            header: {
+              authorization: '' // Will be overridden by middleware
+            }
+          }
+        });
 
-        if (!authStore.token) {
-          throw new Error('No authentication token available');
+        if (error || !data) {
+          throw new Error(error?.message || 'Failed to fetch latest series');
         }
-                
-        const response = await authStore.apiFetch('http://localhost:8000/api/comic-series/latest');
-        
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-        }
-        
-        const responseData = await response.json();
 
         // We need to append the full URL to the thumbnail path to make it accessible
-        this.latestSeries = responseData.data.map((series: SeriesData) => ({
+        this.latestSeries = data.data.map((series) => ({
           ...series,
-          thumbnailUrl: 'http://localhost:8000' + series.thumbnailUrl || 'https://placehold.co/400x400/gray/white'
+          thumbnailUrl: series.thumbnailUrl 
+            ? 'http://localhost:8000' + series.thumbnailUrl 
+            : 'https://placehold.co/400x400/gray/white'
         }));
       } catch (error) {
         console.error('Error fetching latest series:', error);
@@ -53,28 +49,24 @@ export const useHomeStore = defineStore('home', {
     },
     async fetchUpdatedSeries() {
       try {
-        const authStore = useAuthStore();
-        
-        if (!authStore.isAuthenticated) {
-          throw new Error('User is not authenticated');
-        }
+        const { data, error } = await apiClient.GET('/comic-series/updated', {
+          params: {
+            header: {
+              authorization: '' // Will be overridden by middleware
+            }
+          }
+        });
 
-        if (!authStore.token) {
-          throw new Error('No authentication token available');
+        if (error || !data) {
+          throw new Error(error?.message || 'Failed to fetch updated series');
         }
-                
-        const response = await authStore.apiFetch('http://localhost:8000/api/comic-series/updated');
-        
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-        }
-        
-        const responseData = await response.json();
 
         // We need to append the full URL to the thumbnail path to make it accessible
-        this.updatedSeries = responseData.data.map((series: SeriesData) => ({
+        this.updatedSeries = data.data.map((series) => ({
           ...series,
-          thumbnailUrl: 'http://localhost:8000' + series.thumbnailUrl || 'https://placehold.co/400x400/gray/white'
+          thumbnailUrl: series.thumbnailUrl 
+            ? 'http://localhost:8000' + series.thumbnailUrl 
+            : 'https://placehold.co/400x400/gray/white'
         }));
       } catch (error) {
         console.error('Error fetching updated series:', error);
