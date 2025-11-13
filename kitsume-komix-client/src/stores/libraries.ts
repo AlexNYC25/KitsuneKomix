@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
 
+import { DEFAULT_HEADER_AUTHORIZATION } from '../utilities/constants';
+
 export type LibraryData = {
 	id: number;
 	name: string;
@@ -43,9 +45,7 @@ export const useLibrariesStore = defineStore('libraries', {
 			// The authorization header is automatically added by the apiClient middleware
 			const { data, error } = await apiClient.GET('/comic-libraries', {
 				params: {
-					header: {
-						authorization: '' // Will be overridden by middleware
-					}
+					header: DEFAULT_HEADER_AUTHORIZATION
 				}
 			});
 

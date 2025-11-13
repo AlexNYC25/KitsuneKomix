@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
 
+import { DEFAULT_HEADER_AUTHORIZATION } from '../utilities/constants';
+
 type SeriesData = {
   id: number;
   name: string;
@@ -25,9 +27,7 @@ export const useHomeStore = defineStore('home', {
       try {
         const { data, error } = await apiClient.GET('/comic-series/latest', {
           params: {
-            header: {
-              authorization: '' // Will be overridden by middleware
-            }
+            header: DEFAULT_HEADER_AUTHORIZATION
           }
         });
 
@@ -51,9 +51,7 @@ export const useHomeStore = defineStore('home', {
       try {
         const { data, error } = await apiClient.GET('/comic-series/updated', {
           params: {
-            header: {
-              authorization: '' // Will be overridden by middleware
-            }
+            header: DEFAULT_HEADER_AUTHORIZATION
           }
         });
 
