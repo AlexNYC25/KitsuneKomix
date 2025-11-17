@@ -429,7 +429,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             message: string;
-                            data?: {
+                            data: {
                                 id: number;
                                 name: string;
                                 path: string;
@@ -438,16 +438,7 @@ export interface paths {
                                 changed_at: string;
                                 created_at: string;
                                 updated_at: string;
-                            }[] | {
-                                id: number;
-                                name: string;
-                                path: string;
-                                description: string | null;
-                                enabled: number;
-                                changed_at: string;
-                                created_at: string;
-                                updated_at: string;
-                            };
+                            }[];
                         };
                     };
                 };
@@ -689,25 +680,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             message: string;
-                            data?: {
-                                id: number;
-                                name: string;
-                                path: string;
-                                description: string | null;
-                                enabled: number;
-                                changed_at: string;
-                                created_at: string;
-                                updated_at: string;
-                            }[] | {
-                                id: number;
-                                name: string;
-                                path: string;
-                                description: string | null;
-                                enabled: number;
-                                changed_at: string;
-                                created_at: string;
-                                updated_at: string;
-                            };
+                            libraryId: number;
                         };
                     };
                 };
