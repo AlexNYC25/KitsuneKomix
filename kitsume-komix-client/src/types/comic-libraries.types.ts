@@ -5,4 +5,8 @@ export type GetComicLibrariesResponse = paths['/comic-libraries']['get']['respon
 
 export type ComicLibrariesData = GetComicLibrariesResponse['data'];
 
-export type ComicLibrary = Extract<ComicLibrariesData, unknown[]>[number];
+// Library item - automatically extracted from the OpenAPI schema
+// Since data is now always an array, extraction is straightforward
+export type ComicLibrary = ComicLibrariesData extends (infer Item)[]
+  ? Item
+  : never;
