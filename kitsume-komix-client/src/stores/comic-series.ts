@@ -1,48 +1,13 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
-
-type comicSeriesDataWithMetadataAndThumbnail = {
-	id: number;
-	name: string;
-	description: string | null;
-	folderPath: string;
-	createdAt: string;
-	updatedAt: string;
-	thumbnailUrl?: string | null;
-	metadata?: {
-		writers?: string | null;
-		pencillers?: string | null;
-		inkers?: string | null;
-		colorists?: string | null;
-		letterers?: string | null;
-		editors?: string | null;
-		coverArtists?: string | null;
-		publishers?: string | null;
-		imprints?: string | null;
-		genres?: string | null;
-		characters?: string | null;
-		teams?: string | null;
-		locations?: string | null;
-		storyArcs?: string | null;
-		seriesGroups?: string | null;
-	};
-	comics?: Array<{
-		id: number;
-		libraryId: number;
-		filePath: string;
-		title: string | null;
-		issueNumber: string | null;
-		thumbnailUrl?: string | null;
-		// ... other comic fields as needed
-	}>;
-};
+import type { ComicSeriesWithComics } from '../types/comic-series.types'
 
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({
-    comicSeriesData: [] as Array<comicSeriesDataWithMetadataAndThumbnail>,
+    comicSeriesData: [] as Array<ComicSeriesWithComics>,
   }),
 	getters: {
-		getComicSeriesData(state): Array<comicSeriesDataWithMetadataAndThumbnail> {
+		getComicSeriesData(state): Array<ComicSeriesWithComics> {
 			return state.comicSeriesData;
 		}
 	},

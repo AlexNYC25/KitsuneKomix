@@ -1,22 +1,13 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
+import type { LatestComicSeriesSingle, UpdatedComicSeriesSingle } from '../types/comic-series.types'
 
 import { DEFAULT_HEADER_AUTHORIZATION } from '../utilities/constants';
 
-type SeriesData = {
-  id: number;
-  name: string;
-  description: string | null;
-  folderPath: string;
-  createdAt: string;
-  updatedAt: string;
-  thumbnailUrl?: string | null;
-}
-
 export const useHomeStore = defineStore('home', {
   state: () => ({
-    latestSeries: [] as SeriesData[],
-    updatedSeries: [] as SeriesData[],
+    latestSeries: [] as LatestComicSeriesSingle[],
+    updatedSeries: [] as UpdatedComicSeriesSingle[],
   }),
   getters: {
     getLatestSeries: (state) => state.latestSeries,

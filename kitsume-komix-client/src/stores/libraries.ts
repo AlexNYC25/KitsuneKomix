@@ -1,21 +1,11 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
+import type { ComicLibrary } from '../types/comic-libraries.types'
 
 import { DEFAULT_HEADER_AUTHORIZATION } from '../utilities/constants';
 
-export type LibraryData = {
-	id: number;
-	name: string;
-	description: string | null;
-	path: string;
-	enabled: boolean;
-	changed_at: string;
-	created_at: string;
-	updated_at: string;
-}
-
-// Convert LibraryData to objects compatible with MenuItem
-function transformToMenuItems(libraries: Array<LibraryData>) {
+// Convert ComicLibrary to objects compatible with MenuItem
+function transformToMenuItems(libraries: Array<ComicLibrary>) {
   return libraries.map((library) => ({
     label: library.name,
     items: [
@@ -31,14 +21,14 @@ function transformToMenuItems(libraries: Array<LibraryData>) {
 
 export const useLibrariesStore = defineStore('libraries', {
   state: () => ({
-    libraries: [] as Array<LibraryData>,
+    libraries: [] as Array<ComicLibrary>,
 	}),
 	getters: {
 		getLibraries: (state) => state.libraries,
     	sidePanelLibraries: (state) => transformToMenuItems(state.libraries), // Dynamically generate side panel data
 	},
 	actions: {
-		setLibraries(libraries: Array<LibraryData>) {
+		setLibraries(libraries: Array<ComicLibrary>) {
 			this.libraries = libraries;
 		},
 		async requestUsersLibraries() {
@@ -54,15 +44,15 @@ export const useLibrariesStore = defineStore('libraries', {
 			}
 
 			// Handle the response data which could be an array or single object
-			const libraries: Array<LibraryData> = Array.isArray(data.data) 
+			const libraries: Array<ComicLibrary> = Array.isArray(data.data) 
 				? data.data.map(lib => ({
 					...lib,
-					enabled: Boolean(lib.enabled) // Convert number to boolean
+					enabled: lib.enabled as unknown as number // Keep as number from API
 				}))
 				: data.data 
 					? [{
 						...data.data,
-						enabled: Boolean(data.data.enabled)
+						enabled: data.data.enabled as unknown as number
 					}]
 					: [];
 
