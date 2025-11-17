@@ -1,14 +1,13 @@
 import { z } from "@hono/zod-openapi";
 
 import {
-  comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
-  comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
   comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
+  comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
+  comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
 } from "./data/comic-series.schema.ts";
-
 import { metadataSchema } from "./data/comic-metadata.schema.ts";
 import { comicBookSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comic-books.schema.ts";
-import { comicLibrariesArraySelectSchema, comicLibrariesSelectSchema } from "./data/comic-libraries.schema.ts";
+import { comicLibrariesArraySelectSchema } from "./data/comic-libraries.schema.ts";
 
 // **** Basic response schemas **** //
 export const MessageResponseSchema = z.object({
@@ -80,7 +79,26 @@ export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema =
   description: "A camelCase response containing a comic series with its metadata, thumbnail, and associated comic books.",
 });
 
+/**
+ * Schema for library list response
+ * Returns an array of comic libraries
+ */
 export const LibraryResponseSchema = z.object({
   message: z.string(),
-  data: z.union([comicLibrariesArraySelectSchema, comicLibrariesSelectSchema]).optional(),
+  data: comicLibrariesArraySelectSchema,
+}).openapi({
+  title: "LibraryListResponse",
+  description: "Response containing a message and array of comic library data",
+});
+
+/**
+ * Schema for create library response
+ * Returns the ID of the newly created library
+ */
+export const CreateLibraryResponseSchema = z.object({
+  message: z.string(),
+  libraryId: z.number(),
+}).openapi({
+  title: "CreateLibraryResponse",
+  description: "Response containing a message and the ID of the newly created library",
 });
