@@ -9,6 +9,7 @@ import { ComicLibrarySchema } from "../../schemas/comicLibrary.schema.ts";
 import {
   ErrorResponseSchema,
   LibraryResponseSchema,
+  CreateLibraryResponseSchema,
 } from "../../zod/schemas/response.schema.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import type { AppEnv, LibraryRegistrationInput } from "../../types/index.ts";
@@ -89,7 +90,7 @@ app.openapi(
     // Get the libraries for the user from the database
     const libraries = await getComicLibrariesAvailableToUser(userId);
     return c.json(
-      { message: "Comic Libraries retrieved successfully", libraries },
+      { message: "Comic Libraries retrieved successfully", data: libraries },
       200,
     );
   },
@@ -274,7 +275,7 @@ const createLibraryRoute = createRoute({
     201: {
       content: {
         "application/json": {
-          schema: LibraryResponseSchema,
+          schema: CreateLibraryResponseSchema,
         },
       },
       description: "Library created successfully",
