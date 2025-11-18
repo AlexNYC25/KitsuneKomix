@@ -628,7 +628,8 @@ export const getComicBooksInSeries = async (
       .from(comicSeriesBooksTable)
       .where(eq(comicSeriesBooksTable.comic_series_id, seriesId));
 
-    return result.map((row) => row.id);
+    // Return the comic_book_id (the linked comic book) for all association rows
+    return result.map((row) => row.comic_book_id);
   } catch (error) {
     console.error("Error fetching comic books in series:", error);
     throw error;
