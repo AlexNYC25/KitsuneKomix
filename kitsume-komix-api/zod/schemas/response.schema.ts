@@ -19,6 +19,9 @@ export const ErrorResponseSchema = z.object({
   errors: z.record(z.string(), z.any().openapi({ type: "object" })).optional(),
 });
 
+// Flexible schema for responses we don't want to type strictly in OpenAPI
+export const FlexibleResponseSchema = z.unknown();
+
 /**
  * Schema for paginated comic series response
  */

@@ -14,6 +14,28 @@ export const PaginationQuerySchema = z.object({
     description: "Number of items per page (default is 20, max is 100)",
     example: 20,
   }),
+  // Optional sorting and filtering parameters. These are common but optional and
+  // will be ignored by routes that don't support them.
+  sort: z.string().optional().openapi({
+    description: "A free-form sort string or 'relevance' style identifier",
+    example: "title",
+  }),
+  sortProperty: z.string().optional().openapi({
+    description: "The specific property to sort by",
+    example: "created_at",
+  }),
+  sortDirection: z.enum(["asc", "desc"]).optional().openapi({
+    description: "Sort direction",
+    example: "desc",
+  }),
+  filter: z.string().optional().openapi({
+    description: "Filter value to search by",
+    example: "Batman",
+  }),
+  filterProperty: z.string().optional().openapi({
+    description: "Property used for filter",
+    example: "authors",
+  }),
 });
 
 /**
@@ -54,4 +76,27 @@ export const ParamIdThumbnailIdSchema = z.object({
     param: { name: "thumbnailId", in: "path" },
     example: "1",
   }),
+});
+
+// Schema for updating comic book partial fields in request body
+export const ComicBookUpdateSchema = z.object({
+  title: z.string().optional(),
+  series: z.string().optional(),
+  issue_number: z.number().optional(),
+  volume: z.string().optional(),
+  publisher: z.string().optional(),
+  year: z.number().optional(),
+  summary: z.string().optional(),
+  authors: z.array(z.string()).optional(),
+  genres: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  hash: z.string().optional(),
+  page_count: z.number().optional(),
+  review: z.string().optional(),
+  age_rating: z.string().optional(),
+  community_rating: z.number().min(0).max(5).optional(),
+  file_size: z.number().optional(),
+}).openapi({
+  title: "ComicBookUpdate",
+  description: "Partial comic book updates for PATCH/PUT requests",
 });
