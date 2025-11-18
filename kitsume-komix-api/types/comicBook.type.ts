@@ -124,3 +124,17 @@ export type ComicBookFilteringAndSortingParams = {
   offset?: number;
   limit?: number;
 };
+
+// Response contract for routes that return lists of comic books
+export type MultipleReturnResponse = {
+  data: ComicBook[] | ComicBookWithMetadata[];
+  count: number;
+  hasNextPage: boolean;
+  currentPage: number;
+  pageSize: number;
+  filter: string | null;
+  filterProperty: string | null;
+  sort: string | null;
+  sortProperty: string | null;
+  sortOrder?: string | null;
+};
