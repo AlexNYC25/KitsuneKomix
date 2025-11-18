@@ -1,4 +1,4 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import z from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { basename } from "@std/path";
@@ -8,6 +8,9 @@ import {
   getComicBookById,
   updateComicBook,
 } from "../../db/sqlite/models/comicBooks.model.ts";
+import {
+  getComicBooksInSeries,
+} from "../../db/sqlite/models/comicSeries.model.ts";
 import {
   checkComicReadByUser,
   createCustomThumbnail,
@@ -26,158 +29,190 @@ import {
   setComicReadByUser,
   startStreamingComicBookFile,
 } from "../services/comicbooks.service.ts";
+import camelcasekeys from "camelcase-keys";
 import {
   AllowedFilterProperties,
   AllowedSortProperties,
   ComicBook,
   ComicBookFilterItem,
+  MultipleReturnResponse,
 } from "../../types/index.ts";
-import { ComicBookWithMetadata } from "../../types/comicBook.type.ts";
+// ComicBookWithMetadata is re-exported via ../../types/index.ts if needed
+import type { AppEnv } from "../../types/index.ts";
+import { ComicBooksResponseSchema, FlexibleResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { PaginationQuerySchema, ComicBookUpdateSchema } from "../../zod/schemas/request.schema.ts";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono<AppEnv>();
+
+// Register Bearer Auth security scheme for OpenAPI
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
+});
 
 // This should be the expected json return type for routes that return multiple comic books with pagination info
-type multipleReturnResponse = {
-  data: ComicBook[] | ComicBookWithMetadata[];
-  count: number;
-  hasNextPage: boolean;
-  currentPage: number;
-  pageSize: number;
-  filter: string | null;
-  filterProperty: string | null;
-  sort: string | null;
-  sortProperty: string | null;
-  sortOrder?: string | null;
-};
+// Moved MultipleReturnResponse to `types/comicBook.type.ts` — use MultipleReturnResponse
 
 /**
- * Get all comic books
- * ROUTE: GET /api/comic-books/all
+ * GET /api/comic-books/all
  *
- * This should return a list of all comic books in the database, with the option of pagination, sorting, and filtering
- * @return JSON array of comic books
+ * Get all comic books with pagination, sorting, and filtering
  */
-app.get(
-  "/all",
-  zValidator(
-    "query",
-    z.object({
-      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
-      limit: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val) : 20)),
-      sort: z.string().optional(),
-      sortProperty: z.string().optional(),
-      sortDirection: z.enum(["asc", "desc"]).optional(),
-      filter: z.string().optional(),
-      filterProperty: z.string().optional(),
-    }),
-  ),
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/all",
+    summary: "Get all comic books",
+    description: "Retrieve all comic books in the database with pagination, sorting, and filtering",
+    tags: ["Comic Books"],
+    request: {
+      query: PaginationQuerySchema,
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+          schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Comic books retrieved successfully",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
+    },
+  }),
   async (c) => {
-    const {
-      page,
-      limit,
-      sort,
-      sortProperty,
-      sortDirection,
-      filter,
-      filterProperty,
-    } = c.req.query();
+  const queryData = c.req.valid("query");
+  const page = queryData.page || 1;
+  const pageSize = queryData.pageSize || 20;
+  const sort = queryData.sort;
+  const sortProperty = queryData.sortProperty;
+  const sortDirection = queryData.sortDirection;
+  const filter = queryData.filter;
+  const filterProperty = queryData.filterProperty;
 
-    try {
-      // Convert query parameters to the new service function format
-      const filters: ComicBookFilterItem[] = [];
-      if (filter && filterProperty) {
-        filters.push({
-          filterProperty: filterProperty as AllowedFilterProperties,
-          filterValue: filter,
-        });
-      }
-
-      const pageNum = parseInt(page) || 1;
-      const pageSize = parseInt(limit) || 20;
-      const offset = (pageNum - 1) * pageSize;
-
-      // Use the new optimized service function
-      const comics = await getComicBooksWithRelatedMetadata(
-        filters,
-        (sortProperty as AllowedSortProperties) || "created_at",
-        sortDirection === "desc" ? "desc" : "asc",
-        offset,
-        pageSize + 1, // +1 to check for next page
-      );
-
-      // Check if there's a next page
-      const hasNextPage = comics.length > pageSize;
-      const resultComics = hasNextPage ? comics.slice(0, pageSize) : comics;
-
-      const returnObj: multipleReturnResponse = {
-        data: resultComics,
-        count: resultComics.length,
-        hasNextPage,
-        currentPage: pageNum,
-        pageSize: pageSize,
-        filter: filter || null,
-        filterProperty: filterProperty || null,
-        sort: sort || null,
-        sortProperty: sortProperty || null,
-        sortOrder: sortDirection === "desc" ? "desc" : "asc",
-      };
-
-      return c.json(returnObj);
-    } catch (error) {
-      console.error("API Route Error:", error);
-      return c.json({ error: "Failed to fetch comic books" }, 500);
+  try {
+    // Convert query parameters to the new service function format
+    const filters: ComicBookFilterItem[] = [];
+    if (filter && filterProperty) {
+      filters.push({
+        filterProperty: filterProperty as AllowedFilterProperties,
+        filterValue: filter,
+      });
     }
-  },
-);
+
+  const pageNum = page || 1;
+    const offset = (pageNum - 1) * pageSize;
+
+    // Use the new optimized service function
+    const comics = await getComicBooksWithRelatedMetadata(
+      filters,
+      (sortProperty as AllowedSortProperties) || "created_at",
+      sortDirection === "desc" ? "desc" : "asc",
+      offset,
+      pageSize + 1, // +1 to check for next page
+    );
+
+    // Check if there's a next page
+    const hasNextPage = comics.length > pageSize;
+    const resultComics = hasNextPage ? comics.slice(0, pageSize) : comics;
+
+  const returnObj: MultipleReturnResponse = {
+      data: resultComics,
+      count: resultComics.length,
+      hasNextPage,
+      currentPage: pageNum,
+      pageSize: pageSize,
+      filter: filter || null,
+      filterProperty: filterProperty || null,
+      sort: sort || null,
+      sortProperty: sortProperty || null,
+      sortOrder: sortDirection === "desc" ? "desc" : "asc",
+    };
+
+    return c.json(returnObj, 200);
+  } catch (error) {
+    console.error("API Route Error:", error);
+    return c.json({ message: "Failed to fetch comic books" }, 500);
+  }
+});
 
 /**
- * Get comic book duplicates
- *
  * GET /api/comic-books/duplicates
  *
- * This route returns a list of duplicate comic books based on the unique hash generated for each comic book
+ * Get duplicate comic books
  */
-app.get(
-  "/duplicates",
-  zValidator(
-    "query",
-    z.object({
-      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
-      limit: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val) : 20)),
-    }),
-  ),
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/duplicates",
+    summary: "Get duplicate comic books",
+    description: "Retrieve duplicate comic books based on unique hash",
+    tags: ["Comic Books"],
+    request: {
+      query: z.object({
+        page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
+          description: "Page number for pagination",
+          example: 1,
+        }),
+  pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 20)).openapi({
+          description: "Number of items per page",
+          example: 20,
+        }),
+      }),
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Duplicate comic books retrieved successfully",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
+    },
+  }),
   async (c) => {
-    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
-    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
+  const queryData = c.req.valid("query");
+  const page = queryData.page || 1;
+  const pageSize = queryData.pageSize || 20;
 
-    try {
-      const duplicates = await fetchComicDuplicatesInTheDb({
-        page: page,
-        pageSize: limit,
+  try {
+    const duplicates = await fetchComicDuplicatesInTheDb({
+      page: page,
+  pageSize: pageSize,
+    });
+
+    if (duplicates && Array.isArray(duplicates)) {
+      return c.json({
+        data: duplicates,
+    hasNextPage: duplicates.length >= pageSize,
       });
-
-      if (duplicates) {
-        return c.json({
-          duplicates: duplicates,
-          message: "Fetched comic book duplicates successfully",
-        });
-      } else {
-        return c.json({
-          message: "No duplicate comic books found",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching comic book duplicates:", error);
-      return c.json({ error: "Failed to fetch comic book duplicates" }, 500);
+    } else {
+      return c.json({
+        data: [],
+        hasNextPage: false,
+      });
     }
-  },
-);
+  } catch (error) {
+    console.error("Error fetching comic book duplicates:", error);
+    return c.json({ message: "Failed to fetch comic book duplicates" }, 500);
+  }
+});
 
 /**
  * Get the latest comic books added to the database
@@ -186,50 +221,76 @@ app.get(
  *
  * This route returns the latest comic books added to the database, sorted by the date they were added
  */
-app.get(
-  "/latest",
-  zValidator(
-    "query",
-    z.object({
-      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
-      limit: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val) : 10)),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/latest",
+  summary: "Get latest comic books",
+  description: "Retrieve the latest comic books added to the database, sorted by creation date in descending order",
+  tags: ["Comic Books"],
+  request: {
+    query: z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
+        description: "Page number for pagination",
+        example: 1,
+      }),
+  pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 10)).openapi({
+        description: "Number of items per page",
+        example: 10,
+      }),
     }),
-  ),
-  async (c) => {
-    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
-    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
-
-    try {
-      const comicsResult = await fetchAllComicBooksWithRelatedData(
-        {
-          page: page,
-          pageSize: limit,
-        },
-        {
-          filter: undefined,
-          filterProperty: undefined,
-        },
-        {
-          sort: "created_at",
-          sortProperty: "created_at",
-          sortOrder: "desc",
-        },
-      );
-      return c.json({
-        data: comicsResult.comics,
-        count: comicsResult.comics.length,
-        currentPage: page,
-        pageSize: limit,
-      });
-    } catch (error) {
-      console.error("Error fetching latest comic books:", error);
-      return c.json({ error: "Failed to fetch latest comic books" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Latest comic books retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const queryData = c.req.valid("query");
+  const page = queryData.page || 1;
+  const pageSize = queryData.pageSize || 10;
+
+  try {
+    const comicsResult = await fetchAllComicBooksWithRelatedData(
+      {
+        page: page,
+  pageSize: pageSize,
+      },
+      {
+        filter: undefined,
+        filterProperty: undefined,
+      },
+      {
+        sort: "created_at",
+        sortProperty: "created_at",
+        sortOrder: "desc",
+      },
+    );
+    return c.json({
+      data: comicsResult.comics,
+      count: comicsResult.comics.length,
+      currentPage: page,
+  pageSize: pageSize,
+    });
+  } catch (error) {
+    console.error("Error fetching latest comic books:", error);
+    return c.json({ error: "Failed to fetch latest comic books" }, 500);
+  }
+});
 
 /**
  * Get the newest comic books by publication date
@@ -238,51 +299,77 @@ app.get(
  *
  * This route returns the newest comic books sorted by their publication date
  */
-app.get(
-  "/newest",
-  zValidator(
-    "query",
-    z.object({
-      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
-      limit: z
-        .string()
-        .optional()
-        .transform((val) => (val ? parseInt(val) : 10)),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/newest",
+  summary: "Get newest comic books",
+  description: "Retrieve the newest comic books sorted by publication date in descending order",
+  tags: ["Comic Books"],
+  request: {
+    query: z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
+        description: "Page number for pagination",
+        example: 1,
+      }),
+  pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 10)).openapi({
+        description: "Number of items per page",
+        example: 10,
+      }),
     }),
-  ),
-  async (c) => {
-    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
-    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
-
-    try {
-      const comicsResult = await fetchAllComicBooksWithRelatedData(
-        {
-          page: page,
-          pageSize: limit,
-        },
-        {
-          filter: undefined,
-          filterProperty: undefined,
-        },
-        {
-          sort: "publication_date",
-          sortProperty: "publication_year",
-          sortOrder: "desc",
-        },
-      );
-      return c.json({
-        data: comicsResult.comics,
-        count: comicsResult.comics.length,
-        currentPage: page,
-        pageSize: limit,
-        hasNextPage: comicsResult.hasNextPage,
-      });
-    } catch (error) {
-      console.error("Error fetching newest comic books:", error);
-      return c.json({ error: "Failed to fetch newest comic books" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Newest comic books retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const queryData = c.req.valid("query");
+  const page = queryData.page || 1;
+  const pageSize = queryData.pageSize || 10;
+
+  try {
+    const comicsResult = await fetchAllComicBooksWithRelatedData(
+      {
+        page: page,
+  pageSize: pageSize,
+      },
+      {
+        filter: undefined,
+        filterProperty: undefined,
+      },
+      {
+        sort: "publication_date",
+        sortProperty: "publication_year",
+        sortOrder: "desc",
+      },
+    );
+    return c.json({
+      data: comicsResult.comics,
+      count: comicsResult.comics.length,
+      currentPage: page,
+  pageSize: pageSize,
+      hasNextPage: comicsResult.hasNextPage,
+    });
+  } catch (error) {
+    console.error("Error fetching newest comic books:", error);
+    return c.json({ error: "Failed to fetch newest comic books" }, 500);
+  }
+});
 
 /**
  * Get a random comic book
@@ -291,71 +378,194 @@ app.get(
  *
  * This route returns a random comic book from the database
  */
-app.get(
-  "/random",
-  zValidator(
-    "query",
-    z.object({
-      count: z.string().optional().transform((
-        val,
-      ) => (val ? parseInt(val) : 1)),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/random",
+  summary: "Get random comic book",
+  description: "Retrieve a random comic book from the database",
+  tags: ["Comic Books"],
+  request: {
+    query: z.object({
+      count: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
+        description: "Number of random comics to fetch",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const count = c.req.query("count") ? parseInt(c.req.query("count")!) : 1;
-
-    try {
-      const comic = await fetchRandomComicBook(count);
-      return c.json(comic);
-    } catch (error) {
-      console.error("Error fetching random comic book:", error);
-      return c.json({ error: "Failed to fetch random comic book" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Random comic book retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const queryData = c.req.valid("query");
+  const count = queryData.count || 1;
 
-app.get(
-  "/list",
-  zValidator(
-    "query",
-    z.object({
-      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)),
-      limit: z.string().optional().transform((
-        val,
-      ) => (val ? parseInt(val) : 20)),
-      letter: z.string().optional().transform((val) => val || "A"),
+  try {
+    const comic = await fetchRandomComicBook(count);
+    return c.json(comic);
+  } catch (error) {
+    console.error("Error fetching random comic book:", error);
+    return c.json({ error: "Failed to fetch random comic book" }, 500);
+  }
+});
+
+/**
+ * Get comic books filtered by first letter
+ */
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/list",
+  summary: "Get comic books by letter",
+  description: "Retrieve comic books filtered by their first letter with pagination",
+  tags: ["Comic Books"],
+  request: {
+    query: z.object({
+      page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
+        description: "Page number for pagination",
+        example: 1,
+      }),
+  pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 20)).openapi({
+        description: "Number of items per page",
+        example: 20,
+      }),
+      letter: z.string().optional().transform((val) => val || "A").openapi({
+        description: "First letter to filter by",
+        example: "A",
+      }),
     }),
-  ),
-  async (c) => {
-    const page = c.req.query("page") ? parseInt(c.req.query("page")!) : 1;
-    const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : 20;
-    const letter = c.req.query("letter") || "A";
-
-    try {
-      const comicsResult = await fetchComicBooksByLetter(
-        letter,
-        { page: page, pageSize: limit },
-      );
-      return c.json({
-        data: comicsResult,
-        count: comicsResult.length,
-        currentPage: page,
-        pageSize: limit,
-      });
-    } catch (error) {
-      console.error("Error fetching comic book list:", error);
-      return c.json({ error: "Failed to fetch comic book list" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic books retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const queryData = c.req.valid("query");
+  const page = queryData.page || 1;
+  const pageSize = queryData.pageSize || 20;
+  const letter = queryData.letter || "A";
 
-app.get("/queue", (_c) => {
+  try {
+    const comicsResult = await fetchComicBooksByLetter(
+      letter,
+  { page: page, pageSize: pageSize },
+    );
+    return c.json({
+      data: comicsResult,
+      count: comicsResult.length,
+      currentPage: page,
+  pageSize: pageSize,
+    });
+  } catch (error) {
+    console.error("Error fetching comic book list:", error);
+    return c.json({ error: "Failed to fetch comic book list" }, 500);
+  }
+});
+
+/**
+ * Get queue
+ */
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/queue",
+  summary: "Get processing queue status",
+  description: "Retrieve the status of the comic book processing queue",
+  tags: ["Comic Books"],
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Queue status retrieved",
+    },
+    501: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Not implemented",
+    },
+  },
+  }),
+  (_c) => {
   //TODO: implement queue logic
   return _c.json({ message: "Queue not implemented yet" }, 501);
 });
 
-// Note this should be a batch update of metadata for multiple comic books either adding or replacing existing metadata
-app.post("/metadata-batch", async (c) => {
+/**
+ * Batch update metadata
+ */
+app.openapi(
+  createRoute({
+  method: "post",
+  path: "/metadata-batch",
+  summary: "Batch update metadata",
+  description: "Update metadata for multiple comic books",
+  tags: ["Comic Books"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.any(),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Metadata updated",
+    },
+    501: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Not implemented",
+    },
+  },
+  }),
+  async (c) => {
   const _metadata = await c.req.json();
 
   //TODO: implement metadata update logic
@@ -373,25 +583,58 @@ app.post("/metadata-batch", async (c) => {
  * @param id - The ID of the comic book to retrieve
  * @return JSON object of the comic book
  */
-app.get(
-  "/:id",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id",
+  summary: "Get comic book by ID",
+  description: "Retrieve a single comic book by its ID",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = Number(c.req.param("id"));
-
-    const comic: ComicBook | null = await getComicBookById(id);
-    if (comic) {
-      return c.json(comic);
-    } else {
-      return c.notFound();
-    }
+    query: PaginationQuerySchema,
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book retrieved successfully",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book not found",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = Number(c.req.param("id"));
+
+  const comic: ComicBook | null = await getComicBookById(id);
+  if (comic) {
+    return c.json(comic);
+  }
+  return c.json({ error: "Comic book not found" }, 404);
+});
 
 /**
  * Get a comic book with its full metadata by ID
@@ -401,25 +644,57 @@ app.get(
  * @param id - The ID of the comic book to retrieve
  * @return JSON object of the comic book with its full metadata
  */
-app.get(
-  "/:id/metadata",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/metadata",
+  summary: "Get comic book metadata by ID",
+  description: "Retrieve a comic book with its full metadata by its ID",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
-
-    const metadata = await fetchComicBookMetadataById(id);
-    if (metadata) {
-      return c.json(metadata);
-    } else {
-      return c.notFound();
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book metadata retrieved successfully",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book not found",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+
+  const metadata = await fetchComicBookMetadataById(id);
+  if (metadata) {
+    return c.json(metadata);
+  }
+  return c.json({ error: "Comic book not found" }, 404);
+});
 
 /**
  * Download a comic book by ID
@@ -553,160 +828,232 @@ app.get(
  * - Total number of pages actually extracted and stored in the database
  * - array of page numbers and their corresponding ids
  */
-app.get(
-  "/:id/pages",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/pages",
+  summary: "Get comic book pages information",
+  description: "Retrieve information about the pages of a comic book",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = c.req.param("id");
-
-    try {
-      const result = await getComicPagesInfo(parseInt(id, 10));
-
-      return c.json(result);
-    } catch (error) {
-      console.error("Error fetching comic book pages info:", error);
-      return c.json({ error: "Failed to fetch comic book pages info" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+            schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic pages information retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+
+  try {
+    const result = await getComicPagesInfo(id);
+    return c.json(result);
+  } catch (error) {
+    console.error("Error fetching comic book pages info:", error);
+    return c.json({ error: "Failed to fetch comic book pages info" }, 500);
+  }
+});
 
 /**
  * Check if a comic book has been read by a user
  *
  * GET /api/comic-books/:id/read
  *
- * This should return whether the comic book has been marked as read by the user, with the user id being read from
- * the jwt token provided in the Authorization header
+ * This should return whether the comic book has been marked as read by the user
  */
-app.get(
-  "/:id/read",
-  // requireAuth - TODO: Add auth middleware for OpenAPIHono,
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/read",
+  summary: "Check if comic book has been read",
+  description: "Check if a comic book has been marked as read by the current user",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = c.req.param("id");
-    // TODO: Implement proper auth check
-    // const userId = c.get("user").sub;
-    const userId = 1; // Placeholder until auth is properly migrated
-
-    const hasRead = await checkComicReadByUser(userId, parseInt(id, 10));
-    return c.json({ hasRead });
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Read status retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+  // TODO: Implement proper auth check
+  // const userId = c.get("user").sub;
+  const userId = 1; // Placeholder until auth is properly migrated
+
+  const hasRead = await checkComicReadByUser(userId, id);
+  return c.json({ hasRead });
+});
 
 /**
  * Mark a comic book as read by a user
  *
  * POST /api/comic-books/:id/read
  *
- * This should mark the comic book as read by the user, with the user id being read from the jwt token provided in the Authorization header
+ * This should mark the comic book as read by the user
  */
-app.post(
-  "/:id/read",
-  // requireAuth - TODO: Add auth middleware for OpenAPIHono,
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "post",
+  path: "/:id/read",
+  summary: "Mark comic book as read",
+  description: "Mark a comic book as read by the current user",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = c.req.param("id");
-    // TODO: Implement proper auth check
-    // const userId = c.get("user").sub;
-    const userId = 1; // Placeholder until auth is properly migrated
-
-    const success = await setComicReadByUser(userId, parseInt(id, 10), true);
-    if (success) {
-      return c.json({ message: "Comic book marked as read" });
-    } else {
-      return c.json({ error: "Failed to mark comic book as read" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+          "application/json": {
+            schema: FlexibleResponseSchema,
+          },
+      },
+      description: "Comic book marked as read",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+  // TODO: Implement proper auth check
+  // const userId = c.get("user").sub;
+  const userId = 1; // Placeholder until auth is properly migrated
+
+  const success = await setComicReadByUser(userId, id, true);
+  if (success) {
+    return c.json({ message: "Comic book marked as read" });
+  } else {
+    return c.json({ error: "Failed to mark comic book as read" }, 500);
+  }
+});
 
 /**
  * Update a comic book by ID, partial updates allowed
  *
  * PUT /api/comic-books/:id/update
  *
- * This should allow partial updates to a comic book's metadata, specifically to certain fields:
- * - title
- * - series (name only, not the ID)
- * - issue_number
- * - volume
- * - publisher
- * - year
- * - summary
- * - authors
- * - genres
- * - tags
- * - hash
- * - page_count
- * - review
- * - age_rating
- * - community_rating
- * - file_size
- *
- * TODO: Reconsider some fields like hash and file_size, should they be updatable?
+ * This should allow partial updates to a comic book's metadata
  */
-app.put(
-  "/:id/update",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "put",
+  path: "/:id/update",
+  summary: "Update comic book",
+  description: "Update comic book metadata with partial updates allowed",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  zValidator(
-    "json",
-    z.object({
-      title: z.string().optional(),
-      series: z.string().optional(),
-      issue_number: z.number().optional(),
-      volume: z.string().optional(),
-      publisher: z.string().optional(),
-      year: z.number().optional(),
-      summary: z.string().optional(),
-      authors: z.array(z.string()).optional(),
-      genres: z.array(z.string()).optional(),
-      tags: z.array(z.string()).optional(),
-      hash: z.string().optional(),
-      page_count: z.number().optional(),
-      review: z.string().optional(),
-      age_rating: z.string().optional(),
-      community_rating: z.number().min(0).max(5).optional(),
-      file_size: z.number().optional(),
-    }),
-  ),
-  async (c) => {
-    const id = Number(c.req.param("id"));
-    const updates = await c.req.json();
-
-    try {
-      const success = await updateComicBook(id, updates);
-      if (success) {
-        return c.json({
-          message: `Comic book with ID ${id} updated successfully`,
-        });
-      } else {
-        return c.notFound();
-      }
-    } catch (error) {
-      console.error("Error updating comic book:", error);
-      return c.json({ message: "Internal server error" }, 500);
-    }
+    body: {
+      content: {
+        "application/json": {
+          schema: ComicBookUpdateSchema,
+        },
+      },
+    },
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book updated successfully",
+    },
+    404: {
+      content: {
+        "application/json": {
+            schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book not found",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = Number(c.req.param("id"));
+  const updates = await c.req.json();
+
+  try {
+    const success = await updateComicBook(id, updates);
+    if (success) {
+      return c.json({
+        message: `Comic book with ID ${id} updated successfully`,
+      });
+    } else {
+      return c.json({ error: "Comic book not found" }, 404);
+    }
+  } catch (error) {
+    console.error("Error updating comic book:", error);
+    return c.json({ message: "Internal server error" }, 500);
+  }
+});
 
 /**
  * Delete a comic book by ID
@@ -715,32 +1062,160 @@ app.put(
  *
  * This should delete a comic book by its ID
  */
-app.delete(
-  "/:id/delete",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "delete",
+  path: "/:id/delete",
+  summary: "Delete comic book",
+  description: "Delete a comic book by its ID",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = Number(c.req.param("id"));
-
-    try {
-      const success = await deleteComicBook(id);
-      if (success) {
-        return c.json({
-          message: `Comic book with ID ${id} deleted successfully`,
-        });
-      } else {
-        return c.notFound();
-      }
-    } catch (error) {
-      console.error("Error deleting comic book:", error);
-      return c.json({ message: "Internal server error" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+            schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book deleted successfully",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book not found",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = Number(c.req.param("id"));
+
+  try {
+    const success = await deleteComicBook(id);
+    if (success) {
+      return c.json({
+        message: `Comic book with ID ${id} deleted successfully`,
+      });
+    } else {
+      return c.json({ error: "Comic book not found" }, 404);
+    }
+  } catch (error) {
+    console.error("Error deleting comic book:", error);
+    return c.json({ message: "Internal server error" }, 500);
+  }
+});
+
+/**
+ * Get all comic books in a series
+ *
+ * GET /api/comic-books/series/:seriesId
+ *
+ * This route returns all comic book issues that belong to a given series
+ */
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/series/:seriesId",
+  summary: "Get comic books by series",
+  description: "Retrieve all comic book issues belonging to a specific series",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      seriesId: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Series ID",
+        example: 1,
+      }),
+    }),
+    query: PaginationQuerySchema,
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: ComicBooksResponseSchema,
+        },
+      },
+      description: "Comic books retrieved successfully",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Series not found",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const seriesId = parseInt(c.req.param("seriesId"), 10);
+  const queryData = c.req.valid("query");
+  const page = queryData.page || 1;
+  const pageSize = queryData.pageSize || 20;
+
+  try {
+    const comicsInSeries = await getComicBooksInSeries(seriesId);
+    if (!comicsInSeries || comicsInSeries.length === 0) {
+      return c.json({ message: "No comic books found for this series" }, 404);
+    }
+
+  const total = comicsInSeries.length;
+  const offset = (page - 1) * pageSize;
+  const pageIds = comicsInSeries.slice(offset, offset + pageSize);
+
+    // Fetch full metadata for each comic in the page
+    const comicsWithMetadata = await Promise.all(
+      pageIds.map(async (comicId) => {
+        const data = await fetchComicBookMetadataById(comicId);
+        return data
+          ? camelcasekeys(data, { deep: true })
+          : null;
+      }),
+    );
+
+    // Remove any null results
+    const filtered = comicsWithMetadata.filter((c) => c !== null);
+
+    return c.json({
+      data: filtered,
+      meta: {
+        total,
+        page,
+  pageSize: pageSize,
+  hasNextPage: offset + pageSize < total,
+      },
+      message: "Comic books retrieved successfully",
+    }, 200);
+  } catch (error) {
+    console.error("Error fetching comic books in series:", error);
+    return c.json({ message: "Internal server error" }, 500);
+  }
+});
 
 /**
  * Get the next comic book in the series, returning back the comic book of the next issue number
@@ -749,35 +1224,60 @@ app.delete(
  *
  * This should return the next comic book in the same series based on the issue number
  */
-app.get(
-  "/:id/next",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/next",
+  summary: "Get next comic book in series",
+  description: "Retrieve the next comic book in the same series based on issue number",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = c.req.param("id");
-
-    try {
-      const nextComic = await getNextComicBookId(parseInt(id, 10));
-      if (nextComic) {
-        return c.json({
-          nextComic: nextComic,
-          message: "Fetched next comic book successfully",
-        });
-      } else {
-        return c.json({
-          message: "No next comic book found",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching next comic book:", error);
-      return c.json({ error: "Failed to fetch next comic book" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Next comic book retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+
+  try {
+    const nextComic = await getNextComicBookId(id);
+    if (nextComic) {
+      return c.json({
+        nextComic: nextComic,
+        message: "Fetched next comic book successfully",
+      });
+    } else {
+      return c.json({
+        message: "No next comic book found",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching next comic book:", error);
+    return c.json({ error: "Failed to fetch next comic book" }, 500);
+  }
+});
 
 /**
  * Get the previous comic book in the series, returning back the comic book of the previous issue number
@@ -786,35 +1286,60 @@ app.get(
  *
  * This should return the previous comic book in the same series based on the issue number
  */
-app.get(
-  "/:id/previous",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/previous",
+  summary: "Get previous comic book in series",
+  description: "Retrieve the previous comic book in the same series based on issue number",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
     }),
-  ),
-  async (c) => {
-    const id = c.req.param("id");
-
-    try {
-      const previousComic = await getPreviousComicBookId(parseInt(id, 10));
-      if (previousComic) {
-        return c.json({
-          previousComic: previousComic,
-          message: "Fetched previous comic book successfully",
-        });
-      } else {
-        return c.json({
-          message: "No previous comic book found",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching previous comic book:", error);
-      return c.json({ error: "Failed to fetch previous comic book" }, 500);
-    }
   },
-);
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Previous comic book retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+
+  try {
+    const previousComic = await getPreviousComicBookId(id);
+    if (previousComic) {
+      return c.json({
+        previousComic: previousComic,
+        message: "Fetched previous comic book successfully",
+      });
+    } else {
+      return c.json({
+        message: "No previous comic book found",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching previous comic book:", error);
+    return c.json({ error: "Failed to fetch previous comic book" }, 500);
+  }
+});
 
 /**
  * Get all thumbnails for a comic book by ID
@@ -823,11 +1348,45 @@ app.get(
  *
  * This should return all thumbnails for a comic book, both generated and custom ones
  */
-app.get("/:id/thumbnails", async (c) => {
-  const id = c.req.param("id");
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/thumbnails",
+  summary: "Get comic book thumbnails",
+  description: "Retrieve all thumbnails for a comic book",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Thumbnails retrieved successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
 
   try {
-    const thumbnails = await getComicThumbnails(parseInt(id, 10));
+    const thumbnails = await getComicThumbnails(id);
     if (thumbnails) {
       return c.json({
         thumbnails: thumbnails,
@@ -851,15 +1410,58 @@ app.get("/:id/thumbnails", async (c) => {
  *
  * This should return a specific thumbnail for a comic book by its ID and the thumbnail ID
  */
-app.get("/:id/thumbnails/:thumbId", async (c) => {
-  const id = c.req.param("id");
-  const thumbId = c.req.param("thumbId");
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/thumbnails/:thumbId",
+  summary: "Get specific comic thumbnail",
+  description: "Retrieve a specific thumbnail for a comic book",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
+      thumbId: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Thumbnail ID",
+        example: 1,
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Thumbnail retrieved successfully",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Thumbnail not found",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+  const thumbId = parseInt(c.req.param("thumbId"), 10);
 
   try {
-    const thumbnail = await getComicThumbnailByComicIdThumbnailId(
-      parseInt(id, 10),
-      parseInt(thumbId, 10),
-    );
+    const thumbnail = await getComicThumbnailByComicIdThumbnailId(id, thumbId);
     if (thumbnail) {
       return c.json({
         thumbnail: thumbnail,
@@ -885,12 +1487,50 @@ app.get("/:id/thumbnails/:thumbId", async (c) => {
  * This should delete a specific thumbnail for a comic book by its ID and the thumbnail ID,
  * the comic book id is provided for validation purposes so its a 2 point check
  */
-app.delete("/:id/thumbnails/:thumbId", async (c) => {
-  const id = c.req.param("id");
-  const thumbId = c.req.param("thumbId");
+app.openapi(
+  createRoute({
+  method: "delete",
+  path: "/:id/thumbnails/:thumbId",
+  summary: "Delete comic thumbnail",
+  description: "Delete a specific thumbnail for a comic book",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
+      thumbId: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Thumbnail ID",
+        example: 1,
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Thumbnail deleted successfully",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const id = parseInt(c.req.param("id"), 10);
+  const thumbId = parseInt(c.req.param("thumbId"), 10);
 
   try {
-    await deleteComicsThumbnailById(parseInt(id, 10), parseInt(thumbId, 10));
+    await deleteComicsThumbnailById(id, thumbId);
     return c.json({ message: "Comic book thumbnail deleted successfully" });
   } catch (error) {
     console.error("Error deleting comic book thumbnail:", error);
@@ -905,91 +1545,171 @@ app.delete("/:id/thumbnails/:thumbId", async (c) => {
  *
  * This should create a custom thumbnail for a comic book by its ID
  */
-app.post(
-  "/:id/thumbnails",
-  // requireAuth - TODO: Add auth middleware for OpenAPIHono
-  async (c) => {
-    const id = c.req.param("id");
-    const comicId = parseInt(id, 10);
-
-    if (isNaN(comicId)) {
-      return c.json({ error: "Invalid comic book ID" }, 400);
-    }
-
-    try {
-      // Get user from auth middleware
-      // TODO: Implement proper auth check
-      // const user = c.get("user");
-      // const userId = parseInt(user.sub);
-      const userId = 1; // Placeholder until auth is properly migrated
-
-      // Parse the multipart form data
-      const body = await c.req.parseBody();
-
-      // Extract image file
-      const imageFile = body.image;
-      if (!imageFile || !(imageFile instanceof File)) {
-        return c.json({ error: "Image file is required" }, 400);
-      }
-
-      // Optional name and description
-      const name = body.name as string | undefined;
-      const description = body.description as string | undefined;
-
-      // Validate file type
-      const allowedTypes = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/webp",
-      ];
-      if (!allowedTypes.includes(imageFile.type)) {
-        return c.json({
-          error: "Invalid file type. Supported types: JPEG, PNG, WebP",
-        }, 400);
-      }
-
-      // Convert file to ArrayBuffer
-      const imageData = await imageFile.arrayBuffer();
-
-      // Create the custom thumbnail
-      const result = await createCustomThumbnail(
-        comicId,
-        imageData,
-        userId,
-        name,
-        description,
-      );
-
-      return c.json({
-        message: "Custom thumbnail created successfully",
-        thumbnail: {
-          id: result.thumbnailId,
-          filePath: result.filePath,
-          name: name,
-          description: description,
-          type: "custom",
-        },
-      }, 201);
-    } catch (error) {
-      console.error("Error creating custom thumbnail:", error);
-
-      if (error instanceof Error) {
-        if (error.message.includes("not found")) {
-          return c.json({ error: error.message }, 404);
-        }
-      }
-
-      return c.json({ error: "Failed to create custom thumbnail" }, 500);
-    }
+app.openapi(
+  createRoute({
+  method: "post",
+  path: "/:id/thumbnails",
+  summary: "Create custom thumbnail",
+  description: "Create a custom thumbnail for a comic book via multipart form data",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
+    }),
   },
-);
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Custom thumbnail created successfully",
+    },
+    400: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Bad request - invalid input",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Comic book not found",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Internal Server Error",
+    },
+  },
+  }),
+  async (c) => {
+  const comicId = parseInt(c.req.param("id"), 10);
 
-//TODO: Updated parsing to actually read the readlists from the db, have the table and model ready
-app.get("/:id/readlists", (c) => {
-  const _id = c.req.param("id");
+  if (isNaN(comicId)) {
+    return c.json({ error: "Invalid comic book ID" }, 400);
+  }
 
-  //TODO: implement comic book readlists retrieval logic
+  try {
+    // TODO: Implement proper auth check
+    const userId = 1; // Placeholder until auth is properly migrated
+
+    // Parse the multipart form data
+    const body = await c.req.parseBody();
+
+    // Extract image file
+    const imageFile = body.image;
+    if (!imageFile || !(imageFile instanceof File)) {
+      return c.json({ error: "Image file is required" }, 400);
+    }
+
+    // Optional name and description
+    const name = body.name as string | undefined;
+    const description = body.description as string | undefined;
+
+    // Validate file type
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+    if (!allowedTypes.includes(imageFile.type)) {
+      return c.json({
+        error: "Invalid file type. Supported types: JPEG, PNG, WebP",
+      }, 400);
+    }
+
+    // Convert file to ArrayBuffer
+    const imageData = await imageFile.arrayBuffer();
+
+    // Create the custom thumbnail
+    const result = await createCustomThumbnail(
+      comicId,
+      imageData,
+      userId,
+      name,
+      description,
+    );
+
+    return c.json({
+      message: "Custom thumbnail created successfully",
+      thumbnail: {
+        id: result.thumbnailId,
+        filePath: result.filePath,
+        name: name,
+        description: description,
+        type: "custom",
+      },
+    }, 201);
+  } catch (error) {
+    console.error("Error creating custom thumbnail:", error);
+
+    if (error instanceof Error) {
+      if (error.message.includes("not found")) {
+        return c.json({ error: error.message }, 404);
+      }
+    }
+
+    return c.json({ error: "Failed to create custom thumbnail" }, 500);
+  }
+});
+
+/**
+ * Get readlists for a comic book
+ *
+ * GET /api/comic-books/:id/readlists
+ *
+ * This should return the readlists that contain this comic book
+ */
+app.openapi(
+  createRoute({
+  method: "get",
+  path: "/:id/readlists",
+  summary: "Get comic book readlists",
+  description: "Retrieve readlists that contain this comic book",
+  tags: ["Comic Books"],
+  request: {
+    params: z.object({
+      id: z.string().regex(/^\d+$/).transform(Number).openapi({
+        description: "Comic book ID",
+        example: 1,
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Readlists retrieved",
+    },
+    501: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "Not yet implemented",
+    },
+  },
+  }),
+  (c) => {
+  // TODO: implement comic book readlists retrieval logic
   return c.json({
     message: "Comic book readlists retrieval not implemented yet",
   }, 501);
