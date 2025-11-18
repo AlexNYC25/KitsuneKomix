@@ -6,7 +6,7 @@ import {
   comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
 } from "./data/comic-series.schema.ts";
 import { metadataSchema } from "./data/comic-metadata.schema.ts";
-import { comicBookSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comic-books.schema.ts";
+import { comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comic-books.schema.ts";
 import { comicLibrariesArraySelectSchema } from "./data/comic-libraries.schema.ts";
 
 // **** Basic response schemas **** //
@@ -33,6 +33,23 @@ export const ComicSeriesResponseSchema = z.object({
     hasNextPage: z.boolean(),
   }),
   message: z.string(),
+});
+
+/**
+ * Schema for paginated comic books response
+ */
+export const ComicBooksResponseSchema = z.object({
+  data: z.array(comicBookWithMetadataCamelCaseSchema),
+  meta: z.object({
+    total: z.number(),
+    page: z.number(),
+    pageSize: z.number(),
+    hasNextPage: z.boolean(),
+  }),
+  message: z.string(),
+}).openapi({
+  title: "ComicBooksResponse",
+  description: "A paginated list of comic books with metadata",
 });
 
 /**
