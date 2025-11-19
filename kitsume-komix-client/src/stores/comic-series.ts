@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
 import type { ComicSeriesWithComics } from '../types/comic-series.types'
+import type { ComicBooksSeriesResponse } from '../types/comic-books.types'
 
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({
@@ -42,6 +43,29 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 		}
 
 		return comicSeries || null;
+	},
+	async fetchComicsInSeries(seriesId: number, page: number = 1, pageSize: number = 20): Promise<ComicBooksSeriesResponse> {
+		try {
+			const { data, error } = await apiClient.GET('/comic-books/series/:seriesId', {
+				params: {
+					path: {
+						seriesId: String(seriesId)
+					},
+					query: {
+						page,
+						pageSize
+					}
+				}
+			});
+
+			if (error || !data) {
+				throw new Error('Failed to fetch comics in series');
+			}
+
+			return data;
+		} catch (err) {
+			throw new Error(err instanceof Error ? err.message : 'Failed to fetch comics in series');
+		}
 	}
   }
 })
