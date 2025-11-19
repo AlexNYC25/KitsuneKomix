@@ -1080,6 +1080,1426 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/comic-books/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all comic books
+         * @description Retrieve all comic books in the database with pagination, sorting, and filtering
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    /** @description A free-form sort string or 'relevance' style identifier */
+                    sort?: string;
+                    /** @description The specific property to sort by */
+                    sortProperty?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic books retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get duplicate comic books
+         * @description Retrieve duplicate comic books based on unique hash
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination */
+                    page?: string;
+                    /** @description Number of items per page */
+                    pageSize?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Duplicate comic books retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get latest comic books
+         * @description Retrieve the latest comic books added to the database, sorted by creation date in descending order
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination */
+                    page?: string;
+                    /** @description Number of items per page */
+                    pageSize?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Latest comic books retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/newest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get newest comic books
+         * @description Retrieve the newest comic books sorted by publication date in descending order
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination */
+                    page?: string;
+                    /** @description Number of items per page */
+                    pageSize?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Newest comic books retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/random": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get random comic book
+         * @description Retrieve a random comic book from the database
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Number of random comics to fetch */
+                    count?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Random comic book retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic books by letter
+         * @description Retrieve comic books filtered by their first letter with pagination
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination */
+                    page?: string;
+                    /** @description Number of items per page */
+                    pageSize?: string;
+                    /** @description First letter to filter by */
+                    letter?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic books retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get processing queue status
+         * @description Retrieve the status of the comic book processing queue
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Queue status retrieved */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/metadata-batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Batch update metadata
+         * @description Update metadata for multiple comic books
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            responses: {
+                /** @description Metadata updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic book by ID
+         * @description Retrieve a single comic book by its ID
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    /** @description A free-form sort string or 'relevance' style identifier */
+                    sort?: string;
+                    /** @description The specific property to sort by */
+                    sortProperty?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic book retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Comic book not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic book metadata by ID
+         * @description Retrieve a comic book with its full metadata by its ID
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic book metadata retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Comic book not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/pages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic book pages information
+         * @description Retrieve information about the pages of a comic book
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic pages information retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check if comic book has been read
+         * @description Check if a comic book has been marked as read by the current user
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Read status retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Mark comic book as read
+         * @description Mark a comic book as read by the current user
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic book marked as read */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update comic book
+         * @description Update comic book metadata with partial updates allowed
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        title?: string;
+                        series?: string;
+                        issue_number?: number;
+                        volume?: string;
+                        publisher?: string;
+                        year?: number;
+                        summary?: string;
+                        authors?: string[];
+                        genres?: string[];
+                        tags?: string[];
+                        hash?: string;
+                        page_count?: number;
+                        review?: string;
+                        age_rating?: string;
+                        community_rating?: number;
+                        file_size?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Comic book updated successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Comic book not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete comic book
+         * @description Delete a comic book by its ID
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic book deleted successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Comic book not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/series/:seriesId": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic books by series
+         * @description Retrieve all comic book issues belonging to a specific series
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    /** @description A free-form sort string or 'relevance' style identifier */
+                    sort?: string;
+                    /** @description The specific property to sort by */
+                    sortProperty?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Series ID */
+                    seriesId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Comic books retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                id: number;
+                                libraryId: number;
+                                filePath: string;
+                                hash: string;
+                                title: string | null;
+                                series: string | null;
+                                issueNumber: string | null;
+                                count: number | null;
+                                volume: string | null;
+                                alternateSeries: string | null;
+                                alternateIssueNumber: string | null;
+                                alternateCount: number | null;
+                                pageCount: number | null;
+                                fileSize: number | null;
+                                summary: string | null;
+                                notes: string | null;
+                                year: number | null;
+                                month: number | null;
+                                day: number | null;
+                                publisher: string | null;
+                                publicationDate: string | null;
+                                scanInfo: string | null;
+                                language: string | null;
+                                format: string | null;
+                                blackAndWhite: number | null;
+                                manga: number | null;
+                                readingDirection: string | null;
+                                review: string | null;
+                                ageRating: string | null;
+                                communityRating: number | null;
+                                createdAt: string;
+                                updatedAt: string;
+                                thumbnailUrl?: string | null;
+                                writers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                pencillers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                inkers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                letterers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                editors?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                colorists?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                coverArtists?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                publishers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                imprints?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                genres?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                characters?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                teams?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                locations?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                storyArcs?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                seriesGroups?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                            }[];
+                            meta: {
+                                total: number;
+                                page: number;
+                                pageSize: number;
+                                hasNextPage: boolean;
+                            };
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Series not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get next comic book in series
+         * @description Retrieve the next comic book in the same series based on issue number
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Next comic book retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/previous": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get previous comic book in series
+         * @description Retrieve the previous comic book in the same series based on issue number
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Previous comic book retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/thumbnails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic book thumbnails
+         * @description Retrieve all thumbnails for a comic book
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnails retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create custom thumbnail
+         * @description Create a custom thumbnail for a comic book via multipart form data
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Custom thumbnail created successfully */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Bad request - invalid input */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Comic book not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/thumbnails/:thumbId": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get specific comic thumbnail
+         * @description Retrieve a specific thumbnail for a comic book
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                    /** @description Thumbnail ID */
+                    thumbId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnail retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Thumbnail not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Delete comic thumbnail
+         * @description Delete a specific thumbnail for a comic book
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                    /** @description Thumbnail ID */
+                    thumbId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnail deleted successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/:id/readlists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic book readlists
+         * @description Retrieve readlists that contain this comic book
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Comic book ID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Readlists retrieved */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not yet implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/purge-data": {
         parameters: {
             query?: never;
@@ -1177,6 +2597,16 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
+                    /** @description A free-form sort string or 'relevance' style identifier */
+                    sort?: string;
+                    /** @description The specific property to sort by */
+                    sortProperty?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
                 };
                 header: {
                     /** @description Bearer token for authentication */
@@ -1271,6 +2701,16 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
+                    /** @description A free-form sort string or 'relevance' style identifier */
+                    sort?: string;
+                    /** @description The specific property to sort by */
+                    sortProperty?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
                 };
                 header: {
                     /** @description Bearer token for authentication */
