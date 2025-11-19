@@ -28,6 +28,7 @@ import {
   getPreviousComicBookId,
   setComicReadByUser,
   startStreamingComicBookFile,
+  attachThumbnailToComicBook,
 } from "../services/comicbooks.service.ts";
 import camelcasekeys from "camelcase-keys";
 import {
@@ -1188,13 +1189,20 @@ app.openapi(
   const offset = (page - 1) * pageSize;
   const pageIds = comicsInSeries.slice(offset, offset + pageSize);
 
-    // Fetch full metadata for each comic in the page
+    // Fetch full metadata for each comic in the page with thumbnails
     const comicsWithMetadata = await Promise.all(
       pageIds.map(async (comicId) => {
         const data = await fetchComicBookMetadataById(comicId);
-        return data
-          ? camelcasekeys(data, { deep: true })
-          : null;
+        if (!data) return null;
+        
+        const camelData = camelcasekeys(data, { deep: true });
+        // Attach thumbnail URL to the comic book data
+        const comicWithThumbnail = await attachThumbnailToComicBook(comicId);
+        
+        return {
+          ...camelData,
+          thumbnailUrl: comicWithThumbnail?.thumbnailUrl || null,
+        };
       }),
     );
 
