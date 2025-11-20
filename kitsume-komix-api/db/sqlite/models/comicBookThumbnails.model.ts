@@ -77,16 +77,24 @@ export const getThumbnailsByComicBookId = async (
   }
 
   try {
-    // Updated query to handle both generated and custom thumbnails
+    // Query for thumbnails linked to the comic book
+    // Prefer generated thumbnails (actual thumbnail files in cache) over custom ones
     const result = await db
       .select()
       .from(comicBookThumbnails)
       .where(
-        // Get thumbnails directly linked to the comic book OR through covers/pages
         eq(comicBookThumbnails.comic_book_id, comicBookId),
       );
 
-    return result;
+    // Sort to prefer generated thumbnails that look like cache paths
+    const sorted = result.sort((a, b) => {
+      // Thumbnails with hash filenames (cache generated) come first
+      const aIsGenerated = a.file_path?.includes("_thumb.") ? 0 : 1;
+      const bIsGenerated = b.file_path?.includes("_thumb.") ? 0 : 1;
+      return aIsGenerated - bIsGenerated;
+    });
+
+    return sorted.length > 0 ? sorted : null;
   } catch (error) {
     console.error("Error fetching thumbnails by comic book ID:", error);
     throw error;

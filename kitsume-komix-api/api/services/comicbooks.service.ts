@@ -1062,8 +1062,6 @@ export const setComicReadByUser = async (
   }
 };
 
-const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
-
 export const attachThumbnailToComicBook = async (
   comicId: number,
 ): Promise<ComicBookWithThumbnail | null> => {
@@ -1077,7 +1075,7 @@ export const attachThumbnailToComicBook = async (
   const comicWithThumbnail: ComicBookWithThumbnail = {
     ...comic,
     thumbnailUrl: thumbnails && thumbnails.length > 0
-      ? thumbnails[0].file_path.replace(CACHE_DIRECTORY, "/api/image")
+      ? `/api/image/thumbnails/${thumbnails[0].file_path.split("/").pop()}`
       : undefined,
   };
 

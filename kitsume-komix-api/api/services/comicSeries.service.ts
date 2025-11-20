@@ -57,10 +57,7 @@ export const getLatestComicSeriesUserCanAccess = async (
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
       const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(
-        CACHE_DIRECTORY,
-        "/api/image",
-      );
+      seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].file_path.split("/").pop()}`;
       latestSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
       latestSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
@@ -94,10 +91,7 @@ export const getUpdatedComicSeriesUserCanAccess = async (
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
       const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      seriesWithThumbnailUrl.thumbnailUrl = thumbnails[0].file_path.replace(
-        CACHE_DIRECTORY,
-        "/api/image",
-      );
+      seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].file_path.split("/").pop()}`;
       updatedSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
       updatedSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
@@ -142,11 +136,7 @@ export const getSelectedComicSeriesDetails = async (
     comicBooksForCurrentSeriesWithThumbnails &&
     comicBooksForCurrentSeriesWithThumbnails.length > 0
   ) {
-    seriesWithThumbnailUrl.thumbnailUrl =
-      comicBooksForCurrentSeriesWithThumbnails[0].file_path.replace(
-        CACHE_DIRECTORY,
-        "/api/image",
-      );
+    seriesWithThumbnailUrl.thumbnailUrl = comicBooksForCurrentSeriesWithThumbnails[0].thumbnailUrl || undefined;
   }
 
   const seriesWithComicsMetadataAndThumbnail = {
