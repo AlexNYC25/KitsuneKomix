@@ -6,10 +6,14 @@ import type { ComicBooksSeriesResponse } from '../types/comic-books.types'
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({
     comicSeriesData: [] as Array<ComicSeriesWithComics>,
+    comicsInSeriesData: new Map<number, ComicBooksSeriesResponse>(),
   }),
 	getters: {
 		getComicSeriesData(state): Array<ComicSeriesWithComics> {
 			return state.comicSeriesData;
+		},
+		getComicsInSeries: (state) => (seriesId: number): ComicBooksSeriesResponse | undefined => {
+			return state.comicsInSeriesData.get(seriesId);
 		}
 	},
   actions: {
@@ -46,21 +50,26 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 	},
 	async fetchComicsInSeries(seriesId: number, page: number = 1, pageSize: number = 20): Promise<ComicBooksSeriesResponse> {
 		try {
-			const { data, error } = await apiClient.GET('/comic-books/series/:seriesId', {
-				params: {
-					path: {
-						seriesId: String(seriesId)
-					},
-					query: {
-						page,
-						pageSize
-					}
+			// Construct the URL manually since the OpenAPI schema uses :seriesId format
+			const baseUrl = 'http://localhost:8000/api';
+			const url = new URL(`${baseUrl}/comic-books/series/${seriesId}`);
+			url.searchParams.append('page', String(page));
+			url.searchParams.append('pageSize', String(pageSize));
+
+			const response = await fetch(url.toString(), {
+				headers: {
+					'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
 				}
 			});
 
-			if (error || !data) {
-				throw new Error('Failed to fetch comics in series');
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
 			}
+
+			const data = await response.json() as ComicBooksSeriesResponse;
+			
+			// Save to store state
+			this.comicsInSeriesData.set(seriesId, data);
 
 			return data;
 		} catch (err) {
