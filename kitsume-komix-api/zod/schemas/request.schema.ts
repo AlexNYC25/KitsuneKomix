@@ -6,11 +6,11 @@ import { z } from "@hono/zod-openapi";
  * Used in routes that support pagination.
  */
 export const PaginationQuerySchema = z.object({
-  page: z.number().min(1).default(1).openapi({
+  page: z.coerce.number().min(1).default(1).openapi({
     description: "Page number for pagination (default is 1)",
     example: 1,
   }),
-  pageSize: z.number().min(1).max(100).default(20).openapi({
+  pageSize: z.coerce.number().min(1).max(100).default(20).openapi({
     description: "Number of items per page (default is 20, max is 100)",
     example: 20,
   }),
