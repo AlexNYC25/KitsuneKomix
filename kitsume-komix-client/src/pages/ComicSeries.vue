@@ -220,16 +220,33 @@ const toggleViewMode = (mode: 'grid' | 'list') => {
 			</div>
 
 			<!-- List View -->
-			<div v-else-if="viewMode === 'list' && paginatedComics.length > 0" class="space-y-2">
-				<!-- Placeholder list items -->
-				<div v-for="(comic, index) in paginatedComics" :key="index" class="p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer border-l-4 border-cyan-800">
-					<div class="flex items-center justify-between">
-						<div class="flex-1">
-							<p class="font-semibold">Issue {{ comic.issueNumber || 'Unknown' }}</p>
-							<p class="text-sm text-gray-600">Release Date: {{ comic.publicationDate || 'TBD' }} | Pages: {{ comic.pageCount || 'TBD' }}</p>
+			<div v-else-if="viewMode === 'list' && paginatedComics.length > 0" class="space-y-3">
+				<!-- List items -->
+				<div v-for="(comic, index) in paginatedComics" :key="index" class="w-full flex items-start gap-4 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer border-l-4 border-cyan-800">
+					<!-- Thumbnail -->
+					<div class="flex-shrink-0 w-24 h-32 bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
+						<img
+							v-if="comic.thumbnailUrl"
+							:src="`http://localhost:8000${comic.thumbnailUrl}`"
+							:alt="`Issue ${comic.issueNumber}`"
+							class="w-full h-full object-contain"
+						/>
+						<div v-else class="w-full h-full bg-gray-700 flex items-center justify-center">
+							<span class="text-xs text-gray-500">No Image</span>
 						</div>
-						<div class="text-sm text-gray-500">
-							Read Status: Unread
+					</div>
+					
+					<!-- Content -->
+					<div class="flex-1">
+						<div class="flex items-center justify-between">
+							<div>
+								<p class="font-semibold text-lg">Issue {{ comic.issueNumber || 'Unknown' }}</p>
+								<p v-if="comic.title" class="text-sm text-gray-300 mt-1">{{ comic.title }}</p>
+								<p class="text-sm text-gray-400 mt-2">Release Date: {{ comic.publicationDate || 'TBD' }} | Pages: {{ comic.pageCount || 'TBD' }}</p>
+							</div>
+							<div class="text-sm text-gray-400">
+								Read Status: Unread
+							</div>
 						</div>
 					</div>
 				</div>
