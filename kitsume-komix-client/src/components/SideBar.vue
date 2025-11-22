@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { useLibrariesStore } from '@/stores/libraries';
+import { useAuthStore } from '@/stores/auth';
 
 import Button from 'primevue/button';
 import Divider from 'primevue/divider';
 import PanelMenu from 'primevue/panelmenu';
 
+const router = useRouter();
+const authStore = useAuthStore();
 const librariesStore = useLibrariesStore();
 
 const bookmarks = ref([
@@ -22,12 +26,15 @@ const bookmarks = ref([
 const libraries = computed(() => {
   return librariesStore.sidePanelLibraries.map((library) => ({
     label: library.label,
-		items: library.items
+	items: library.items
   }));
 });
-</script>
 
-<template>
+const handleLogout = async () => {
+	authStore.logout();
+	await router.push('/login');
+};
+</script><template>
   <div id="sidebar" class="flex flex-col h-full">
     <div id="sidebar-header">
       <h2 class="text-2xl font-bold mx-2" style="color: var(--p-secondary-color)">
@@ -88,7 +95,7 @@ const libraries = computed(() => {
 						<v-icon name="md-manageaccounts" class="mr-1" />
 					</Button>
 
-					<Button severity="info" class="p-button-text p-button-sm grow" rounded>
+					<Button severity="info" class="p-button-text p-button-sm grow" rounded @click="handleLogout">
 						<v-icon name="md-logout" class="mr-1" />
 					</Button>
 				</div>
