@@ -63,6 +63,10 @@ const toggleViewMode = (mode: 'grid' | 'list') => {
 	currentPage.value = 0;
 };
 
+const hasMetadata = (data: string | undefined): boolean => {
+	return !!data && data.trim().length > 0;
+};
+
 
 </script>
 
@@ -88,45 +92,53 @@ const toggleViewMode = (mode: 'grid' | 'list') => {
 					{{ comicSeriesData?.description }}
 				</div>
 
-				<!-- Metadata Contents -->
-				<div class="comic-series-page-details-contents mt-4">
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Characters'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.characters" 
-					/>
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Teams'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.teams" 
-					/>
-				</div>
+			<!-- Metadata Contents -->
+			<div class="comic-series-page-details-contents mt-4">
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.characters)"
+					:comicMetadataDetailsLabel="'Characters'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.characters" 
+				/>
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.teams)"
+					:comicMetadataDetailsLabel="'Teams'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.teams" 
+				/>
+			</div>
 
-				<!-- Credits -->
-				<div class="comic-series-page-detail-credits mt-4">
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Writers'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.writers" 
-					/>
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Colorists'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.colorists" 
-					/>
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Cover Artists'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.coverArtists" 
-					/>
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Inkers'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.inkers" 
-					/>
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Letterers'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.letterers" 
-					/>
-					<ComicSeriesPageDetails 
-						:comicMetadataDetailsLabel="'Editors'" 
-						:comicMetadataDetails="comicSeriesData?.metadata.editors" 
-					/>
-				</div>
+			<!-- Credits -->
+			<div class="comic-series-page-detail-credits mt-4">
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.writers)"
+					:comicMetadataDetailsLabel="'Writers'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.writers" 
+				/>
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.colorists)"
+					:comicMetadataDetailsLabel="'Colorists'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.colorists" 
+				/>
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.coverArtists)"
+					:comicMetadataDetailsLabel="'Cover Artists'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.coverArtists" 
+				/>
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.inkers)"
+					:comicMetadataDetailsLabel="'Inkers'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.inkers" 
+				/>
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.letterers)"
+					:comicMetadataDetailsLabel="'Letterers'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.letterers" 
+				/>
+				<ComicSeriesPageDetails 
+					v-if="hasMetadata(comicSeriesData?.metadata.editors)"
+					:comicMetadataDetailsLabel="'Editors'" 
+					:comicMetadataDetails="comicSeriesData?.metadata.editors" 
+				/>
+			</div>
 			</div>
 		</div>
 
