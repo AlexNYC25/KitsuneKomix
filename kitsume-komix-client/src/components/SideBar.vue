@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-
 import { useLibrariesStore } from '@/stores/libraries';
 import { useAuthStore } from '@/stores/auth';
-
 import Button from 'primevue/button';
-import Divider from 'primevue/divider';
 import PanelMenu from 'primevue/panelmenu';
 
 const router = useRouter();
@@ -22,7 +19,6 @@ const bookmarks = ref([
 	{ label: 'All Comic Readlists', icon: 'md-librarybooks-sharp' }
 ]);
 
-// Updated computed property to align with the new `libraries` state structure
 const libraries = computed(() => {
   return librariesStore.sidePanelLibraries.map((library) => ({
     label: library.label,
@@ -34,6 +30,11 @@ const handleLogout = async () => {
 	authStore.logout();
 	await router.push('/login');
 };
+
+const userDisplayName = computed(() => {
+	const email = authStore.user?.email;
+	return email ? email.split('@')[0] : 'User';
+});
 </script><template>
   <div id="sidebar" class="flex flex-col h-full">
     <div id="sidebar-header">
@@ -86,9 +87,9 @@ const handleLogout = async () => {
 				<img src="https://www.gravatar.com/avatar?d=mp&s=40" alt="User Avatar" class="rounded-full block" />
 			</div>
 			<div id="sidebar-user-details" class="ml-3 mr-2">
-				<div id="sidebar-user-name" class="font-bold">John Doe</div>
+				<div id="sidebar-user-name" class="font-bold">{{ userDisplayName }}</div>
 				<div id="sidebar-user-email" class="text-sm text-gray-500">
-					johndoe@example.com
+					{{ authStore.user?.email || 'No email' }}
 				</div>
 				<div id="sidebar-user-actions" class="mt-2 flex space-x-2">
 					<Button severity="info" class="p-button-text p-button-sm grow" rounded>
