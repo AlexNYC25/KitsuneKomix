@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useComicSeriesStore } from '@/stores/comic-series';
 import type { ComicBooksSeriesResponse } from '@/types/comic-books.types';
 import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
 import Paginator from 'primevue/paginator';
 import Button from 'primevue/button';
 
+const router = useRouter();
 const comicSeriesStore = useComicSeriesStore();
 const comicSeriesData = ref<any | null>(null);
 const comicsData = ref<ComicBooksSeriesResponse | null>(null);
@@ -67,78 +68,92 @@ const hasMetadata = (data: string | undefined): boolean => {
 	return !!data && data.trim().length > 0;
 };
 
+const navigateToComicBook = (comicBookId: number) => {
+	router.push(`/comic-book/${comicBookId}`);
+};
+
+
 
 </script>
 
 <template>
 	<div class="comic-series-page flex flex-col w-full h-full p-4 overflow-auto">
-		<!-- Series Header -->
-		<div class="comic-series-page-details bg-cyan-800 h-auto w-full rounded-2xl object-cover grid grid-cols-4">
-			<!-- Series Thumbnail -->
-			<div class="comic-series-page-details-thumbnail col-span-1 h-full flex items-center justify-center">
-				<img
-					:src="'http://localhost:8000' + comicSeriesData?.thumbnailUrl || 'https://via.placeholder.com/300x450?text=No+Image'"
-					alt="Comic Series Thumbnail"
-					class="object-contain h-full px-5 py-5"
-				/>
-			</div>
+		<!-- Header -->
+		<div class="flex items-center justify-between mb-6">
+			<h1 class="text-4xl font-bold">{{ comicSeriesData?.name || 'Series' }}</h1>
+			<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" />
+		</div>
 
-			<!-- Series Info -->
-			<div class="comic-series-page-details-info h-full m-6 col-span-3">
-				<div class="comic-series-page-details-title text-shadow-lg font-bold text-4xl">
-					{{ comicSeriesData?.name }}
+		<!-- Series Details with Thumbnail -->
+		<div class="bg-gray-800 rounded-lg p-6 space-y-4 mb-6">
+			<div class="flex gap-6">
+				<!-- Thumbnail -->
+				<div class="flex-shrink-0 w-80 h-auto">
+					<div class="aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
+						<img
+							v-if="comicSeriesData?.thumbnailUrl"
+							:src="'http://localhost:8000' + comicSeriesData.thumbnailUrl"
+							:alt="comicSeriesData?.name || 'Series Thumbnail'"
+							class="w-full h-full object-contain"
+						/>
+						<div v-else class="w-full h-full bg-gray-700 flex items-center justify-center">
+							<span class="text-gray-500">No Image</span>
+						</div>
+					</div>
 				</div>
-				<div class="comic-series-page-details-description mt-4 text-lg">
-					{{ comicSeriesData?.description }}
+
+				<!-- Details -->
+				<div class="flex-1">
+					<div v-if="comicSeriesData?.description" class="mb-4">
+						<p class="text-gray-400 text-sm mb-2">Description</p>
+						<p class="text-gray-300">{{ comicSeriesData.description }}</p>
+					</div>
+
+					<!-- Metadata Contents -->
+					<div v-if="comicSeriesData?.metadata" class="space-y-3 border-t border-gray-700 pt-4">
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.characters)"
+							:comicMetadataDetailsLabel="'Characters'" 
+							:comicMetadataDetails="comicSeriesData.metadata.characters" 
+							:maxVisible="5"
+						/>
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.teams)"
+							:comicMetadataDetailsLabel="'Teams'" 
+							:comicMetadataDetails="comicSeriesData.metadata.teams" 
+						/>
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.writers)"
+							:comicMetadataDetailsLabel="'Writers'" 
+							:comicMetadataDetails="comicSeriesData.metadata.writers" 
+						/>
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.colorists)"
+							:comicMetadataDetailsLabel="'Colorists'" 
+							:comicMetadataDetails="comicSeriesData.metadata.colorists" 
+						/>
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.coverArtists)"
+							:comicMetadataDetailsLabel="'Cover Artists'" 
+							:comicMetadataDetails="comicSeriesData.metadata.coverArtists" 
+						/>
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.inkers)"
+							:comicMetadataDetailsLabel="'Inkers'" 
+							:comicMetadataDetails="comicSeriesData.metadata.inkers" 
+						/>
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.letterers)"
+							:comicMetadataDetailsLabel="'Letterers'" 
+							:comicMetadataDetails="comicSeriesData.metadata.letterers" 
+						/>
+						<ComicSeriesPageDetails 
+							v-if="hasMetadata(comicSeriesData.metadata.editors)"
+							:comicMetadataDetailsLabel="'Editors'" 
+							:comicMetadataDetails="comicSeriesData.metadata.editors" 
+						/>
+					</div>
 				</div>
-
-			<!-- Metadata Contents -->
-			<div class="comic-series-page-details-contents mt-4">
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.characters)"
-					:comicMetadataDetailsLabel="'Characters'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.characters" 
-				/>
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.teams)"
-					:comicMetadataDetailsLabel="'Teams'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.teams" 
-				/>
-			</div>
-
-			<!-- Credits -->
-			<div class="comic-series-page-detail-credits mt-4">
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.writers)"
-					:comicMetadataDetailsLabel="'Writers'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.writers" 
-				/>
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.colorists)"
-					:comicMetadataDetailsLabel="'Colorists'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.colorists" 
-				/>
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.coverArtists)"
-					:comicMetadataDetailsLabel="'Cover Artists'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.coverArtists" 
-				/>
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.inkers)"
-					:comicMetadataDetailsLabel="'Inkers'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.inkers" 
-				/>
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.letterers)"
-					:comicMetadataDetailsLabel="'Letterers'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.letterers" 
-				/>
-				<ComicSeriesPageDetails 
-					v-if="hasMetadata(comicSeriesData?.metadata.editors)"
-					:comicMetadataDetailsLabel="'Editors'" 
-					:comicMetadataDetails="comicSeriesData?.metadata.editors" 
-				/>
-			</div>
 			</div>
 		</div>
 
@@ -177,6 +192,7 @@ const hasMetadata = (data: string | undefined): boolean => {
 						v-for="(comic, index) in paginatedComics" 
 						:key="index"
 						class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+						@click="navigateToComicBook(comic.id)"
 					>
 						<div class="w-full aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
 							<img
@@ -200,6 +216,7 @@ const hasMetadata = (data: string | undefined): boolean => {
 					v-for="(comic, index) in paginatedComics" 
 					:key="index" 
 					class="w-full flex items-start gap-4 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer border-l-4 border-cyan-800"
+					@click="navigateToComicBook(comic.id)"
 				>
 					<!-- Thumbnail -->
 					<div class="flex-shrink-0 w-24 h-32 bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
