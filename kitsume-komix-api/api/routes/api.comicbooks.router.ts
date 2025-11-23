@@ -632,7 +632,8 @@ app.openapi(
 
   const comic: ComicBook | null = await getComicBookById(id);
   if (comic) {
-    return c.json(comic);
+    const camelData = camelcasekeys(comic, { deep: true });
+    return c.json(camelData);
   }
   return c.json({ error: "Comic book not found" }, 404);
 });
@@ -692,7 +693,8 @@ app.openapi(
 
   const metadata = await fetchComicBookMetadataById(id);
   if (metadata) {
-    return c.json(metadata);
+    const camelData = camelcasekeys(metadata, { deep: true });
+    return c.json(camelData);
   }
   return c.json({ error: "Comic book not found" }, 404);
 });
