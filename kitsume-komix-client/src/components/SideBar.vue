@@ -45,7 +45,7 @@ const userDisplayName = computed(() => {
 
 		<div id="sidebar-content" class="flex-1 overflow-y-auto">
 			<div id="sidebar-home-section" class="sidebar-section mb-2 mt-2">
-				<Button variant="text" class="w-full flex !justify-start items-center">
+				<Button variant="text" class="w-full flex !justify-start items-center" @click="router.push('/')">
 					<v-icon name="la-home-solid" class="ml-2"/>
 					<p class="ml-2">
 						Home
