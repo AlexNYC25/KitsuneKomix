@@ -10,6 +10,7 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
 const router = useRouter();
+const route = useRoute();
 const comicSeriesStore = useComicSeriesStore();
 const comicSeriesData = ref<any | null>(null);
 const comicsData = ref<ComicBooksSeriesResponse | null>(null);
@@ -20,7 +21,6 @@ const isLoading = ref(true);
 const activeTab = ref(0);
 
 onMounted(async () => {
-	const route = useRoute();
 	const id = route.params.id;
 	const idStr = Array.isArray(id) ? id[0] : id;
 	const idNum = parseInt(idStr, 10);
@@ -72,7 +72,9 @@ const hasMetadata = (data: string | undefined): boolean => {
 };
 
 const navigateToComicBook = (comicBookId: number) => {
-	router.push(`/comic-book/${comicBookId}`);
+	// Pass series ID in query param so ComicBook page knows which series it came from
+	const seriesId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+	router.push(`/comic-book/${comicBookId}?seriesId=${seriesId}`);
 };
 
 
