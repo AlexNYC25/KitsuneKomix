@@ -5,8 +5,10 @@ import Button from 'primevue/button';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
+import { useBreadcrumbStore } from '@/stores/breadcrumb';
 
 const route = useRoute();
+const breadcrumbStore = useBreadcrumbStore();
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<any | null>(null);
 const thumbnailUrl = ref<string | null>(null);
@@ -35,6 +37,18 @@ onMounted(async () => {
 
 		if (response.ok) {
 			comicBookData.value = await response.json();
+
+			// Get series ID from query params (passed from ComicSeries page)
+			const seriesId = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
+
+			breadcrumbStore.setComicBookData(
+				seriesId,
+				comicBookData.value.title || `Comic Book #${comicBookId.value}`
+			);
+			console.log('Breadcrumb store after update:', {
+				seriesId: breadcrumbStore.comicBookSeriesId,
+				title: breadcrumbStore.comicBookTitle
+			})
 
 			// Fetch thumbnail
 			try {
