@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useComicSeriesStore } from '@/stores/comic-series'
+import { useBreadcrumbStore } from '@/stores/breadcrumb'
 import Breadcrumb from 'primevue/breadcrumb'
 import InputGroup from 'primevue/inputgroup'
 import InputText from 'primevue/inputtext'
@@ -9,6 +10,7 @@ import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const route = useRoute()
 const comicSeriesStore = useComicSeriesStore()
+const breadcrumbStore = useBreadcrumbStore()
 
 const breadcrumbItems = ref<any[]>([])
 
@@ -20,27 +22,6 @@ const getComicSeriesName = async (seriesId: number): Promise<string> => {
 		console.error('Failed to fetch series name:', error)
 	}
 	return 'Comic Series'
-}
-
-const getComicBookTitle = async (bookId: number): Promise<{ title: string; seriesId?: number }> => {
-	try {
-		const response = await fetch(`http://localhost:8000/api/comic-books/${bookId}/metadata`, {
-			headers: {
-				'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
-			}
-		})
-
-		if (response.ok) {
-			const data = await response.json()
-			return {
-				title: data.title || 'Comic Book',
-				seriesId: data.comicSeriesId
-			}
-		}
-	} catch (error) {
-		console.error('Failed to fetch comic book title:', error)
-	}
-	return { title: 'Comic Book' }
 }
 
 const generateBreadcrumbs = async () => {
@@ -67,9 +48,9 @@ const generateBreadcrumbs = async () => {
 	if (route.path.includes('/comic-book')) {
 		const bookId = parseInt(route.params.id as string)
 		if (!isNaN(bookId)) {
-			const { title, seriesId } = await getComicBookTitle(bookId)
-
-			// Add series in breadcrumb if available
+			// Use the series ID from breadcrumb store if available
+			const seriesId = breadcrumbStore.comicBookSeriesId
+			
 			if (seriesId) {
 				const seriesName = await getComicSeriesName(seriesId)
 				items.push({
@@ -80,7 +61,7 @@ const generateBreadcrumbs = async () => {
 			}
 
 			items.push({
-				label: title,
+				label: breadcrumbStore.comicBookTitle || 'Comic Book',
 				icon: 'pi pi-image',
 				to: `/comic-book/${bookId}`
 			})
@@ -90,8 +71,8 @@ const generateBreadcrumbs = async () => {
 	breadcrumbItems.value = items
 }
 
-// Watch route changes
-watch(() => route.path, () => {
+// Watch route changes and breadcrumb store changes
+watch([() => route.path, () => breadcrumbStore.comicBookSeriesId, () => breadcrumbStore.comicBookTitle], () => {
 	generateBreadcrumbs()
 }, { immediate: true })
 </script>
