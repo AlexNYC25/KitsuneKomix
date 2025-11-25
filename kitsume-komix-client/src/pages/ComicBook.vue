@@ -7,6 +7,7 @@ import TabPanel from 'primevue/tabpanel';
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
+import ComicThumbnail from '../components/ComicThumbnail.vue';
 
 const route = useRoute();
 const breadcrumbStore = useBreadcrumbStore();
@@ -104,19 +105,10 @@ const openComicReader = () => {
 			<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 				<div class="flex gap-6">
 					<!-- Thumbnail -->
-					<div class="flex-shrink-0 w-80 h-auto">
-						<div class="aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
-							<img
-								v-if="thumbnailUrl"
-								:src="`http://localhost:8000${thumbnailUrl}`"
-								:alt="comicBookData.title || 'Comic Book Thumbnail'"
-								class="w-full h-full object-contain"
-							/>
-							<div v-else class="w-full h-full bg-gray-700 flex items-center justify-center">
-								<span class="text-gray-500">No Image</span>
-							</div>
-						</div>
-					</div>
+                    <ComicThumbnail
+                        :thumbnailUrl="thumbnailUrl || undefined"
+                        :comicName="comicBookData.title || `Comic Book #${comicBookId}`"
+                    />
 
 					<!-- Details -->
 					<div class="flex-1">
