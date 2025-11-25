@@ -85,7 +85,7 @@ const navigateToComicBook = (comicBookId: number) => {
 	<div class="comic-series-page flex flex-col w-full h-full p-4 overflow-auto">
 		<!-- Header -->
 		<div class="flex items-center justify-between mb-6">
-			<h1 class="text-4xl font-bold">{{ comicSeriesData?.name || 'Series' }}</h1>
+			
 			<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" />
 		</div>
 
@@ -109,6 +109,8 @@ const navigateToComicBook = (comicBookId: number) => {
 
 				<!-- Details -->
 				<div class="flex-1">
+          <h1 class="text-4xl font-bold">{{ comicSeriesData?.name || 'Series' }}</h1>
+          
 					<div v-if="comicSeriesData?.description" class="mb-4">
 						<p class="text-gray-400 text-sm mb-2">Description</p>
 						<p class="text-gray-300">{{ comicSeriesData.description }}</p>
