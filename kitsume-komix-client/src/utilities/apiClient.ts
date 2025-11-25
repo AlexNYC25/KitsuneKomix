@@ -2,10 +2,15 @@ import createClient, { type Middleware } from "openapi-fetch";
 import type { paths } from "@/openapi/openapi-schema";
 
 const apiClientBaseURL = "http://localhost:8000/api";
+const apiRootBaseURL = "http://localhost:8000";
 
 let authToken: string | null = null;
 let refreshToken: string | null = null;
 let onTokenRefresh: (() => Promise<boolean>) | null = null;
+
+export function composeStaticUrl(path: string): string {
+  return `${apiRootBaseURL}${path}`;
+}
 
 export function setAuthToken(token: string | null) {
   authToken = token;
