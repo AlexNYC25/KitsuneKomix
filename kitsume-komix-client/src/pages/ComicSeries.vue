@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { composeStaticUrl } from '@/utilities/apiClient';
 import { useComicSeriesStore } from '@/stores/comic-series';
 import type { ComicBooksSeriesResponse } from '@/types/comic-books.types';
 import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
@@ -8,12 +9,16 @@ import Paginator from 'primevue/paginator';
 import Button from 'primevue/button';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
+import ComicThumbnail from '@/components/ComicThumbnail.vue';
 
 const router = useRouter();
 const route = useRoute();
+
 const comicSeriesStore = useComicSeriesStore();
+
 const comicSeriesData = ref<any | null>(null);
 const comicsData = ref<ComicBooksSeriesResponse | null>(null);
+
 const currentPage = ref(0);
 const itemsPerPage = 25;
 const viewMode = ref<'grid' | 'list'>('grid');
@@ -21,17 +26,20 @@ const isLoading = ref(true);
 const activeTab = ref(0);
 
 onMounted(async () => {
+  // Get series ID from route params
 	const id = route.params.id;
 	const idStr = Array.isArray(id) ? id[0] : id;
 	const idNum = parseInt(idStr, 10);
 
 	if (isNaN(idNum)) return;
 
+  // We lookup series details from the comic series store
 	const lookupResult = await comicSeriesStore.lookupComicSeriesById(idNum);
 	if (lookupResult) {
 		comicSeriesData.value = lookupResult;
 	}
 
+  // we kick off a fetch for comics in this series
 	try {
 		const response = await comicSeriesStore.fetchComicsInSeries(idNum);
 		comicsData.value = response;
@@ -42,6 +50,7 @@ onMounted(async () => {
 	}
 });
 
+// Computed Properties
 const totalComics = computed(() => comicsData.value?.data?.length || 0);
 
 const paginatedComics = computed(() => {
@@ -58,6 +67,7 @@ const paginatedComics = computed(() => {
 	return sorted.slice(start, end);
 });
 
+// Get the year of the first comic issue in the series
 const firstComicYear = computed(() => {
 	if (!comicsData.value?.data || comicsData.value.data.length === 0) return null;
 
@@ -80,17 +90,17 @@ const toggleViewMode = (mode: 'grid' | 'list') => {
 	currentPage.value = 0;
 };
 
+// helper to check if the selected comic series has metadata of a given type
 const hasMetadata = (data: string | undefined): boolean => {
 	return !!data && data.trim().length > 0;
 };
 
+// The function to navigate to a comic book page using the vue router
 const navigateToComicBook = (comicBookId: number) => {
 	// Pass series ID in query param so ComicBook page knows which series it came from
 	const seriesId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
 	router.push(`/comic-book/${comicBookId}?seriesId=${seriesId}`);
 };
-
-
 
 </script>
 
@@ -98,27 +108,17 @@ const navigateToComicBook = (comicBookId: number) => {
 	<div class="comic-series-page flex flex-col w-full h-full p-4 overflow-auto">
 		<!-- Header -->
 		<div class="flex items-center justify-between mb-6">
-			
-			<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" />
+			<Button @click="$router.back()">
+        <v-icon name="io-arrow-back"/>
+        Back
+      </Button>
 		</div>
 
 		<!-- Series Details with Thumbnail -->
 		<div class="bg-gray-800 rounded-lg p-6 space-y-4 mb-6">
 			<div class="flex gap-6">
 				<!-- Thumbnail -->
-				<div class="flex-shrink-0 w-80 h-auto">
-					<div class="aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
-						<img
-							v-if="comicSeriesData?.thumbnailUrl"
-							:src="'http://localhost:8000' + comicSeriesData.thumbnailUrl"
-							:alt="comicSeriesData?.name || 'Series Thumbnail'"
-							class="w-full h-full object-contain"
-						/>
-						<div v-else class="w-full h-full bg-gray-700 flex items-center justify-center">
-							<span class="text-gray-500">No Image</span>
-						</div>
-					</div>
-				</div>
+				<ComicThumbnail :thumbnailUrl="comicSeriesData?.thumbnailUrl" :comicName="comicSeriesData?.name" />
 
 				<!-- Details -->
 				<div class="flex-1">
