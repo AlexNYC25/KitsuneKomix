@@ -58,6 +58,19 @@ const paginatedComics = computed(() => {
 	return sorted.slice(start, end);
 });
 
+const firstComicYear = computed(() => {
+	if (!comicsData.value?.data || comicsData.value.data.length === 0) return null;
+
+	// Sort all comics by issue number to get the first one
+	const sorted = [...comicsData.value.data].sort((a, b) => {
+		const aNum = parseFloat(a.issueNumber ?? '0') || 0;
+		const bNum = parseFloat(b.issueNumber ?? '0') || 0;
+		return aNum - bNum;
+	});
+
+	return sorted[0]?.year || null;
+});
+
 const onPageChange = (event: any) => {
 	currentPage.value = event.page;
 };
@@ -109,8 +122,8 @@ const navigateToComicBook = (comicBookId: number) => {
 
 				<!-- Details -->
 				<div class="flex-1">
-          <h1 class="text-4xl font-bold">{{ comicSeriesData?.name || 'Series' }}</h1>
-          
+          <h1 class="text-4xl font-bold">{{ comicSeriesData?.name || 'Series' }} <span v-if="firstComicYear" class="text-gray-400">({{ firstComicYear }})</span></h1>
+
 					<div v-if="comicSeriesData?.description" class="mb-4">
 						<p class="text-gray-400 text-sm mb-2">Description</p>
 						<p class="text-gray-300">{{ comicSeriesData.description }}</p>
