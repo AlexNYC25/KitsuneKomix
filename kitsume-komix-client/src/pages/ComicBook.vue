@@ -5,10 +5,12 @@ import Button from 'primevue/button';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
+import ComicReader from '../components/ComicReader.vue';
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
 
 const route = useRoute();
 const breadcrumbStore = useBreadcrumbStore();
+const comicReaderRef = ref<InstanceType<typeof ComicReader>>();
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<any | null>(null);
 const thumbnailUrl = ref<string | null>(null);
@@ -77,6 +79,10 @@ onMounted(async () => {
 		isLoading.value = false;
 	}
 });
+
+const openComicReader = () => {
+	comicReaderRef.value?.openReader();
+};
 </script>
 
 <template>
@@ -146,7 +152,13 @@ onMounted(async () => {
 
 						<!-- Actions -->
 						<div class="flex gap-2 mt-6 border-t border-gray-700 pt-4">
-							<Button label="Read Comic" icon="pi pi-book" severity="success" class="flex-1" />
+							<Button 
+								label="Read Comic" 
+								icon="pi pi-book" 
+								severity="success" 
+								class="flex-1"
+								@click="openComicReader"
+							/>
 							<Button label="Mark as Read" icon="pi pi-check" severity="info" class="flex-1" />
 							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1" />
 						</div>
@@ -270,6 +282,14 @@ onMounted(async () => {
 					</div>
 				</TabPanel>
 			</TabView>
+
+			<!-- Comic Reader Modal -->
+			<ComicReader 
+				v-if="comicBookId && comicBookData"
+				ref="comicReaderRef"
+				:comicBookId="comicBookId"
+				:comicTitle="comicBookData.title"
+			/>
 		</div>
 
 		<!-- Error state -->
