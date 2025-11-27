@@ -186,20 +186,22 @@ const navigateToComicBook = (comicBookId: number) => {
 					<div class="flex items-center justify-between mb-6">
 						<h2 class="text-2xl font-bold">Comic Issues</h2>
 						<div class="flex gap-2">
-							<Button 
-								icon="pi pi-th-large"
+							<Button
 								:severity="viewMode === 'grid' ? 'info' : 'secondary'"
 								@click="toggleViewMode('grid')"
 								v-tooltip="'Grid View'"
 								size="small"
-							/>
-							<Button 
-								icon="pi pi-bars"
+							>
+                <v-icon name="io-grid-outline"/>
+              </Button>
+							<Button
 								:severity="viewMode === 'list' ? 'info' : 'secondary'"
 								@click="toggleViewMode('list')"
 								v-tooltip="'List View'"
 								size="small"
-							/>
+							>
+                <v-icon name="io-list"/>
+              </Button>
 						</div>
 					</div>
 
