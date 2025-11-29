@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+
 import Button from 'primevue/button';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
+
+import { useBreadcrumbStore } from '@/stores/breadcrumb';
+
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
-import { useBreadcrumbStore } from '@/stores/breadcrumb';
 import ComicThumbnail from '../components/ComicThumbnail.vue';
 
 const route = useRoute();
+
 const breadcrumbStore = useBreadcrumbStore();
-const comicReaderRef = ref<InstanceType<typeof ComicReader>>();
+
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<any | null>(null);
 const thumbnailUrl = ref<string | null>(null);
+
+const comicReaderRef = ref<InstanceType<typeof ComicReader>>();
 const isLoading = ref(true);
 const activeTab = ref(0);
 
@@ -31,6 +37,7 @@ onMounted(async () => {
 
 	comicBookId.value = idNum;
 
+	// Fetch comic book metadata
 	try {
 		const response = await fetch(`http://localhost:8000/api/comic-books/${idNum}/metadata`, {
 			headers: {
@@ -44,6 +51,7 @@ onMounted(async () => {
 			// Get series ID from query params (passed from ComicSeries page)
 			const seriesId = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
 
+			// TODO: Migrat this to breadcrumb store action
 			breadcrumbStore.setComicBookData(
 				seriesId,
 				comicBookData.value.title || `Comic Book #${comicBookId.value}`
