@@ -56,10 +56,6 @@ onMounted(async () => {
 				seriesId,
 				comicBookData.value.title || `Comic Book #${comicBookId.value}`
 			);
-			console.log('Breadcrumb store after update:', {
-				seriesId: breadcrumbStore.comicBookSeriesId,
-				title: breadcrumbStore.comicBookTitle
-			})
 
 			// Fetch thumbnail
 			try {
