@@ -44,6 +44,7 @@ const loadPageInfo = async () => {
 
 		if (response.ok) {
 			const data = await response.json();
+            console.log(data)
 			totalPages.value = data.totalPages || data.pagesInDb || 0;
 		} else {
 			error.value = 'Failed to load page information';
@@ -75,8 +76,9 @@ const loadPage = async (pageNumber: number) => {
 
 		if (response.ok) {
 			const data = await response.json();
+            console.log(data);
 			if (data.pagePath) {
-				currentImageUrl.value = `http://localhost:8000${data.pagePath}`;
+				currentImageUrl.value = `http://localhost:8000/api/image/comic-book/${data.comicId}/page/${data.pagePath.split('/').pop()}`;
 				currentPage.value = pageNumber;
 			} else {
 				error.value = 'Failed to load page';
