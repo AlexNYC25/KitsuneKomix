@@ -76,7 +76,6 @@ const loadPage = async (pageNumber: number) => {
 
 		if (response.ok) {
 			const data = await response.json();
-            console.log(data);
 			if (data.pagePath) {
 				currentImageUrl.value = `http://localhost:8000/api/image/comic-book/${data.comicId}/page/${data.pagePath.split('/').pop()}`;
 				currentPage.value = pageNumber;
