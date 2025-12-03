@@ -7,7 +7,7 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 
 import { OhVueIcon, addIcons } from "oh-vue-icons";
-import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBackOutline, IoPlayForwardOutline, IoPlaySkipBackOutline, IoPlaySkipForwardOutline } from "oh-vue-icons/icons";
+import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward } from "oh-vue-icons/icons";
 
 import { useAuthStore } from './stores/auth'
 
@@ -21,7 +21,7 @@ const app = createApp(App)
 
 app.use(createPinia())
 
-addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBackOutline, IoPlayForwardOutline, IoPlaySkipBackOutline, IoPlaySkipForwardOutline);
+addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMenubookSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward);
 app.component("v-icon", OhVueIcon);
 
 app.use(PrimeVue, {
