@@ -154,21 +154,23 @@ defineExpose({
 				<!-- Left Controls -->
 				<div class="flex gap-2">
 					<Button
-						icon="pi pi-angle-double-left"
 						:disabled="isFirstPage || isLoading"
 						@click="goToPage(1)"
 						v-tooltip="'First Page'"
 						severity="secondary"
 						size="small"
-					/>
+					>
+						<v-icon name="io-play-skip-back-outline" />
+					</Button>
 					<Button
-						icon="pi pi-angle-left"
 						:disabled="isFirstPage || isLoading"
 						@click="previousPage"
 						v-tooltip="'Previous Page'"
 						severity="secondary"
 						size="small"
-					/>
+					>
+						<v-icon name="io-play-back-outline" />
+					</Button>
 				</div>
 
 				<!-- Page Information and Slider -->
@@ -194,7 +196,9 @@ defineExpose({
 						v-tooltip="'Next Page'"
 						severity="secondary"
 						size="small"
-					/>
+					>
+						<v-icon name="io-play-forward-outline" />
+					</Button>
 					<Button
 						icon="pi pi-angle-double-right"
 						:disabled="isLastPage || isLoading"
@@ -202,7 +206,9 @@ defineExpose({
 						v-tooltip="'Last Page'"
 						severity="secondary"
 						size="small"
-					/>
+					>
+						<v-icon name="io-play-skip-forward-outline" />
+					</Button>
 				</div>
 			</div>
 		</div>
