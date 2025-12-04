@@ -129,6 +129,37 @@ const goToPage = (pageNum: number) => {
 	}
 };
 
+const getInitialAnimationState = () => {
+	// Vertical mode: scroll up effect (slide from bottom)
+	if (scrollDirection.value === 'vertical') {
+		return { y: 100, opacity: 0 };
+	}
+
+	// LTR mode: normal direction
+	if (scrollDirection.value === 'ltr') {
+		if (transitionDirection.value === 'left') {
+			// Going forward (next page) - slide in from right
+			return { x: 100, opacity: 0 };
+		} else {
+			// Going backward (previous page) - slide in from left
+			return { x: -100, opacity: 0 };
+		}
+	}
+
+	// RTL mode: reversed direction
+	if (scrollDirection.value === 'rtl') {
+		if (transitionDirection.value === 'left') {
+			// Going forward (next page) - slide in from left
+			return { x: -100, opacity: 0 };
+		} else {
+			// Going backward (previous page) - slide in from right
+			return { x: 100, opacity: 0 };
+		}
+	}
+
+	return { opacity: 1, x: 0 };
+};
+
 const resetControlsTimeout = () => {
 	showControls.value = true;
 	if (controlsTimeout.value) {
@@ -149,27 +180,46 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 	const scrollAmount = 50;
 
-	switch (event.key) {
-		case 'ArrowUp':
-			event.preventDefault();
-			contentArea.scrollTop -= scrollAmount;
-			break;
-		case 'ArrowDown':
-			event.preventDefault();
-			contentArea.scrollTop += scrollAmount;
-			break;
-		case 'ArrowLeft':
-			event.preventDefault();
-			previousPage();
-			break;
-		case 'ArrowRight':
-			event.preventDefault();
-			nextPage();
-			break;
-		case 'Escape':
-			event.preventDefault();
-			closeReader();
-			break;
+	// In vertical mode: up/down arrows navigate pages
+	if (scrollDirection.value === 'vertical') {
+		switch (event.key) {
+			case 'ArrowUp':
+				event.preventDefault();
+				previousPage();
+				break;
+			case 'ArrowDown':
+				event.preventDefault();
+				nextPage();
+				break;
+			case 'Escape':
+				event.preventDefault();
+				closeReader();
+				break;
+		}
+	} else {
+		// In horizontal modes (ltr/rtl): left/right navigate pages, up/down scroll
+		switch (event.key) {
+			case 'ArrowUp':
+				event.preventDefault();
+				contentArea.scrollTop -= scrollAmount;
+				break;
+			case 'ArrowDown':
+				event.preventDefault();
+				contentArea.scrollTop += scrollAmount;
+				break;
+			case 'ArrowLeft':
+				event.preventDefault();
+				previousPage();
+				break;
+			case 'ArrowRight':
+				event.preventDefault();
+				nextPage();
+				break;
+			case 'Escape':
+				event.preventDefault();
+				closeReader();
+				break;
+		}
 	}
 };
 
@@ -221,9 +271,9 @@ defineExpose({
 					v-if="currentImageUrl"
 					:src="currentImageUrl"
 					:alt="`Page ${currentPage}`"
-					:initial="scrollDirection === 'vertical' ? { opacity: 1, x: 0 } : (transitionDirection === 'left' ? { x: 100, opacity: 0 } : { x: -100, opacity: 0 })"
-					:animate="{ x: 0, opacity: 1 }"
-					:transition="scrollDirection === 'vertical' ? { duration: 0 } : { duration: 0.4, ease: 'easeInOut' }"
+					:initial="getInitialAnimationState()"
+					:animate="{ x: 0, y: 0, opacity: 1 }"
+					:transition="scrollDirection === 'vertical' ? { duration: 0.4, ease: 'easeInOut' } : { duration: 0.4, ease: 'easeInOut' }"
 					:class="fitMode === 'height' ? 'max-w-full max-h-full object-contain' : 'w-full h-auto'"
 					:key="currentPage"
 				/>
