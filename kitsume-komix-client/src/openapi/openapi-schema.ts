@@ -4055,6 +4055,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/image/comic-book/{comicId}/page/{imagePath}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get comic book page image
+         * @description Retrieve a comic book page image from the cache directory.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The ID of the comic book */
+                    comicId: string;
+                    /** @description The name of the page image file */
+                    imagePath: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The comic book page image */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": unknown;
+                        "image/png": unknown;
+                        "image/webp": unknown;
+                    };
+                };
+                /** @description Image not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
