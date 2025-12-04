@@ -124,10 +124,9 @@ defineExpose({
 		:maximizable="true"
 		:style="{ width: '95vw', height: '95vh' }"
 		:breakpoints="{ '960px': '95vw', '640px': '95vw' }"
-		class="comic-reader-dialog"
 		@hide="closeReader"
 	>
-		<div class="comic-reader-container flex flex-col h-full">
+		<div class="flex flex-col h-full min-h-0">
 			<!-- Error Message -->
 			<div v-if="error" class="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded mb-4">
 				{{ error }}
@@ -160,7 +159,7 @@ defineExpose({
 						severity="secondary"
 						size="small"
 					>
-						<v-icon name="io-play-skip-back-outline" />
+						<v-icon name="io-play-skip-back" />
 					</Button>
 					<Button
 						:disabled="isFirstPage || isLoading"
@@ -169,7 +168,7 @@ defineExpose({
 						severity="secondary"
 						size="small"
 					>
-						<v-icon name="io-play-back-outline" />
+						<v-icon name="io-play-back" />
 					</Button>
 				</div>
 
@@ -197,7 +196,7 @@ defineExpose({
 						severity="secondary"
 						size="small"
 					>
-						<v-icon name="io-play-forward-outline" />
+						<v-icon name="io-play-forward" />
 					</Button>
 					<Button
 						icon="pi pi-angle-double-right"
@@ -207,7 +206,7 @@ defineExpose({
 						severity="secondary"
 						size="small"
 					>
-						<v-icon name="io-play-skip-forward-outline" />
+						<v-icon name="io-play-skip-forward" />
 					</Button>
 				</div>
 			</div>
@@ -216,22 +215,24 @@ defineExpose({
 </template>
 
 <style scoped>
-.comic-reader-container {
-	min-height: 0;
-}
-
-:deep(.comic-reader-dialog .p-dialog-content) {
-	padding: 1rem;
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	min-height: 0;
-}
-
+/* Range input styling */
 input[type="range"] {
+	width: 100%;
+	height: 0.5rem;
+	background: #374151;
+	border-radius: 0.5rem;
+	cursor: pointer;
+	accent-color: #3b82f6;
 	-webkit-appearance: none;
+	appearance: none;
 }
 
+input[type="range"]:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
 input[type="range"]::-webkit-slider-thumb {
 	-webkit-appearance: none;
 	appearance: none;
@@ -247,6 +248,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 	background: #2563eb;
 }
 
+/* Firefox */
 input[type="range"]::-moz-range-thumb {
 	width: 1.25rem;
 	height: 1.25rem;
@@ -259,10 +261,5 @@ input[type="range"]::-moz-range-thumb {
 
 input[type="range"]::-moz-range-thumb:hover {
 	background: #2563eb;
-}
-
-input[type="range"]:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
 }
 </style>
