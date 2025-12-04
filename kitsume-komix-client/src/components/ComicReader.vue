@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { ref, computed } from 'vue';
 import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
 
 interface ComicReaderProps {
 	comicBookId: number;
@@ -16,6 +15,10 @@ const totalPages = ref(0);
 const currentImageUrl = ref<string | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
+const scrollDirection = ref<'vertical' | 'ltr' | 'rtl'>('vertical');
+const showControls = ref(true);
+const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const fitMode = ref<'height' | 'width'>('height');
 
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -44,7 +47,6 @@ const loadPageInfo = async () => {
 
 		if (response.ok) {
 			const data = await response.json();
-            console.log(data)
 			totalPages.value = data.totalPages || data.pagesInDb || 0;
 		} else {
 			error.value = 'Failed to load page information';
@@ -111,46 +113,90 @@ const goToPage = (pageNum: number) => {
 	}
 };
 
+const resetControlsTimeout = () => {
+	showControls.value = true;
+	if (controlsTimeout.value) {
+		clearTimeout(controlsTimeout.value);
+	}
+	controlsTimeout.value = setTimeout(() => {
+		showControls.value = false;
+	}, 3000);
+};
+
+const handleMouseMove = () => {
+	resetControlsTimeout();
+};
+
 defineExpose({
 	openReader
 });
 </script>
 
 <template>
-	<Dialog 
-		v-model:visible="isVisible" 
-		:header="comicTitle"
-		:modal="true"
-		:maximizable="true"
-		:style="{ width: '95vw', height: '95vh' }"
-		:breakpoints="{ '960px': '95vw', '640px': '95vw' }"
-		@hide="closeReader"
+	<div 
+		v-if="isVisible"
+		class="fixed inset-0 bg-black z-50 flex flex-col"
+		@mousemove="handleMouseMove"
 	>
-		<div class="flex flex-col h-full min-h-0">
-			<!-- Error Message -->
-			<div v-if="error" class="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded mb-4">
-				{{ error }}
-			</div>
+		<!-- Error Message -->
+		<div v-if="error" class="bg-red-900 border-b border-red-700 text-red-100 px-4 py-3">
+			{{ error }}
+		</div>
 
-			<!-- Main Content Area -->
-			<div class="flex-1 flex items-center justify-center bg-gray-900 rounded-lg overflow-hidden mb-4 min-h-0">
-				<div v-if="isLoading" class="text-gray-400">
-					<p>Loading page...</p>
-				</div>
-				<img 
-					v-else-if="currentImageUrl"
-					:src="currentImageUrl"
-					:alt="`Page ${currentPage}`"
-					class="max-w-full max-h-full object-contain"
-				/>
-				<div v-else class="text-gray-500">
-					<p>No page loaded</p>
-				</div>
+		<!-- Main Content Area -->
+		<div class="flex-1 bg-black overflow-auto" :class="fitMode === 'height' ? 'flex items-center justify-center' : ''">
+			<div v-if="isLoading" class="text-gray-400 flex items-center justify-center w-full h-full">
+				<p>Loading page...</p>
 			</div>
+			<img 
+				v-else-if="currentImageUrl"
+				:src="currentImageUrl"
+				:alt="`Page ${currentPage}`"
+				:class="fitMode === 'height' ? 'max-w-full max-h-full object-contain' : 'w-full h-auto'"
+			/>
+			<div v-else class="text-gray-500 flex items-center justify-center w-full h-full">
+				<p>No page loaded</p>
+			</div>
+		</div>
 
-			<!-- Bottom Controls -->
-			<div class="flex items-center justify-between gap-4 bg-gray-800 p-4 rounded-lg">
-				<!-- Left Controls -->
+		<!-- Top Bar -->
+		<div 
+			class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between transition-all duration-200"
+			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
+		>
+			<span class="text-gray-300 font-semibold">{{ comicTitle }}</span>
+			<Button
+				@click="closeReader"
+				v-tooltip="'Close Reader'"
+				severity="secondary"
+				size="small"
+				rounded
+			>
+				<v-icon name="io-close" />
+			</Button>
+		</div>
+
+		<!-- Bottom Bar -->
+		<div 
+			class="bg-gray-800 border-t border-gray-700 p-4 transition-all duration-200"
+			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
+		>
+			<div class="flex items-center justify-between gap-4">
+				<!-- Page Slider -->
+				<div class="flex-1 flex items-center gap-4">
+					<span class="text-gray-400 whitespace-nowrap text-sm">{{ pageInfo }}</span>
+					<input 
+						type="range" 
+						:min="1" 
+						:max="totalPages" 
+						:value="currentPage"
+						@input="(e) => goToPage(parseInt((e.target as HTMLInputElement).value))"
+						:disabled="isLoading"
+						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+					/>
+				</div>
+
+				<!-- Navigation Buttons -->
 				<div class="flex gap-2">
 					<Button
 						:disabled="isFirstPage || isLoading"
@@ -170,26 +216,7 @@ defineExpose({
 					>
 						<v-icon name="io-play-back" />
 					</Button>
-				</div>
-
-				<!-- Page Information and Slider -->
-				<div class="flex-1 flex items-center gap-4">
-					<span class="text-gray-400 whitespace-nowrap">{{ pageInfo }}</span>
-					<input 
-						type="range" 
-						:min="1" 
-						:max="totalPages" 
-						:value="currentPage"
-						@input="(e) => goToPage(parseInt((e.target as HTMLInputElement).value))"
-						:disabled="isLoading"
-						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-					/>
-				</div>
-
-				<!-- Right Controls -->
-				<div class="flex gap-2">
 					<Button
-						icon="pi pi-angle-right"
 						:disabled="isLastPage || isLoading"
 						@click="nextPage"
 						v-tooltip="'Next Page'"
@@ -199,7 +226,6 @@ defineExpose({
 						<v-icon name="io-play-forward" />
 					</Button>
 					<Button
-						icon="pi pi-angle-double-right"
 						:disabled="isLastPage || isLoading"
 						@click="goToPage(totalPages)"
 						v-tooltip="'Last Page'"
@@ -209,9 +235,62 @@ defineExpose({
 						<v-icon name="io-play-skip-forward" />
 					</Button>
 				</div>
+
+				<!-- Scroll Direction Options -->
+				<div class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
+					<Button
+						:pressed="scrollDirection === 'vertical'"
+						@click="scrollDirection = 'vertical'"
+						v-tooltip="'Vertical Scroll'"
+						severity="secondary"
+						size="small"
+					>
+						<v-icon name="io-caret-down-circle" />
+					</Button>
+					<Button
+						:pressed="scrollDirection === 'ltr'"
+						@click="scrollDirection = 'ltr'"
+						v-tooltip="'Left to Right'"
+						severity="secondary"
+						size="small"
+					>
+						<v-icon name="io-caret-forward-circle" />
+					</Button>
+					<Button
+						:pressed="scrollDirection === 'rtl'"
+						@click="scrollDirection = 'rtl'"
+						v-tooltip="'Right to Left'"
+						severity="secondary"
+						size="small"
+					>
+						<v-icon name="io-caret-back-circle" />
+					</Button>
+				</div>
+
+				<!-- Fit Mode Options -->
+				<div class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
+					<Button
+						:pressed="fitMode === 'height'"
+						@click="fitMode = 'height'"
+						v-tooltip="'Fit Height'"
+						severity="secondary"
+						size="small"
+					>
+						<v-icon name="bi-arrows-expand" />
+					</Button>
+					<Button
+						:pressed="fitMode === 'width'"
+						@click="fitMode = 'width'"
+						v-tooltip="'Fit Width (Zoom)'"
+						severity="secondary"
+						size="small"
+					>
+						<v-icon name="bi-arrows-collapse" />
+					</Button>
+				</div>
 			</div>
 		</div>
-	</Dialog>
+	</div>
 </template>
 
 <style scoped>
