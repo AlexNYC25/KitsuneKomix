@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { motion } from 'motion-v';
 import Button from 'primevue/button';
 
 interface ComicReaderProps {
@@ -15,10 +16,11 @@ const totalPages = ref(0);
 const currentImageUrl = ref<string | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
-const scrollDirection = ref<'vertical' | 'ltr' | 'rtl'>('vertical');
+const scrollDirection = ref<'vertical' | 'ltr' | 'rtl'>('ltr');
 const showControls = ref(true);
 const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const fitMode = ref<'height' | 'width'>('height');
+const transitionDirection = ref<'left' | 'right' | null>(null);
 
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -67,6 +69,13 @@ const loadPage = async (pageNumber: number) => {
 		return;
 	}
 
+	// Determine transition direction BEFORE changing page
+	if (pageNumber > currentPage.value) {
+		transitionDirection.value = 'left';
+	} else if (pageNumber < currentPage.value) {
+		transitionDirection.value = 'right';
+	}
+
 	isLoading.value = true;
 	error.value = null;
 
@@ -84,7 +93,9 @@ const loadPage = async (pageNumber: number) => {
 		if (response.ok) {
 			const data = await response.json();
 			if (data.pagePath) {
-				currentImageUrl.value = `http://localhost:8000/api/image/comic-book/${data.comicId}/page/${data.pagePath.split('/').pop()}`;
+				const newImageUrl = `http://localhost:8000/api/image/comic-book/${data.comicId}/page/${data.pagePath.split('/').pop()}`;
+				
+				currentImageUrl.value = newImageUrl;
 				currentPage.value = pageNumber;
 			} else {
 				error.value = 'Failed to load page';
@@ -182,25 +193,9 @@ defineExpose({
 			{{ error }}
 		</div>
 
-		<!-- Main Content Area -->
-		<div class="flex-1 bg-black overflow-auto" :class="fitMode === 'height' ? 'flex items-center justify-center' : ''" data-comic-content>
-			<div v-if="isLoading" class="text-gray-400 flex items-center justify-center w-full h-full">
-				<p>Loading page...</p>
-			</div>
-			<img 
-				v-else-if="currentImageUrl"
-				:src="currentImageUrl"
-				:alt="`Page ${currentPage}`"
-				:class="fitMode === 'height' ? 'max-w-full max-h-full object-contain' : 'w-full h-auto'"
-			/>
-			<div v-else class="text-gray-500 flex items-center justify-center w-full h-full">
-				<p>No page loaded</p>
-			</div>
-		</div>
-
 		<!-- Top Bar -->
 		<div 
-			class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between transition-all duration-200"
+			class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
 			<span class="text-gray-300 font-semibold">{{ comicTitle }}</span>
@@ -215,9 +210,39 @@ defineExpose({
 			</Button>
 		</div>
 
+		<!-- Main Content Area -->
+		<div class="flex-1 relative w-full overflow-hidden">
+			<div 
+				class="w-full h-full bg-black overflow-auto" 
+				:class="fitMode === 'height' ? 'flex items-center justify-center' : ''" 
+				data-comic-content
+			>
+				<motion.img
+					v-if="currentImageUrl"
+					:src="currentImageUrl"
+					:alt="`Page ${currentPage}`"
+					:initial="scrollDirection === 'vertical' ? { opacity: 1, x: 0 } : (transitionDirection === 'left' ? { x: 100, opacity: 0 } : { x: -100, opacity: 0 })"
+					:animate="{ x: 0, opacity: 1 }"
+					:transition="scrollDirection === 'vertical' ? { duration: 0 } : { duration: 0.4, ease: 'easeInOut' }"
+					:class="fitMode === 'height' ? 'max-w-full max-h-full object-contain' : 'w-full h-auto'"
+					:key="currentPage"
+				/>
+				<div v-else-if="!isLoading" class="text-gray-500 flex items-center justify-center w-full h-full">
+					<p>No page loaded</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Loading Indicator (Overlay) -->
+		<div v-if="isLoading && !currentImageUrl" class="fixed inset-0 flex items-center justify-center pointer-events-none z-40">
+			<div class="text-gray-400 text-center">
+				<p>Loading page...</p>
+			</div>
+		</div>
+
 		<!-- Bottom Bar -->
 		<div 
-			class="bg-gray-800 border-t border-gray-700 p-4 transition-all duration-200"
+			class="bg-gray-800 border-t border-gray-700 p-4 transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
 			<div class="flex items-center justify-between gap-4">
@@ -281,7 +306,7 @@ defineExpose({
 						:pressed="scrollDirection === 'vertical'"
 						@click="scrollDirection = 'vertical'"
 						v-tooltip="'Vertical Scroll'"
-						severity="secondary"
+						:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
 						size="small"
 					>
 						<v-icon name="io-caret-down-circle" />
@@ -290,7 +315,7 @@ defineExpose({
 						:pressed="scrollDirection === 'ltr'"
 						@click="scrollDirection = 'ltr'"
 						v-tooltip="'Left to Right'"
-						severity="secondary"
+						:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
 						size="small"
 					>
 						<v-icon name="io-caret-forward-circle" />
@@ -299,7 +324,7 @@ defineExpose({
 						:pressed="scrollDirection === 'rtl'"
 						@click="scrollDirection = 'rtl'"
 						v-tooltip="'Right to Left'"
-						severity="secondary"
+						:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
 						size="small"
 					>
 						<v-icon name="io-caret-back-circle" />
@@ -312,7 +337,7 @@ defineExpose({
 						:pressed="fitMode === 'height'"
 						@click="fitMode = 'height'"
 						v-tooltip="'Fit Height'"
-						severity="secondary"
+						:severity="fitMode === 'height' ? 'info' : 'secondary'"
 						size="small"
 					>
 						<v-icon name="bi-arrows-expand" />
@@ -321,7 +346,7 @@ defineExpose({
 						:pressed="fitMode === 'width'"
 						@click="fitMode = 'width'"
 						v-tooltip="'Fit Width (Zoom)'"
-						severity="secondary"
+						:severity="fitMode === 'width' ? 'info' : 'secondary'"
 						size="small"
 					>
 						<v-icon name="bi-arrows-collapse" />
