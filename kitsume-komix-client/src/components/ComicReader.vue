@@ -28,6 +28,11 @@ const openReader = async () => {
 	isVisible.value = true;
 	await loadPageInfo();
 	await loadPage(1);
+	// Focus the container after page loads
+	setTimeout(() => {
+		const container = document.querySelector('[data-comic-reader]') as HTMLElement;
+		if (container) container.focus();
+	}, 0);
 };
 
 const closeReader = () => {
@@ -127,6 +132,36 @@ const handleMouseMove = () => {
 	resetControlsTimeout();
 };
 
+const handleKeyDown = (event: KeyboardEvent) => {
+	const contentArea = document.querySelector('[data-comic-content]') as HTMLElement;
+	if (!contentArea) return;
+
+	const scrollAmount = 50;
+
+	switch (event.key) {
+		case 'ArrowUp':
+			event.preventDefault();
+			contentArea.scrollTop -= scrollAmount;
+			break;
+		case 'ArrowDown':
+			event.preventDefault();
+			contentArea.scrollTop += scrollAmount;
+			break;
+		case 'ArrowLeft':
+			event.preventDefault();
+			previousPage();
+			break;
+		case 'ArrowRight':
+			event.preventDefault();
+			nextPage();
+			break;
+		case 'Escape':
+			event.preventDefault();
+			closeReader();
+			break;
+	}
+};
+
 defineExpose({
 	openReader
 });
@@ -135,8 +170,12 @@ defineExpose({
 <template>
 	<div 
 		v-if="isVisible"
-		class="fixed inset-0 bg-black z-50 flex flex-col"
+		class="fixed inset-0 bg-black z-50 flex flex-col outline-none"
 		@mousemove="handleMouseMove"
+		@keydown="handleKeyDown"
+		tabindex="0"
+		autofocus
+		data-comic-reader
 	>
 		<!-- Error Message -->
 		<div v-if="error" class="bg-red-900 border-b border-red-700 text-red-100 px-4 py-3">
@@ -144,7 +183,7 @@ defineExpose({
 		</div>
 
 		<!-- Main Content Area -->
-		<div class="flex-1 bg-black overflow-auto" :class="fitMode === 'height' ? 'flex items-center justify-center' : ''">
+		<div class="flex-1 bg-black overflow-auto" :class="fitMode === 'height' ? 'flex items-center justify-center' : ''" data-comic-content>
 			<div v-if="isLoading" class="text-gray-400 flex items-center justify-center w-full h-full">
 				<p>Loading page...</p>
 			</div>
@@ -294,6 +333,11 @@ defineExpose({
 </template>
 
 <style scoped>
+/* Remove focus outline */
+div[tabindex]:focus {
+	outline: none;
+}
+
 /* Range input styling */
 input[type="range"] {
 	width: 100%;
