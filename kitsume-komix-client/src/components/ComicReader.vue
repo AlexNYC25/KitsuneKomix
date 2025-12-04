@@ -25,6 +25,7 @@ const transitionDirection = ref<'left' | 'right' | null>(null);
 const webtoonPages = ref<{ pageNumber: number; imageUrl: string }[]>([]);
 const isLoadingWebtoon = ref(false);
 const webtoonImageWidth = ref(100); // Width percentage for webtoon mode images
+const singlePageImageWidth = ref(100); // Width percentage for single page mode (fit-width)
 
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -328,14 +329,27 @@ defineExpose({
 				:class="fitMode === 'height' ? 'flex items-center justify-center' : ''" 
 				data-comic-content
 			>
+				<div v-if="fitMode === 'width'" class="w-full flex justify-center py-4">
+					<motion.img
+						v-if="currentImageUrl"
+						:src="currentImageUrl"
+						:alt="`Page ${currentPage}`"
+						:initial="getInitialAnimationState()"
+						:animate="{ x: 0, y: 0, opacity: 1 }"
+						:transition="scrollDirection === 'vertical' ? { duration: 0.4, ease: 'easeInOut' } : { duration: 0.4, ease: 'easeInOut' }"
+						class="object-contain"
+						:style="{ width: `${singlePageImageWidth}%`, height: 'auto' }"
+						:key="currentPage"
+					/>
+				</div>
 				<motion.img
-					v-if="currentImageUrl"
+					v-else-if="currentImageUrl"
 					:src="currentImageUrl"
 					:alt="`Page ${currentPage}`"
 					:initial="getInitialAnimationState()"
 					:animate="{ x: 0, y: 0, opacity: 1 }"
 					:transition="scrollDirection === 'vertical' ? { duration: 0.4, ease: 'easeInOut' } : { duration: 0.4, ease: 'easeInOut' }"
-					:class="fitMode === 'height' ? 'max-w-full max-h-full object-contain' : 'w-full h-auto'"
+					class="max-w-full max-h-full object-contain"
 					:key="currentPage"
 				/>
 				<div v-else-if="!isLoading" class="text-gray-500 flex items-center justify-center w-full h-full">
@@ -378,6 +392,40 @@ defineExpose({
 			</div>
 		</div>
 
+		<!-- Width Slider Bar (Appears when needed) -->
+		<div 
+			class="bg-gray-800 border-t border-gray-700 p-4 transition-all duration-200 flex-shrink-0"
+			:class="showControls && ((readingMode === 'webtoon') || (readingMode === 'single' && fitMode === 'width')) ? 'opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden p-0'"
+		>
+			<div class="flex items-center gap-4">
+				<!-- Webtoon Width Slider -->
+				<div v-if="readingMode === 'webtoon'" class="flex-1 flex items-center gap-4">
+					<span class="text-gray-400 whitespace-nowrap text-sm">Width: {{ webtoonImageWidth }}%</span>
+					<input 
+						type="range" 
+						:min="20" 
+						:max="100" 
+						:value="webtoonImageWidth"
+						@input="(e) => webtoonImageWidth = parseInt((e.target as HTMLInputElement).value)"
+						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+					/>
+				</div>
+
+				<!-- Single Page Width Slider (Fit-Width Mode) -->
+				<div v-if="readingMode === 'single' && fitMode === 'width'" class="flex-1 flex items-center gap-4">
+					<span class="text-gray-400 whitespace-nowrap text-sm">Width: {{ singlePageImageWidth }}%</span>
+					<input 
+						type="range" 
+						:min="30" 
+						:max="100" 
+						:value="singlePageImageWidth"
+						@input="(e) => singlePageImageWidth = parseInt((e.target as HTMLInputElement).value)"
+						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+					/>
+				</div>
+			</div>
+		</div>
+
 		<!-- Bottom Bar -->
 		<div 
 			class="bg-gray-800 border-t border-gray-700 p-4 transition-all duration-200 flex-shrink-0"
@@ -394,19 +442,6 @@ defineExpose({
 						:value="currentPage"
 						@input="(e) => goToPage(parseInt((e.target as HTMLInputElement).value))"
 						:disabled="isLoading"
-						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-					/>
-				</div>
-
-				<!-- Webtoon Width Slider (Visible in Webtoon Mode) -->
-				<div v-if="readingMode === 'webtoon'" class="flex-1 flex items-center gap-4">
-					<span class="text-gray-400 whitespace-nowrap text-sm">Width: {{ webtoonImageWidth }}%</span>
-					<input 
-						type="range" 
-						:min="20" 
-						:max="100" 
-						:value="webtoonImageWidth"
-						@input="(e) => webtoonImageWidth = parseInt((e.target as HTMLInputElement).value)"
 						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
 					/>
 				</div>
