@@ -17,10 +17,14 @@ const currentImageUrl = ref<string | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const scrollDirection = ref<'vertical' | 'ltr' | 'rtl'>('ltr');
+const readingMode = ref<'single' | 'webtoon'>('single');
 const showControls = ref(true);
 const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const fitMode = ref<'height' | 'width'>('height');
 const transitionDirection = ref<'left' | 'right' | null>(null);
+const webtoonPages = ref<{ pageNumber: number; imageUrl: string }[]>([]);
+const isLoadingWebtoon = ref(false);
+const webtoonImageWidth = ref(100); // Width percentage for webtoon mode images
 
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -42,6 +46,7 @@ const closeReader = () => {
 	currentPage.value = 1;
 	currentImageUrl.value = null;
 	error.value = null;
+	webtoonPages.value = [];
 };
 
 const loadPageInfo = async () => {
@@ -160,6 +165,43 @@ const getInitialAnimationState = () => {
 	return { opacity: 1, x: 0 };
 };
 
+const loadWebtoonPages = async () => {
+	isLoadingWebtoon.value = true;
+	webtoonPages.value = [];
+	error.value = null;
+
+	try {
+		for (let pageNum = 1; pageNum <= totalPages.value; pageNum++) {
+			try {
+				const response = await fetch(
+					`http://localhost:8000/api/comic-books/${props.comicBookId}/stream/${pageNum}`,
+					{
+						headers: {
+							'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+							'Accept': 'image/webp,image/jpeg,image/*'
+						}
+					}
+				);
+
+				if (response.ok) {
+					const data = await response.json();
+					if (data.pagePath) {
+						const imageUrl = `http://localhost:8000/api/image/comic-book/${data.comicId}/page/${data.pagePath.split('/').pop()}`;
+						webtoonPages.value.push({ pageNumber: pageNum, imageUrl });
+					}
+				}
+			} catch (err) {
+				console.error(`Error loading webtoon page ${pageNum}:`, err);
+			}
+		}
+	} catch (err) {
+		console.error('Error loading webtoon mode:', err);
+		error.value = 'Error loading webtoon mode';
+	} finally {
+		isLoadingWebtoon.value = false;
+	}
+};
+
 const resetControlsTimeout = () => {
 	showControls.value = true;
 	if (controlsTimeout.value) {
@@ -180,8 +222,25 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 	const scrollAmount = 50;
 
+	// In webtoon mode: up/down arrows scroll
+	if (readingMode.value === 'webtoon') {
+		switch (event.key) {
+			case 'ArrowUp':
+				event.preventDefault();
+				contentArea.scrollTop -= scrollAmount;
+				break;
+			case 'ArrowDown':
+				event.preventDefault();
+				contentArea.scrollTop += scrollAmount;
+				break;
+			case 'Escape':
+				event.preventDefault();
+				closeReader();
+				break;
+		}
+	}
 	// In vertical mode: up/down arrows navigate pages
-	if (scrollDirection.value === 'vertical') {
+	else if (scrollDirection.value === 'vertical') {
 		switch (event.key) {
 			case 'ArrowUp':
 				event.preventDefault();
@@ -262,7 +321,9 @@ defineExpose({
 
 		<!-- Main Content Area -->
 		<div class="flex-1 relative w-full overflow-hidden">
+			<!-- Single Page Mode -->
 			<div 
+				v-if="readingMode === 'single'"
 				class="w-full h-full bg-black overflow-auto" 
 				:class="fitMode === 'height' ? 'flex items-center justify-center' : ''" 
 				data-comic-content
@@ -281,6 +342,33 @@ defineExpose({
 					<p>No page loaded</p>
 				</div>
 			</div>
+
+			<!-- Webtoon Mode -->
+			<div
+				v-else
+				class="w-full h-full bg-black overflow-auto flex flex-col items-center py-4"
+				data-comic-content
+			>
+				<div v-if="isLoadingWebtoon" class="flex items-center justify-center w-full h-full">
+					<p class="text-gray-400">Loading webtoon mode...</p>
+				</div>
+				<template v-else>
+					<motion.img
+						v-for="page in webtoonPages"
+						:key="`webtoon-${page.pageNumber}`"
+						:src="page.imageUrl"
+						:alt="`Page ${page.pageNumber}`"
+						:initial="{ opacity: 0 }"
+						:animate="{ opacity: 1 }"
+						:transition="{ duration: 0.3, ease: 'easeInOut' }"
+						:style="{ width: `${webtoonImageWidth}%` }"
+						class="mb-4 object-contain"
+					/>
+					<div v-if="webtoonPages.length === 0" class="text-gray-500 flex items-center justify-center w-full h-full">
+						<p>No pages loaded</p>
+					</div>
+				</template>
+			</div>
 		</div>
 
 		<!-- Loading Indicator (Overlay) -->
@@ -296,8 +384,8 @@ defineExpose({
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
 			<div class="flex items-center justify-between gap-4">
-				<!-- Page Slider -->
-				<div class="flex-1 flex items-center gap-4">
+				<!-- Page Slider (Hidden in Webtoon Mode) -->
+				<div v-if="readingMode === 'single'" class="flex-1 flex items-center gap-4">
 					<span class="text-gray-400 whitespace-nowrap text-sm">{{ pageInfo }}</span>
 					<input 
 						type="range" 
@@ -310,8 +398,21 @@ defineExpose({
 					/>
 				</div>
 
-				<!-- Navigation Buttons -->
-				<div class="flex gap-2">
+				<!-- Webtoon Width Slider (Visible in Webtoon Mode) -->
+				<div v-if="readingMode === 'webtoon'" class="flex-1 flex items-center gap-4">
+					<span class="text-gray-400 whitespace-nowrap text-sm">Width: {{ webtoonImageWidth }}%</span>
+					<input 
+						type="range" 
+						:min="20" 
+						:max="100" 
+						:value="webtoonImageWidth"
+						@input="(e) => webtoonImageWidth = parseInt((e.target as HTMLInputElement).value)"
+						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+					/>
+				</div>
+
+				<!-- Navigation Buttons (Hidden in Webtoon Mode) -->
+				<div v-if="readingMode === 'single'" class="flex gap-2">
 					<Button
 						:disabled="isFirstPage || isLoading"
 						@click="goToPage(1)"
@@ -350,8 +451,8 @@ defineExpose({
 					</Button>
 				</div>
 
-				<!-- Scroll Direction Options -->
-				<div class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
+				<!-- Scroll Direction Options (Hidden in Webtoon Mode) -->
+				<div v-if="readingMode === 'single'" class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
 					<Button
 						:pressed="scrollDirection === 'vertical'"
 						@click="scrollDirection = 'vertical'"
@@ -381,8 +482,30 @@ defineExpose({
 					</Button>
 				</div>
 
-				<!-- Fit Mode Options -->
+				<!-- Reading Mode Options -->
 				<div class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
+					<Button
+						:pressed="readingMode === 'single'"
+						@click="readingMode = 'single'"
+						v-tooltip="'Single Page Mode'"
+						:severity="readingMode === 'single' ? 'info' : 'secondary'"
+						size="small"
+					>
+						<v-icon name="md-menubook-sharp" />
+					</Button>
+					<Button
+						:pressed="readingMode === 'webtoon'"
+						@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
+						v-tooltip="'Webtoon Mode'"
+						:severity="readingMode === 'webtoon' ? 'info' : 'secondary'"
+						size="small"
+					>
+						<v-icon name="io-library-sharp" />
+					</Button>
+				</div>
+
+				<!-- Fit Mode Options (Hidden in Webtoon Mode) -->
+				<div v-if="readingMode === 'single'" class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
 					<Button
 						:pressed="fitMode === 'height'"
 						@click="fitMode = 'height'"
