@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { motion } from 'motion-v';
 import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
 
 interface ComicReaderProps {
 	comicBookId: number;
@@ -26,6 +27,7 @@ const webtoonPages = ref<{ pageNumber: number; imageUrl: string }[]>([]);
 const isLoadingWebtoon = ref(false);
 const webtoonImageWidth = ref(100); // Width percentage for webtoon mode images
 const singlePageImageWidth = ref(100); // Width percentage for single page mode (fit-width)
+const showSettings = ref(false); // Settings dialog visibility
 
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
 const isFirstPage = computed(() => currentPage.value === 1);
@@ -309,15 +311,26 @@ defineExpose({
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
 			<span class="text-gray-300 font-semibold">{{ comicTitle }}</span>
-			<Button
-				@click="closeReader"
-				v-tooltip="'Close Reader'"
-				severity="secondary"
-				size="small"
-				rounded
-			>
-				<v-icon name="io-close" />
-			</Button>
+			<div class="flex gap-2">
+				<Button
+					@click="showSettings = true"
+					v-tooltip="'Settings'"
+					severity="secondary"
+					size="small"
+					rounded
+				>
+					<v-icon name="io-settings-sharp" />
+				</Button>
+				<Button
+					@click="closeReader"
+					v-tooltip="'Close Reader'"
+					severity="secondary"
+					size="small"
+					rounded
+				>
+					<v-icon name="io-close" />
+				</Button>
+			</div>
 		</div>
 
 		<!-- Main Content Area -->
@@ -394,13 +407,13 @@ defineExpose({
 
 		<!-- Width Slider Bar (Appears when needed) -->
 		<div 
-			class="bg-gray-800 border-t border-gray-700 p-4 transition-all duration-200 flex-shrink-0"
-			:class="showControls && ((readingMode === 'webtoon') || (readingMode === 'single' && fitMode === 'width')) ? 'opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden p-0'"
+			class="bg-gray-800 border-t border-gray-700 px-3 py-2 transition-all duration-200 flex-shrink-0"
+			:class="showControls && readingMode === 'webtoon' ? 'opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
-			<div class="flex items-center gap-4">
+			<div class="flex items-center gap-2 md:gap-4">
 				<!-- Webtoon Width Slider -->
-				<div v-if="readingMode === 'webtoon'" class="flex-1 flex items-center gap-4">
-					<span class="text-gray-400 whitespace-nowrap text-sm">Width: {{ webtoonImageWidth }}%</span>
+				<div v-if="readingMode === 'webtoon'" class="flex-1 flex items-center gap-2 md:gap-3">
+					<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">W:</span>
 					<input 
 						type="range" 
 						:min="20" 
@@ -409,32 +422,44 @@ defineExpose({
 						@input="(e) => webtoonImageWidth = parseInt((e.target as HTMLInputElement).value)"
 						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
 					/>
-				</div>
-
-				<!-- Single Page Width Slider (Fit-Width Mode) -->
-				<div v-if="readingMode === 'single' && fitMode === 'width'" class="flex-1 flex items-center gap-4">
-					<span class="text-gray-400 whitespace-nowrap text-sm">Width: {{ singlePageImageWidth }}%</span>
-					<input 
-						type="range" 
-						:min="30" 
-						:max="100" 
-						:value="singlePageImageWidth"
-						@input="(e) => singlePageImageWidth = parseInt((e.target as HTMLInputElement).value)"
-						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-					/>
+					<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">{{ webtoonImageWidth }}%</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Bottom Bar -->
 		<div 
-			class="bg-gray-800 border-t border-gray-700 p-4 transition-all duration-200 flex-shrink-0"
+			class="bg-gray-800 border-t border-gray-700 px-3 py-2 transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
-			<div class="flex items-center justify-between gap-4">
-				<!-- Page Slider (Hidden in Webtoon Mode) -->
-				<div v-if="readingMode === 'single'" class="flex-1 flex items-center gap-4">
-					<span class="text-gray-400 whitespace-nowrap text-sm">{{ pageInfo }}</span>
+			<div v-if="readingMode === 'single'" class="flex items-center gap-2 md:gap-3">
+				<!-- First Page Button -->
+				<Button
+					:disabled="isFirstPage || isLoading"
+					@click="goToPage(1)"
+					v-tooltip="'First Page'"
+					severity="secondary"
+					size="small"
+					class="flex-shrink-0"
+				>
+					<v-icon name="io-play-skip-back" />
+				</Button>
+
+				<!-- Previous Page Button -->
+				<Button
+					:disabled="isFirstPage || isLoading"
+					@click="previousPage"
+					v-tooltip="'Previous Page'"
+					severity="secondary"
+					size="small"
+					class="flex-shrink-0"
+				>
+					<v-icon name="io-play-back" />
+				</Button>
+
+				<!-- Page Slider -->
+				<div class="flex-1 flex items-center gap-2">
+					<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">{{ pageInfo }}</span>
 					<input 
 						type="range" 
 						:min="1" 
@@ -446,122 +471,153 @@ defineExpose({
 					/>
 				</div>
 
-				<!-- Navigation Buttons (Hidden in Webtoon Mode) -->
-				<div v-if="readingMode === 'single'" class="flex gap-2">
-					<Button
-						:disabled="isFirstPage || isLoading"
-						@click="goToPage(1)"
-						v-tooltip="'First Page'"
-						severity="secondary"
-						size="small"
-					>
-						<v-icon name="io-play-skip-back" />
-					</Button>
-					<Button
-						:disabled="isFirstPage || isLoading"
-						@click="previousPage"
-						v-tooltip="'Previous Page'"
-						severity="secondary"
-						size="small"
-					>
-						<v-icon name="io-play-back" />
-					</Button>
-					<Button
-						:disabled="isLastPage || isLoading"
-						@click="nextPage"
-						v-tooltip="'Next Page'"
-						severity="secondary"
-						size="small"
-					>
-						<v-icon name="io-play-forward" />
-					</Button>
-					<Button
-						:disabled="isLastPage || isLoading"
-						@click="goToPage(totalPages)"
-						v-tooltip="'Last Page'"
-						severity="secondary"
-						size="small"
-					>
-						<v-icon name="io-play-skip-forward" />
-					</Button>
-				</div>
+				<!-- Next Page Button -->
+				<Button
+					:disabled="isLastPage || isLoading"
+					@click="nextPage"
+					v-tooltip="'Next Page'"
+					severity="secondary"
+					size="small"
+					class="flex-shrink-0"
+				>
+					<v-icon name="io-play-forward" />
+				</Button>
 
-				<!-- Scroll Direction Options (Hidden in Webtoon Mode) -->
-				<div v-if="readingMode === 'single'" class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
-					<Button
-						:pressed="scrollDirection === 'vertical'"
-						@click="scrollDirection = 'vertical'"
-						v-tooltip="'Vertical Scroll'"
-						:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
-						size="small"
-					>
-						<v-icon name="io-caret-down-circle" />
-					</Button>
-					<Button
-						:pressed="scrollDirection === 'ltr'"
-						@click="scrollDirection = 'ltr'"
-						v-tooltip="'Left to Right'"
-						:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
-						size="small"
-					>
-						<v-icon name="io-caret-forward-circle" />
-					</Button>
-					<Button
-						:pressed="scrollDirection === 'rtl'"
-						@click="scrollDirection = 'rtl'"
-						v-tooltip="'Right to Left'"
-						:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
-						size="small"
-					>
-						<v-icon name="io-caret-back-circle" />
-					</Button>
-				</div>
-
-				<!-- Reading Mode Options -->
-				<div class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
-					<Button
-						:pressed="readingMode === 'single'"
-						@click="readingMode = 'single'"
-						v-tooltip="'Single Page Mode'"
-						:severity="readingMode === 'single' ? 'info' : 'secondary'"
-						size="small"
-					>
-						<v-icon name="md-menubook-sharp" />
-					</Button>
-					<Button
-						:pressed="readingMode === 'webtoon'"
-						@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
-						v-tooltip="'Webtoon Mode'"
-						:severity="readingMode === 'webtoon' ? 'info' : 'secondary'"
-						size="small"
-					>
-						<v-icon name="io-library-sharp" />
-					</Button>
-				</div>
-
-				<!-- Fit Mode Options (Hidden in Webtoon Mode) -->
-				<div v-if="readingMode === 'single'" class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
-					<Button
-						:pressed="fitMode === 'height'"
-						@click="fitMode = 'height'"
-						v-tooltip="'Fit Height'"
-						:severity="fitMode === 'height' ? 'info' : 'secondary'"
-						size="small"
-					>
-						<v-icon name="bi-arrows-expand" />
-					</Button>
-					<Button
-						:pressed="fitMode === 'width'"
-						@click="fitMode = 'width'"
-						v-tooltip="'Fit Width (Zoom)'"
-						:severity="fitMode === 'width' ? 'info' : 'secondary'"
-						size="small"
-					>
-						<v-icon name="bi-arrows-collapse" />
-					</Button>
-				</div>
+				<!-- Last Page Button -->
+				<Button
+					:disabled="isLastPage || isLoading"
+					@click="goToPage(totalPages)"
+					v-tooltip="'Last Page'"
+					severity="secondary"
+					size="small"
+					class="flex-shrink-0"
+				>
+					<v-icon name="io-play-skip-forward" />
+				</Button>
 			</div>
 		</div>
+
+		<!-- Settings Dialog -->
+		<Dialog
+			v-model:visible="showSettings"
+			modal
+			header="Reader Settings"
+			:style="{ width: '90vw', maxWidth: '500px' }"
+			class="p-dialog-header-light"
+		>
+			<div class="flex flex-col gap-4">
+				<!-- Scroll Direction Section (Single Mode Only) -->
+				<div v-if="readingMode === 'single'" class="flex flex-col gap-2">
+					<h3 class="text-sm font-semibold text-gray-300">Scroll Direction</h3>
+					<div class="flex gap-2">
+						<Button
+							:pressed="scrollDirection === 'vertical'"
+							@click="scrollDirection = 'vertical'"
+							v-tooltip="'Vertical'"
+							:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
+							size="small"
+							class="flex-1"
+						>
+							<v-icon name="io-caret-down-circle" />
+						</Button>
+						<Button
+							:pressed="scrollDirection === 'ltr'"
+							@click="scrollDirection = 'ltr'"
+							v-tooltip="'LTR'"
+							:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
+							size="small"
+							class="flex-1"
+						>
+							<v-icon name="io-caret-forward-circle" />
+						</Button>
+						<Button
+							:pressed="scrollDirection === 'rtl'"
+							@click="scrollDirection = 'rtl'"
+							v-tooltip="'RTL'"
+							:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
+							size="small"
+							class="flex-1"
+						>
+							<v-icon name="io-caret-back-circle" />
+						</Button>
+					</div>
+				</div>
+
+				<!-- Reading Mode Section -->
+				<div class="flex flex-col gap-2 border-t border-gray-600 pt-4">
+					<h3 class="text-sm font-semibold text-gray-300">Reading Mode</h3>
+					<div class="flex gap-2">
+						<Button
+							:pressed="readingMode === 'single'"
+							@click="readingMode = 'single'"
+							v-tooltip.top="'Single Page Mode'"
+							:severity="readingMode === 'single' ? 'info' : 'secondary'"
+							size="small"
+							class="flex-1"
+						>
+							<v-icon name="io-book" />
+						</Button>
+						<Button
+							:pressed="readingMode === 'webtoon'"
+							@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
+							v-tooltip.top="'Webtoon'"
+							:severity="readingMode === 'webtoon' ? 'info' : 'secondary'"
+							size="small"
+							class="flex-1"
+						>
+							<v-icon name="io-document" />
+						</Button>
+					</div>
+				</div>
+
+				<!-- Display Mode Section (Single Mode Only) -->
+				<div v-if="readingMode === 'single'" class="flex flex-col gap-2 border-t border-gray-600 pt-4">
+					<h3 class="text-sm font-semibold text-gray-300">Display Mode</h3>
+					<p class="text-xs text-gray-400 mb-2">
+						{{ fitMode === 'height' ? 'Fit Height: Entire image visible in viewport' : 'Fit Width: Image fills width, scroll vertically' }}
+					</p>
+					<div class="flex gap-2">
+						<Button
+							:pressed="fitMode === 'height'"
+							@click="fitMode = 'height'"
+							v-tooltip="'Fit Height - Entire image visible'"
+							:severity="fitMode === 'height' ? 'info' : 'secondary'"
+							size="small"
+							class="flex-1"
+						>
+							<v-icon name="bi-arrows-expand" />
+						</Button>
+						<Button
+							:pressed="fitMode === 'width'"
+							@click="fitMode = 'width'"
+							v-tooltip="'Fit Width - Scroll vertically'"
+							:severity="fitMode === 'width' ? 'info' : 'secondary'"
+							size="small"
+							class="flex-1"
+						>
+							<v-icon name="bi-arrows-collapse" />
+						</Button>
+					</div>
+				</div>
+
+				<!-- Zoom Slider Section (Single Mode Only) -->
+				<div v-if="readingMode === 'single' && fitMode === 'width'" class="flex flex-col gap-2 border-t border-gray-600 pt-4">
+					<h3 class="text-sm font-semibold text-gray-300">Zoom Level</h3>
+					<div class="flex items-center gap-3">
+						<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">30%</span>
+						<input 
+							type="range" 
+							:min="30" 
+							:max="100" 
+							:value="singlePageImageWidth"
+							@input="(e) => singlePageImageWidth = parseInt((e.target as HTMLInputElement).value)"
+							class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+						/>
+						<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">{{ singlePageImageWidth }}%</span>
+					</div>
+				</div>
+			</div>
+		</Dialog>
 	</div>
 </template>
 
