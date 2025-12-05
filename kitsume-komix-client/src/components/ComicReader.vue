@@ -311,10 +311,12 @@ defineExpose({
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
 			<span class="text-gray-300 font-semibold">{{ comicTitle }}</span>
+
+			<!-- Top Bar Buttons -->
 			<div class="flex gap-2">
 				<Button
 					@click="showSettings = true"
-					v-tooltip="'Settings'"
+					v-tooltip.left="{value: 'Settings', showDelay: 750}"
 					severity="secondary"
 					size="small"
 					rounded
@@ -323,7 +325,7 @@ defineExpose({
 				</Button>
 				<Button
 					@click="closeReader"
-					v-tooltip="'Close Reader'"
+					v-tooltip.left="{value: 'Close Reader', showDelay: 750}"
 					severity="secondary"
 					size="small"
 					rounded
@@ -437,7 +439,7 @@ defineExpose({
 				<Button
 					:disabled="isFirstPage || isLoading"
 					@click="goToPage(1)"
-					v-tooltip="'First Page'"
+					v-tooltip.top="'First Page'"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -449,7 +451,7 @@ defineExpose({
 				<Button
 					:disabled="isFirstPage || isLoading"
 					@click="previousPage"
-					v-tooltip="'Previous Page'"
+					v-tooltip.top="'Previous Page'"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -475,7 +477,7 @@ defineExpose({
 				<Button
 					:disabled="isLastPage || isLoading"
 					@click="nextPage"
-					v-tooltip="'Next Page'"
+					v-tooltip.top="'Next Page'"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -487,7 +489,7 @@ defineExpose({
 				<Button
 					:disabled="isLastPage || isLoading"
 					@click="goToPage(totalPages)"
-					v-tooltip="'Last Page'"
+					v-tooltip.top="'Last Page'"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -513,7 +515,7 @@ defineExpose({
 						<Button
 							:pressed="scrollDirection === 'vertical'"
 							@click="scrollDirection = 'vertical'"
-							v-tooltip="'Vertical'"
+							v-tooltip.top="'Vertical'"
 							:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -523,7 +525,7 @@ defineExpose({
 						<Button
 							:pressed="scrollDirection === 'ltr'"
 							@click="scrollDirection = 'ltr'"
-							v-tooltip="'LTR'"
+							v-tooltip.top="'LTR'"
 							:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -533,7 +535,7 @@ defineExpose({
 						<Button
 							:pressed="scrollDirection === 'rtl'"
 							@click="scrollDirection = 'rtl'"
-							v-tooltip="'RTL'"
+							v-tooltip.top="'RTL'"
 							:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -580,7 +582,7 @@ defineExpose({
 						<Button
 							:pressed="fitMode === 'height'"
 							@click="fitMode = 'height'"
-							v-tooltip="'Fit Height - Entire image visible'"
+							v-tooltip.top="'Fit Height - Entire image visible'"
 							:severity="fitMode === 'height' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -590,7 +592,7 @@ defineExpose({
 						<Button
 							:pressed="fitMode === 'width'"
 							@click="fitMode = 'width'"
-							v-tooltip="'Fit Width - Scroll vertically'"
+							v-tooltip.top="'Fit Width - Scroll vertically'"
 							:severity="fitMode === 'width' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
