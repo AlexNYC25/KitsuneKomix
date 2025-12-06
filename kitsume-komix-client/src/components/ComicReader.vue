@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { motion } from 'motion-v';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
+import Skeleton from 'primevue/skeleton';
 
 interface ComicReaderProps {
 	comicBookId: number;
@@ -11,24 +12,37 @@ interface ComicReaderProps {
 
 const props = defineProps<ComicReaderProps>();
 
+// Comic Reader top boolean, used to show/hide the reader
 const isVisible = ref(false);
+
+const error = ref<string | null>(null);
+
+// single page mode state
+const isLoading = ref(false);
 const currentPage = ref(1);
 const totalPages = ref(0);
 const currentImageUrl = ref<string | null>(null);
-const isLoading = ref(false);
-const error = ref<string | null>(null);
-const scrollDirection = ref<'vertical' | 'ltr' | 'rtl'>('ltr');
-const readingMode = ref<'single' | 'webtoon'>('single');
-const showControls = ref(true);
-const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const singlePageImageWidth = ref(100);
+
+// webtoon mode state
+const isLoadingWebtoon = ref(false);
+const webtoonPages = ref<{ pageNumber: number; imageUrl: string }[]>([]);
+const webtoonImageWidth = ref(100); // Width percentage for webtoon mode images
+
+// show settings dialog
+const showSettings = ref(false);
+
+// actual reader settings
 const fitMode = ref<'height' | 'width'>('height');
 const transitionDirection = ref<'left' | 'right' | null>(null);
-const webtoonPages = ref<{ pageNumber: number; imageUrl: string }[]>([]);
-const isLoadingWebtoon = ref(false);
-const webtoonImageWidth = ref(100); // Width percentage for webtoon mode images
-const singlePageImageWidth = ref(100); // Width percentage for single page mode (fit-width)
-const showSettings = ref(false); // Settings dialog visibility
+const scrollDirection = ref<'vertical' | 'ltr' | 'rtl'>('ltr');
+const readingMode = ref<'single' | 'webtoon'>('single');
 
+// used to show/hide controls displayed as the top and bottom bars
+const showControls = ref(true);
+const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+
+// computed properties
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
 const isFirstPage = computed(() => currentPage.value === 1);
 const isLastPage = computed(() => currentPage.value === totalPages.value);
@@ -288,6 +302,23 @@ const handleKeyDown = (event: KeyboardEvent) => {
 defineExpose({
 	openReader
 });
+
+// Utilities
+const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { value: string; showDelay: number } => {
+	let delay = 500;
+	switch (type) {
+		case 'low':
+			delay = 500;
+			break;
+		case 'medium':
+			delay = 750;
+			break;
+		case 'high':
+			delay = 1000;
+			break;
+	}
+	return { value: msg, showDelay: delay };
+}
 </script>
 
 <template>
@@ -316,7 +347,7 @@ defineExpose({
 			<div class="flex gap-2">
 				<Button
 					@click="showSettings = true"
-					v-tooltip.left="{value: 'Settings', showDelay: 750}"
+					v-tooltip.left="generateTooltipDelay('Reader Settings', 'medium')"
 					severity="secondary"
 					size="small"
 					rounded
@@ -325,7 +356,7 @@ defineExpose({
 				</Button>
 				<Button
 					@click="closeReader"
-					v-tooltip.left="{value: 'Close Reader', showDelay: 750}"
+					v-tooltip.left="generateTooltipDelay('Close Reader', 'medium')"
 					severity="secondary"
 					size="small"
 					rounded
@@ -338,6 +369,7 @@ defineExpose({
 		<!-- Main Content Area -->
 		<div class="flex-1 relative w-full overflow-hidden">
 			<!-- Navigation Click Zones -->
+
 			<!-- Horizontal Scroll Directions (LTR/RTL): Left/Right Zones -->
 			<template v-if="readingMode === 'single' && scrollDirection !== 'vertical'">
 				<!-- Left Click Zone (Previous Page) -->
@@ -437,12 +469,10 @@ defineExpose({
 
 		<!-- Loading Indicator (Overlay) -->
 		<div v-if="isLoading && !currentImageUrl" class="fixed inset-0 flex items-center justify-center pointer-events-none z-40">
-			<div class="text-gray-400 text-center">
-				<p>Loading page...</p>
-			</div>
+			<Skeleton width="60vh" height="90vh" />
 		</div>
 
-		<!-- Width Slider Bar (Appears when needed) -->
+		<!-- Width Slider Bar (Appears when only in webtoon mode) -->
 		<div 
 			class="bg-gray-800 border-t border-gray-700 px-3 py-2 transition-all duration-200 flex-shrink-0"
 			:class="showControls && readingMode === 'webtoon' ? 'opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden p-0'"
@@ -474,7 +504,7 @@ defineExpose({
 				<Button
 					:disabled="isFirstPage || isLoading"
 					@click="goToPage(1)"
-					v-tooltip.top="'First Page'"
+					v-tooltip.top="generateTooltipDelay('First Page', 'high')"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -486,7 +516,7 @@ defineExpose({
 				<Button
 					:disabled="isFirstPage || isLoading"
 					@click="previousPage"
-					v-tooltip.top="'Previous Page'"
+					v-tooltip.top="generateTooltipDelay('Previous Page', 'high')"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -512,7 +542,7 @@ defineExpose({
 				<Button
 					:disabled="isLastPage || isLoading"
 					@click="nextPage"
-					v-tooltip.top="'Next Page'"
+					v-tooltip.top="generateTooltipDelay('Next Page', 'high')"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -524,7 +554,7 @@ defineExpose({
 				<Button
 					:disabled="isLastPage || isLoading"
 					@click="goToPage(totalPages)"
-					v-tooltip.top="'Last Page'"
+					v-tooltip.top="generateTooltipDelay('Last Page', 'high')"
 					severity="secondary"
 					size="small"
 					class="flex-shrink-0"
@@ -550,7 +580,7 @@ defineExpose({
 						<Button
 							:pressed="scrollDirection === 'vertical'"
 							@click="scrollDirection = 'vertical'"
-							v-tooltip.top="'Vertical'"
+							v-tooltip.top="generateTooltipDelay('Vertical', 'medium')"
 							:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -560,7 +590,7 @@ defineExpose({
 						<Button
 							:pressed="scrollDirection === 'ltr'"
 							@click="scrollDirection = 'ltr'"
-							v-tooltip.top="'LTR'"
+							v-tooltip.top="generateTooltipDelay('LTR', 'medium')"
 							:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -570,7 +600,7 @@ defineExpose({
 						<Button
 							:pressed="scrollDirection === 'rtl'"
 							@click="scrollDirection = 'rtl'"
-							v-tooltip.top="'RTL'"
+							v-tooltip.top="generateTooltipDelay('RTL', 'medium')"
 							:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -587,7 +617,7 @@ defineExpose({
 						<Button
 							:pressed="readingMode === 'single'"
 							@click="readingMode = 'single'"
-							v-tooltip.top="'Single Page Mode'"
+							v-tooltip.top="generateTooltipDelay('Single Page Mode', 'medium')"
 							:severity="readingMode === 'single' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
@@ -597,7 +627,7 @@ defineExpose({
 						<Button
 							:pressed="readingMode === 'webtoon'"
 							@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
-							v-tooltip.top="'Webtoon'"
+							v-tooltip.top="generateTooltipDelay('Webtoon Mode', 'medium')"
 							:severity="readingMode === 'webtoon' ? 'info' : 'secondary'"
 							size="small"
 							class="flex-1"
