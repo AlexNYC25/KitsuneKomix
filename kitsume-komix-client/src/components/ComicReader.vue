@@ -337,6 +337,41 @@ defineExpose({
 
 		<!-- Main Content Area -->
 		<div class="flex-1 relative w-full overflow-hidden">
+			<!-- Navigation Click Zones -->
+			<!-- Horizontal Scroll Directions (LTR/RTL): Left/Right Zones -->
+			<template v-if="readingMode === 'single' && scrollDirection !== 'vertical'">
+				<!-- Left Click Zone (Previous Page) -->
+				<div
+					class="absolute left-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10"
+					@click="previousPage"
+					:class="isFirstPage ? 'cursor-not-allowed' : ''"
+				/>
+
+				<!-- Right Click Zone (Next Page) -->
+				<div
+					class="absolute right-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10"
+					@click="nextPage"
+					:class="isLastPage ? 'cursor-not-allowed' : ''"
+				/>
+			</template>
+
+			<!-- Vertical Scroll Direction: Top/Bottom Zones -->
+			<template v-if="readingMode === 'single' && scrollDirection === 'vertical'">
+				<!-- Top Click Zone (Previous Page) -->
+				<div
+					class="absolute top-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10"
+					@click="previousPage"
+					:class="isFirstPage ? 'cursor-not-allowed' : ''"
+				/>
+
+				<!-- Bottom Click Zone (Next Page) -->
+				<div
+					class="absolute bottom-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10"
+					@click="nextPage"
+					:class="isLastPage ? 'cursor-not-allowed' : ''"
+				/>
+			</template>
+
 			<!-- Single Page Mode -->
 			<div 
 				v-if="readingMode === 'single'"
