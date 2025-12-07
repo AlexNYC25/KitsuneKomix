@@ -7,7 +7,12 @@ import Skeleton from 'primevue/skeleton';
 
 interface ComicReaderProps {
 	comicBookId: number;
-	comicTitle: string;
+	comicBookData?: {
+		id: number;
+		title: string;
+		seriesId: number;
+		seriesName: string;
+	};
 }
 
 const props = defineProps<ComicReaderProps>();
@@ -341,7 +346,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
-			<span class="text-gray-300 font-semibold">{{ comicTitle }}</span>
+			<span class="text-gray-300 font-semibold">{{ comicBookData?.title || 'Comic Reader' }}</span>
 
 			<!-- Top Bar Buttons -->
 			<div class="flex gap-2">

@@ -285,6 +285,7 @@ const openComicReader = () => {
 				ref="comicReaderRef"
 				:comicBookId="comicBookId"
 				:comicTitle="comicBookData.title"
+				:comicBookData="comicBookData"
 			/>
 		</div>
 
