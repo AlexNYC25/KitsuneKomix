@@ -40,7 +40,7 @@ import {
 } from "../../types/index.ts";
 // ComicBookWithMetadata is re-exported via ../../types/index.ts if needed
 import type { AppEnv } from "../../types/index.ts";
-import { ComicBooksResponseSchema, FlexibleResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { ComicBooksResponseSchema, FlexibleResponseSchema, ComicBookMetadataResponseSchema } from "../../zod/schemas/response.schema.ts";
 import { PaginationQuerySchema, ComicBookUpdateSchema } from "../../zod/schemas/request.schema.ts";
 
 const app = new OpenAPIHono<AppEnv>();
@@ -644,7 +644,7 @@ app.openapi(
  *
  * This should return a single comic book with its full metadata by its ID
  * @param id - The ID of the comic book to retrieve
- * @return JSON object of the comic book with its full metadata
+ * @return JSON object of the comic book with its full metadata or null
  */
 app.openapi(
   createRoute({
@@ -665,7 +665,7 @@ app.openapi(
     200: {
       content: {
         "application/json": {
-          schema: FlexibleResponseSchema,
+          schema: ComicBookMetadataResponseSchema,
         },
       },
       description: "Comic book metadata retrieved successfully",
