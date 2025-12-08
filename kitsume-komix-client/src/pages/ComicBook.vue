@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import Button from 'primevue/button';
@@ -91,6 +91,16 @@ onMounted(async () => {
 const openComicReader = () => {
 	comicReaderRef.value?.openReader();
 };
+
+const comicBookHeading = computed(() => {
+	if (comicBookData.value) {
+		if (comicBookData.value.issueNumber && comicBookData.value.title) {
+			return `Issue Number #${comicBookData.value.issueNumber} - ${comicBookData.value.title}`;
+		}
+		return `Issue Number #${comicBookData.value.issueNumber}`;
+	}
+	return 'Comic Book';
+});
 </script>
 
 <template>
@@ -104,7 +114,7 @@ const openComicReader = () => {
 		<div v-else-if="comicBookData" class="space-y-6">
 			<!-- Header -->
 			<div class="flex items-center justify-between">
-				<h1 class="text-4xl font-bold">{{`Issue Number #${comicBookData.issueNumber} - ${comicBookData.title}`}}</h1>
+				<h1 class="text-4xl font-bold">{{ comicBookHeading }}</h1>
 				<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" />
 			</div>
 
@@ -255,7 +265,7 @@ const openComicReader = () => {
 
 			<!-- Comic Reader Modal -->
 			<ComicReader v-if="comicBookId && comicBookData" ref="comicReaderRef" :comicBookId="comicBookId"
-				:comicTitle="comicBookData.title" :comicBookData="comicBookData" />
+				:comicTitle="comicBookHeading" :comicBookData="comicBookData" />
 		</div>
 
 		<!-- Error state -->
