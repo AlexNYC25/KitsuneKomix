@@ -4,15 +4,12 @@ import { motion } from 'motion-v';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Skeleton from 'primevue/skeleton';
+import type { ComicBookMetadata } from '@/types/comic-books.types';
 
 interface ComicReaderProps {
 	comicBookId: number;
-	comicBookData?: {
-		id: number;
-		title: string;
-		seriesId: number;
-		seriesName: string;
-	};
+	comicTitle: string;
+	comicBookData?: ComicBookMetadata;
 }
 
 const props = defineProps<ComicReaderProps>();

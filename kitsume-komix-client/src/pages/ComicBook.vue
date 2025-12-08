@@ -7,6 +7,7 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
+import type { ComicBookMetadata } from '@/types/comic-books.types';
 
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
@@ -17,7 +18,7 @@ const route = useRoute();
 const breadcrumbStore = useBreadcrumbStore();
 
 const comicBookId = ref<number | null>(null);
-const comicBookData = ref<any | null>(null);
+const comicBookData = ref<ComicBookMetadata | null>(null);
 const thumbnailUrl = ref<string | null>(null);
 
 const comicReaderRef = ref<InstanceType<typeof ComicReader>>();
@@ -52,10 +53,12 @@ onMounted(async () => {
 			const seriesId = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
 
 			// TODO: Migrat this to breadcrumb store action
-			breadcrumbStore.setComicBookData(
-				seriesId,
-				comicBookData.value.title || `Comic Book #${comicBookId.value}`
-			);
+			if (comicBookData.value) {
+				breadcrumbStore.setComicBookData(
+					seriesId,
+					comicBookData.value.title || `Comic Book #${comicBookId.value}`
+				);
+			}
 
 			// Fetch thumbnail
 			try {
@@ -101,7 +104,7 @@ const openComicReader = () => {
 		<div v-else-if="comicBookData" class="space-y-6">
 			<!-- Header -->
 			<div class="flex items-center justify-between">
-				<h1 class="text-4xl font-bold">{{ comicBookData.title || `Comic Book #${comicBookId}` }}</h1>
+				<h1 class="text-4xl font-bold">{{`Issue Number #${comicBookData.issueNumber} - ${comicBookData.title}`}}</h1>
 				<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" />
 			</div>
 
@@ -109,10 +112,8 @@ const openComicReader = () => {
 			<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 				<div class="flex gap-6">
 					<!-- Thumbnail -->
-                    <ComicThumbnail
-                        :thumbnailUrl="thumbnailUrl || undefined"
-                        :comicName="comicBookData.title || `Comic Book #${comicBookId}`"
-                    />
+					<ComicThumbnail :thumbnailUrl="thumbnailUrl || undefined"
+						:comicName="comicBookData.title || `Comic Book #${comicBookId}`" />
 
 					<!-- Details -->
 					<div class="flex-1">
@@ -148,13 +149,7 @@ const openComicReader = () => {
 
 						<!-- Actions -->
 						<div class="flex gap-2 mt-6 border-t border-gray-700 pt-4">
-							<Button 
-								label="Read Comic" 
-								icon="pi pi-book" 
-								severity="success" 
-								class="flex-1"
-								@click="openComicReader"
-							/>
+							<Button label="Read Comic" icon="pi pi-book" severity="success" class="flex-1" @click="openComicReader" />
 							<Button label="Mark as Read" icon="pi pi-check" severity="info" class="flex-1" />
 							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1" />
 						</div>
@@ -170,96 +165,67 @@ const openComicReader = () => {
 						<!-- Credits Section -->
 						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Credits</h2>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.writers && comicBookData.writers.length > 0"
-								comicMetadataDetailsLabel="Writers"
-								:comicMetadataDetails="comicBookData.writers.map((w: any) => w.name || w).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.pencillers && comicBookData.pencillers.length > 0"
-								comicMetadataDetailsLabel="Pencillers"
-								:comicMetadataDetails="comicBookData.pencillers.map((p: any) => p.name || p).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.inkers && comicBookData.inkers.length > 0"
-								comicMetadataDetailsLabel="Inkers"
-								:comicMetadataDetails="comicBookData.inkers.map((i: any) => i.name || i).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.letterers && comicBookData.letterers.length > 0"
-								comicMetadataDetailsLabel="Letterers"
-								:comicMetadataDetails="comicBookData.letterers.map((l: any) => l.name || l).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.colorists && comicBookData.colorists.length > 0"
-								comicMetadataDetailsLabel="Colorists"
-								:comicMetadataDetails="comicBookData.colorists.map((c: any) => c.name || c).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.editors && comicBookData.editors.length > 0"
-								comicMetadataDetailsLabel="Editors"
-								:comicMetadataDetails="comicBookData.editors.map((e: any) => e.name || e).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.coverArtists && comicBookData.coverArtists.length > 0"
-								comicMetadataDetailsLabel="Cover Artists"
-								:comicMetadataDetails="comicBookData.coverArtists.map((ca: any) => ca.name || ca).join(', ')"
-							/>
+						<ComicSeriesPageDetails v-if="comicBookData.writers && comicBookData.writers.length > 0"
+							comicMetadataDetailsLabel="Writers"
+							:comicMetadataDetails="comicBookData.writers.map((w) => w.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.pencillers && comicBookData.pencillers.length > 0"
+							comicMetadataDetailsLabel="Pencillers"
+							:comicMetadataDetails="comicBookData.pencillers.map((p) => p.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.inkers && comicBookData.inkers.length > 0"
+							comicMetadataDetailsLabel="Inkers"
+							:comicMetadataDetails="comicBookData.inkers.map((i) => i.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.letterers && comicBookData.letterers.length > 0"
+							comicMetadataDetailsLabel="Letterers"
+							:comicMetadataDetails="comicBookData.letterers.map((l) => l.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.colorists && comicBookData.colorists.length > 0"
+							comicMetadataDetailsLabel="Colorists"
+							:comicMetadataDetails="comicBookData.colorists.map((c) => c.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.editors && comicBookData.editors.length > 0"
+							comicMetadataDetailsLabel="Editors"
+							:comicMetadataDetails="comicBookData.editors.map((e) => e.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.coverArtists && comicBookData.coverArtists.length > 0"
+							comicMetadataDetailsLabel="Cover Artists"
+							:comicMetadataDetails="comicBookData.coverArtists.map((ca) => ca.name).join(', ')" />
 						</div>
 
 						<!-- Publishing Section -->
 						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Publishing</h2>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.publishers && comicBookData.publishers.length > 0"
-								comicMetadataDetailsLabel="Publishers"
-								:comicMetadataDetails="comicBookData.publishers.map((p: any) => p.name || p).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.imprints && comicBookData.imprints.length > 0"
-								comicMetadataDetailsLabel="Imprints"
-								:comicMetadataDetails="comicBookData.imprints.map((i: any) => i.name || i).join(', ')"
-							/>
+						<ComicSeriesPageDetails v-if="comicBookData.publishers && comicBookData.publishers.length > 0"
+							comicMetadataDetailsLabel="Publishers"
+							:comicMetadataDetails="comicBookData.publishers.map((p) => p.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.imprints && comicBookData.imprints.length > 0"
+							comicMetadataDetailsLabel="Imprints"
+							:comicMetadataDetails="comicBookData.imprints.map((i) => i.name).join(', ')" />
 						</div>
 
 						<!-- Content Section -->
 						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Content</h2>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.genres && comicBookData.genres.length > 0"
-								comicMetadataDetailsLabel="Genres"
-								:comicMetadataDetails="comicBookData.genres.map((g: any) => g.name || g).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.characters && comicBookData.characters.length > 0"
-								comicMetadataDetailsLabel="Characters"
-								:comicMetadataDetails="comicBookData.characters.map((c: any) => c.name || c).join(', ')"
-								:maxVisible="8"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.teams && comicBookData.teams.length > 0"
-								comicMetadataDetailsLabel="Teams"
-								:comicMetadataDetails="comicBookData.teams.map((t: any) => t.name || t).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.locations && comicBookData.locations.length > 0"
-								comicMetadataDetailsLabel="Locations"
-								:comicMetadataDetails="comicBookData.locations.map((l: any) => l.name || l).join(', ')"
-							/>
-							<ComicSeriesPageDetails
-								v-if="comicBookData.storyArcs && comicBookData.storyArcs.length > 0"
-								comicMetadataDetailsLabel="Story Arcs"
-								:comicMetadataDetails="comicBookData.storyArcs.map((sa: any) => sa.name || sa).join(', ')"
-							/>
+						<ComicSeriesPageDetails v-if="comicBookData.genres && comicBookData.genres.length > 0"
+							comicMetadataDetailsLabel="Genres"
+							:comicMetadataDetails="comicBookData.genres.map((g) => g.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.characters && comicBookData.characters.length > 0"
+							comicMetadataDetailsLabel="Characters"
+							:comicMetadataDetails="comicBookData.characters.map((c) => c.name).join(', ')"
+							:maxVisible="8" />
+						<ComicSeriesPageDetails v-if="comicBookData.teams && comicBookData.teams.length > 0"
+							comicMetadataDetailsLabel="Teams"
+							:comicMetadataDetails="comicBookData.teams.map((t) => t.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.locations && comicBookData.locations.length > 0"
+							comicMetadataDetailsLabel="Locations"
+							:comicMetadataDetails="comicBookData.locations.map((l) => l.name).join(', ')" />
+						<ComicSeriesPageDetails v-if="comicBookData.storyArcs && comicBookData.storyArcs.length > 0"
+							comicMetadataDetailsLabel="Story Arcs"
+							:comicMetadataDetails="comicBookData.storyArcs.map((sa) => sa.name).join(', ')" />
 						</div>
 
 						<!-- Series Groups Section -->
-						<div v-if="comicBookData.seriesGroups && comicBookData.seriesGroups.length > 0" class="bg-gray-800 rounded-lg p-6 space-y-4">
+						<div v-if="comicBookData.seriesGroups && comicBookData.seriesGroups.length > 0"
+							class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Series Groups</h2>
-							<ComicSeriesPageDetails
-								comicMetadataDetailsLabel="Groups"
-								:comicMetadataDetails="comicBookData.seriesGroups.map((sg: any) => sg.name || sg).join(', ')"
-							/>
+						<ComicSeriesPageDetails comicMetadataDetailsLabel="Groups"
+							:comicMetadataDetails="comicBookData.seriesGroups.map((sg) => sg.name).join(', ')" />
 						</div>
 					</div>
 				</TabPanel>
@@ -280,13 +246,8 @@ const openComicReader = () => {
 			</TabView>
 
 			<!-- Comic Reader Modal -->
-			<ComicReader 
-				v-if="comicBookId && comicBookData"
-				ref="comicReaderRef"
-				:comicBookId="comicBookId"
-				:comicTitle="comicBookData.title"
-				:comicBookData="comicBookData"
-			/>
+			<ComicReader v-if="comicBookId && comicBookData" ref="comicReaderRef" :comicBookId="comicBookId"
+				:comicTitle="comicBookData.title" :comicBookData="comicBookData" />
 		</div>
 
 		<!-- Error state -->
@@ -296,5 +257,4 @@ const openComicReader = () => {
 	</div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
