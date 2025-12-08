@@ -1612,7 +1612,148 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": {
+                            id: number;
+                            libraryId: number;
+                            filePath: string;
+                            hash: string;
+                            title: string | null;
+                            series: string | null;
+                            issueNumber: string | null;
+                            count: number | null;
+                            volume: string | null;
+                            alternateSeries: string | null;
+                            alternateIssueNumber: string | null;
+                            alternateCount: number | null;
+                            pageCount: number | null;
+                            fileSize: number | null;
+                            summary: string | null;
+                            notes: string | null;
+                            year: number | null;
+                            month: number | null;
+                            day: number | null;
+                            publisher: string | null;
+                            publicationDate: string | null;
+                            scanInfo: string | null;
+                            language: string | null;
+                            format: string | null;
+                            blackAndWhite: number | null;
+                            manga: number | null;
+                            readingDirection: string | null;
+                            review: string | null;
+                            ageRating: string | null;
+                            communityRating: number | null;
+                            createdAt: string;
+                            updatedAt: string;
+                            thumbnailUrl?: string | null;
+                            writers?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            pencillers?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            inkers?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            letterers?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            editors?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            colorists?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            coverArtists?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            publishers?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            imprints?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            genres?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            characters?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            teams?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            locations?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            storyArcs?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            seriesGroups?: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                        } & {
+                            [key: string]: unknown;
+                        };
                     };
                 };
                 /** @description Comic book not found */
