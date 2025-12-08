@@ -17,29 +17,5 @@ export interface Creator {
 	name: string;
 }
 
-// /comic-books/:id/metadata endpoint types
-export interface ComicBookMetadata {
-	id: number;
-	issueNumber: number;
-	title: string;
-	description?: string | null;
-	publicationDate?: string | null;
-	pageCount: number;
-	filePath: string;
-	series?: string | null;
-	writers: Creator[];
-	pencillers: Creator[];
-	inkers: Creator[];
-	letterers: Creator[];
-	colorists: Creator[];
-	editors: Creator[];
-	coverArtists: Creator[];
-	publishers: Creator[];
-	imprints: Creator[];
-	genres: Creator[];
-	characters: Creator[];
-	teams: Creator[];
-	locations: Creator[];
-	storyArcs: Creator[];
-	seriesGroups: Creator[];
-}
+// /comic-books/:id/metadata endpoint types - derived from OpenAPI schema
+export type ComicBookMetadata = paths['/comic-books/:id/metadata']['get']['responses']['200']['content']['application/json'];
