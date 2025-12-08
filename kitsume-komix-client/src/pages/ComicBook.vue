@@ -117,6 +117,13 @@ const openComicReader = () => {
 
 					<!-- Details -->
 					<div class="flex-1">
+						<!-- Series Info -->
+						<div v-if="comicBookData.series" class="border-b border-gray-700 mb-4 pb-4">
+							<p class="text-gray-400 text-sm mb-2">Series</p>
+							<p class="text-lg font-semibold text-cyan-400">{{ comicBookData.series }}</p>
+						</div>
+
+						<!-- Basic Metadata -->
 						<div class="grid grid-cols-2 gap-4">
 							<div>
 								<p class="text-gray-400 text-sm">Issue Number</p>
@@ -131,21 +138,22 @@ const openComicReader = () => {
 								<p class="text-lg font-semibold">{{ comicBookData.pageCount || 'N/A' }} pages</p>
 							</div>
 							<div>
+								<p class="text-gray-400 text-sm">File Size</p>
+								<p class="text-lg font-semibold">{{ comicBookData.fileSize ? (comicBookData.fileSize / (1024 * 1024)).toFixed(2) + ' MB' : 'N/A' }}</p>
+							</div>
+							<div>
 								<p class="text-gray-400 text-sm">File Path</p>
 								<p class="text-sm text-gray-300 truncate">{{ comicBookData.filePath || 'N/A' }}</p>
 							</div>
+							
 						</div>
 
-						<div v-if="comicBookData.description" class="border-t border-gray-700 mt-4 pt-4">
+						<div v-if="comicBookData.summary" class="border-t border-gray-700 mt-4 pt-4">
 							<p class="text-gray-400 text-sm mb-2">Description</p>
-							<p class="text-gray-300">{{ comicBookData.description }}</p>
+							<p class="text-gray-300">{{ comicBookData.summary }}</p>
 						</div>
 
-						<!-- Series Info -->
-						<div v-if="comicBookData.series" class="border-t border-gray-700 mt-4 pt-4">
-							<p class="text-gray-400 text-sm mb-2">Series</p>
-							<p class="text-lg font-semibold text-cyan-400">{{ comicBookData.series }}</p>
-						</div>
+						
 
 						<!-- Actions -->
 						<div class="flex gap-2 mt-6 border-t border-gray-700 pt-4">
