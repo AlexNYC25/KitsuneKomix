@@ -1,75 +1,73 @@
-# Nuxt Minimal Starter
+# KitsuneKomix
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## Overview
 
-## Setup
+KitsuneKomix is a digital comic book reader and management application designed to ultimately provide users with
+a seamless experience for reading their digital comic book collections.
 
-Make sure to install dependencies:
+The project consists of two main components:
+1. **KitsuneKomix API**: A backend RESTful API built with Deno and TypeScript, responsible for managing comic book data,
+   user authentication, and serving comic book files.
 
-```bash
-# npm
-npm install
+2. **KitsuneKomix Client**: A frontend application built with Vue.js and TypeScript, providing an intuitive user interface
+   for browsing, reading, and managing comic books.
 
-# pnpm
-pnpm install
+## Features
+- User authentication and management
+- Rolling scanning for new comic books
+- Comic book metadata comprehension and display for the most popular formats: ComicInfo, Metron
+- Responsive and user-friendly interface for reading comic books
 
-# yarn
-yarn install
+## Installation
 
-# bun
-bun install
-```
+### Instructions for setting up the KitsuneKomix API and Client locally.
 
-## Development Server
+#### Prerequisites
+- [Docker](https://www.docker.com/get-started) installed on your machine
 
-Start the development server on `http://localhost:3000`:
+#### Steps
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/AlexNYC25/KitsuneKomix.git
+   cd KitsuneKomix
+   ```
+2. Run the docker-compose to set up the development environment:
+   ```bash
+   docker-compose up --build
+   ```
 
-```bash
-# npm
-npm run dev
+### Instructions for setting up the KitsuneKomix API and Client in production.
+Work in progress...
 
-# pnpm
-pnpm dev
+## Usage
+- Access the KitsuneKomix Client at `http://localhost:5173`
+- Access the KitsuneKomix API at `http://localhost:8000`
+- Access the OpenAPI documentation with Swagger UI at `http://localhost:8000/api/ui`
 
-# yarn
-yarn dev
 
-# bun
-bun run dev
-```
+## Development
 
-## Production
+### Repository Structure
+- `kitsume-komix-api/`: Contains the source code for the KitsuneKomix API and the background worker responsible for scanning and processing comic books.
+- `kitsume-komix-client/`: Contains the source code for the KitsuneKomix Client.
 
-Build the application for production:
+### Major Technologies Used
 
-```bash
-# npm
-npm run build
+#### KitsuneKomix API
+- [Deno](https://deno.land/): A secure runtime for JavaScript and TypeScript.
+- [Zod](https://zod.dev/): A TypeScript-first schema declaration and validation library.
+- [Hono](https://hono.dev/): A small, simple, and fast web framework for Deno and Node.js.
+- [Zod-Openapi](https://github.com/honojs/middleware/tree/main/packages/zod-openapi): A extended Hono library for OpenAPI documentation generation using Zod schemas.
+- [SQLite](https://www.sqlite.org/index.html): A lightweight, disk-based database, used to store comic book metadata and user information.
+- [Pino](https://getpino.io/#/): A fast and low-overhead logging library for logging API activities and errors.
 
-# pnpm
-pnpm build
+#### KitsuneKomix API worker
+- [BullMQ](https://docs.bullmq.io/): A Node.js library for handling distributed jobs and messages in Node.js applications, used for background processing of comic book scanning and metadata extraction.
+- [Redis](https://redis.io/): An in-memory data structure store, used as the main memory database for BullMQ.
+- [Chokidar](https://github.com/paulmillr/chokidar): A Node.js library for watching file system changes, used for monitoring comic book directories for new or updated files.
 
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+#### KitsuneKomix Client
+- [Vue.js](https://vuejs.org/): A progressive JavaScript framework for building user interfaces.
+- [Pinia](https://pinia.vuejs.org/): A state management library for Vue.js applications.
+- [PrimeVue](https://www.primefaces.org/primevue/): A rich set of open-source UI components for Vue.js.
+- [Tailwind CSS](https://tailwindcss.com/): A utility-first CSS framework for rapid UI development.
