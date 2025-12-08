@@ -56,6 +56,15 @@ export const ComicBooksResponseSchema = z.object({
 });
 
 /**
+ * Schema for single comic book metadata response
+ * Used for GET /api/comic-books/:id/metadata endpoint
+ */
+export const ComicBookMetadataResponseSchema = comicBookWithMetadataCamelCaseSchema.catchall(z.any()).openapi({
+  title: "ComicBookMetadataResponse",
+  description: "A single comic book with its full metadata including all related creator and content information",
+});
+
+/**
  * Schema for single comic series with metadata and thumbnails response
  */
 export const ComicSeriesWithMetadataAndThumbnailsResponseSchema = z.object({
