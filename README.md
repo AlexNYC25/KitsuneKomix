@@ -71,3 +71,22 @@ Work in progress...
 - [Pinia](https://pinia.vuejs.org/): A state management library for Vue.js applications.
 - [PrimeVue](https://www.primefaces.org/primevue/): A rich set of open-source UI components for Vue.js.
 - [Tailwind CSS](https://tailwindcss.com/): A utility-first CSS framework for rapid UI development.
+
+### Contributing
+
+For both the KitsuneKomix API and Client we generally follow the AirBnb JavaScript style guide, with additional
+rules for Typescript. Please ensure that your code adheres to these guidelines before submitting a pull request.
+[AirBnb JavaScript Style Guide](https://github.com/airbnb/javascript)
+[Typescripts best Practices](https://github.com/andredesousa/typescript-best-practices)
+
+### Documentation
+
+Comprehensive documentation for both the KitsuneKomix API and Client can be found in the `docs/` directory of each
+component. This includes specific setup guides, reference materials, and development guidelines.
+
+#### KitsuneKomix API Documentation
+- [Development Guide](./kitsume-komix-api/docs/development.md)
+
+#### KitsuneKomix Client Documentation
+- [Development Guide](./kitsume-komix-client/docs/development.md)
+
