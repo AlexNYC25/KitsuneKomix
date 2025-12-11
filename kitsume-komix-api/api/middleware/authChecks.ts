@@ -11,9 +11,9 @@ import { apiLogger } from "../../logger/loggers.ts";
  * @returns A response indicating whether the user is authenticated.
  */
 export const requireAuth = async (c: Context, next: Next) => {
-  const authHeader = c.req.header("Authorization");
+  const authHeader = c.req.header("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return c.json({ message: "Unauthorized" }, 401);
+    return c.json({ message: "Unauthorized - Missing or invalid Authorization header" }, 401);
   }
 
   const token = authHeader.split(" ")[1];
