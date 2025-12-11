@@ -1,6 +1,6 @@
 export const ISSUER = Deno.env.get("JWT_ISSUER") || "kitsunekomix";
 export const AUDIENCE = Deno.env.get("JWT_AUDIENCE") || "kitsunekomix_users";
-export const ACCESS_TTL = Deno.env.get("JWT_ACCESS_TTL") || "15m"; // 15 minutes
+export const ACCESS_TTL = Deno.env.get("JWT_ACCESS_TTL") || "5h"; // 5 hours
 export const REFRESH_TTL = Deno.env.get("JWT_REFRESH_TTL") || "7d"; // 7 days
 
 const secret = Deno.env.get("JWT_SECRET");
