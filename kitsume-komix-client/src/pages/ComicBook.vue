@@ -7,6 +7,7 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
+import { useAuthStore } from '@/stores/auth';
 import type { ComicBookMetadata } from '@/types/comic-books.types';
 
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
@@ -16,6 +17,7 @@ import ComicThumbnail from '../components/ComicThumbnail.vue';
 const route = useRoute();
 
 const breadcrumbStore = useBreadcrumbStore();
+const authStore = useAuthStore();
 
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<ComicBookMetadata | null>(null);
@@ -42,7 +44,7 @@ onMounted(async () => {
 	try {
 		const response = await fetch(`http://localhost:8000/api/comic-books/${idNum}/metadata`, {
 			headers: {
-				'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+				'Authorization': `Bearer ${authStore.token}`
 			}
 		});
 
@@ -64,7 +66,7 @@ onMounted(async () => {
 			try {
 				const thumbnailResponse = await fetch(`http://localhost:8000/api/comic-books/${idNum}/thumbnails`, {
 					headers: {
-						'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+						'Authorization': `Bearer ${authStore.token}`
 					}
 				});
 
@@ -101,6 +103,22 @@ const comicBookHeading = computed(() => {
 	}
 	return 'Comic Book';
 });
+
+const setComicToRead = async (comicBookId: number) => {
+	try {
+		const response = await fetch(`http://localhost:8000/api/comic-books/${comicBookId}/read`, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${authStore.token}`
+			}
+		});
+		if (!response.ok) {
+			console.error('Failed to mark comic as read:', response.status, response.statusText);
+		}
+	} catch (error) {
+		console.error('Error marking comic as read:', error);
+	}
+};
 </script>
 
 <template>
@@ -168,7 +186,7 @@ const comicBookHeading = computed(() => {
 						<!-- Actions -->
 						<div class="flex gap-2 mt-6 border-t border-gray-700 pt-4">
 							<Button label="Read Comic" icon="pi pi-book" severity="success" class="flex-1" @click="openComicReader" />
-							<Button label="Mark as Read" icon="pi pi-check" severity="info" class="flex-1" />
+							<Button label="Mark as Read" icon="pi pi-check" severity="info" class="flex-1" @click="setComicToRead(comicBookData.id)" />
 							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1" />
 						</div>
 					</div>
