@@ -19,6 +19,10 @@ export const ErrorResponseSchema = z.object({
   errors: z.record(z.string(), z.any().openapi({ type: "object" })).optional(),
 });
 
+export const SuccessResponseSchema = z.object({
+  success: z.boolean(),
+});
+
 // Flexible schema for responses we don't want to type strictly in OpenAPI
 export const FlexibleResponseSchema = z.unknown();
 
@@ -53,6 +57,17 @@ export const ComicBooksResponseSchema = z.object({
 }).openapi({
   title: "ComicBooksResponse",
   description: "A paginated list of comic books with metadata",
+});
+
+/**
+ * Schema for comic book read by user response
+ */
+export const ComicBookReadByUserResponseSchema = z.object({
+  id: z.number(),
+  read: z.boolean(),
+}).openapi({
+  title: "ComicBookReadByUserResponse",
+  description: "Response indicating if a comic book has been read by the user",
 });
 
 /**
