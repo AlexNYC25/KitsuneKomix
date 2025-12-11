@@ -40,8 +40,11 @@ import {
 } from "../../types/index.ts";
 // ComicBookWithMetadata is re-exported via ../../types/index.ts if needed
 import type { AppEnv } from "../../types/index.ts";
-import { ComicBooksResponseSchema, FlexibleResponseSchema, ComicBookMetadataResponseSchema } from "../../zod/schemas/response.schema.ts";
-import { PaginationQuerySchema, ComicBookUpdateSchema } from "../../zod/schemas/request.schema.ts";
+
+import { ComicBooksResponseSchema, FlexibleResponseSchema, ComicBookMetadataResponseSchema, SuccessResponseSchema, ErrorResponseSchema, ComicBookReadByUserResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { PaginationQuerySchema, ComicBookUpdateSchema, ParamIdSchema } from "../../zod/schemas/request.schema.ts";
+import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
+import { requireAuth } from "../middleware/authChecks.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -891,27 +894,40 @@ app.openapi(
   summary: "Check if comic book has been read",
   description: "Check if a comic book has been marked as read by the current user",
   tags: ["Comic Books"],
+  middleware: [requireAuth],
   request: {
-    params: z.object({
-      id: z.string().regex(/^\d+$/).transform(Number).openapi({
-        description: "Comic book ID",
-        example: 1,
-      }),
-    }),
+    headers: AuthHeaderSchema,
+    params: ParamIdSchema
   },
   responses: {
     200: {
       content: {
         "application/json": {
-          schema: FlexibleResponseSchema,
+          schema: ComicBookReadByUserResponseSchema,
         },
       },
       description: "Read status retrieved successfully",
     },
+    400: {
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: "Bad Request",
+    },
+    401: {
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: "Unauthorized",
+    },
     500: {
       content: {
         "application/json": {
-          schema: FlexibleResponseSchema,
+          schema: ErrorResponseSchema,
         },
       },
       description: "Internal Server Error",
@@ -919,14 +935,28 @@ app.openapi(
   },
   }),
   async (c) => {
-  const id = parseInt(c.req.param("id"), 10);
-  // TODO: Implement proper auth check
-  // const userId = c.get("user").sub;
-  const userId = 1; // Placeholder until auth is properly migrated
+    const id = parseInt(c.req.param("id"), 10);
 
-  const hasRead = await checkComicReadByUser(userId, id);
-  return c.json({ hasRead });
-});
+    const user = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    try {
+      const hasRead = await checkComicReadByUser(userId, id);
+      return c.json({ read: hasRead, id: id }, 200);
+    } catch (error) {
+      console.error("Error checking read status:", error);
+      return c.json({ message: "Failed to check read status"}, 500);
+    }
+  }
+);
 
 /**
  * Mark a comic book as read by a user
@@ -942,27 +972,48 @@ app.openapi(
   summary: "Mark comic book as read",
   description: "Mark a comic book as read by the current user",
   tags: ["Comic Books"],
+  middleware: [requireAuth],
   request: {
-    params: z.object({
-      id: z.string().regex(/^\d+$/).transform(Number).openapi({
-        description: "Comic book ID",
-        example: 1,
-      }),
-    }),
+    headers: AuthHeaderSchema,
+    params: ParamIdSchema
   },
   responses: {
     200: {
       content: {
           "application/json": {
-            schema: FlexibleResponseSchema,
+            schema: SuccessResponseSchema,
           },
       },
       description: "Comic book marked as read",
     },
+    400: {
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: "Bad Request",
+    },
+    401: {
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: "Unauthorized",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+      description: "Not Found",
+    },
     500: {
       content: {
         "application/json": {
-          schema: FlexibleResponseSchema,
+          schema: ErrorResponseSchema,
         },
       },
       description: "Internal Server Error",
@@ -970,18 +1021,37 @@ app.openapi(
   },
   }),
   async (c) => {
-  const id = parseInt(c.req.param("id"), 10);
-  // TODO: Implement proper auth check
-  // const userId = c.get("user").sub;
-  const userId = 1; // Placeholder until auth is properly migrated
+    const id = parseInt(c.req.param("id"), 10);
+    
+    const user = c.get("user");
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized - Missing or invalid user information" }, 401);
+    }
 
-  const success = await setComicReadByUser(userId, id, true);
-  if (success) {
-    return c.json({ message: "Comic book marked as read" });
-  } else {
-    return c.json({ error: "Failed to mark comic book as read" }, 500);
+    const userId = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    try {
+      const setComicToReadSuccess = await setComicReadByUser(id, userId, true);
+
+      if (setComicToReadSuccess) {
+        return c.json({ success: true }, 200);
+      } else {
+        return c.json({ message: "Failed to mark comic book as read" }, 500);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes("FOREIGN KEY")) {
+        return c.json({ message: "User or comic book not found" }, 404);
+      }
+      
+      return c.json({ message: "Failed to mark comic book as read" }, 500);
+    }
   }
-});
+);
 
 /**
  * Update a comic book by ID, partial updates allowed
