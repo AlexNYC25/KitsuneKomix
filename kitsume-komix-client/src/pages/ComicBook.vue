@@ -8,6 +8,7 @@ import TabPanel from 'primevue/tabpanel';
 
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
 import { useAuthStore } from '@/stores/auth';
+import { apiClient } from '@/utilities/apiClient';
 import type { ComicBookMetadata } from '@/types/comic-books.types';
 
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
@@ -42,14 +43,16 @@ onMounted(async () => {
 
 	// Fetch comic book metadata
 	try {
-		const response = await fetch(`http://localhost:8000/api/comic-books/${idNum}/metadata`, {
-			headers: {
-				'Authorization': `Bearer ${authStore.token}`
+		const { data, error } = await apiClient.GET('/comic-books/{id}/metadata', {
+			params: {
+				path: { id: String(idNum) }
 			}
 		});
 
-		if (response.ok) {
-			comicBookData.value = await response.json();
+		if (error) {
+			console.error('Failed to fetch comic book data:', error);
+		} else if (data) {
+			comicBookData.value = data as ComicBookMetadata;
 
 			// Get series ID from query params (passed from ComicSeries page)
 			const seriesId = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
@@ -64,24 +67,22 @@ onMounted(async () => {
 
 			// Fetch thumbnail
 			try {
-				const thumbnailResponse = await fetch(`http://localhost:8000/api/comic-books/${idNum}/thumbnails`, {
-					headers: {
-						'Authorization': `Bearer ${authStore.token}`
+				const { data: thumbnailData, error: thumbnailError } = await apiClient.GET('/comic-books/{id}/thumbnails', {
+					params: {
+						path: { id: String(idNum) }
 					}
 				});
 
-				if (thumbnailResponse.ok) {
-					const thumbnailData = await thumbnailResponse.json();
-					if (thumbnailData.thumbnails && thumbnailData.thumbnails.length > 0) {
-						const firstThumbnail = thumbnailData.thumbnails[0];
+				if (!thumbnailError && thumbnailData) {
+					const thumbnails = (thumbnailData as any).thumbnails;
+					if (thumbnails && thumbnails.length > 0) {
+						const firstThumbnail = thumbnails[0];
 						thumbnailUrl.value = `/api/image/thumbnails/${firstThumbnail.file_path.split('/').pop()}`;
 					}
 				}
 			} catch (error) {
 				console.error('Error fetching thumbnail:', error);
 			}
-		} else {
-			console.error('Failed to fetch comic book data');
 		}
 	} catch (error) {
 		console.error('Error fetching comic book:', error);
@@ -104,16 +105,95 @@ const comicBookHeading = computed(() => {
 	return 'Comic Book';
 });
 
+// Computed properties for metadata arrays with proper typing
+// TODO: Refactor to a utility function to reduce redundancy
+const writersString = computed(() => {
+	const writers = comicBookData.value?.writers as Array<{ name: string }> | undefined;
+	return writers?.map((w: { name: string }) => w.name).join(', ') ?? '';
+});
+
+const pencillersString = computed(() => {
+	const pencillers = comicBookData.value?.pencillers as Array<{ name: string }> | undefined;
+	return pencillers?.map((p: { name: string }) => p.name).join(', ') ?? '';
+});
+
+const inkersString = computed(() => {
+	const inkers = comicBookData.value?.inkers as Array<{ name: string }> | undefined;
+	return inkers?.map((i: { name: string }) => i.name).join(', ') ?? '';
+});
+
+const letterersString = computed(() => {
+	const letterers = comicBookData.value?.letterers as Array<{ name: string }> | undefined;
+	return letterers?.map((l: { name: string }) => l.name).join(', ') ?? '';
+});
+
+const coloristsString = computed(() => {
+	const colorists = comicBookData.value?.colorists as Array<{ name: string }> | undefined;
+	return colorists?.map((c: { name: string }) => c.name).join(', ') ?? '';
+});
+
+const editorsString = computed(() => {
+	const editors = comicBookData.value?.editors as Array<{ name: string }> | undefined;
+	return editors?.map((e: { name: string }) => e.name).join(', ') ?? '';
+});
+
+const coverArtistsString = computed(() => {
+	const coverArtists = comicBookData.value?.coverArtists as Array<{ name: string }> | undefined;
+	return coverArtists?.map((ca: { name: string }) => ca.name).join(', ') ?? '';
+});
+
+const publishersString = computed(() => {
+	const publishers = comicBookData.value?.publishers as Array<{ name: string }> | undefined;
+	return publishers?.map((p: { name: string }) => p.name).join(', ') ?? '';
+});
+
+const imprintsString = computed(() => {
+	const imprints = comicBookData.value?.imprints as Array<{ name: string }> | undefined;
+	return imprints?.map((i: { name: string }) => i.name).join(', ') ?? '';
+});
+
+const genresString = computed(() => {
+	const genres = comicBookData.value?.genres as Array<{ name: string }> | undefined;
+	return genres?.map((g: { name: string }) => g.name).join(', ') ?? '';
+});
+
+const charactersString = computed(() => {
+	const characters = comicBookData.value?.characters as Array<{ name: string }> | undefined;
+	return characters?.map((c: { name: string }) => c.name).join(', ') ?? '';
+});
+
+const teamsString = computed(() => {
+	const teams = comicBookData.value?.teams as Array<{ name: string }> | undefined;
+	return teams?.map((t: { name: string }) => t.name).join(', ') ?? '';
+});
+
+const locationsString = computed(() => {
+	const locations = comicBookData.value?.locations as Array<{ name: string }> | undefined;
+	return locations?.map((l: { name: string }) => l.name).join(', ') ?? '';
+});
+
+const storyArcsString = computed(() => {
+	const storyArcs = comicBookData.value?.storyArcs as Array<{ name: string }> | undefined;
+	return storyArcs?.map((sa: { name: string }) => sa.name).join(', ') ?? '';
+});
+
+const seriesGroupsString = computed(() => {
+	const seriesGroups = comicBookData.value?.seriesGroups as Array<{ name: string }> | undefined;
+	return seriesGroups?.map((sg: { name: string }) => sg.name).join(', ') ?? '';
+});
+
+// Function to mark comic as read
 const setComicToRead = async (comicBookId: number) => {
 	try {
-		const response = await fetch(`http://localhost:8000/api/comic-books/${comicBookId}/read`, {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${authStore.token}`
+		const { error } = await apiClient.POST('/comic-books/{id}/read', {
+			params: {
+				path: { id: String(comicBookId) },
+				header: { authorization: 'Bearer ' }
 			}
 		});
-		if (!response.ok) {
-			console.error('Failed to mark comic as read:', response.status, response.statusText);
+
+		if (error) {
+			console.error('Failed to mark comic as read:', error);
 		}
 	} catch (error) {
 		console.error('Error marking comic as read:', error);
@@ -203,25 +283,25 @@ const setComicToRead = async (comicBookId: number) => {
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Credits</h2>
 						<ComicSeriesPageDetails v-if="comicBookData.writers && comicBookData.writers.length > 0"
 							comicMetadataDetailsLabel="Writers"
-							:comicMetadataDetails="comicBookData.writers.map((w) => w.name).join(', ')" />
+							:comicMetadataDetails="writersString" />
 						<ComicSeriesPageDetails v-if="comicBookData.pencillers && comicBookData.pencillers.length > 0"
 							comicMetadataDetailsLabel="Pencillers"
-							:comicMetadataDetails="comicBookData.pencillers.map((p) => p.name).join(', ')" />
+							:comicMetadataDetails="pencillersString" />
 						<ComicSeriesPageDetails v-if="comicBookData.inkers && comicBookData.inkers.length > 0"
 							comicMetadataDetailsLabel="Inkers"
-							:comicMetadataDetails="comicBookData.inkers.map((i) => i.name).join(', ')" />
+							:comicMetadataDetails="inkersString" />
 						<ComicSeriesPageDetails v-if="comicBookData.letterers && comicBookData.letterers.length > 0"
 							comicMetadataDetailsLabel="Letterers"
-							:comicMetadataDetails="comicBookData.letterers.map((l) => l.name).join(', ')" />
+							:comicMetadataDetails="letterersString" />
 						<ComicSeriesPageDetails v-if="comicBookData.colorists && comicBookData.colorists.length > 0"
 							comicMetadataDetailsLabel="Colorists"
-							:comicMetadataDetails="comicBookData.colorists.map((c) => c.name).join(', ')" />
+							:comicMetadataDetails="coloristsString" />
 						<ComicSeriesPageDetails v-if="comicBookData.editors && comicBookData.editors.length > 0"
 							comicMetadataDetailsLabel="Editors"
-							:comicMetadataDetails="comicBookData.editors.map((e) => e.name).join(', ')" />
+							:comicMetadataDetails="editorsString" />
 						<ComicSeriesPageDetails v-if="comicBookData.coverArtists && comicBookData.coverArtists.length > 0"
 							comicMetadataDetailsLabel="Cover Artists"
-							:comicMetadataDetails="comicBookData.coverArtists.map((ca) => ca.name).join(', ')" />
+							:comicMetadataDetails="coverArtistsString" />
 						</div>
 
 						<!-- Publishing Section -->
@@ -229,10 +309,10 @@ const setComicToRead = async (comicBookId: number) => {
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Publishing</h2>
 						<ComicSeriesPageDetails v-if="comicBookData.publishers && comicBookData.publishers.length > 0"
 							comicMetadataDetailsLabel="Publishers"
-							:comicMetadataDetails="comicBookData.publishers.map((p) => p.name).join(', ')" />
+							:comicMetadataDetails="publishersString" />
 						<ComicSeriesPageDetails v-if="comicBookData.imprints && comicBookData.imprints.length > 0"
 							comicMetadataDetailsLabel="Imprints"
-							:comicMetadataDetails="comicBookData.imprints.map((i) => i.name).join(', ')" />
+							:comicMetadataDetails="imprintsString" />
 						</div>
 
 						<!-- Content Section -->
@@ -240,20 +320,20 @@ const setComicToRead = async (comicBookId: number) => {
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Content</h2>
 						<ComicSeriesPageDetails v-if="comicBookData.genres && comicBookData.genres.length > 0"
 							comicMetadataDetailsLabel="Genres"
-							:comicMetadataDetails="comicBookData.genres.map((g) => g.name).join(', ')" />
+							:comicMetadataDetails="genresString" />
 						<ComicSeriesPageDetails v-if="comicBookData.characters && comicBookData.characters.length > 0"
 							comicMetadataDetailsLabel="Characters"
-							:comicMetadataDetails="comicBookData.characters.map((c) => c.name).join(', ')"
+							:comicMetadataDetails="charactersString"
 							:maxVisible="8" />
 						<ComicSeriesPageDetails v-if="comicBookData.teams && comicBookData.teams.length > 0"
 							comicMetadataDetailsLabel="Teams"
-							:comicMetadataDetails="comicBookData.teams.map((t) => t.name).join(', ')" />
+							:comicMetadataDetails="teamsString" />
 						<ComicSeriesPageDetails v-if="comicBookData.locations && comicBookData.locations.length > 0"
 							comicMetadataDetailsLabel="Locations"
-							:comicMetadataDetails="comicBookData.locations.map((l) => l.name).join(', ')" />
+							:comicMetadataDetails="locationsString" />
 						<ComicSeriesPageDetails v-if="comicBookData.storyArcs && comicBookData.storyArcs.length > 0"
 							comicMetadataDetailsLabel="Story Arcs"
-							:comicMetadataDetails="comicBookData.storyArcs.map((sa) => sa.name).join(', ')" />
+							:comicMetadataDetails="storyArcsString" />
 						</div>
 
 						<!-- Series Groups Section -->
@@ -261,7 +341,7 @@ const setComicToRead = async (comicBookId: number) => {
 							class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Series Groups</h2>
 						<ComicSeriesPageDetails comicMetadataDetailsLabel="Groups"
-							:comicMetadataDetails="comicBookData.seriesGroups.map((sg) => sg.name).join(', ')" />
+							:comicMetadataDetails="seriesGroupsString" />
 						</div>
 					</div>
 				</TabPanel>
