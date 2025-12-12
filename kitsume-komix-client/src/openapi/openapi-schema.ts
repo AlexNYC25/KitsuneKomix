@@ -2490,9 +2490,11 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Bearer token for authentication */
+                    authorization: string;
+                };
                 path: {
-                    /** @description Comic book ID */
                     id: string;
                 };
                 cookie?: never;
@@ -2501,6 +2503,29 @@ export interface paths {
             responses: {
                 /** @description Thumbnails retrieved successfully */
                 200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            thumbnails: {
+                                id: number;
+                                comic_book_id: number;
+                                comic_book_cover_id: number | null;
+                                file_path: string;
+                                thumbnail_type: string;
+                                name: string | null;
+                                description: string | null;
+                                uploaded_by: number | null;
+                                created_at: string;
+                                updated_at: string;
+                            }[];
+                            message: string;
+                        };
+                    };
+                };
+                /** @description No thumbnails found for this comic book */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
