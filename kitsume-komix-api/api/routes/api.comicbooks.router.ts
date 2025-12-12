@@ -37,11 +37,12 @@ import {
   ComicBook,
   ComicBookFilterItem,
   MultipleReturnResponse,
+  ComicBookThumbnail,
 } from "../../types/index.ts";
 // ComicBookWithMetadata is re-exported via ../../types/index.ts if needed
 import type { AppEnv } from "../../types/index.ts";
 
-import { ComicBooksResponseSchema, FlexibleResponseSchema, ComicBookMetadataResponseSchema, SuccessResponseSchema, ErrorResponseSchema, ComicBookReadByUserResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { ComicBooksResponseSchema, FlexibleResponseSchema, ComicBookMetadataResponseSchema, SuccessResponseSchema, ErrorResponseSchema, ComicBookReadByUserResponseSchema, ComicBookThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
 import { PaginationQuerySchema, ComicBookUpdateSchema, ParamIdSchema } from "../../zod/schemas/request.schema.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import { requireAuth } from "../middleware/authChecks.ts";
@@ -1435,22 +1436,27 @@ app.openapi(
   summary: "Get comic book thumbnails",
   description: "Retrieve all thumbnails for a comic book",
   tags: ["Comic Books"],
+  middleware: [requireAuth],
   request: {
-    params: z.object({
-      id: z.string().regex(/^\d+$/).transform(Number).openapi({
-        description: "Comic book ID",
-        example: 1,
-      }),
-    }),
+    headers: AuthHeaderSchema,
+    params: ParamIdSchema
   },
   responses: {
     200: {
       content: {
         "application/json": {
-          schema: FlexibleResponseSchema,
+          schema: ComicBookThumbnailsResponseSchema,
         },
       },
       description: "Thumbnails retrieved successfully",
+    },
+    404: {
+      content: {
+        "application/json": {
+          schema: FlexibleResponseSchema,
+        },
+      },
+      description: "No thumbnails found for this comic book",
     },
     500: {
       content: {
@@ -1463,25 +1469,26 @@ app.openapi(
   },
   }),
   async (c) => {
-  const id = parseInt(c.req.param("id"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
 
-  try {
-    const thumbnails = await getComicThumbnails(id);
-    if (thumbnails) {
-      return c.json({
-        thumbnails: thumbnails,
-        message: "Fetched comic book thumbnails successfully",
-      });
-    } else {
-      return c.json({
-        message: "No thumbnails found for this comic book",
-      });
+    try {
+      const thumbnails: ComicBookThumbnail[] | null = await getComicThumbnails(id);
+      if (thumbnails) {
+        return c.json({
+          thumbnails: thumbnails,
+          message: "Fetched comic book thumbnails successfully",
+        }, 200);
+      } else {
+        return c.json({
+          message: "No thumbnails found for this comic book",
+        }, 404);
+      }
+    } catch (error) {
+      console.error("Error fetching comic book thumbnails:", error);
+      return c.json({ error: "Failed to fetch comic book thumbnails" }, 500);
     }
-  } catch (error) {
-    console.error("Error fetching comic book thumbnails:", error);
-    return c.json({ error: "Failed to fetch comic book thumbnails" }, 500);
   }
-});
+);
 
 /**
  * Get a specific thumbnail for a comic book by ID and thumbnail ID
