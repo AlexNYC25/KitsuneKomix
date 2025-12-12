@@ -590,7 +590,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id",
+  path: "/{id}",
   summary: "Get comic book by ID",
   description: "Retrieve a single comic book by its ID",
   tags: ["Comic Books"],
@@ -652,7 +652,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/metadata",
+  path: "/{id}/metadata",
   summary: "Get comic book metadata by ID",
   description: "Retrieve a comic book with its full metadata by its ID",
   tags: ["Comic Books"],
@@ -837,7 +837,7 @@ app.get(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/pages",
+  path: "/{id}/pages",
   summary: "Get comic book pages information",
   description: "Retrieve information about the pages of a comic book",
   tags: ["Comic Books"],
@@ -890,7 +890,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/read",
+  path: "/{id}/read",
   summary: "Check if comic book has been read",
   description: "Check if a comic book has been marked as read by the current user",
   tags: ["Comic Books"],
@@ -968,7 +968,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "post",
-  path: "/:id/read",
+  path: "/{id}/read",
   summary: "Mark comic book as read",
   description: "Mark a comic book as read by the current user",
   tags: ["Comic Books"],
@@ -1063,7 +1063,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "put",
-  path: "/:id/update",
+  path: "/{id}/update",
   summary: "Update comic book",
   description: "Update comic book metadata with partial updates allowed",
   tags: ["Comic Books"],
@@ -1138,7 +1138,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "delete",
-  path: "/:id/delete",
+  path: "/{id}/delete",
   summary: "Delete comic book",
   description: "Delete a comic book by its ID",
   tags: ["Comic Books"],
@@ -1205,7 +1205,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/series/:seriesId",
+  path: "/series/{seriesId}",
   summary: "Get comic books by series",
   description: "Retrieve all comic book issues belonging to a specific series",
   tags: ["Comic Books"],
@@ -1307,7 +1307,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/next",
+  path: "/{id}/next",
   summary: "Get next comic book in series",
   description: "Retrieve the next comic book in the same series based on issue number",
   tags: ["Comic Books"],
@@ -1369,7 +1369,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/previous",
+  path: "/{id}/previous",
   summary: "Get previous comic book in series",
   description: "Retrieve the previous comic book in the same series based on issue number",
   tags: ["Comic Books"],
@@ -1431,7 +1431,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/thumbnails",
+  path: "/{id}/thumbnails",
   summary: "Get comic book thumbnails",
   description: "Retrieve all thumbnails for a comic book",
   tags: ["Comic Books"],
@@ -1493,7 +1493,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/thumbnails/:thumbId",
+  path: "/{id}/thumbnails/{thumbId}",
   summary: "Get specific comic thumbnail",
   description: "Retrieve a specific thumbnail for a comic book",
   tags: ["Comic Books"],
@@ -1570,7 +1570,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "delete",
-  path: "/:id/thumbnails/:thumbId",
+  path: "/{id}/thumbnails/{thumbId}",
   summary: "Delete comic thumbnail",
   description: "Delete a specific thumbnail for a comic book",
   tags: ["Comic Books"],
@@ -1628,7 +1628,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "post",
-  path: "/:id/thumbnails",
+  path: "/{id}/thumbnails",
   summary: "Create custom thumbnail",
   description: "Create a custom thumbnail for a comic book via multipart form data",
   tags: ["Comic Books"],
@@ -1757,7 +1757,7 @@ app.openapi(
 app.openapi(
   createRoute({
   method: "get",
-  path: "/:id/readlists",
+  path: "/{id}/readlists",
   summary: "Get comic book readlists",
   description: "Retrieve readlists that contain this comic book",
   tags: ["Comic Books"],
