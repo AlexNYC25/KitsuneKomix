@@ -897,7 +897,6 @@ app.openapi(
   tags: ["Comic Books"],
   middleware: [requireAuth],
   request: {
-    headers: AuthHeaderSchema,
     params: ParamIdSchema
   },
   responses: {
@@ -975,7 +974,6 @@ app.openapi(
   tags: ["Comic Books"],
   middleware: [requireAuth],
   request: {
-    headers: AuthHeaderSchema,
     params: ParamIdSchema
   },
   responses: {
@@ -1438,7 +1436,6 @@ app.openapi(
   tags: ["Comic Books"],
   middleware: [requireAuth],
   request: {
-    headers: AuthHeaderSchema,
     params: ParamIdSchema
   },
   responses: {
