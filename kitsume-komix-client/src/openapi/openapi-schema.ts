@@ -1508,7 +1508,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id": {
+    "/comic-books/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1583,7 +1583,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/metadata": {
+    "/comic-books/{id}/metadata": {
         parameters: {
             query?: never;
             header?: never;
@@ -1784,7 +1784,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/pages": {
+    "/comic-books/{id}/pages": {
         parameters: {
             query?: never;
             header?: never;
@@ -1835,7 +1835,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/read": {
+    "/comic-books/{id}/read": {
         parameters: {
             query?: never;
             header?: never;
@@ -1849,9 +1849,11 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description Bearer token for authentication */
+                    authorization: string;
+                };
                 path: {
-                    /** @description Comic book ID */
                     id: string;
                 };
                 cookie?: never;
@@ -1864,7 +1866,38 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": {
+                            id: number;
+                            read: boolean;
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
                     };
                 };
                 /** @description Internal Server Error */
@@ -1873,7 +1906,12 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": unknown;
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
                     };
                 };
             };
@@ -1936,6 +1974,20 @@ export interface paths {
                         };
                     };
                 };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
                 /** @description Internal Server Error */
                 500: {
                     headers: {
@@ -1958,7 +2010,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/update": {
+    "/comic-books/{id}/update": {
         parameters: {
             query?: never;
             header?: never;
@@ -2039,7 +2091,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/delete": {
+    "/comic-books/{id}/delete": {
         parameters: {
             query?: never;
             header?: never;
@@ -2099,7 +2151,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/series/:seriesId": {
+    "/comic-books/series/{seriesId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2322,7 +2374,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/next": {
+    "/comic-books/{id}/next": {
         parameters: {
             query?: never;
             header?: never;
@@ -2373,7 +2425,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/previous": {
+    "/comic-books/{id}/previous": {
         parameters: {
             query?: never;
             header?: never;
@@ -2424,7 +2476,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/thumbnails": {
+    "/comic-books/{id}/thumbnails": {
         parameters: {
             query?: never;
             header?: never;
@@ -2528,7 +2580,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/thumbnails/:thumbId": {
+    "/comic-books/{id}/thumbnails/{thumbId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2627,7 +2679,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/:id/readlists": {
+    "/comic-books/{id}/readlists": {
         parameters: {
             query?: never;
             header?: never;
