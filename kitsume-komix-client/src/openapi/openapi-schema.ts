@@ -1849,10 +1849,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
+                header?: never;
                 path: {
                     id: string;
                 };
@@ -1924,10 +1921,7 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
+                header?: never;
                 path: {
                     id: string;
                 };
@@ -2490,10 +2484,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
+                header?: never;
                 path: {
                     id: string;
                 };
