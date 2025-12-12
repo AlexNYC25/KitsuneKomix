@@ -8,6 +8,7 @@ import {
 import { metadataSchema } from "./data/comic-metadata.schema.ts";
 import { comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comic-books.schema.ts";
 import { comicLibrariesArraySelectSchema } from "./data/comic-libraries.schema.ts";
+import { comicBookThumbnailSchema } from "./data/comic-thumbnails.schema.ts";
 
 // **** Basic response schemas **** //
 export const MessageResponseSchema = z.object({
@@ -57,6 +58,17 @@ export const ComicBooksResponseSchema = z.object({
 }).openapi({
   title: "ComicBooksResponse",
   description: "A paginated list of comic books with metadata",
+});
+
+/**
+ * Schema for the comic book's thumbnails response, as a standalone response
+ */
+export const ComicBookThumbnailsResponseSchema = z.object({
+  thumbnails: z.array(comicBookThumbnailSchema),
+  message: z.string(),
+}).openapi({
+  title: "ComicBookThumbnailsResponse",
+  description: "Response containing an array of comic book thumbnails",
 });
 
 /**
