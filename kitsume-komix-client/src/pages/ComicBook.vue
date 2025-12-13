@@ -7,9 +7,11 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
-import { useAuthStore } from '@/stores/auth';
+
 import { apiClient } from '@/utilities/apiClient';
-import type { ComicBookMetadata } from '@/types/comic-books.types';
+import { convertArrayOfCreditsToString } from '@/utilities/metadata';
+
+import type { ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail } from '@/types/comic-books.types';
 
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
@@ -18,7 +20,6 @@ import ComicThumbnail from '../components/ComicThumbnail.vue';
 const route = useRoute();
 
 const breadcrumbStore = useBreadcrumbStore();
-const authStore = useAuthStore();
 
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<ComicBookMetadata | null>(null);
@@ -29,9 +30,9 @@ const isLoading = ref(true);
 const activeTab = ref(0);
 
 onMounted(async () => {
-	const id = route.params.id;
-	const idStr = Array.isArray(id) ? id[0] : id;
-	const idNum = parseInt(idStr, 10);
+	const id: string | string[] | undefined = route.params.id;
+	const idStr: string | undefined = Array.isArray(id) ? id[0] : id;
+	const idNum: number = parseInt(idStr, 10);
 
 	if (isNaN(idNum)) {
 		console.error('Invalid comic book ID');
@@ -43,19 +44,19 @@ onMounted(async () => {
 
 	// Fetch comic book metadata
 	try {
-		const { data, error } = await apiClient.GET('/comic-books/{id}/metadata', {
+		const { data: comicBookMetadata, error: comicBookMetadataError } = await apiClient.GET('/comic-books/{id}/metadata', {
 			params: {
 				path: { id: String(idNum) }
 			}
 		});
 
-		if (error) {
-			console.error('Failed to fetch comic book data:', error);
-		} else if (data) {
-			comicBookData.value = data as ComicBookMetadata;
+		if (comicBookMetadataError) {
+			console.error('Failed to fetch comic book data:', comicBookMetadataError);
+		} else if (comicBookMetadata) {
+			comicBookData.value = comicBookMetadata as ComicBookMetadata;
 
 			// Get series ID from query params (passed from ComicSeries page)
-			const seriesId = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
+			const seriesId: number | undefined = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
 
 			// TODO: Migrat this to breadcrumb store action
 			if (comicBookData.value) {
@@ -74,9 +75,9 @@ onMounted(async () => {
 				});
 
 				if (!thumbnailError && thumbnailData) {
-					const thumbnails = (thumbnailData as any).thumbnails;
+					const thumbnails: ComicBookThumbnailsData = (thumbnailData as GetComicBookThumbnailsResponse).thumbnails;
 					if (thumbnails && thumbnails.length > 0) {
-						const firstThumbnail = thumbnails[0];
+						const firstThumbnail: ComicBookThumbnail = thumbnails[0];
 						thumbnailUrl.value = `/api/image/thumbnails/${firstThumbnail.file_path.split('/').pop()}`;
 					}
 				}
@@ -106,80 +107,79 @@ const comicBookHeading = computed(() => {
 });
 
 // Computed properties for metadata arrays with proper typing
-// TODO: Refactor to a utility function to reduce redundancy
 const writersString = computed(() => {
 	const writers = comicBookData.value?.writers as Array<{ name: string }> | undefined;
-	return writers?.map((w: { name: string }) => w.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(writers);
 });
 
 const pencillersString = computed(() => {
 	const pencillers = comicBookData.value?.pencillers as Array<{ name: string }> | undefined;
-	return pencillers?.map((p: { name: string }) => p.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(pencillers);
 });
 
 const inkersString = computed(() => {
 	const inkers = comicBookData.value?.inkers as Array<{ name: string }> | undefined;
-	return inkers?.map((i: { name: string }) => i.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(inkers);
 });
 
 const letterersString = computed(() => {
 	const letterers = comicBookData.value?.letterers as Array<{ name: string }> | undefined;
-	return letterers?.map((l: { name: string }) => l.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(letterers);
 });
 
 const coloristsString = computed(() => {
 	const colorists = comicBookData.value?.colorists as Array<{ name: string }> | undefined;
-	return colorists?.map((c: { name: string }) => c.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(colorists);
 });
 
 const editorsString = computed(() => {
 	const editors = comicBookData.value?.editors as Array<{ name: string }> | undefined;
-	return editors?.map((e: { name: string }) => e.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(editors);
 });
 
 const coverArtistsString = computed(() => {
 	const coverArtists = comicBookData.value?.coverArtists as Array<{ name: string }> | undefined;
-	return coverArtists?.map((ca: { name: string }) => ca.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(coverArtists);
 });
 
 const publishersString = computed(() => {
 	const publishers = comicBookData.value?.publishers as Array<{ name: string }> | undefined;
-	return publishers?.map((p: { name: string }) => p.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(publishers);
 });
 
 const imprintsString = computed(() => {
 	const imprints = comicBookData.value?.imprints as Array<{ name: string }> | undefined;
-	return imprints?.map((i: { name: string }) => i.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(imprints);
 });
 
 const genresString = computed(() => {
 	const genres = comicBookData.value?.genres as Array<{ name: string }> | undefined;
-	return genres?.map((g: { name: string }) => g.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(genres);
 });
 
 const charactersString = computed(() => {
 	const characters = comicBookData.value?.characters as Array<{ name: string }> | undefined;
-	return characters?.map((c: { name: string }) => c.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(characters);
 });
 
 const teamsString = computed(() => {
 	const teams = comicBookData.value?.teams as Array<{ name: string }> | undefined;
-	return teams?.map((t: { name: string }) => t.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(teams);
 });
 
 const locationsString = computed(() => {
 	const locations = comicBookData.value?.locations as Array<{ name: string }> | undefined;
-	return locations?.map((l: { name: string }) => l.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(locations);
 });
 
 const storyArcsString = computed(() => {
 	const storyArcs = comicBookData.value?.storyArcs as Array<{ name: string }> | undefined;
-	return storyArcs?.map((sa: { name: string }) => sa.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(storyArcs);
 });
 
 const seriesGroupsString = computed(() => {
 	const seriesGroups = comicBookData.value?.seriesGroups as Array<{ name: string }> | undefined;
-	return seriesGroups?.map((sg: { name: string }) => sg.name).join(', ') ?? '';
+	return convertArrayOfCreditsToString(seriesGroups);
 });
 
 // Function to mark comic as read
@@ -187,8 +187,7 @@ const setComicToRead = async (comicBookId: number) => {
 	try {
 		const { error } = await apiClient.POST('/comic-books/{id}/read', {
 			params: {
-				path: { id: String(comicBookId) },
-				header: { authorization: 'Bearer ' }
+				path: { id: String(comicBookId) }
 			}
 		});
 
