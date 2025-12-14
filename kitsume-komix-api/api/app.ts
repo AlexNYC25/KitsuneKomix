@@ -11,6 +11,17 @@ import { CLIENT_URL } from "../utilities/environment.ts";
 
 const app = new OpenAPIHono();
 
+// CORS middleware must be registered BEFORE routes
+app.use(
+  "*",
+  cors({
+    origin: CLIENT_URL,
+    allowMethods: ["GET", "POST", "PUT", "DELETE"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Disposition", "Content-Length", "Content-Type"],
+  }),
+);
+
 // API routes (highest priority)
 app.route("/api", apiRouter);
 
@@ -19,15 +30,6 @@ app.route("/health", healthRouter);
 
 // Vue.js SPA (catch-all for everything else)
 app.route("/", webRouter);
-
-app.use(
-  "*",
-  cors({
-    origin: CLIENT_URL,
-    allowMethods: ["GET", "POST", "PUT", "DELETE"],
-    allowHeaders: ["Content-Type", "Authorization"],
-  }),
-);
 
 app.notFound((c) => {
   return c.json({ error: "Not Found" }, 404);
