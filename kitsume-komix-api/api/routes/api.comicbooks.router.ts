@@ -706,49 +706,112 @@ app.openapi(
 /**
  * Download a comic book by ID
  *
- * GET /api/comic-books/:id/download
+ * GET /api/comic-books/{id}/download
  *
  * This should return the comic book file as a download
+ * Requires authentication - only logged in users can download files
  * @param id - The ID of the comic book to download
  * @return The comic book file as a download
  *
  * TODO: TEST for large files
  */
-app.get("/:id/download", async (c) => {
-  const id = Number(c.req.param("id"));
-
-  const comic: ComicBook | null = await getComicBookById(id);
-  if (!comic) {
-    return c.notFound();
-  }
-
-  const filePath = comic.file_path;
-  const originalFileName = basename(filePath);
-
-  // Sanitize filename but preserve the original extension and more characters
-  // Remove only problematic characters for file systems
-  const sanitizedFileName = originalFileName.replace(/[<>:"/\\|?*]/g, "_");
-
-  // Handle comic book file types specifically
-  // Force generic binary download to prevent browser interpretation
-  const comicContentType = "application/octet-stream";
-
-  const fileOpen = await Deno.open(filePath, { read: true });
-  const fileSize = (await Deno.stat(filePath)).size;
-
-  // Create response with explicit headers
-  const response = new Response(fileOpen.readable, {
-    headers: {
-      "Content-Type": comicContentType,
-      "Content-Disposition": `attachment; filename="${sanitizedFileName}"`,
-      "Content-Length": fileSize.toString(),
-      "Cache-Control": "no-cache",
-      "X-Content-Type-Options": "nosniff",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}/download",
+    summary: "Download comic book",
+    description: "Download a comic book file. Requires authentication.",
+    tags: ["Comic Books"],
+    middleware: [requireAuth],
+    request: {
+      params: z.object({
+        id: z.string().regex(/^\d+$/).transform(Number).openapi({
+          description: "Comic book ID",
+          example: 1,
+        }),
+      }),
     },
-  });
+    responses: {
+      200: {
+        content: {
+          "application/octet-stream": {
+            schema: z.any(),
+          },
+        },
+        description: "Comic book file downloaded successfully",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized - User must be logged in",
+      },
+      404: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Comic book not found",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
+    },
+  }),
+  async (c) => {
+    const id = Number(c.req.param("id"));
 
-  return response;
-});
+    // Verify user is authenticated (middleware checks this, but being explicit)
+    const user = c.get("user");
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized - Must be logged in to download files" }, 401);
+    }
+
+    try {
+      const comic: ComicBook | null = await getComicBookById(id);
+      if (!comic) {
+        return c.json({ message: "Comic book not found" }, 404);
+      }
+
+      const filePath = comic.file_path;
+      const originalFileName = basename(filePath);
+
+      // Sanitize filename but preserve the original extension and more characters
+      // Remove only problematic characters for file systems
+      const sanitizedFileName = originalFileName.replace(/[<>:"/\\|?*]/g, "_");
+
+      // Handle comic book file types specifically
+      // Force generic binary download to prevent browser interpretation
+      const comicContentType = "application/octet-stream";
+
+      const fileOpen = await Deno.open(filePath, { read: true });
+      const fileSize = (await Deno.stat(filePath)).size;
+
+      // Create a proper Response object with headers and return it
+      return new Response(fileOpen.readable, {
+        status: 200,
+        headers: {
+          "Content-Type": comicContentType,
+          "Content-Disposition": `attachment; filename="${sanitizedFileName}"`,
+          "Content-Length": fileSize.toString(),
+          "Cache-Control": "no-cache",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
+    } catch (error) {
+      console.error("Error downloading comic book:", error);
+      return c.json({ message: "Failed to download comic book file" }, 500);
+    }
+  }
+);
 
 /**
  * Stream a comic book page by page, this should be the first step in a reading session
