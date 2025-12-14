@@ -7,6 +7,7 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
+import { useAuthStore } from '@/stores/auth';
 
 import { apiClient } from '@/utilities/apiClient';
 import { convertArrayOfCreditsToString } from '@/utilities/metadata';
@@ -20,6 +21,7 @@ import ComicThumbnail from '../components/ComicThumbnail.vue';
 const route = useRoute();
 
 const breadcrumbStore = useBreadcrumbStore();
+const authStore = useAuthStore();
 
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<ComicBookMetadata | null>(null);
@@ -28,6 +30,7 @@ const thumbnailUrl = ref<string | null>(null);
 const comicReaderRef = ref<InstanceType<typeof ComicReader>>();
 const isLoading = ref(true);
 const activeTab = ref(0);
+const isDownloading = ref(false);
 
 onMounted(async () => {
 	const id: string | string[] | undefined = route.params.id;
@@ -198,6 +201,65 @@ const setComicToRead = async (comicBookId: number) => {
 		console.error('Error marking comic as read:', error);
 	}
 };
+
+const downloadComic = async (comicBookId: number) => {
+	if (isDownloading.value) return; // Prevent duplicate downloads
+	
+	isDownloading.value = true;
+	try {
+		const response = await fetch(`http://localhost:8000/api/comic-books/${comicBookId}/download`, {
+			method: 'GET',
+			headers: {
+				'Authorization': `Bearer ${authStore.token}`
+			}
+		});
+
+		if (!response.ok) {
+			throw new Error(`Download failed: ${response.statusText}`);
+		}
+
+		// Get the filename from Content-Disposition header
+		// Format: attachment; filename="filename.ext"
+		const contentDisposition: string | null = response.headers.get('content-disposition');
+		// TODO: Replace fallback name with generated name from metadata
+		let filename: string = `comic-book-${comicBookId}`;
+		
+		if (contentDisposition) {
+			// Normalize whitespace (replace newlines and tabs with spaces)
+			const normalizedHeader: string = contentDisposition.replace(/[\n\r\t]+/g, ' ');
+			
+			let match: RegExpMatchArray | null = normalizedHeader.match(/filename="([^"]+)"/);
+			if (match && match[1]) {
+				filename = match[1];
+			} else {
+				match = normalizedHeader.match(/filename=([^;\s]+)/);
+				if (match && match[1]) {
+					filename = match[1].trim();
+				}
+			}
+		}
+
+		// Get the blob from the response
+		const blob: Blob = await response.blob();
+
+		const url: string = window.URL.createObjectURL(blob);
+
+		// Create a temporary anchor element and trigger download
+		const link: HTMLAnchorElement = document.createElement('a');
+		link.href = url;
+		link.download = filename;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+
+		// Clean up the URL object
+		window.URL.revokeObjectURL(url);
+	} catch (error) {
+		console.error('Error downloading comic:', error);
+	} finally {
+		isDownloading.value = false;
+	}
+};
 </script>
 
 <template>
@@ -266,7 +328,7 @@ const setComicToRead = async (comicBookId: number) => {
 						<div class="flex gap-2 mt-6 border-t border-gray-700 pt-4">
 							<Button label="Read Comic" icon="pi pi-book" severity="success" class="flex-1" @click="openComicReader" />
 							<Button label="Mark as Read" icon="pi pi-check" severity="info" class="flex-1" @click="setComicToRead(comicBookData.id)" />
-							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1" />
+							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)" />
 						</div>
 					</div>
 				</div>
