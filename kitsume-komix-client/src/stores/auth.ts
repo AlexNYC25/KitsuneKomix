@@ -52,7 +52,7 @@ export const useAuthStore = defineStore('auth', {
 			setAuthToken(this.token);
 			setRefreshToken(this.refreshToken);
 		},
-		async login({ username, password }: { username: string, password: string }) {
+		async login({ username, password, rememberMe }: { username: string, password: string, rememberMe: boolean }): Promise<boolean> {
 			this.loading = true;
 			this.error = null;
 
@@ -71,6 +71,13 @@ export const useAuthStore = defineStore('auth', {
 				this.token = data.accessToken;
 				this.refreshToken = data.refreshToken;
 				this.user = { id: data.user.id, email: data.user.email, admin: data.user.admin };
+				
+				if (!rememberMe) {
+					// If not remembering, clear tokens on unload
+					window.addEventListener('beforeunload', () => {
+						this.logout();
+					});
+				}
 				
 				this.persist();
 
