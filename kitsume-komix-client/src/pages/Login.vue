@@ -1,69 +1,114 @@
 <script setup lang="ts">
-import type { FormFieldState, FormSubmitEvent } from '@primevue/forms';
 
-
-import { reactive } from 'vue';
-import { z } from 'zod';
-import { Form } from '@primevue/forms';
-import { zodResolver } from '@primevue/forms/resolvers/zod';
-import { useAuthStore } from '@/stores/auth';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useForm, useField } from 'vee-validate';
 
-import InputText from 'primevue/inputtext';
-import Message from 'primevue/message';
-import Password from 'primevue/password';
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
+import { useAuthStore } from '@/stores/auth';
 
-const initialFormData = reactive({
-    email: '',
-    password: '',
-    rememberMe: false
-});
-
-const validateForm = zodResolver(
-  z.object({
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z.string().min(6, { message: "Password must be at least 6 characters long" })
-  })
-);
+import { validateEmailPassword } from '@/zod/login.schema.ts';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-const loginFormSubmit = async (event: FormSubmitEvent) => {
-  const success = await authStore.login({username: event.states.email.value, password: event.states.password.value});
-  if (success) {
-    const redirect = (route.query.redirect as string) || '/';
-    router.push(redirect);
+// Define validation schema with Zod
+const validationSchema = validateEmailPassword;
+
+// Setup form with vee-validate
+const { handleSubmit, isSubmitting } = useForm({
+  validationSchema,
+  initialValues: {
+    email: '',
+    password: '',
   }
-};
+});
+
+// Setup individual fields
+const { value: email, errorMessage: emailError } = useField('email');
+const { value: password, errorMessage: passwordError } = useField('password');
+
+const rememberMe = ref(false);
+
+// Handle form submission
+const loginFormSubmit = handleSubmit(async (values) => {
+  try {
+    const success = await authStore.login({
+      username: values.email,
+      password: values.password,
+      rememberMe: rememberMe.value
+    });
+
+    if (success) {
+      const redirect = (route.query.redirect as string) || '/';
+      router.push(redirect);
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+  }
+});
 </script>
 
 <template>
   <div id="login-page" class="flex justify-center items-center h-screen bg-gray-600">
-    <div class="card bg-black shadow-lg p-6 rounded-lg">
-      <div class="flex justify-center mb-4">
-        <h1 class="text-2xl font-bold mb-4 text-white">
+    <div class="bg-black shadow-lg p-8 rounded-lg w-full max-w-md">
+      <div class="flex justify-center mb-6">
+        <h1 class="text-2xl font-bold text-white">
           Kistume Komix Login
         </h1>
       </div>
-      <Form v-slot="$form" :formData="initialFormData" :resolver="validateForm" @submit="loginFormSubmit" class="flex justify-center flex-col gap-4">
-        <div class="flex flex-col gap-1">
-            <InputText name="email" placeholder="Email" />
-            <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">{{ $form.email.error.message }}</Message>
+      
+      <form @submit="loginFormSubmit" class="space-y-4">
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-white mb-1">Email</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            placeholder="Enter your email"
+            class="w-full px-3 py-2 bg-gray-700 border rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-1 transition-colors duration-200"
+            :class="emailError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-600 focus:border-blue-500 focus:ring-blue-500'"
+          />
+          <p v-if="emailError" class="mt-1 text-sm text-red-500">{{ emailError }}</p>
         </div>
-        <div class="flex flex-col gap-1">
-            <Password name="password" placeholder="Password" :feedback="false" toggleMask fluid/>
-            <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">{{ $form.password.error.message }}</Message>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-white mb-1">Password</label>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            placeholder="Enter your password"
+            class="w-full px-3 py-2 bg-gray-700 border rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-1 transition-colors duration-200"
+            :class="passwordError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-600 focus:border-blue-500 focus:ring-blue-500'"
+          />
+          <p v-if="passwordError" class="mt-1 text-sm text-red-500">{{ passwordError }}</p>
         </div>
-        <div class="flex align-items-center">
-          <Checkbox v-model="initialFormData.rememberMe" />
-          <label class="ml-2 text-white">Remember Me</label>
+
+        <!-- Remember Me Checkbox -->
+        <div class="flex items-center">
+          <input
+            id="rememberMe"
+            v-model="rememberMe"
+            type="checkbox"
+            class="w-4 h-4 accent-blue-500 bg-gray-700 border-gray-600 rounded cursor-pointer"
+          />
+          <label for="rememberMe" class="ml-2 text-sm text-white cursor-pointer">
+            Remember Me
+          </label>
         </div>
-        <Button type="submit" label="Submit" />
-      </Form>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          :disabled="isSubmitting"
+          class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-medium rounded-md transition-colors duration-200"
+        >
+          {{ isSubmitting ? 'Logging in...' : 'Login' }}
+        </button>
+      </form>
     </div>
   </div>
 </template>
