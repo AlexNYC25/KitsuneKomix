@@ -26,11 +26,14 @@ const authStore = useAuthStore();
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<ComicBookMetadata | null>(null);
 const thumbnailUrl = ref<string | null>(null);
+const comicBookListsData = ref<any[]>([]);
 
 const comicReaderRef = ref<InstanceType<typeof ComicReader>>();
 const isLoading = ref(true);
 const activeTab = ref(0);
 const isDownloading = ref(false);
+const showAddListDialog = ref(false);
+const listNameInput = ref('');
 
 onMounted(async () => {
 	const id: string | string[] | undefined = route.params.id;
@@ -416,7 +419,12 @@ const downloadComic = async (comicBookId: number) => {
 
 				<!-- Lists Tab -->
 				<TabPanel header="Lists" value="lists">
-					<div class="text-center py-8">
+					<div v-if="comicBookListsData.length === 0" class="text-center py-8">
+						<p class="text-gray-400 mb-4">Comic is not part of any lists</p>
+						<Button label="Add Comic To List" icon="pi pi-plus" severity="success" @click="showAddListDialog = true" />
+					</div>
+					<div v-else>
+						<!-- Lists content will go here -->
 						<p class="text-gray-400">Lists will be displayed here</p>
 					</div>
 				</TabPanel>
@@ -425,6 +433,27 @@ const downloadComic = async (comicBookId: number) => {
 			<!-- Comic Reader Modal -->
 			<ComicReader v-if="comicBookId && comicBookData" ref="comicReaderRef" :comicBookId="comicBookId"
 				:comicTitle="comicBookHeading" :comicBookData="comicBookData" />
+
+			<!-- Add Comic To List Dialog -->
+			<div v-if="showAddListDialog" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm">
+				<div class="bg-gray-900 rounded-lg p-6 w-full max-w-sm">
+					<h2 class="text-2xl font-bold text-white mb-4">Add Comic To List</h2>
+					
+					<div class="flex gap-2 mb-4">
+						<input
+							v-model="listNameInput"
+							type="text"
+							placeholder="Enter list name"
+							class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+						/>
+						<Button icon="pi pi-plus" @click="() => {}" />
+					</div>
+					
+					<div class="flex gap-2 justify-end">
+						<Button label="Cancel" severity="secondary" @click="showAddListDialog = false; listNameInput = ''" />
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<!-- Error state -->
