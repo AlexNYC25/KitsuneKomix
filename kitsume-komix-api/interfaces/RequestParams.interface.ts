@@ -31,3 +31,17 @@ export interface ComicBookQueryParams {
     | "genre";
   sortOrder?: "asc" | "desc";
 }
+
+export interface ComicStoryArcQueryParams {
+  // Pagination
+  offset?: number;
+  limit?: number;
+
+  // Filtering
+  nameFilter?: string;
+  descriptionFilter?: string;
+
+  // Sorting
+  sortBy?: "name" | "created_at" | "updated_at";
+  sortOrder?: "asc" | "desc";
+}
