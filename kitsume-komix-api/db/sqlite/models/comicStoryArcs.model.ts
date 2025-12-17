@@ -1,11 +1,155 @@
-import { eq } from "drizzle-orm";
+import { eq, and, asc, desc } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import type { ComicStoryArc } from "../../../types/index.ts";
+import type { ComicStoryArc} from "#types/index.ts";
+import type { ComicStoryArcQueryParams } from "../../../interfaces/RequestParams.interface.ts";
 import { comicBookStoryArcsTable, comicStoryArcsTable } from "../schema.ts";
+import { PAGE_SIZE_DEFAULT } from "../../../utilities/constants.ts";
 
-export const insertComicStoryArc = async (name: string): Promise<number> => {
+export const getAllComicStoryArcs = async (
+  params: ComicStoryArcQueryParams = {}
+): Promise<ComicStoryArc[]> => {
+  const { db, client } = getClient();
+
+  const {
+    offset = 0,
+    limit = PAGE_SIZE_DEFAULT,
+    nameFilter,
+    descriptionFilter,
+    sortBy,
+    sortOrder
+  } = params;
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+
+    const whereConditions = [];
+
+    if (nameFilter) {
+      whereConditions.push(eq(comicStoryArcsTable.name, nameFilter));
+    }
+
+    if (descriptionFilter) {
+      whereConditions.push(eq(comicStoryArcsTable.description, descriptionFilter));
+    }
+
+    let orderByColumn;
+
+    switch (sortBy) {
+      case "name":
+        orderByColumn = comicStoryArcsTable.name;
+        break;
+      case "created_at":
+        orderByColumn = comicStoryArcsTable.created_at;
+        break;
+      case "updated_at":
+        orderByColumn = comicStoryArcsTable.updated_at;
+        break;
+      default:
+        orderByColumn = comicStoryArcsTable.id;
+        break;
+    }
+
+    const baseQuery = db.select().from(comicStoryArcsTable).$dynamic();
+
+    // Apply where conditions
+    const finalQuery = whereConditions.length > 0
+          ? baseQuery.where(and(...whereConditions))
+          : baseQuery;
+
+
+    const result = await finalQuery
+          .orderBy(sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn))
+          .limit(limit)
+          .offset(offset);
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching all comic story arcs:", error);
+    throw new Error("Failed to fetch all comic story arcs.");
+  }
+};
+
+export const getComicStoryArcById = async (
+  storyArcId: number,
+): Promise<ComicStoryArc | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(comicStoryArcsTable)
+      .where(eq(comicStoryArcsTable.id, storyArcId));
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error(
+      `Error fetching comic story arc by ID ${storyArcId}:`,
+      error,
+    );
+    throw new Error("Failed to fetch comic story arc by ID.");
+  }
+};
+
+export const getComicsInStoryArc = async (
+  storyArcId: number,
+): Promise<number[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select({ comic_book_id: comicBookStoryArcsTable.comic_book_id })
+      .from(comicBookStoryArcsTable)
+      .where(eq(comicBookStoryArcsTable.comic_story_arc_id, storyArcId));
+
+    return result.map((row) => row.comic_book_id);
+  } catch (error) {
+    console.error(
+      `Error fetching comics in story arc ID ${storyArcId}:`,
+      error,
+    );
+    throw new Error("Failed to fetch comics in story arc.");
+  }
+};
+
+export const getComicStoryArcByName = async (
+  name: string,
+): Promise<ComicStoryArc | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(comicStoryArcsTable)
+      .where(eq(comicStoryArcsTable.name, name));
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error(
+      `Error fetching comic story arc by name ${name}:`,
+      error,
+    );
+    throw new Error("Failed to fetch comic story arc by name.");
+  }
+};
+
+export const insertComicStoryArc = async (name: string, description?: string ): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -15,7 +159,7 @@ export const insertComicStoryArc = async (name: string): Promise<number> => {
   try {
     const result = await db
       .insert(comicStoryArcsTable)
-      .values({ name })
+      .values({ name, description })
       .onConflictDoNothing()
       .returning({ id: comicStoryArcsTable.id });
 
@@ -45,6 +189,25 @@ export const insertComicStoryArc = async (name: string): Promise<number> => {
   } catch (error) {
     console.error("Error inserting comic story arc:", error);
     throw new Error("Failed to insert comic story arc.");
+  }
+};
+
+export const deleteComicStoryArcById = async (
+  storyArcId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicStoryArcsTable)
+      .where(eq(comicStoryArcsTable.id, storyArcId));
+  } catch (error) {
+    console.error("Error deleting comic story arc by ID:", error);
+    throw new Error("Failed to delete comic story arc by ID.");
   }
 };
 
@@ -99,3 +262,4 @@ export const getStoryArcsByComicBookId = async (
     throw new Error("Failed to fetch story arcs for comic book.");
   }
 };
+
