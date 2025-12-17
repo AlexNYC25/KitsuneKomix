@@ -280,7 +280,6 @@ app.openapi(
         filterProperty: undefined,
       },
       {
-        sort: "created_at",
         sortProperty: "created_at",
         sortOrder: "desc",
       },
@@ -358,7 +357,6 @@ app.openapi(
         filterProperty: undefined,
       },
       {
-        sort: "publication_date",
         sortProperty: "publication_year",
         sortOrder: "desc",
       },
