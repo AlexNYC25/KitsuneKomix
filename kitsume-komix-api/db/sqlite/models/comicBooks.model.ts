@@ -45,7 +45,7 @@ import {
   COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
   // Constants (imported as values since they're used at runtime)
   COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
-} from "../../../types/index.ts";
+} from "#types/index.ts";
 import type { ComicBookQueryParams } from "../../../interfaces/RequestParams.interface.ts";
 
 export const getComicBooksWithMetadataFilteringSoring = async (
@@ -638,33 +638,6 @@ export const getComicBooksWithMetadataFilteringSoring = async (
   }
 };
 
-export const getAllComicBooks = async (
-  offset: number,
-  limit: number,
-  sort: string | undefined,
-): Promise<ComicBook[]> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result = await db.select().from(comicBooksTable).limit(limit).offset(
-      offset,
-    ).orderBy(
-      sort === "asc"
-        ? asc(comicBooksTable.file_path)
-        : desc(comicBooksTable.file_path),
-    );
-
-    return result;
-  } catch (error) {
-    console.error("Error fetching all comic books:", error);
-    throw error;
-  }
-};
-
 export const getAllComicBooksSortByDate = async (
   offset: number,
   limit: number,
@@ -688,32 +661,6 @@ export const getAllComicBooksSortByDate = async (
     return result;
   } catch (error) {
     console.error("Error fetching all comic books sorted by date:", error);
-    throw error;
-  }
-};
-
-export const getAllComicBooksSortByFileName = async (
-  letter: string,
-  limit: number = 50,
-  offset: number = 0,
-): Promise<ComicBook[]> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const likeQuery = `${letter}%`;
-    const result = await db.select().from(comicBooksTable).where(
-      sql`${comicBooksTable.file_path} LIKE ${likeQuery}`,
-    ).orderBy(desc(comicBooksTable.file_path))
-      .limit(limit)
-      .offset(offset);
-
-    return result;
-  } catch (error) {
-    console.error("Error fetching comic books by starting letter:", error);
     throw error;
   }
 };
