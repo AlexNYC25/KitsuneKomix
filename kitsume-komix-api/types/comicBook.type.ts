@@ -49,7 +49,6 @@ export type RequestPaginationParametersValidated = {
 };
 
 export type RequestSortParameters = {
-  sort?: string;
   sortProperty?: string;
   sortOrder?: "asc" | "desc";
 };
