@@ -119,8 +119,6 @@ import {
   updateComicBookHistory,
 } from "../../db/sqlite/models/comicBookHistory.model.ts";
 
-const DEFAULT_PAGE_SIZE = 20;
-
 export const getComicBooksWithRelatedMetadata = async (
   filters: ComicBookFilterItem[] = [],
   sortProperty: AllowedSortProperties = "created_at",
@@ -271,10 +269,8 @@ export const fetchAllComicBooksWithRelatedData = async (
   );
 
   try {
-    // Execute the database query with efficient JOINs
     const comicsFromDb = await getComicBooksWithMetadata(queryParams);
 
-    // Determine if there's a next page
     const hasNextPage =
       comicsFromDb.length > validatedPaginationParameters.pageSize;
     const comics = hasNextPage
@@ -298,7 +294,7 @@ export const fetchAllComicBooksWithRelatedData = async (
       isFiltered: !!(requestFilterParameters.filterProperty &&
         requestFilterParameters.filter),
       isSorted:
-        !!(requestSortParameters.sortProperty && requestSortParameters.sort),
+        !!(requestSortParameters.sortProperty && requestSortParameters.sortOrder),
     };
   } catch (error) {
     console.error("Error fetching all comic books:", error);
