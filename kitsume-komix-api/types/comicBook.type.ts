@@ -43,6 +43,11 @@ export type RequestPaginationParameters = {
   pageSize?: number;
 };
 
+export type RequestPaginationParametersValidated = {
+  page: number;
+  pageSize: number;
+};
+
 export type RequestSortParameters = {
   sort?: string;
   sortProperty?: string;
