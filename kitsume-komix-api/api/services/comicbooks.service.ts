@@ -6,6 +6,11 @@ import {
 } from "../../utilities/extract.ts";
 
 import {
+  buildComicBookQueryParams,
+  validatePaginationParameters,
+} from "../../utilities/parameters.ts";
+
+import {
   AllowedSortProperties,
   COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
   // Constants
@@ -24,6 +29,7 @@ import {
   // Request parameter types
   RequestPaginationParameters,
   RequestSortParameters,
+  RequestPaginationParametersValidated
 } from "../../types/index.ts";
 import {
   getAllComicBooksSortByDate,
@@ -256,139 +262,23 @@ export const fetchAllComicBooksWithRelatedData = async (
   requestSortParameters: RequestSortParameters,
 ) => {
   // Set default pagination values
-  if (
-    !requestPaginationParameters.page || requestPaginationParameters.page < 1
-  ) {
-    requestPaginationParameters.page = 1;
-  }
+  const validatedPaginationParameters: RequestPaginationParametersValidated = validatePaginationParameters(requestPaginationParameters);
 
-  if (
-    !requestPaginationParameters.pageSize ||
-    requestPaginationParameters.pageSize < 1
-  ) {
-    requestPaginationParameters.pageSize = DEFAULT_PAGE_SIZE;
-  }
-
-  // Calculate offset for pagination
-  const offset = (requestPaginationParameters.page - 1) *
-    requestPaginationParameters.pageSize;
+  const queryParams: ComicBookQueryParams = buildComicBookQueryParams(
+    validatedPaginationParameters,
+    requestFilterParameters,
+    requestSortParameters
+  );
 
   try {
-    // Build the query parameters for the new database function
-    const queryParams: ComicBookQueryParams = {
-      offset,
-      limit: requestPaginationParameters.pageSize + 1, // +1 to check for next page
-    };
-
-    // Map filter parameters
-    if (
-      requestFilterParameters.filterProperty && requestFilterParameters.filter
-    ) {
-      const filterValue = requestFilterParameters.filter.trim();
-      const filterProperty = requestFilterParameters.filterProperty
-        .toLowerCase();
-
-      switch (filterProperty) {
-        case "title":
-          queryParams.titleFilter = filterValue;
-          break;
-        case "series":
-        case "series_name":
-          queryParams.seriesFilter = filterValue;
-          break;
-        case "writer":
-        case "writers":
-          queryParams.writerFilter = filterValue;
-          break;
-        case "artist":
-        case "penciller":
-        case "inker":
-        case "colorist":
-        case "cover_artist":
-          queryParams.artistFilter = filterValue;
-          break;
-        case "publisher":
-        case "publishers":
-          queryParams.publisherFilter = filterValue;
-          break;
-        case "genre":
-        case "genres":
-          queryParams.genreFilter = filterValue;
-          break;
-        case "character":
-        case "characters":
-          queryParams.characterFilter = filterValue;
-          break;
-        case "year":
-        case "publication_year": {
-          const yearNum = parseInt(filterValue);
-          if (!isNaN(yearNum)) {
-            queryParams.yearFilter = yearNum;
-          }
-          break;
-        }
-        default:
-          // Use general filter for unrecognized properties
-          queryParams.generalFilter = filterValue;
-          break;
-      }
-    }
-
-    // Map sort parameters
-    if (requestSortParameters.sortProperty && requestSortParameters.sort) {
-      const sortProperty = requestSortParameters.sortProperty.toLowerCase();
-
-      // Map sort properties to the database function's expected values
-      switch (sortProperty) {
-        case "title":
-          queryParams.sortBy = "title";
-          break;
-        case "series":
-        case "series_name":
-          queryParams.sortBy = "series";
-          break;
-        case "issue_number":
-          queryParams.sortBy = "issue_number";
-          break;
-        case "publication_year":
-        case "year":
-          queryParams.sortBy = "publication_year";
-          break;
-        case "created_at":
-          queryParams.sortBy = "created_at";
-          break;
-        case "updated_at":
-          queryParams.sortBy = "updated_at";
-          break;
-        case "file_name":
-        case "file_path":
-          queryParams.sortBy = "file_name";
-          break;
-        case "writer":
-          queryParams.sortBy = "writer";
-          break;
-        case "publisher":
-          queryParams.sortBy = "publisher";
-          break;
-        case "genre":
-          queryParams.sortBy = "genre";
-          break;
-        default:
-          queryParams.sortBy = "created_at";
-          break;
-      }
-
-      queryParams.sortOrder = requestSortParameters.sortOrder || "asc";
-    }
-
     // Execute the database query with efficient JOINs
     const comicsFromDb = await getComicBooksWithMetadata(queryParams);
 
     // Determine if there's a next page
     const hasNextPage =
-      comicsFromDb.length > requestPaginationParameters.pageSize;
+      comicsFromDb.length > validatedPaginationParameters.pageSize;
     const comics = hasNextPage
-      ? comicsFromDb.slice(0, requestPaginationParameters.pageSize)
+      ? comicsFromDb.slice(0, validatedPaginationParameters.pageSize)
       : comicsFromDb;
 
     // Convert to ComicBookWithMetadata by attaching all related data
@@ -427,28 +317,15 @@ export const fetchAllComicBooksWithRelatedData = async (
 export const fetchComicDuplicatesInTheDb = async (
   requestPaginationParameters: RequestPaginationParameters,
 ): Promise<ComicBook[]> => {
-  // Set default pagination values
-  if (
-    !requestPaginationParameters.page || requestPaginationParameters.page < 1
-  ) {
-    requestPaginationParameters.page = 1;
-  }
-
-  if (
-    !requestPaginationParameters.pageSize ||
-    requestPaginationParameters.pageSize < 1
-  ) {
-    requestPaginationParameters.pageSize = DEFAULT_PAGE_SIZE;
-  }
+  const validatedPaginationParameters: RequestPaginationParametersValidated = validatePaginationParameters(requestPaginationParameters);
 
   // Calculate offset for pagination
-  const offset = (requestPaginationParameters.page - 1) *
-    requestPaginationParameters.pageSize;
-
+  const offset = (validatedPaginationParameters.page - 1) *
+    validatedPaginationParameters.pageSize;
   try {
     const duplicates = await getComicDuplicates(
       offset,
-      requestPaginationParameters.pageSize,
+      validatedPaginationParameters.pageSize,
     );
 
     return duplicates;
@@ -492,30 +369,18 @@ export const fetchComicBooksByLetter = async (
   requestPaginationParameters: RequestPaginationParameters,
 ): Promise<ComicBookWithMetadata[]> => {
   const letterFormatted = letter.toLowerCase().trim();
-  // Set default pagination values
-  if (
-    !requestPaginationParameters.page || requestPaginationParameters.page < 1
-  ) {
-    requestPaginationParameters.page = 1;
-  }
-
-  if (
-    !requestPaginationParameters.pageSize ||
-    requestPaginationParameters.pageSize < 1
-  ) {
-    requestPaginationParameters.pageSize = DEFAULT_PAGE_SIZE;
-  }
+  
+  const validatedPaginationParameters: RequestPaginationParametersValidated = validatePaginationParameters(requestPaginationParameters);
 
   // Calculate offset for pagination
-  const offset = (requestPaginationParameters.page - 1) *
-    requestPaginationParameters.pageSize;
-
+  const offset = (validatedPaginationParameters.page - 1) *
+    validatedPaginationParameters.pageSize;
   try {
     // Use the optimized getComicBooksWithMetadata with title filter for letter matching, passing a % wildcard after the specified letter
     const queryParams: ComicBookQueryParams = {
       titleFilter: `${letterFormatted}%`,
       offset: offset,
-      limit: requestPaginationParameters.pageSize,
+      limit: validatedPaginationParameters.pageSize,
       sortBy: "title",
       sortOrder: "asc",
     };
