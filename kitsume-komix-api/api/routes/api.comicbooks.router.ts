@@ -44,7 +44,6 @@ import type { AppEnv } from "../../types/index.ts";
 
 import { ComicBooksResponseSchema, FlexibleResponseSchema, ComicBookMetadataResponseSchema, SuccessResponseSchema, ErrorResponseSchema, ComicBookReadByUserResponseSchema, ComicBookThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
 import { PaginationQuerySchema, ComicBookUpdateSchema, ParamIdSchema } from "../../zod/schemas/request.schema.ts";
-import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import { requireAuth } from "../middleware/authChecks.ts";
 
 const app = new OpenAPIHono<AppEnv>();
@@ -239,7 +238,7 @@ app.openapi(
         description: "Page number for pagination",
         example: 1,
       }),
-  pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 10)).openapi({
+      pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 10)).openapi({
         description: "Number of items per page",
         example: 10,
       }),
