@@ -86,7 +86,7 @@ export const validatePaginationParameters = (
  * @param filterValue The filter value to apply
  * @returns Object with mapped query parameter key and value, or null if invalid
  */
-export const mapFilterPropertyToQueryParam = (
+export const mapComicFilterPropertyToQueryParam = (
 	filterProperty: string,
 	filterValue: string
 ): { key: string; value: string | number } | null => {
@@ -142,7 +142,7 @@ export const mapFilterPropertyToQueryParam = (
  * @param sortOrder The sort order (asc/desc), defaults to "asc"
  * @returns Object with mapped sortBy column name and sortOrder, or null if invalid
  */
-export const mapSortPropertyToQueryParam = (
+export const mapComicSortPropertyToQueryParam = (
 	sortProperty: string,
 	sortOrder: string = FILTER_SORT_DEFAULT
 ): { sortBy: string; sortOrder: string } | null => {
@@ -207,6 +207,81 @@ export const mapSortPropertyToQueryParam = (
 };
 
 /**
+ * Maps filter property names to their corresponding query parameter names.
+ * Handles aliases for common filter fields.
+ * 
+ * @param filterProperty The filter property name to map
+ * @param filterValue The filter value to apply
+ * @returns Object with mapped query parameter key and value, or null if invalid
+ */
+export const mapReadlistFilterPropertyToQueryParam = (
+	filterProperty: string,
+	filterValue: string
+): { key: string; value: string | number } | null => {
+	if (!filterProperty || !filterValue) {
+		return null;
+	}
+
+	const trimmedValue = filterValue.trim();
+	const normalizedProperty = filterProperty.toLowerCase();
+
+	switch (normalizedProperty) {
+		case "name":
+			return { key: "nameFilter", value: trimmedValue };
+		case "description":
+			return { key: "descriptionFilter", value: trimmedValue };
+		default:
+			// Use general filter for unrecognized properties
+			return { key: "generalFilter", value: trimmedValue };
+	}
+};
+
+/**
+ * Maps sort property names to their corresponding database column names.
+ * Handles aliases for common sort fields and defaults to "created_at" if unrecognized.
+ * 
+ * @param sortProperty The sort property name to map
+ * @param sortOrder The sort order (asc/desc), defaults to "asc"
+ * @returns Object with mapped sortBy column name and sortOrder, or null if invalid
+ */
+export const mapReadlistSortPropertyToQueryParam = (
+	sortProperty: string,
+	sortOrder: string = FILTER_SORT_DEFAULT
+): { sortBy: string; sortOrder: string } | null => {
+	if (!sortProperty) {
+		return null;
+	}
+
+	const normalizedProperty = sortProperty.toLowerCase();
+	const normalizedOrder = sortOrder.toLowerCase();
+
+	// Validate sort order
+	const validSortOrder = (normalizedOrder === "asc" || normalizedOrder === "desc") 
+		? normalizedOrder 
+		: FILTER_SORT_DEFAULT;
+
+	// Map sort properties to database columns
+	let sortByColumn: string;
+	switch (normalizedProperty) {
+		case "name":
+			sortByColumn = "name";
+			break;
+		case "description":
+			sortByColumn = "description";
+			break;
+		default:
+			// Default to created_at for unrecognized properties
+			sortByColumn = "created_at";
+			break;
+	}
+
+	return {
+		sortBy: sortByColumn,
+		sortOrder: validSortOrder
+	};
+};
+
+/**
  * Builds a ComicBookQueryParams object from request parameters.
  * Combines pagination, filter, and sort parameters into a single query object.
  * 
@@ -231,7 +306,7 @@ export const buildComicBookQueryParams = (
 
 	// Apply filter if provided
 	if (filterParams.filterProperty && filterParams.filter) {
-		const filterMapping = mapFilterPropertyToQueryParam(
+		const filterMapping = mapComicFilterPropertyToQueryParam(
 			filterParams.filterProperty,
 			filterParams.filter
 		);
@@ -244,7 +319,7 @@ export const buildComicBookQueryParams = (
 
 	// Apply sort if provided
 	if (sortParams.sortProperty && sortParams.sortOrder) {
-		const sortMapping = mapSortPropertyToQueryParam(
+		const sortMapping = mapComicSortPropertyToQueryParam(
 			sortParams.sortProperty,
 			sortParams.sortOrder
 		);
@@ -257,3 +332,56 @@ export const buildComicBookQueryParams = (
 
 	return queryParams;
 };
+
+
+/**
+ * Builds a ComicBookQueryParams object from request parameters.
+ * Combines pagination, filter, and sort parameters into a single query object.
+ * 
+ * @param paginationParams Validated pagination parameters (page, pageSize)
+ * @param filterParams Filter parameters (filterProperty, filter)
+ * @param sortParams Sort parameters (sortProperty, sortOrder)
+ * @returns ComicBookQueryParams object ready for database query
+ */
+export const buildReadListQueryParams = (
+	paginationParams: RequestPaginationParametersValidated,
+	filterParams: RequestFilterParameters,
+	sortParams: RequestSortParameters
+): ComicBookQueryParams => {
+	// Calculate offset for pagination
+	const offset = (paginationParams.page - 1) * paginationParams.pageSize;
+
+	// Initialize query params with pagination
+	const queryParams: ComicBookQueryParams = {
+		offset,
+		limit: paginationParams.pageSize + 1, // +1 to check for next page
+	};
+
+	// Apply filter if provided
+	if (filterParams.filterProperty && filterParams.filter) {
+		const filterMapping = mapReadlistFilterPropertyToQueryParam(
+			filterParams.filterProperty,
+			filterParams.filter
+		);
+
+		if (filterMapping) {
+			queryParams[filterMapping.key as keyof ComicBookQueryParams] =
+				filterMapping.value as never;
+		}
+	}
+
+	// Apply sort if provided
+	if (sortParams.sortProperty && sortParams.sortOrder) {
+		const sortMapping = mapReadlistSortPropertyToQueryParam(
+			sortParams.sortProperty,
+			sortParams.sortOrder
+		);
+
+		if (sortMapping) {
+			queryParams.sortBy = sortMapping.sortBy as ComicBookQueryParams["sortBy"];
+			queryParams.sortOrder = sortMapping.sortOrder as "asc" | "desc";
+		}
+	}
+
+	return queryParams;
+}
