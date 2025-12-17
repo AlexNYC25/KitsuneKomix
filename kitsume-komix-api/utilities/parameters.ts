@@ -11,7 +11,7 @@ import {
 	FILTER_SORT_DEFAULT
 } from "../utilities/constants.ts";
 
-import type { ComicBookQueryParams } from "../interfaces/RequestParams.interface.ts";
+import type { ComicBookQueryParams, ComicStoryArcQueryParams } from "../interfaces/RequestParams.interface.ts";
 
 /**
  * Validates and sanitizes filter parameters.
@@ -343,16 +343,16 @@ export const buildComicBookQueryParams = (
  * @param sortParams Sort parameters (sortProperty, sortOrder)
  * @returns ComicBookQueryParams object ready for database query
  */
-export const buildReadListQueryParams = (
+export const buildStoryArcQueryParams = (
 	paginationParams: RequestPaginationParametersValidated,
 	filterParams: RequestFilterParameters,
 	sortParams: RequestSortParameters
-): ComicBookQueryParams => {
+): ComicStoryArcQueryParams => {
 	// Calculate offset for pagination
 	const offset = (paginationParams.page - 1) * paginationParams.pageSize;
 
 	// Initialize query params with pagination
-	const queryParams: ComicBookQueryParams = {
+	const queryParams: ComicStoryArcQueryParams = {
 		offset,
 		limit: paginationParams.pageSize + 1, // +1 to check for next page
 	};
@@ -365,7 +365,7 @@ export const buildReadListQueryParams = (
 		);
 
 		if (filterMapping) {
-			queryParams[filterMapping.key as keyof ComicBookQueryParams] =
+			queryParams[filterMapping.key as keyof ComicStoryArcQueryParams] =
 				filterMapping.value as never;
 		}
 	}
@@ -378,7 +378,7 @@ export const buildReadListQueryParams = (
 		);
 
 		if (sortMapping) {
-			queryParams.sortBy = sortMapping.sortBy as ComicBookQueryParams["sortBy"];
+			queryParams.sortBy = sortMapping.sortBy as ComicStoryArcQueryParams["sortBy"];
 			queryParams.sortOrder = sortMapping.sortOrder as "asc" | "desc";
 		}
 	}
