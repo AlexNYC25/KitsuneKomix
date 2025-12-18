@@ -1,7 +1,12 @@
 import { getClient } from "../client.ts";
 import { comicBookCovers } from "../schema.ts";
-import { eq } from "drizzle-orm";
 
+/**
+ * Insertion function for a new comic book cover record
+ * @param comicPageId Id of the page within the comic page table
+ * @param filePath The internal path to the image from within the comic archive
+ * @returns The id of the new record
+ */
 export const insertComicBookCover = async (
   comicPageId: number,
   filePath: string,
@@ -16,8 +21,8 @@ export const insertComicBookCover = async (
     const result = await db
       .insert(comicBookCovers)
       .values({
-        comic_page_id: comicPageId,
-        file_path: filePath,
+        comicPageId: comicPageId,
+        filePath: filePath,
       })
       .returning({ id: comicBookCovers.id });
 

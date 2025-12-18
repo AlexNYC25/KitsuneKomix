@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
@@ -6,7 +6,7 @@ import { comicBookHistoryTable } from "../schema.ts";
 import type {
   ComicBookHistory,
   NewComicBookHistory,
-} from "../../../types/index.ts";
+} from "#types/index.ts";
 
 export const insertComicBookHistory = async (
   historyData: NewComicBookHistory,
@@ -46,8 +46,8 @@ export const getComicBookHistoryByUserAndComic = async (
       .from(comicBookHistoryTable)
       .where(
         and(
-          eq(comicBookHistoryTable.user_id, userId),
-          eq(comicBookHistoryTable.comic_book_id, comicBookId),
+          eq(comicBookHistoryTable.userId, userId),
+          eq(comicBookHistoryTable.comicBookId, comicBookId),
         ),
       )
       .all();

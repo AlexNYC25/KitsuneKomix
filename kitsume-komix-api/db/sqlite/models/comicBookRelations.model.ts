@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import {
   comicBookCharactersTable,
@@ -22,8 +23,8 @@ import type {
   NewComicBookPenciller,
   NewComicBookPublisher,
   NewComicBookWriter,
-} from "../../../types/index.ts";
-import { eq } from "drizzle-orm";
+} from "#types/index.ts";
+
 
 // Writers
 export const addComicBookWriter = async (
@@ -63,8 +64,8 @@ export const removeComicBookWriter = async (
     const result = await db
       .delete(comicBookWritersTable)
       .where(
-        eq(comicBookWritersTable.comic_book_id, comicBookId) &&
-          eq(comicBookWritersTable.comic_writer_id, writerId),
+        eq(comicBookWritersTable.comicBookId, comicBookId) &&
+        eq(comicBookWritersTable.comicWriterId, writerId),
       )
       .returning({ id: comicBookWritersTable.id });
 
@@ -185,49 +186,49 @@ export const removeAllComicBookRelations = async (
     // Remove all relationship entries for this comic book
     await Promise.all([
       db.delete(comicBookWritersTable).where(
-        eq(comicBookWritersTable.comic_book_id, comicBookId),
+        eq(comicBookWritersTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookPencillersTable).where(
-        eq(comicBookPencillersTable.comic_book_id, comicBookId),
+        eq(comicBookPencillersTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookInkersTable).where(
-        eq(comicBookInkersTable.comic_book_id, comicBookId),
+        eq(comicBookInkersTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookColoristsTable).where(
-        eq(comicBookColoristsTable.comic_book_id, comicBookId),
+        eq(comicBookColoristsTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookLetterersTable).where(
-        eq(comicBookLetterersTable.comic_book_id, comicBookId),
+        eq(comicBookLetterersTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookEditorsTable).where(
-        eq(comicBookEditorsTable.comic_book_id, comicBookId),
+        eq(comicBookEditorsTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookCoverArtistsTable).where(
-        eq(comicBookCoverArtistsTable.comic_book_id, comicBookId),
+        eq(comicBookCoverArtistsTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookPublishersTable).where(
-        eq(comicBookPublishersTable.comic_book_id, comicBookId),
+        eq(comicBookPublishersTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookImprintsTable).where(
-        eq(comicBookImprintsTable.comic_book_id, comicBookId),
+        eq(comicBookImprintsTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookGenresTable).where(
-        eq(comicBookGenresTable.comic_book_id, comicBookId),
+        eq(comicBookGenresTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookCharactersTable).where(
-        eq(comicBookCharactersTable.comic_book_id, comicBookId),
+        eq(comicBookCharactersTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookLocationsTable).where(
-        eq(comicBookLocationsTable.comic_book_id, comicBookId),
+        eq(comicBookLocationsTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookTeamsTable).where(
-        eq(comicBookTeamsTable.comic_book_id, comicBookId),
+        eq(comicBookTeamsTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookStoryArcsTable).where(
-        eq(comicBookStoryArcsTable.comic_book_id, comicBookId),
+        eq(comicBookStoryArcsTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookSeriesGroupsTable).where(
-        eq(comicBookSeriesGroupsTable.comic_book_id, comicBookId),
+        eq(comicBookSeriesGroupsTable.comicBookId, comicBookId),
       ),
     ]);
   } catch (error) {
