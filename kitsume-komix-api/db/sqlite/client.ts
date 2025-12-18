@@ -9,14 +9,14 @@ let db: ReturnType<typeof drizzle> | null = null;
 
 export const getClient = () => {
   if (!client) {
-    client = createClient({ url: `file:${DB_PATH}` });
-    db = drizzle(client);
+    client = createClient({ url: `file:${DB_PATH}`});
+    db = drizzle(client, { casing: "snake_case" });
   }
   return { client, db };
 };
 
 export const createNewClient = () => {
   const newClient = createClient({ url: `file:${DB_PATH}` });
-  const newDb = drizzle(newClient);
+  const newDb = drizzle(newClient, { casing: "snake_case" });
   return { client: newClient, db: newDb };
 };
