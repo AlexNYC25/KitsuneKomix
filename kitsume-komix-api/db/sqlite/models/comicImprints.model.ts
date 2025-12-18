@@ -61,7 +61,7 @@ export const linkImprintToComicBook = async (
   try {
     await db
       .insert(comicBookImprintsTable)
-      .values({ comic_imprint_id: imprintId, comic_book_id: comicBookId })
+      .values({ comicImprintId: imprintId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking imprint to comic book:", error);
@@ -81,16 +81,16 @@ export const getImprintsByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_imprint: comicImprintsTable,
+        comicImprint: comicImprintsTable,
       })
       .from(comicImprintsTable)
       .innerJoin(
         comicBookImprintsTable,
-        eq(comicImprintsTable.id, comicBookImprintsTable.comic_imprint_id),
+        eq(comicImprintsTable.id, comicBookImprintsTable.comicImprintId),
       )
-      .where(eq(comicBookImprintsTable.comic_book_id, comicBookId));
+      .where(eq(comicBookImprintsTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_imprint);
+    return result.map((row) => row.comicImprint);
   } catch (error) {
     console.error("Error fetching imprints by comic book ID:", error);
     throw error;

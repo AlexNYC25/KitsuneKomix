@@ -61,7 +61,7 @@ export const linkCharacterToComicBook = async (
   try {
     await db
       .insert(comicBookCharactersTable)
-      .values({ comic_character_id: characterId, comic_book_id: comicBookId })
+      .values({ comicCharacterId: characterId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking character to comic book:", error);
@@ -88,10 +88,10 @@ export const getCharactersByComicBookId = async (
         comicBookCharactersTable,
         eq(
           comicCharactersTable.id,
-          comicBookCharactersTable.comic_character_id,
+          comicBookCharactersTable.comicCharacterId,
         ),
       )
-      .where(eq(comicBookCharactersTable.comic_book_id, comicBookId));
+      .where(eq(comicBookCharactersTable.comicBookId, comicBookId));
 
     return result.map((row) => row.comic_character);
   } catch (error) {

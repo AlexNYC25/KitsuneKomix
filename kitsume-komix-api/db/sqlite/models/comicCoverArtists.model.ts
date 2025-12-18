@@ -65,8 +65,8 @@ export const linkCoverArtistToComicBook = async (
     await db
       .insert(comicBookCoverArtistsTable)
       .values({
-        comic_cover_artist_id: coverArtistId,
-        comic_book_id: comicBookId,
+        comicCoverArtistId: coverArtistId,
+        comicBookId: comicBookId,
       })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
@@ -87,19 +87,19 @@ export const getCoverArtistsByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_cover_artist: comicCoverArtistsTable,
+        comicCoverArtist: comicCoverArtistsTable,
       })
       .from(comicCoverArtistsTable)
       .innerJoin(
         comicBookCoverArtistsTable,
         eq(
           comicCoverArtistsTable.id,
-          comicBookCoverArtistsTable.comic_cover_artist_id,
+          comicBookCoverArtistsTable.comicCoverArtistId,
         ),
       )
-      .where(eq(comicBookCoverArtistsTable.comic_book_id, comicBookId));
+      .where(eq(comicBookCoverArtistsTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_cover_artist);
+    return result.map((row) => row.comicCoverArtist);
   } catch (error) {
     console.error("Error fetching cover artists by comic book ID:", error);
     throw error;

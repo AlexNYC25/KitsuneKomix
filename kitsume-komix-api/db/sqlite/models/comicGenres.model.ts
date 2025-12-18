@@ -61,7 +61,7 @@ export const linkGenreToComicBook = async (
   try {
     await db
       .insert(comicBookGenresTable)
-      .values({ comic_genre_id: genreId, comic_book_id: comicBookId })
+      .values({ comicGenreId: genreId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking genre to comic book:", error);
@@ -81,16 +81,16 @@ export const getGenresForComicBook = async (
   try {
     const result = await db
       .select({
-        comic_genre: comicGenresTable,
+        comicGenre: comicGenresTable,
       })
       .from(comicGenresTable)
       .innerJoin(
         comicBookGenresTable,
-        eq(comicGenresTable.id, comicBookGenresTable.comic_genre_id),
+        eq(comicGenresTable.id, comicBookGenresTable.comicGenreId),
       )
-      .where(eq(comicBookGenresTable.comic_book_id, comicBookId));
+      .where(eq(comicBookGenresTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_genre);
+    return result.map((row) => row.comicGenre);
   } catch (error) {
     console.error("Error fetching genres for comic book:", error);
     throw error;

@@ -61,7 +61,7 @@ export const linkLettererToComicBook = async (
   try {
     await db
       .insert(comicBookLetterersTable)
-      .values({ comic_letterer_id: lettererId, comic_book_id: comicBookId })
+      .values({ comicLetterId: lettererId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking letterer to comic book:", error);
@@ -81,16 +81,16 @@ export const getLetterersByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_letterer: comicLetterersTable,
+        comicLetterer: comicLetterersTable,
       })
       .from(comicLetterersTable)
       .innerJoin(
         comicBookLetterersTable,
-        eq(comicLetterersTable.id, comicBookLetterersTable.comic_letterer_id),
+        eq(comicLetterersTable.id, comicBookLetterersTable.comicLetterId),
       )
-      .where(eq(comicBookLetterersTable.comic_book_id, comicBookId));
+      .where(eq(comicBookLetterersTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_letterer);
+    return result.map((row) => row.comicLetterer);
   } catch (error) {
     console.error("Error fetching letterers by comic book ID:", error);
     throw error;

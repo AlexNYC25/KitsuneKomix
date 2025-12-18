@@ -28,10 +28,10 @@ export const insertComicBookThumbnail = async (
       const result = await db
         .insert(comicBookThumbnails)
         .values({
-          comic_book_id: comicBookId,
-          comic_book_cover_id: comicBookCoverId,
-          file_path: filePath,
-          thumbnail_type: "generated",
+          comicBookId: comicBookId,
+          comicBookCoverId: comicBookCoverId,
+          filePath: filePath,
+          thumbnailType: "generated",
         })
         .returning({ id: comicBookThumbnails.id });
 
@@ -47,9 +47,9 @@ export const insertComicBookThumbnail = async (
       const result = await db
         .insert(comicBookThumbnails)
         .values({
-          comic_book_id: comicBookId,
-          comic_book_cover_id: comicBookCoverId,
-          file_path: filePath,
+          comicBookId: comicBookId,
+          comicBookCoverId: comicBookCoverId,
+          filePath: filePath,
         })
         .returning({ id: comicBookThumbnails.id });
 
@@ -83,14 +83,14 @@ export const getThumbnailsByComicBookId = async (
       .select()
       .from(comicBookThumbnails)
       .where(
-        eq(comicBookThumbnails.comic_book_id, comicBookId),
+        eq(comicBookThumbnails.comicBookId, comicBookId),
       );
 
     // Sort to prefer generated thumbnails that look like cache paths
     const sorted = result.sort((a, b) => {
       // Thumbnails with hash filenames (cache generated) come first
-      const aIsGenerated = a.file_path?.includes("_thumb.") ? 0 : 1;
-      const bIsGenerated = b.file_path?.includes("_thumb.") ? 0 : 1;
+      const aIsGenerated = a.filePath?.includes("_thumb.") ? 0 : 1;
+      const bIsGenerated = b.filePath?.includes("_thumb.") ? 0 : 1;
       return aIsGenerated - bIsGenerated;
     });
 
@@ -143,13 +143,13 @@ export const insertCustomComicBookThumbnail = async (
     const result = await db
       .insert(comicBookThumbnails)
       .values({
-        comic_book_id: comicBookId,
-        comic_book_cover_id: null, // Custom thumbnails aren't linked to covers
-        file_path: filePath,
-        thumbnail_type: "custom",
+        comicBookId: comicBookId,
+        comicBookCoverId: null, // Custom thumbnails aren't linked to covers
+        filePath: filePath,
+        thumbnailType: "custom",
         name: name,
         description: description,
-        uploaded_by: uploadedBy,
+        uploadedBy: uploadedBy,
       })
       .returning({ id: comicBookThumbnails.id });
 
