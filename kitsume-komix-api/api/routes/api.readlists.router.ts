@@ -1,6 +1,21 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import camelcasekeys from "camelcase-keys";
 
-const app = new OpenAPIHono();
+import { requireAuth } from "../middleware/authChecks.ts";
+
+import type { AppEnv } from "#types/index.ts";
+import type { RequestPaginationParameters, RequestFilterParameters, RequestSortParameters } from "#types/index.ts";
+
+import { fetchAllComicStoryArcs } from "../services/comicStoryArcs.service.ts";
+import { ComicArcResponseSchema } from "../../zod/schemas/response.schema.ts";
+
+const app = new OpenAPIHono<AppEnv>();
+
+// Register Bearer Auth security scheme for OpenAPI
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
+});
 
 const MessageResponseSchema = z.object({
   message: z.string(),
@@ -35,20 +50,98 @@ app.openapi(
     path: "/",
     summary: "Get all readlists",
     tags: ["Readlists"],
+    request: {
+      query: z.object({
+        page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
+          description: "Page number for pagination",
+          example: 1,
+        }),
+        pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 10)).openapi({
+          description: "Number of items per page",
+          example: 10,
+        }),
+        filter: z.string().optional().openapi({
+          description: "Filter readlists by name",
+          example: "My Readlist",
+        }),
+        filterProperty: z.string().optional().openapi({
+          description: "Property to filter readlists by",
+          example: "name",
+        }),
+        sort: z.string().optional().openapi({
+          description: "Sort readlists by a specific property",
+          example: "name",
+        }),
+        sortDirection: z.enum(["asc", "desc"]).optional().openapi({
+          description: "Sort direction",
+          example: "asc",
+        }), 
+      }),
+    },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: z.array(z.object({ id: z.number(), name: z.string() })),
+            schema: ComicArcResponseSchema,
           },
         },
         description: "Readlists retrieved successfully",
       },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },  
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
     },
-  }), (_c) => {
-    //TODO: implement readlist retrieval logic
-    const readlists = [{ id: 1, name: "Default Readlist" }];
-    return _c.json(readlists);
+  }), async (c) => {
+    const user = c.get("user");
+    if (!user) {
+      return c.json(
+        { message: "Unauthorized" },
+        401,
+      );
+    }
+
+    // Extract and construct pagination parameters
+    const query = c.req.valid("query");
+    const paginationParams: RequestPaginationParameters = {
+      page: query.page,
+      pageSize: query.pageSize,
+    };
+
+    // Construct filter parameters
+    const filterParams: RequestFilterParameters = {
+      filterProperty: query.filterProperty,
+      filter: query.filter,
+    };
+
+    // Construct sort parameters
+    const sortParams: RequestSortParameters = {
+      sortProperty: query.sort,
+      sortOrder: query.sortDirection,
+    };
+
+    const readlists = await fetchAllComicStoryArcs(paginationParams, filterParams, sortParams);
+
+    if (!readlists) {
+      return c.json(
+        { message: "Error fetching readlists" },
+        500,
+      );
+    }
+
+    return c.json(camelcasekeys(readlists, { deep: true }), 200);
   }
 );
 
