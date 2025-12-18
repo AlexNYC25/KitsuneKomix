@@ -4140,7 +4140,20 @@ export interface paths {
         /** Get all readlists */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Page number for pagination */
+                    page?: string;
+                    /** @description Number of items per page */
+                    pageSize?: string;
+                    /** @description Filter readlists by name */
+                    filter?: string;
+                    /** @description Property to filter readlists by */
+                    filterProperty?: string;
+                    /** @description Sort readlists by a specific property */
+                    sort?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -4154,9 +4167,44 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            id: number;
-                            name: string;
-                        }[];
+                            storyArcs: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                createdAt: string;
+                                updatedAt: string;
+                            }[];
+                            hasNextPage: boolean;
+                            currentPage: number;
+                            pageSize: number;
+                            totalResults: number;
+                            isFiltered: boolean;
+                            isSorted: boolean;
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: unknown;
+                        };
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: unknown;
+                        };
                     };
                 };
             };
@@ -4325,6 +4373,58 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/readlists/comic-book/{comicBookId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get readlists containing a specific comic book */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    comicBookId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Readlists retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                        }[];
+                    };
+                };
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
