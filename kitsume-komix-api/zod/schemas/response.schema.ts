@@ -9,6 +9,7 @@ import { metadataSchema } from "./data/comic-metadata.schema.ts";
 import { comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comic-books.schema.ts";
 import { comicLibrariesArraySelectSchema } from "./data/comic-libraries.schema.ts";
 import { comicBookThumbnailSchema } from "./data/comic-thumbnails.schema.ts";
+import { comicStoryArcSelectSchema } from "./data/comic-story-arcs.schema.ts";
 
 // **** Basic response schemas **** //
 export const MessageResponseSchema = z.object({
@@ -157,4 +158,17 @@ export const CreateLibraryResponseSchema = z.object({
 }).openapi({
   title: "CreateLibraryResponse",
   description: "Response containing a message and the ID of the newly created library",
+});
+
+export const ComicArcResponseSchema = z.object({
+  storyArcs: z.array(comicStoryArcSelectSchema),
+  hasNextPage: z.boolean(),
+  currentPage: z.number(),
+  pageSize: z.number(),
+  totalResults: z.number(),
+  isFiltered: z.boolean(),
+  isSorted: z.boolean(),
+}).openapi({
+  title: "ComicArcResponse",
+  description: "Response containing comic story arcs with pagination info",
 });
