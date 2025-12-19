@@ -1,5 +1,14 @@
+import { ResultSet } from "@libsql/client";
 import { createNewClient } from "../client.ts";
 
+/**
+ * Purge all data from all tables in the database.
+ * This function deletes all records from every table
+ * and resets any auto-incrementing primary keys.
+ * 
+ * Purly for testing purposes.
+ * NOTE: REALLY DESTRUCTIVE OPERATION. USE WITH CAUTION.
+ */
 export const purgeAllData = async () => {
   const { db, client } = createNewClient();
 
@@ -9,20 +18,20 @@ export const purgeAllData = async () => {
 
   try {
     // Get all table names except system tables
-    const tables = await client.execute(`
+    const tables: ResultSet = await client.execute(`
       SELECT name FROM sqlite_master 
       WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '__drizzle_%';
     `);
 
     // Delete all data from each table
     for (const row of tables.rows) {
-      const tableName = row[0] as string;
+      const tableName: string = row[0] as string;
       await client.execute(`DELETE FROM ${tableName}`);
     }
 
     // Reset auto-incrementing primary keys
     for (const row of tables.rows) {
-      const tableName = row[0] as string;
+      const tableName: string = row[0] as string;
       await client.execute({
         sql: `DELETE FROM sqlite_sequence WHERE name = ?`,
         args: [tableName],
