@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
 import {
   comicBookCharactersTable,
@@ -17,6 +18,7 @@ import {
   comicBookTeamsTable,
   comicBookWritersTable,
 } from "../schema.ts";
+
 import type {
   NewComicBookCharacter,
   NewComicBookGenre,
@@ -27,6 +29,12 @@ import type {
 
 
 // Writers
+
+/**
+ * Add a writer relation to a comic book.
+ * @param relation NewComicBookWriter The writer relation to add.
+ * @returns Promise<number> The ID of the newly added writer relation.
+ */
 export const addComicBookWriter = async (
   relation: NewComicBookWriter,
 ): Promise<number> => {
@@ -50,6 +58,12 @@ export const addComicBookWriter = async (
   }
 };
 
+/**
+ * Remove a writer relation from a comic book.
+ * @param comicBookId number The ID of the comic book.
+ * @param writerId number The ID of the writer to remove.
+ * @returns Promise<boolean> True if the relation was removed, false otherwise.
+ */
 export const removeComicBookWriter = async (
   comicBookId: number,
   writerId: number,
@@ -77,6 +91,12 @@ export const removeComicBookWriter = async (
 };
 
 // Pencillers
+
+/**
+ * Add a penciller relation to a comic book.
+ * @param relation NewComicBookPenciller The penciller relation to add.
+ * @returns Promise<number> The ID of the newly added penciller relation.
+ */
 export const addComicBookPenciller = async (
   relation: NewComicBookPenciller,
 ): Promise<number> => {
@@ -101,6 +121,12 @@ export const addComicBookPenciller = async (
 };
 
 // Characters
+
+/**
+ * Add a character relation to a comic book.
+ * @param relation NewComicBookCharacter The character relation to add.
+ * @returns Promise<number> The ID of the newly added character relation.
+ */
 export const addComicBookCharacter = async (
   relation: NewComicBookCharacter,
 ): Promise<number> => {
@@ -125,6 +151,12 @@ export const addComicBookCharacter = async (
 };
 
 // Publishers
+
+/**
+ * Add a publisher relation to a comic book.
+ * @param relation NewComicBookPublisher The publisher relation to add.
+ * @returns Promise<number> The ID of the newly added publisher relation.
+ */
 export const addComicBookPublisher = async (
   relation: NewComicBookPublisher,
 ): Promise<number> => {
@@ -149,6 +181,12 @@ export const addComicBookPublisher = async (
 };
 
 // Genres
+
+/**
+ * Add a genre relation to a comic book.
+ * @param relation NewComicBookGenre The genre relation to add.
+ * @returns Promise<number> The ID of the newly added genre relation.
+ */
 export const addComicBookGenre = async (
   relation: NewComicBookGenre,
 ): Promise<number> => {
@@ -172,7 +210,10 @@ export const addComicBookGenre = async (
   }
 };
 
-// Utility function to remove all relations for a comic book
+/**
+ * Utility function to remove all relations for a comic book
+ * @param comicBookId 
+ */
 export const removeAllComicBookRelations = async (
   comicBookId: number,
 ): Promise<void> => {
