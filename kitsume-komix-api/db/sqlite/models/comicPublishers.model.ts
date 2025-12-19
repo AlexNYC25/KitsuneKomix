@@ -61,7 +61,7 @@ export const linkPublisherToComicBook = async (
   try {
     await db
       .insert(comicBookPublishersTable)
-      .values({ comic_publisher_id: publisherId, comic_book_id: comicBookId })
+      .values({ comicPublisherId: publisherId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking publisher to comic book:", error);
@@ -88,10 +88,10 @@ export const getPublishersByComicBookId = async (
         comicBookPublishersTable,
         eq(
           comicPublishersTable.id,
-          comicBookPublishersTable.comic_publisher_id,
+          comicBookPublishersTable.comicPublisherId,
         ),
       )
-      .where(eq(comicBookPublishersTable.comic_book_id, comicBookId));
+      .where(eq(comicBookPublishersTable.comicBookId, comicBookId));
 
     return result.map((row) => row.comic_publisher);
   } catch (error) {

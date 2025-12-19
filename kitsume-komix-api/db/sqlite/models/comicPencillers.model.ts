@@ -63,7 +63,7 @@ export const linkPencillerToComicBook = async (
   try {
     await db
       .insert(comicBookPencillersTable)
-      .values({ comic_penciller_id: pencillerId, comic_book_id: comicBookId })
+      .values({ comicPencillerId: pencillerId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking penciller to comic book:", error);
@@ -90,10 +90,10 @@ export const getPencillersByComicBookId = async (
         comicBookPencillersTable,
         eq(
           comicPencillersTable.id,
-          comicBookPencillersTable.comic_penciller_id,
+          comicBookPencillersTable.comicPencillerId,
         ),
       )
-      .where(eq(comicBookPencillersTable.comic_book_id, comicBookId));
+      .where(eq(comicBookPencillersTable.comicBookId, comicBookId));
 
     return result.map(({ comic_penciller }) => comic_penciller);
   } catch (error) {

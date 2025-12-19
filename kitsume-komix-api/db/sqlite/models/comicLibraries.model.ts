@@ -142,11 +142,11 @@ export const getComicLibraryLastChangedTime = async (
 
   try {
     const result = await db
-      .select({ changed_at: comicLibrariesTable.changed_at })
+      .select({ changedAt: comicLibrariesTable.changedAt })
       .from(comicLibrariesTable)
       .where(eq(comicLibrariesTable.id, id));
 
-    return result.length > 0 ? result[0].changed_at : null;
+    return result.length > 0 ? result[0].changedAt : null;
   } catch (error) {
     console.error("Error fetching comic library changed time:", error);
     throw error;
@@ -163,7 +163,7 @@ export const setComicLibraryChangedTime = async (id: number): Promise<void> => {
   try {
     await db
       .update(comicLibrariesTable)
-      .set({ changed_at: sql`CURRENT_TIMESTAMP` })
+      .set({ changedAt: sql`CURRENT_TIMESTAMP` })
       .where(eq(comicLibrariesTable.id, id));
   } catch (error) {
     console.error("Error updating comic library changed time:", error);
@@ -248,17 +248,17 @@ export const getUsersComicLibraries = async (
           description: comicLibrariesTable.description,
           path: comicLibrariesTable.path,
           enabled: comicLibrariesTable.enabled,
-          changed_at: comicLibrariesTable.changed_at,
-          created_at: comicLibrariesTable.created_at,
-          updated_at: comicLibrariesTable.updated_at,
+          changedAt: comicLibrariesTable.changedAt,
+          createdAt: comicLibrariesTable.createdAt,
+          updatedAt: comicLibrariesTable.updatedAt,
         },
       )
       .from(comicLibrariesTable)
       .innerJoin(
         userComicLibrariesTable,
-        eq(comicLibrariesTable.id, userComicLibrariesTable.library_id),
+        eq(comicLibrariesTable.id, userComicLibrariesTable.libraryId),
       )
-      .where(eq(userComicLibrariesTable.user_id, userId))
+      .where(eq(userComicLibrariesTable.userId, userId))
       .groupBy(comicLibrariesTable.id);
 
     return result;
@@ -288,8 +288,8 @@ export const assignLibraryToUser = async (
     await db
       .insert(userComicLibrariesTable)
       .values({
-        user_id: userId,
-        library_id: libraryId,
+        userId: userId,
+        libraryId: libraryId,
       });
   } catch (error) {
     console.error("Error assigning library to user:", error);

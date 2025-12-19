@@ -24,13 +24,13 @@ export const insertComicPage = async (
 
   try {
     const values = {
-      comic_book_id: comicBookId,
-      file_path: filePath,
-      page_number: pageNumber,
+      comicBookId: comicBookId,
+      filePath: filePath,
+      pageNumber: pageNumber,
       hash: hash,
-      file_size: fileSize,
+      fileSize: fileSize,
       type: type,
-      double_page: doublePage,
+      doublePage: doublePage,
       ...(width !== undefined && { width }),
       ...(length !== undefined && { length }),
     };
@@ -58,8 +58,8 @@ export const getComicPagesByComicBookId = async (
 
   try {
     const result = await db.select().from(comicPagesTable).where(
-      eq(comicPagesTable.comic_book_id, comicBookId),
-    ).orderBy(comicPagesTable.page_number);
+      eq(comicPagesTable.comicBookId, comicBookId),
+    ).orderBy(comicPagesTable.pageNumber);
     return result;
   } catch (error) {
     console.error("Error fetching comic pages by comic book ID:", error);

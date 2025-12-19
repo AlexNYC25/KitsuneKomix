@@ -3,7 +3,7 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 
 import { comicBookLocationsTable, comicLocationsTable } from "../schema.ts";
-import type { ComicLocation } from "../../../types/index.ts";
+import type { ComicLocation } from "#types/index.ts";
 
 export const insertComicLocation = async (name: string): Promise<number> => {
   const { db, client } = getClient();
@@ -61,7 +61,7 @@ export const linkLocationToComicBook = async (
   try {
     await db
       .insert(comicBookLocationsTable)
-      .values({ comic_location_id: locationId, comic_book_id: comicBookId })
+      .values({ comicLocationId: locationId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking comic location to comic book:", error);
@@ -88,10 +88,10 @@ export const getLocationsByComicBookId = async (
         comicBookLocationsTable,
         eq(
           comicLocationsTable.id,
-          comicBookLocationsTable.comic_location_id,
+          comicBookLocationsTable.comicLocationId,
         ),
       )
-      .where(eq(comicBookLocationsTable.comic_book_id, comicBookId));
+      .where(eq(comicBookLocationsTable.comicBookId, comicBookId));
 
     return result.map((row) => row.comic_location);
   } catch (error) {
