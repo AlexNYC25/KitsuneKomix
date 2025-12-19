@@ -17,6 +17,8 @@ import {
   ComicWriter,
 } from "./database.types.ts";
 
+import { COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES, COMIC_BOOK_INTERNAL_METADATA_PROPERTIES } from "#utilities/constants.ts";
+
 export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
 
 export type ComicBookWithMetadata = ComicBook & {
@@ -58,38 +60,7 @@ export type RequestFilterParameters = {
   filterProperty?: string;
 };
 
-// Metadata properties constants and types
-export const COMIC_BOOK_INTERNAL_METADATA_PROPERTIES = [
-  "id",
-  "title",
-  "issue_number",
-  "volume",
-  "summary",
-  "series",
-  "alternate_series",
-  "alternate_issue_number",
-  "alternate_volume",
-  "publication_date",
-  "created_at",
-  "updated_at",
-] as const;
 
-export const COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES = [
-  "characters",
-  "colorists",
-  "cover_artists",
-  "editors",
-  "genres",
-  "imprints",
-  "inkers",
-  "letterers",
-  "locations",
-  "pencillers",
-  "publishers",
-  "story_arcs",
-  "teams",
-  "writers",
-] as const;
 
 export type AllowedFilterProperties =
   | typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number]
