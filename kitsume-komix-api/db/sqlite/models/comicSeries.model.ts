@@ -64,15 +64,14 @@ export const insertComicSeries = async (
     // If result is empty, it means the series already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing series by folder_path (which should be unique)
-      if (seriesData.folder_path) {
+      if (seriesData.folderPath) {
         const existingSeries = await db
           .select({ id: comicSeriesTable.id })
           .from(comicSeriesTable)
-          .where(eq(comicSeriesTable.folder_path, seriesData.folder_path));
-
+          .where(eq(comicSeriesTable.folderPath, seriesData.folderPath));
         if (existingSeries.length > 0) {
           console.log(
-            `Comic series already exists at path: ${seriesData.folder_path}, returning existing ID: ${
+            `Comic series already exists at path: ${seriesData.folderPath}, returning existing ID: ${
               existingSeries[0].id
             }`,
           );
@@ -123,8 +122,8 @@ export const insertComicSeriesIntoLibrary = async (
     const result = await db
       .insert(comicLibrariesSeriesTable)
       .values({
-        comic_series_id: seriesId,
-        library_id: libraryId,
+        comicSeriesId: seriesId,
+        libraryId: libraryId,
       })
       .onConflictDoNothing()
       .returning({ id: comicLibrariesSeriesTable.id });
@@ -176,9 +175,9 @@ export const getComicSeriesMetadataById = async (
         id: comicSeriesTable.id,
         name: comicSeriesTable.name,
         description: comicSeriesTable.description,
-        folder_path: comicSeriesTable.folder_path,
-        created_at: comicSeriesTable.created_at,
-        updated_at: comicSeriesTable.updated_at,
+        folderPath: comicSeriesTable.folderPath,
+        createdAt: comicSeriesTable.createdAt,
+        updatedAt: comicSeriesTable.updatedAt,
         writers: sql<string>`GROUP_CONCAT(DISTINCT ${comicWritersTable}.name)`,
         pencillers: sql<
           string
@@ -218,144 +217,144 @@ export const getComicSeriesMetadataById = async (
       .from(comicSeriesTable)
       .leftJoin(
         comicSeriesBooksTable,
-        eq(comicSeriesTable.id, comicSeriesBooksTable.comic_series_id),
+        eq(comicSeriesTable.id, comicSeriesBooksTable.comicSeriesId),
       )
       .leftJoin(
         comicBooksTable,
-        eq(comicSeriesBooksTable.comic_book_id, comicBooksTable.id),
+        eq(comicSeriesBooksTable.comicBookId, comicBooksTable.id),
       )
       .leftJoin(
         comicBookWritersTable,
-        eq(comicBooksTable.id, comicBookWritersTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookWritersTable.comicBookId),
       )
       .leftJoin(
         comicWritersTable,
-        eq(comicBookWritersTable.comic_writer_id, comicWritersTable.id),
+        eq(comicBookWritersTable.comicWriterId, comicWritersTable.id),
       )
       .leftJoin(
         comicBookPencillersTable,
-        eq(comicBooksTable.id, comicBookPencillersTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookPencillersTable.comicBookId),
       )
       .leftJoin(
         comicPencillersTable,
         eq(
-          comicBookPencillersTable.comic_penciller_id,
+          comicBookPencillersTable.comicPencillerId,
           comicPencillersTable.id,
         ),
       )
       .leftJoin(
         comicBookInkersTable,
-        eq(comicBooksTable.id, comicBookInkersTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookInkersTable.comicBookId),
       )
       .leftJoin(
         comicInkersTable,
-        eq(comicBookInkersTable.comic_inker_id, comicInkersTable.id),
+        eq(comicBookInkersTable.comicInkerId, comicInkersTable.id),
       )
       .leftJoin(
         comicBookColoristsTable,
-        eq(comicBooksTable.id, comicBookColoristsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookColoristsTable.comicBookId),
       )
       .leftJoin(
         comicColoristsTable,
-        eq(comicBookColoristsTable.comic_colorist_id, comicColoristsTable.id),
+        eq(comicBookColoristsTable.comicColoristId, comicColoristsTable.id),
       )
       .leftJoin(
         comicBookLetterersTable,
-        eq(comicBooksTable.id, comicBookLetterersTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookLetterersTable.comicBookId),
       )
       .leftJoin(
         comicLetterersTable,
-        eq(comicBookLetterersTable.comic_letterer_id, comicLetterersTable.id),
+        eq(comicBookLetterersTable.comicLetterId, comicLetterersTable.id),
       )
       .leftJoin(
         comicBookEditorsTable,
-        eq(comicBooksTable.id, comicBookEditorsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookEditorsTable.comicBookId),
       )
       .leftJoin(
         comicEditorsTable,
-        eq(comicBookEditorsTable.comic_editor_id, comicEditorsTable.id),
+        eq(comicBookEditorsTable.comicEditorId, comicEditorsTable.id),
       )
       .leftJoin(
         comicBookCoverArtistsTable,
-        eq(comicBooksTable.id, comicBookCoverArtistsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookCoverArtistsTable.comicBookId),
       )
       .leftJoin(
         comicCoverArtistsTable,
         eq(
-          comicBookCoverArtistsTable.comic_cover_artist_id,
+          comicBookCoverArtistsTable.comicCoverArtistId,
           comicCoverArtistsTable.id,
         ),
       )
       .leftJoin(
         comicBookPublishersTable,
-        eq(comicBooksTable.id, comicBookPublishersTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookPublishersTable.comicBookId),
       )
       .leftJoin(
         comicPublishersTable,
         eq(
-          comicBookPublishersTable.comic_publisher_id,
+          comicBookPublishersTable.comicPublisherId,
           comicPublishersTable.id,
         ),
       )
       .leftJoin(
         comicBookImprintsTable,
-        eq(comicBooksTable.id, comicBookImprintsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookImprintsTable.comicBookId),
       )
       .leftJoin(
         comicImprintsTable,
-        eq(comicBookImprintsTable.comic_imprint_id, comicImprintsTable.id),
+        eq(comicBookImprintsTable.comicImprintId, comicImprintsTable.id),
       )
       .leftJoin(
         comicBookGenresTable,
-        eq(comicBooksTable.id, comicBookGenresTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookGenresTable.comicBookId),
       )
       .leftJoin(
         comicGenresTable,
-        eq(comicBookGenresTable.comic_genre_id, comicGenresTable.id),
+        eq(comicBookGenresTable.comicGenreId, comicGenresTable.id),
       )
       .leftJoin(
         comicBookCharactersTable,
-        eq(comicBooksTable.id, comicBookCharactersTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookCharactersTable.comicBookId),
       )
       .leftJoin(
         comicCharactersTable,
         eq(
-          comicBookCharactersTable.comic_character_id,
+          comicBookCharactersTable.comicCharacterId,
           comicCharactersTable.id,
         ),
       )
       .leftJoin(
         comicBookTeamsTable,
-        eq(comicBooksTable.id, comicBookTeamsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookTeamsTable.comicBookId),
       )
       .leftJoin(
         comicTeamsTable,
-        eq(comicBookTeamsTable.comic_team_id, comicTeamsTable.id),
+        eq(comicBookTeamsTable.comicTeamId, comicTeamsTable.id),
       )
       .leftJoin(
         comicBookLocationsTable,
-        eq(comicBooksTable.id, comicBookLocationsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookLocationsTable.comicBookId),
       )
       .leftJoin(
         comicLocationsTable,
-        eq(comicBookLocationsTable.comic_location_id, comicLocationsTable.id),
+        eq(comicBookLocationsTable.comicLocationId, comicLocationsTable.id),
       )
       .leftJoin(
         comicBookStoryArcsTable,
-        eq(comicBooksTable.id, comicBookStoryArcsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookStoryArcsTable.comicBookId),
       )
       .leftJoin(
         comicStoryArcsTable,
-        eq(comicBookStoryArcsTable.comic_story_arc_id, comicStoryArcsTable.id),
+        eq(comicBookStoryArcsTable.comicStoryArcId, comicStoryArcsTable.id),
       )
       .leftJoin(
         comicBookSeriesGroupsTable,
-        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comic_book_id),
+        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comicBookId),
       )
       .leftJoin(
         comicSeriesGroupsTable,
         eq(
-          comicBookSeriesGroupsTable.comic_series_group_id,
+          comicBookSeriesGroupsTable.comicSeriesGroupId,
           comicSeriesGroupsTable.id,
         ),
       )
@@ -400,7 +399,7 @@ export const getComicSeriesByPath = async (
 
   try {
     const result = await db.select().from(comicSeriesTable).where(
-      eq(comicSeriesTable.folder_path, folderPath),
+      eq(comicSeriesTable.folderPath, folderPath),
     );
     return result.length > 0 ? result[0] : null;
   } catch (error) {
@@ -443,19 +442,19 @@ export const getLatestComicSeries = async (
           id: comicSeriesTable.id,
           name: comicSeriesTable.name,
           description: comicSeriesTable.description,
-          folder_path: comicSeriesTable.folder_path,
-          created_at: comicSeriesTable.created_at,
-          updated_at: comicSeriesTable.updated_at,
+          folderPath: comicSeriesTable.folderPath,
+          createdAt: comicSeriesTable.createdAt,
+          updatedAt: comicSeriesTable.updatedAt,
         },
       )
       .from(comicSeriesTable)
       .leftJoin(
         comicLibrariesSeriesTable,
-        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comic_series_id),
+        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comicSeriesId),
       )
       .leftJoin(
         comicLibrariesTable,
-        eq(comicLibrariesSeriesTable.library_id, comicLibrariesTable.id),
+        eq(comicLibrariesSeriesTable.libraryId, comicLibrariesTable.id),
       )
       .where(
         libraryIds && libraryIds.length > 0
@@ -463,7 +462,7 @@ export const getLatestComicSeries = async (
           : undefined,
       )
       .groupBy(comicSeriesTable.id)
-      .orderBy(desc(comicSeriesTable.created_at))
+      .orderBy(desc(comicSeriesTable.createdAt))
       .limit(limit)
       .offset(offset);
     return result;
@@ -491,27 +490,27 @@ export const getUpdatedComicSeries = async (
           id: comicSeriesTable.id,
           name: comicSeriesTable.name,
           description: comicSeriesTable.description,
-          folder_path: comicSeriesTable.folder_path,
-          created_at: comicSeriesTable.created_at,
-          updated_at: comicSeriesTable.updated_at,
+          folderPath: comicSeriesTable.folderPath,
+          createdAt: comicSeriesTable.createdAt,
+          updatedAt: comicSeriesTable.updatedAt,
         },
       )
       .from(comicSeriesTable)
       .leftJoin(
         comicLibrariesSeriesTable,
-        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comic_series_id),
+        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comicSeriesId),
       )
       .leftJoin(
         comicLibrariesTable,
-        eq(comicLibrariesSeriesTable.library_id, comicLibrariesTable.id),
+        eq(comicLibrariesSeriesTable.libraryId, comicLibrariesTable.id),
       )
       .leftJoin(
         comicSeriesBooksTable,
-        eq(comicSeriesTable.id, comicSeriesBooksTable.comic_series_id),
+        eq(comicSeriesTable.id, comicSeriesBooksTable.comicSeriesId),
       )
       .leftJoin(
         comicBooksTable,
-        eq(comicSeriesBooksTable.comic_book_id, comicBooksTable.id),
+        eq(comicSeriesBooksTable.comicBookId, comicBooksTable.id),
       )
       .where(
         libraryIds && libraryIds.length > 0
@@ -519,7 +518,7 @@ export const getUpdatedComicSeries = async (
           : undefined,
       )
       .groupBy(comicSeriesTable.id)
-      .orderBy(desc(comicBooksTable.updated_at))
+      .orderBy(desc(comicBooksTable.updatedAt))
       .limit(limit)
       .offset(offset);
     return result;
@@ -545,8 +544,8 @@ export const updateComicSeries = async (
     if (updates.description !== undefined) {
       updateData.description = updates.description;
     }
-    if (updates.folder_path !== undefined) {
-      updateData.folder_path = updates.folder_path;
+    if (updates.folderPath !== undefined) {
+      updateData.folderPath = updates.folderPath;
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -600,8 +599,8 @@ export const addComicBookToSeries = async (
     const result = await db
       .insert(comicSeriesBooksTable)
       .values({
-        comic_series_id: seriesId,
-        comic_book_id: comicBookId,
+        comicSeriesId: seriesId,
+        comicBookId: comicBookId,
       })
       .onConflictDoNothing()
       .returning({ id: comicSeriesBooksTable.id });
@@ -626,10 +625,10 @@ export const getComicBooksInSeries = async (
     const result = await db
       .select()
       .from(comicSeriesBooksTable)
-      .where(eq(comicSeriesBooksTable.comic_series_id, seriesId));
+      .where(eq(comicSeriesBooksTable.comicSeriesId, seriesId));
 
-    // Return the comic_book_id (the linked comic book) for all association rows
-    return result.map((row) => row.comic_book_id);
+    // Return the comicBookId (the linked comic book) for all association rows
+    return result.map((row) => row.comicBookId);
   } catch (error) {
     console.error("Error fetching comic books in series:", error);
     throw error;
@@ -649,9 +648,9 @@ export const getSeriesIdFromComicBook = async (
     const result = await db
       .select()
       .from(comicSeriesBooksTable)
-      .where(eq(comicSeriesBooksTable.comic_book_id, comicBookId));
+      .where(eq(comicSeriesBooksTable.comicBookId, comicBookId));
 
-    return result.length > 0 ? result[0].comic_series_id : null;
+    return result.length > 0 ? result[0].comicSeriesId : null;
   } catch (error) {
     console.error("Error fetching series ID from comic book ID:", error);
     throw error;
