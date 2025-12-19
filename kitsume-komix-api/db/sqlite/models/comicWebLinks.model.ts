@@ -3,7 +3,7 @@ import { comicWebLinksTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
 export const insertComicWebLink = async (
-  comic_book_id: number,
+  comicBookId: number,
   url: string,
   description?: string,
 ): Promise<number> => {
@@ -16,7 +16,7 @@ export const insertComicWebLink = async (
   try {
     const result = await db
       .insert(comicWebLinksTable)
-      .values({ comic_book_id, url, description: description ?? null })
+      .values({ comicBookId: comicBookId, url, description: description ?? null })
       .onConflictDoNothing()
       .returning({ id: comicWebLinksTable.id });
 

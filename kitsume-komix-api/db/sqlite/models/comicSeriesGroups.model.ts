@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import type { ComicSeriesGroup } from "../../../types/index.ts";
+import type { ComicSeriesGroup } from "#types/index.ts";
 import {
   comicBookSeriesGroupsTable,
   comicSeriesGroupsTable,
@@ -68,8 +68,8 @@ export const linkSeriesGroupToComicBook = async (
     await db
       .insert(comicBookSeriesGroupsTable)
       .values({
-        comic_series_group_id: seriesGroupId,
-        comic_book_id: comicBookId,
+        comicSeriesGroupId: seriesGroupId,
+        comicBookId: comicBookId,
       })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
@@ -97,10 +97,10 @@ export const getSeriesGroupsByComicBookId = async (
         comicBookSeriesGroupsTable,
         eq(
           comicSeriesGroupsTable.id,
-          comicBookSeriesGroupsTable.comic_series_group_id,
+          comicBookSeriesGroupsTable.comicSeriesGroupId,
         ),
       )
-      .where(eq(comicBookSeriesGroupsTable.comic_book_id, comicBookId));
+      .where(eq(comicBookSeriesGroupsTable.comicBookId, comicBookId));
 
     return result.map((row) => row.comic_series_group);
   } catch (error) {

@@ -44,10 +44,10 @@ export const getAllComicStoryArcs = async (
         orderByColumn = comicStoryArcsTable.name;
         break;
       case "created_at":
-        orderByColumn = comicStoryArcsTable.created_at;
+        orderByColumn = comicStoryArcsTable.createdAt;
         break;
       case "updated_at":
-        orderByColumn = comicStoryArcsTable.updated_at;
+        orderByColumn = comicStoryArcsTable.updatedAt;
         break;
       default:
         orderByColumn = comicStoryArcsTable.id;
@@ -110,11 +110,11 @@ export const getComicsInStoryArc = async (
 
   try {
     const result = await db
-      .select({ comic_book_id: comicBookStoryArcsTable.comic_book_id })
+      .select({ comicBookId: comicBookStoryArcsTable.comicBookId })
       .from(comicBookStoryArcsTable)
-      .where(eq(comicBookStoryArcsTable.comic_story_arc_id, storyArcId));
+      .where(eq(comicBookStoryArcsTable.comicStoryArcId, storyArcId));
 
-    return result.map((row) => row.comic_book_id);
+    return result.map((row) => row.comicBookId);
   } catch (error) {
     console.error(
       `Error fetching comics in story arc ID ${storyArcId}:`,
@@ -224,7 +224,7 @@ export const linkStoryArcToComicBook = async (
   try {
     await db
       .insert(comicBookStoryArcsTable)
-      .values({ comic_story_arc_id: storyArcId, comic_book_id: comicBookId })
+      .values({ comicStoryArcId: storyArcId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking comic story arc to comic book:", error);
@@ -249,9 +249,9 @@ export const getStoryArcsByComicBookId = async (
       .from(comicStoryArcsTable)
       .innerJoin(
         comicBookStoryArcsTable,
-        eq(comicStoryArcsTable.id, comicBookStoryArcsTable.comic_story_arc_id),
+        eq(comicStoryArcsTable.id, comicBookStoryArcsTable.comicStoryArcId),
       )
-      .where(eq(comicBookStoryArcsTable.comic_book_id, comicBookId));
+      .where(eq(comicBookStoryArcsTable.comicBookId, comicBookId));
 
     return result.map((row) => row.comic_story_arc);
   } catch (error) {

@@ -3,7 +3,7 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 
 import { comicBookTeamsTable, comicTeamsTable } from "../schema.ts";
-import type { ComicTeam } from "../../../types/index.ts";
+import type { ComicTeam } from "#types/index.ts";
 
 export const insertComicTeam = async (name: string): Promise<number> => {
   const { db, client } = getClient();
@@ -61,7 +61,7 @@ export const linkTeamToComicBook = async (
   try {
     await db
       .insert(comicBookTeamsTable)
-      .values({ comic_team_id: teamId, comic_book_id: comicBookId })
+      .values({ comicTeamId: teamId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error(`Error linking comic team to comic book`, error);
@@ -81,16 +81,16 @@ export const getTeamsByComicBookId = async (
   try {
     const result = await db
       .select({
-        comic_team: comicTeamsTable,
+        comicTeam: comicTeamsTable,
       })
       .from(comicTeamsTable)
       .innerJoin(
         comicBookTeamsTable,
-        eq(comicTeamsTable.id, comicBookTeamsTable.comic_team_id),
+        eq(comicTeamsTable.id, comicBookTeamsTable.comicTeamId),
       )
-      .where(eq(comicBookTeamsTable.comic_book_id, comicBookId));
+      .where(eq(comicBookTeamsTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_team);
+    return result.map((row) => row.comicTeam);
   } catch (error) {
     console.error(
       `Error fetching comic teams for comic book ID ${comicBookId}`,

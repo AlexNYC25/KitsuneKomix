@@ -4,18 +4,18 @@ import { refreshTokensTable } from "../schema.ts";
 
 export interface RefreshToken {
   id: number;
-  user_id: number;
-  token_id: string;
-  expires_at: string;
+  userId: number;
+  tokenId: string;
+  expiresAt: string;
   revoked: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateRefreshTokenInput {
-  user_id: number;
-  token_id: string;
-  expires_at: string;
+  userId: number;
+  tokenId: string;
+  expiresAt: string;
 }
 
 /**
@@ -56,9 +56,9 @@ export async function getValidRefreshToken(
     .from(refreshTokensTable)
     .where(
       and(
-        eq(refreshTokensTable.token_id, tokenId),
+        eq(refreshTokensTable.tokenId, tokenId),
         eq(refreshTokensTable.revoked, 0),
-        gte(refreshTokensTable.expires_at, currentTime),
+        gte(refreshTokensTable.expiresAt, currentTime),
       ),
     )
     .limit(1);
@@ -80,9 +80,9 @@ export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
     .update(refreshTokensTable)
     .set({
       revoked: 1,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
-    .where(eq(refreshTokensTable.token_id, tokenId))
+    .where(eq(refreshTokensTable.tokenId, tokenId))
     .returning({ id: refreshTokensTable.id });
 
   return result.length > 0;
@@ -104,9 +104,9 @@ export async function revokeAllUserRefreshTokens(
     .update(refreshTokensTable)
     .set({
       revoked: 1,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
-    .where(eq(refreshTokensTable.user_id, userId))
+    .where(eq(refreshTokensTable.userId, userId))
     .returning({ id: refreshTokensTable.id });
 
   return result.length;
@@ -128,7 +128,7 @@ export async function cleanupExpiredTokens(): Promise<number> {
     .where(
       and(
         eq(refreshTokensTable.revoked, 0),
-        lt(refreshTokensTable.expires_at, currentTime),
+        lt(refreshTokensTable.expiresAt, currentTime),
       ),
     )
     .returning({ id: refreshTokensTable.id });
@@ -154,9 +154,9 @@ export async function getUserActiveRefreshTokens(
     .from(refreshTokensTable)
     .where(
       and(
-        eq(refreshTokensTable.user_id, userId),
+        eq(refreshTokensTable.userId, userId),
         eq(refreshTokensTable.revoked, 0),
-        gte(refreshTokensTable.expires_at, currentTime),
+        gte(refreshTokensTable.expiresAt, currentTime),
       ),
     );
 }
