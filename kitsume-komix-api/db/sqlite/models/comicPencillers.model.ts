@@ -2,8 +2,15 @@ import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 import { comicBookPencillersTable, comicPencillersTable } from "../schema.ts";
-import type { ComicPenciller } from "../../../types/index.ts";
 
+import type { ComicPenciller } from "#types/index.ts";
+
+/**
+ * Inserts a new comic penciller into the database
+ * @param name The name of the penciller
+ * @param description Optional description of the penciller
+ * @returns The ID of the newly inserted or existing penciller
+ */
 export const insertComicPenciller = async (
   name: string,
   description?: string,
@@ -15,7 +22,7 @@ export const insertComicPenciller = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicPencillersTable)
       .values({ name, description: description ?? null })
       .onConflictDoNothing()
@@ -24,7 +31,7 @@ export const insertComicPenciller = async (
     // If result is empty, it means the penciller already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing penciller by name (which should be unique)
-      const existingPenciller = await db
+      const existingPenciller: { id: number }[] = await db
         .select({ id: comicPencillersTable.id })
         .from(comicPencillersTable)
         .where(eq(comicPencillersTable.name, name));
@@ -50,6 +57,12 @@ export const insertComicPenciller = async (
   }
 };
 
+/**
+ * Links a penciller to a comic book by creating a relationship in the junction table
+ * @param pencillerId The ID of the penciller
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
 export const linkPencillerToComicBook = async (
   pencillerId: number,
   comicBookId: number,
@@ -71,6 +84,11 @@ export const linkPencillerToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all pencillers for a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicPenciller objects associated with the comic book
+ */
 export const getPencillersByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicPenciller[]> => {
@@ -81,7 +99,7 @@ export const getPencillersByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comic_penciller: ComicPenciller }[] = await db
       .select({
         comic_penciller: comicPencillersTable,
       })
@@ -102,6 +120,11 @@ export const getPencillersByComicBookId = async (
   }
 };
 
+/**
+ * Searches for penciller IDs by name filter
+ * @param filter The partial name to search for (case-insensitive)
+ * @returns An array of penciller IDs matching the filter
+ */
 export const getPencillerIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -112,7 +135,7 @@ export const getPencillerIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicPencillersTable.id })
       .from(comicPencillersTable)
       .where(ilike(comicPencillersTable.name, `%${filter}%`));
