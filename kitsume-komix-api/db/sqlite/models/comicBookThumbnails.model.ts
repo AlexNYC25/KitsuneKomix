@@ -2,8 +2,16 @@ import { getClient } from "../client.ts";
 import { comicBookThumbnails } from "../schema.ts";
 
 import { eq } from "drizzle-orm";
-import type { ComicBookThumbnail } from "../../../types/index.ts";
+import type { ComicBookThumbnail } from "#types/index.ts";
+import { Row } from "@libsql/client";
 
+/**
+ * Inserts a new comic book thumbnail into the database.
+ * @param comicBookId - The ID of the comic book.
+ * @param comicBookCoverId - The ID of the comic book cover.
+ * @param filePath - The file path of the thumbnail image.
+ * @returns The ID of the newly inserted thumbnail.
+ */
 //TODO: Refactor to handle both generated and custom thumbnails
 export const insertComicBookThumbnail = async (
   comicBookId: number,
@@ -18,14 +26,14 @@ export const insertComicBookThumbnail = async (
 
   try {
     // Check if comic_book_id column exists (for migration compatibility)
-    const tableInfo = await db.run("PRAGMA table_info(comic_book_thumbnails)");
-    const hasComicBookIdColumn = tableInfo.rows?.some((row: any) =>
+    const tableInfo: { rows?: Row[] } = await db.run("PRAGMA table_info(comic_book_thumbnails)");
+    const hasComicBookIdColumn: boolean | undefined = tableInfo.rows?.some((row: Row) =>
       row[1] === "comic_book_id"
     );
 
     if (hasComicBookIdColumn) {
       // Use new schema
-      const result = await db
+      const result: { id: number }[] = await db
         .insert(comicBookThumbnails)
         .values({
           comicBookId: comicBookId,
@@ -44,7 +52,7 @@ export const insertComicBookThumbnail = async (
       return result[0].id;
     } else {
       // Use old schema (backwards compatibility during migration)
-      const result = await db
+      const result: { id: number }[] = await db
         .insert(comicBookThumbnails)
         .values({
           comicBookId: comicBookId,
@@ -67,6 +75,11 @@ export const insertComicBookThumbnail = async (
   }
 };
 
+/**
+ * Fetch all thumbnails linked to a specific comic book
+ * @param comicBookId - The ID of the comic book.
+ * @returns An array of ComicBookThumbnail objects or null if none found.
+ */
 export const getThumbnailsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicBookThumbnail[] | null> => {
@@ -79,7 +92,7 @@ export const getThumbnailsByComicBookId = async (
   try {
     // Query for thumbnails linked to the comic book
     // Prefer generated thumbnails (actual thumbnail files in cache) over custom ones
-    const result = await db
+    const result: ComicBookThumbnail[] = await db
       .select()
       .from(comicBookThumbnails)
       .where(
@@ -87,10 +100,10 @@ export const getThumbnailsByComicBookId = async (
       );
 
     // Sort to prefer generated thumbnails that look like cache paths
-    const sorted = result.sort((a, b) => {
+    const sorted: ComicBookThumbnail[] = result.sort((a, b) => {
       // Thumbnails with hash filenames (cache generated) come first
-      const aIsGenerated = a.filePath?.includes("_thumb.") ? 0 : 1;
-      const bIsGenerated = b.filePath?.includes("_thumb.") ? 0 : 1;
+      const aIsGenerated: number = a.filePath?.includes("_thumb.") ? 0 : 1;
+      const bIsGenerated: number = b.filePath?.includes("_thumb.") ? 0 : 1;
       return aIsGenerated - bIsGenerated;
     });
 
@@ -101,6 +114,11 @@ export const getThumbnailsByComicBookId = async (
   }
 };
 
+/**
+ * Fetch a comic book thumbnail by its ID
+ * @param thumbnailId - The ID of the thumbnail.
+ * @returns A ComicBookThumbnail object or null if not found.
+ */
 export const getComicThumbnailById = async (
   thumbnailId: number,
 ): Promise<ComicBookThumbnail | null> => {
@@ -111,7 +129,7 @@ export const getComicThumbnailById = async (
   }
 
   try {
-    const result = await db
+    const result: ComicBookThumbnail[] = await db
       .select()
       .from(comicBookThumbnails)
       .where(eq(comicBookThumbnails.id, thumbnailId));
@@ -140,7 +158,7 @@ export const insertCustomComicBookThumbnail = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicBookThumbnails)
       .values({
         comicBookId: comicBookId,
@@ -166,6 +184,10 @@ export const insertCustomComicBookThumbnail = async (
   }
 };
 
+/**
+ * Delete a comic book thumbnail by its ID
+ * @param thumbnailId - The ID of the thumbnail to delete.
+ */
 export const deleteComicBookThumbnail = async (
   thumbnailId: number,
 ): Promise<void> => {
