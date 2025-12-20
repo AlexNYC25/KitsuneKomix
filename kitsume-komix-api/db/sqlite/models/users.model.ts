@@ -1,8 +1,15 @@
-import { getClient } from "../client.ts";
-import { usersTable } from "../schema.ts";
-import type { NewUser, User } from "../../../types/index.ts";
 import { eq } from "drizzle-orm";
 
+import { getClient } from "../client.ts";
+import { usersTable } from "../schema.ts";
+
+import type { NewUser, User } from "#types/index.ts";
+
+/**
+ * Creates a new user in the database
+ * @param userData The user data including username, email, and password hash
+ * @returns The ID of the newly created user
+ */
 export const createUser = async (userData: NewUser): Promise<number> => {
   const { db, client } = getClient();
 
@@ -11,7 +18,7 @@ export const createUser = async (userData: NewUser): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(usersTable)
       .values(userData)
       .returning({ id: usersTable.id });
@@ -23,6 +30,11 @@ export const createUser = async (userData: NewUser): Promise<number> => {
   }
 };
 
+/**
+ * Retrieves a user by their ID
+ * @param id The user ID
+ * @returns The User object, or null if not found
+ */
 export const getUserById = async (id: number): Promise<User | null> => {
   const { db, client } = getClient();
 
@@ -31,9 +43,13 @@ export const getUserById = async (id: number): Promise<User | null> => {
   }
 
   try {
-    const result = await db.select().from(usersTable).where(
-      eq(usersTable.id, id),
-    );
+    const result: User[] = await db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.id, id),
+      );
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by ID:", error);
@@ -41,6 +57,11 @@ export const getUserById = async (id: number): Promise<User | null> => {
   }
 };
 
+/**
+ * Retrieves a user by their email address
+ * @param email The email address of the user
+ * @returns The User object, or null if not found
+ */
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   const { db, client } = getClient();
 
@@ -49,9 +70,13 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   }
 
   try {
-    const result = await db.select().from(usersTable).where(
-      eq(usersTable.email, email),
-    );
+    const result: User[] = await db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.email, email),
+      );
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by email:", error);
@@ -59,6 +84,11 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   }
 };
 
+/**
+ * Retrieves a user by their username
+ * @param username The username of the user
+ * @returns The User object, or null if not found
+ */
 export const getUserByUsername = async (
   username: string,
 ): Promise<User | null> => {
@@ -69,9 +99,13 @@ export const getUserByUsername = async (
   }
 
   try {
-    const result = await db.select().from(usersTable).where(
-      eq(usersTable.username, username),
-    );
+    const result: User[] = await db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.username, username),
+      );
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching user by username:", error);
@@ -79,6 +113,10 @@ export const getUserByUsername = async (
   }
 };
 
+/**
+ * Retrieves all users from the database
+ * @returns An array of all User objects
+ */
 export const getAllUsers = async (): Promise<User[]> => {
   const { db, client } = getClient();
 
@@ -87,7 +125,10 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 
   try {
-    const result = await db.select().from(usersTable);
+    const result: User[] = await db
+      .select()
+      .from(usersTable);
+
     return result;
   } catch (error) {
     console.error("Error fetching all users:", error);
@@ -95,6 +136,12 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 };
 
+/**
+ * Updates an existing user with new data
+ * @param id The ID of the user to update
+ * @param updates Partial user data to update (username, email, password, name fields, admin status)
+ * @returns True if the update was successful, false otherwise
+ */
 export const updateUser = async (
   id: number,
   updates: Partial<{
@@ -127,7 +174,7 @@ export const updateUser = async (
     }
     if (updates.admin !== undefined) updateData.admin = updates.admin ? 1 : 0;
 
-    const result = await db
+    const result: { id: number }[] = await db
       .update(usersTable)
       .set(updateData)
       .where(eq(usersTable.id, id))
@@ -153,7 +200,9 @@ export const deleteUser = async (id: number): Promise<boolean> => {
   }
 
   try {
-    const result = await db
+    const result: {
+      id: number;
+    }[] = await db
       .delete(usersTable)
       .where(eq(usersTable.id, id))
       .returning({ id: usersTable.id });

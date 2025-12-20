@@ -1,7 +1,15 @@
-import { getClient } from "../client.ts";
-import { comicWebLinksTable } from "../schema.ts";
 import { eq } from "drizzle-orm";
 
+import { getClient } from "../client.ts";
+import { comicWebLinksTable } from "../schema.ts";
+
+/**
+ * Inserts a new comic web link into the database
+ * @param comicBookId The ID of the comic book
+ * @param url The URL of the web link
+ * @param description Optional description of the web link
+ * @returns The ID of the newly inserted or existing web link
+ */
 export const insertComicWebLink = async (
   comicBookId: number,
   url: string,
@@ -14,7 +22,7 @@ export const insertComicWebLink = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicWebLinksTable)
       .values({ comicBookId: comicBookId, url, description: description ?? null })
       .onConflictDoNothing()
@@ -22,7 +30,7 @@ export const insertComicWebLink = async (
 
     // If result is empty, it means the web link already exists due to onConflictDoNothing
     if (!result.length) {
-      const existingLink = await db
+      const existingLink: { id: number }[] = await db
         .select()
         .from(comicWebLinksTable)
         .where(eq(comicWebLinksTable.url, url))

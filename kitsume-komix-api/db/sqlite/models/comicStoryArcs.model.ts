@@ -1,12 +1,19 @@
 import { eq, and, asc, desc } from "drizzle-orm";
+import { SQLiteColumn } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
+import { comicBookStoryArcsTable, comicStoryArcsTable } from "../schema.ts";
 
 import type { ComicStoryArc} from "#types/index.ts";
-import type { ComicStoryArcQueryParams } from "../../../interfaces/RequestParams.interface.ts";
-import { comicBookStoryArcsTable, comicStoryArcsTable } from "../schema.ts";
-import { PAGE_SIZE_DEFAULT } from "../../../utilities/constants.ts";
+import type { ComicStoryArcQueryParams } from "#interfaces/RequestParams.interface.ts";
 
+import { PAGE_SIZE_DEFAULT } from "#utilities/constants.ts";
+
+/**
+ * Retrieves all comic story arcs with optional filtering and sorting
+ * @param params Query parameters including offset, limit, filters, sort column and order
+ * @returns An array of ComicStoryArc objects matching the query parameters
+ */
 export const getAllComicStoryArcs = async (
   params: ComicStoryArcQueryParams = {}
 ): Promise<ComicStoryArc[]> => {
@@ -27,7 +34,8 @@ export const getAllComicStoryArcs = async (
 
   try {
 
-    const whereConditions = [];
+const whereConditions: Array<ReturnType<typeof eq>> = [];
+
 
     if (nameFilter) {
       whereConditions.push(eq(comicStoryArcsTable.name, nameFilter));
@@ -37,7 +45,7 @@ export const getAllComicStoryArcs = async (
       whereConditions.push(eq(comicStoryArcsTable.description, descriptionFilter));
     }
 
-    let orderByColumn;
+    let orderByColumn: SQLiteColumn;
 
     switch (sortBy) {
       case "name":
@@ -57,12 +65,12 @@ export const getAllComicStoryArcs = async (
     const baseQuery = db.select().from(comicStoryArcsTable).$dynamic();
 
     // Apply where conditions
-    const finalQuery = whereConditions.length > 0
+    const finalQuery: typeof baseQuery = whereConditions.length > 0
           ? baseQuery.where(and(...whereConditions))
           : baseQuery;
 
 
-    const result = await finalQuery
+    const result: ComicStoryArc[] = await finalQuery
           .orderBy(sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn))
           .limit(limit)
           .offset(offset);
@@ -74,6 +82,11 @@ export const getAllComicStoryArcs = async (
   }
 };
 
+/**
+ * Retrieves a specific comic story arc by ID
+ * @param storyArcId The ID of the story arc
+ * @returns The ComicStoryArc object, or null if not found
+ */
 export const getComicStoryArcById = async (
   storyArcId: number,
 ): Promise<ComicStoryArc | null> => {
@@ -84,7 +97,7 @@ export const getComicStoryArcById = async (
   }
 
   try {
-    const result = await db
+    const result: ComicStoryArc[] = await db
       .select()
       .from(comicStoryArcsTable)
       .where(eq(comicStoryArcsTable.id, storyArcId));
@@ -99,6 +112,11 @@ export const getComicStoryArcById = async (
   }
 };
 
+/**
+ * Retrieves all comic book IDs that are part of a specific story arc
+ * @param storyArcId The ID of the story arc
+ * @returns An array of comic book IDs in the story arc
+ */
 export const getComicsInStoryArc = async (
   storyArcId: number,
 ): Promise<number[]> => {
@@ -109,7 +127,7 @@ export const getComicsInStoryArc = async (
   }
 
   try {
-    const result = await db
+    const result: { comicBookId: number }[] = await db
       .select({ comicBookId: comicBookStoryArcsTable.comicBookId })
       .from(comicBookStoryArcsTable)
       .where(eq(comicBookStoryArcsTable.comicStoryArcId, storyArcId));
@@ -124,6 +142,11 @@ export const getComicsInStoryArc = async (
   }
 };
 
+/**
+ * Retrieves a specific comic story arc by name
+ * @param name The name of the story arc
+ * @returns The ComicStoryArc object, or null if not found
+ */
 export const getComicStoryArcByName = async (
   name: string,
 ): Promise<ComicStoryArc | null> => {
@@ -134,7 +157,7 @@ export const getComicStoryArcByName = async (
   }
 
   try {
-    const result = await db
+    const result: ComicStoryArc[] = await db
       .select()
       .from(comicStoryArcsTable)
       .where(eq(comicStoryArcsTable.name, name));
@@ -149,6 +172,12 @@ export const getComicStoryArcByName = async (
   }
 };
 
+/**
+ * Inserts a new comic story arc into the database
+ * @param name The name of the story arc
+ * @param description Optional description of the story arc
+ * @returns The ID of the newly inserted or existing story arc
+ */
 export const insertComicStoryArc = async (name: string, description?: string ): Promise<number> => {
   const { db, client } = getClient();
 
@@ -157,7 +186,7 @@ export const insertComicStoryArc = async (name: string, description?: string ): 
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicStoryArcsTable)
       .values({ name, description })
       .onConflictDoNothing()
@@ -166,7 +195,7 @@ export const insertComicStoryArc = async (name: string, description?: string ): 
     // If result is empty, it means the story arc already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing story arc by name (which should be unique)
-      const existingStoryArc = await db
+      const existingStoryArc: { id: number }[] = await db
         .select({ id: comicStoryArcsTable.id })
         .from(comicStoryArcsTable)
         .where(eq(comicStoryArcsTable.name, name));
@@ -192,6 +221,11 @@ export const insertComicStoryArc = async (name: string, description?: string ): 
   }
 };
 
+/**
+ * Deletes a comic story arc by ID
+ * @param storyArcId The ID of the story arc to delete
+ * @returns void
+ */
 export const deleteComicStoryArcById = async (
   storyArcId: number,
 ): Promise<void> => {
@@ -211,6 +245,12 @@ export const deleteComicStoryArcById = async (
   }
 };
 
+/**
+ * Links a story arc to a comic book by creating a relationship in the junction table
+ * @param storyArcId The ID of the story arc
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
 export const linkStoryArcToComicBook = async (
   storyArcId: number,
   comicBookId: number,
@@ -232,6 +272,11 @@ export const linkStoryArcToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all story arcs for a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicStoryArc objects associated with the comic book
+ */
 export const getStoryArcsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicStoryArc[]> => {
@@ -242,9 +287,9 @@ export const getStoryArcsByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicStoryArc: ComicStoryArc }[] = await db
       .select({
-        comic_story_arc: comicStoryArcsTable,
+        comicStoryArc: comicStoryArcsTable,
       })
       .from(comicStoryArcsTable)
       .innerJoin(
@@ -253,7 +298,7 @@ export const getStoryArcsByComicBookId = async (
       )
       .where(eq(comicBookStoryArcsTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_story_arc);
+    return result.map((row) => row.comicStoryArc);
   } catch (error) {
     console.error(
       `Error fetching story arcs for comic book ID ${comicBookId}:`,

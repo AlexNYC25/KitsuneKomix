@@ -1,10 +1,15 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-
 import { comicBookTeamsTable, comicTeamsTable } from "../schema.ts";
+
 import type { ComicTeam } from "#types/index.ts";
 
+/**
+ * Inserts a new comic team into the database
+ * @param name The name of the team
+ * @returns The ID of the newly inserted or existing team
+ */
 export const insertComicTeam = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -13,7 +18,7 @@ export const insertComicTeam = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicTeamsTable)
       .values({ name })
       .onConflictDoNothing()
@@ -22,7 +27,7 @@ export const insertComicTeam = async (name: string): Promise<number> => {
     // If result is empty, it means the team already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing team by name (which should be unique)
-      const existingTeam = await db
+      const existingTeam: { id: number }[] = await db
         .select({ id: comicTeamsTable.id })
         .from(comicTeamsTable)
         .where(eq(comicTeamsTable.name, name));
@@ -48,6 +53,12 @@ export const insertComicTeam = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Links a team to a comic book by creating a relationship in the junction table
+ * @param teamId The ID of the team
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
 export const linkTeamToComicBook = async (
   teamId: number,
   comicBookId: number,
@@ -69,6 +80,11 @@ export const linkTeamToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all teams for a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicTeam objects associated with the comic book
+ */
 export const getTeamsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicTeam[]> => {
@@ -79,7 +95,7 @@ export const getTeamsByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicTeam: ComicTeam }[] = await db
       .select({
         comicTeam: comicTeamsTable,
       })
@@ -100,6 +116,11 @@ export const getTeamsByComicBookId = async (
   }
 };
 
+/**
+ * Searches for team IDs by name filter
+ * @param filter The partial name to search for (case-insensitive)
+ * @returns An array of team IDs matching the filter
+ */
 export const getTeamIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -110,7 +131,7 @@ export const getTeamIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicTeamsTable.id })
       .from(comicTeamsTable)
       .where(ilike(comicTeamsTable.name, `%${filter}%`));

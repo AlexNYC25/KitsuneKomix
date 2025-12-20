@@ -1,7 +1,6 @@
 import { desc, eq, inArray, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-
 import {
   comicBookCharactersTable,
   comicBookColoristsTable,
@@ -39,12 +38,18 @@ import {
   comicTeamsTable,
   comicWritersTable,
 } from "../schema.ts";
+
 import type {
   ComicSeries,
   ComicSeriesWithMetadata,
   NewComicSeries,
-} from "../../../types/index.ts";
+} from "#types/index.ts";
 
+/**
+ * Inserts a new comic series into the database
+ * @param seriesData The series data to insert including name, description, and folder path
+ * @returns The ID of the newly inserted or existing series
+ */
 export const insertComicSeries = async (
   seriesData: NewComicSeries,
 ): Promise<number> => {
@@ -55,7 +60,7 @@ export const insertComicSeries = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicSeriesTable)
       .values(seriesData)
       .onConflictDoNothing()
@@ -65,10 +70,11 @@ export const insertComicSeries = async (
     if (result.length === 0) {
       // Find the existing series by folder_path (which should be unique)
       if (seriesData.folderPath) {
-        const existingSeries = await db
+        const existingSeries: { id: number }[] = await db
           .select({ id: comicSeriesTable.id })
           .from(comicSeriesTable)
           .where(eq(comicSeriesTable.folderPath, seriesData.folderPath));
+
         if (existingSeries.length > 0) {
           console.log(
             `Comic series already exists at path: ${seriesData.folderPath}, returning existing ID: ${
@@ -78,21 +84,6 @@ export const insertComicSeries = async (
           return existingSeries[0].id;
         }
       }
-
-      /*
-      // If we can't find by folder_path, try by name
-      if (seriesData.name) {
-        const existingSeriesByName = await db
-          .select({ id: comicSeriesTable.id })
-          .from(comicSeriesTable)
-          .where(eq(comicSeriesTable.name, seriesData.name));
-
-        if (existingSeriesByName.length > 0) {
-          console.log(`Comic series already exists with name: ${seriesData.name}, returning existing ID: ${existingSeriesByName[0].id}`);
-          return existingSeriesByName[0].id;
-        }
-      }
-      */
 
       throw new Error(
         `Failed to insert comic series and could not find existing series. Data: ${
@@ -108,6 +99,12 @@ export const insertComicSeries = async (
   }
 };
 
+/**
+ * Adds a comic series to a library by creating a relationship
+ * @param seriesId The ID of the series
+ * @param libraryId The ID of the library
+ * @returns True if the series was added, false if relationship already exists
+ */
 export const insertComicSeriesIntoLibrary = async (
   seriesId: number,
   libraryId: number,
@@ -119,7 +116,7 @@ export const insertComicSeriesIntoLibrary = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicLibrariesSeriesTable)
       .values({
         comicSeriesId: seriesId,
@@ -135,6 +132,11 @@ export const insertComicSeriesIntoLibrary = async (
   }
 };
 
+/**
+ * Retrieves a comic series by ID
+ * @param id The ID of the series
+ * @returns The ComicSeries object, or null if not found
+ */
 export const getComicSeriesById = async (
   id: number,
 ): Promise<ComicSeries | null> => {
@@ -145,9 +147,13 @@ export const getComicSeriesById = async (
   }
 
   try {
-    const result = await db.select().from(comicSeriesTable).where(
-      eq(comicSeriesTable.id, id),
-    );
+    const result: ComicSeries[] = await db
+      .select()
+      .from(comicSeriesTable)
+      .where(
+        eq(comicSeriesTable.id, id),
+      );
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by ID:", error);
@@ -190,7 +196,7 @@ export const getComicSeriesMetadataById = async (
           string
         >`GROUP_CONCAT(DISTINCT ${comicLetterersTable}.name)`,
         editors: sql<string>`GROUP_CONCAT(DISTINCT ${comicEditorsTable}.name)`,
-        cover_artists: sql<
+        coverArtists: sql<
           string
         >`GROUP_CONCAT(DISTINCT ${comicCoverArtistsTable}.name)`,
         publishers: sql<
@@ -207,10 +213,10 @@ export const getComicSeriesMetadataById = async (
         locations: sql<
           string
         >`GROUP_CONCAT(DISTINCT ${comicLocationsTable}.name)`,
-        story_arcs: sql<
+        storyArcs: sql<
           string
         >`GROUP_CONCAT(DISTINCT ${comicStoryArcsTable}.name)`,
-        series_groups: sql<
+        seriesGroups: sql<
           string
         >`GROUP_CONCAT(DISTINCT ${comicSeriesGroupsTable}.name)`,
       })
@@ -368,6 +374,11 @@ export const getComicSeriesMetadataById = async (
   }
 };
 
+/**
+ * Retrieves a comic series by name
+ * @param name The name of the series
+ * @returns The ComicSeries object, or null if not found
+ */
 export const getComicSeriesByName = async (
   name: string,
 ): Promise<ComicSeries | null> => {
@@ -378,9 +389,13 @@ export const getComicSeriesByName = async (
   }
 
   try {
-    const result = await db.select().from(comicSeriesTable).where(
-      eq(comicSeriesTable.name, name),
-    );
+    const result: ComicSeries[] = await db
+      .select()
+      .from(comicSeriesTable)
+      .where(
+        eq(comicSeriesTable.name, name),
+      );
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by name:", error);
@@ -388,6 +403,11 @@ export const getComicSeriesByName = async (
   }
 };
 
+/**
+ * Retrieves a comic series by folder path
+ * @param path The folder path of the series
+ * @returns The ComicSeries object, or null if not found
+ */
 export const getComicSeriesByPath = async (
   folderPath: string,
 ): Promise<ComicSeries | null> => {
@@ -398,9 +418,13 @@ export const getComicSeriesByPath = async (
   }
 
   try {
-    const result = await db.select().from(comicSeriesTable).where(
-      eq(comicSeriesTable.folderPath, folderPath),
-    );
+    const result: ComicSeries[] = await db
+      .select()
+      .from(comicSeriesTable)
+      .where(
+        eq(comicSeriesTable.folderPath, folderPath),
+      );
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic series by path:", error);
@@ -408,6 +432,10 @@ export const getComicSeriesByPath = async (
   }
 };
 
+/**
+ * Retrieves all comic series from the database
+ * @returns An array of all ComicSeries objects
+ */
 export const getAllComicSeries = async (): Promise<ComicSeries[]> => {
   const { db, client } = getClient();
 
@@ -416,7 +444,7 @@ export const getAllComicSeries = async (): Promise<ComicSeries[]> => {
   }
 
   try {
-    const result = await db.select().from(comicSeriesTable);
+    const result: ComicSeries[] = await db.select().from(comicSeriesTable);
     return result;
   } catch (error) {
     console.error("Error fetching all comic series:", error);
@@ -424,6 +452,11 @@ export const getAllComicSeries = async (): Promise<ComicSeries[]> => {
   }
 };
 
+/**
+ * Retrieves the most recently created comic series
+ * @param limit The maximum number of series to retrieve
+ * @returns An array of the latest ComicSeries objects
+ */
 export const getLatestComicSeries = async (
   limit: number,
   offset: number = 0,
@@ -436,17 +469,10 @@ export const getLatestComicSeries = async (
   }
 
   try {
-    const result = await db
-      .select(
-        {
-          id: comicSeriesTable.id,
-          name: comicSeriesTable.name,
-          description: comicSeriesTable.description,
-          folderPath: comicSeriesTable.folderPath,
-          createdAt: comicSeriesTable.createdAt,
-          updatedAt: comicSeriesTable.updatedAt,
-        },
-      )
+    const result: { comicSeries: ComicSeries }[] = await db
+      .select({
+        comicSeries: comicSeriesTable,
+      })
       .from(comicSeriesTable)
       .leftJoin(
         comicLibrariesSeriesTable,
@@ -465,13 +491,22 @@ export const getLatestComicSeries = async (
       .orderBy(desc(comicSeriesTable.createdAt))
       .limit(limit)
       .offset(offset);
-    return result;
+
+    const comicSeriesResults: ComicSeries[] = result.map((row) => row.comicSeries);
+
+    return comicSeriesResults;
   } catch (error) {
     console.error("Error fetching latest comic series:", error);
     throw error;
   }
 };
 
+/**
+ * Retrieves comic series that have been updated since a specific date
+ * @param since The date to filter series by (ISO string)
+ * @param limit The maximum number of series to retrieve
+ * @returns An array of ComicSeries objects updated after the specified date
+ */
 export const getUpdatedComicSeries = async (
   limit: number,
   offset: number = 0,
@@ -485,16 +520,9 @@ export const getUpdatedComicSeries = async (
 
   try {
     const result = await db
-      .select(
-        {
-          id: comicSeriesTable.id,
-          name: comicSeriesTable.name,
-          description: comicSeriesTable.description,
-          folderPath: comicSeriesTable.folderPath,
-          createdAt: comicSeriesTable.createdAt,
-          updatedAt: comicSeriesTable.updatedAt,
-        },
-      )
+      .select({
+        comicSeries: comicSeriesTable,
+      })
       .from(comicSeriesTable)
       .leftJoin(
         comicLibrariesSeriesTable,
@@ -521,13 +549,22 @@ export const getUpdatedComicSeries = async (
       .orderBy(desc(comicBooksTable.updatedAt))
       .limit(limit)
       .offset(offset);
-    return result;
+
+    const comicSeriesResults: ComicSeries[] = result.map((row) => row.comicSeries);
+
+    return comicSeriesResults;
   } catch (error) {
     console.error("Error fetching updated comic series:", error);
     throw error;
   }
 };
 
+/**
+ * Updates an existing comic series with new data
+ * @param id The ID of the series to update
+ * @param updates Partial data to update in the series
+ * @returns A boolean indicating if the update was successful
+ */
 export const updateComicSeries = async (
   id: number,
   updates: Partial<NewComicSeries>,
@@ -552,7 +589,7 @@ export const updateComicSeries = async (
       return false;
     }
 
-    const result = await db
+    const result: { id: number }[] = await db
       .update(comicSeriesTable)
       .set(updateData)
       .where(eq(comicSeriesTable.id, id))
@@ -565,6 +602,11 @@ export const updateComicSeries = async (
   }
 };
 
+/**
+ * Deletes a comic series by ID
+ * @param id The ID of the series to delete
+ * @returns A boolean indicating if the deletion was successful
+ */
 export const deleteComicSeries = async (id: number): Promise<boolean> => {
   const { db, client } = getClient();
 
@@ -573,7 +615,7 @@ export const deleteComicSeries = async (id: number): Promise<boolean> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .delete(comicSeriesTable)
       .where(eq(comicSeriesTable.id, id))
       .returning({ id: comicSeriesTable.id });
@@ -585,6 +627,12 @@ export const deleteComicSeries = async (id: number): Promise<boolean> => {
   }
 };
 
+/**
+ * Adds a comic book to a series by creating a relationship
+ * @param seriesId The ID of the series
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
 export const addComicBookToSeries = async (
   seriesId: number,
   comicBookId: number,
@@ -596,7 +644,7 @@ export const addComicBookToSeries = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicSeriesBooksTable)
       .values({
         comicSeriesId: seriesId,
@@ -612,6 +660,11 @@ export const addComicBookToSeries = async (
   }
 };
 
+/**
+ * Retrieves all comic book IDs in a specific series
+ * @param seriesId The ID of the series
+ * @returns An array of comic book IDs in the series
+ */
 export const getComicBooksInSeries = async (
   seriesId: number,
 ): Promise<number[]> => {
@@ -622,7 +675,13 @@ export const getComicBooksInSeries = async (
   }
 
   try {
-    const result = await db
+    const result: {
+        id: number;
+        comicSeriesId: number;
+        comicBookId: number;
+        createdAt: string;
+        updatedAt: string;
+    }[] = await db
       .select()
       .from(comicSeriesBooksTable)
       .where(eq(comicSeriesBooksTable.comicSeriesId, seriesId));
@@ -635,6 +694,11 @@ export const getComicBooksInSeries = async (
   }
 };
 
+/**
+ * Retrieves the series ID for a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns The series ID, or null if the comic book is not in a series
+ */
 export const getSeriesIdFromComicBook = async (
   comicBookId: number,
 ): Promise<number | null> => {
@@ -645,7 +709,13 @@ export const getSeriesIdFromComicBook = async (
   }
 
   try {
-    const result = await db
+    const result: {
+      id: number;
+      comicSeriesId: number;
+      comicBookId: number;
+      createdAt: string;
+      updatedAt: string;
+    }[] = await db
       .select()
       .from(comicSeriesBooksTable)
       .where(eq(comicSeriesBooksTable.comicBookId, comicBookId));

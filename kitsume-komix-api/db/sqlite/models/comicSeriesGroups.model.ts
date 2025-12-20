@@ -1,13 +1,19 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-
-import type { ComicSeriesGroup } from "#types/index.ts";
 import {
   comicBookSeriesGroupsTable,
   comicSeriesGroupsTable,
 } from "../schema.ts";
 
+import type { ComicSeriesGroup } from "#types/index.ts";
+
+/**
+ * Inserts a new comic series group into the database
+ * @param name The name of the series group
+ * @param description Optional description of the series group
+ * @returns The ID of the newly inserted or existing series group
+ */
 export const insertComicSeriesGroup = async (
   name: string,
   description?: string,
@@ -19,7 +25,7 @@ export const insertComicSeriesGroup = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicSeriesGroupsTable)
       .values({ name, description: description ?? null })
       .onConflictDoNothing()
@@ -28,7 +34,7 @@ export const insertComicSeriesGroup = async (
     // If result is empty, it means the series group already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing series group by name (which should be unique)
-      const existingGroup = await db
+      const existingGroup: { id: number }[] = await db
         .select({ id: comicSeriesGroupsTable.id })
         .from(comicSeriesGroupsTable)
         .where(eq(comicSeriesGroupsTable.name, name));
@@ -54,6 +60,12 @@ export const insertComicSeriesGroup = async (
   }
 };
 
+/**
+ * Links a series group to a comic book by creating a relationship in the junction table
+ * @param seriesGroupId The ID of the series group
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
 export const linkSeriesGroupToComicBook = async (
   seriesGroupId: number,
   comicBookId: number,
@@ -78,6 +90,11 @@ export const linkSeriesGroupToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all series groups for a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicSeriesGroup objects associated with the comic book
+ */
 export const getSeriesGroupsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicSeriesGroup[]> => {
@@ -88,9 +105,9 @@ export const getSeriesGroupsByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicSeriesGroup: ComicSeriesGroup }[] = await db
       .select({
-        comic_series_group: comicSeriesGroupsTable,
+        comicSeriesGroup: comicSeriesGroupsTable,
       })
       .from(comicSeriesGroupsTable)
       .innerJoin(
@@ -102,7 +119,7 @@ export const getSeriesGroupsByComicBookId = async (
       )
       .where(eq(comicBookSeriesGroupsTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_series_group);
+    return result.map((row) => row.comicSeriesGroup);
   } catch (error) {
     console.error(
       `Error fetching series groups for comic book ID ${comicBookId}:`,

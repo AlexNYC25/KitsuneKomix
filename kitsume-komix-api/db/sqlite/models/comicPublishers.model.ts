@@ -1,10 +1,15 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-
-import type { ComicPublisher } from "../../../types/index.ts";
 import { comicBookPublishersTable, comicPublishersTable } from "../schema.ts";
 
+import type { ComicPublisher } from "#types/index.ts";
+
+/**
+ * Inserts a new comic publisher into the database
+ * @param name The name of the publisher
+ * @returns The ID of the newly inserted or existing publisher
+ */
 export const insertComicPublisher = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -13,7 +18,7 @@ export const insertComicPublisher = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicPublishersTable)
       .values({ name })
       .onConflictDoNothing()
@@ -22,7 +27,7 @@ export const insertComicPublisher = async (name: string): Promise<number> => {
     // If result is empty, it means the publisher already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing publisher by name (which should be unique)
-      const existingPublisher = await db
+      const existingPublisher: { id: number }[] = await db
         .select({ id: comicPublishersTable.id })
         .from(comicPublishersTable)
         .where(eq(comicPublishersTable.name, name));
@@ -48,6 +53,12 @@ export const insertComicPublisher = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Links a publisher to a comic book by creating a relationship in the junction table
+ * @param publisherId The ID of the publisher
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
 export const linkPublisherToComicBook = async (
   publisherId: number,
   comicBookId: number,
@@ -69,6 +80,11 @@ export const linkPublisherToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all publishers for a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicPublisher objects associated with the comic book
+ */
 export const getPublishersByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicPublisher[]> => {
@@ -79,7 +95,7 @@ export const getPublishersByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comic_publisher: ComicPublisher }[] = await db
       .select({
         comic_publisher: comicPublishersTable,
       })
@@ -100,6 +116,11 @@ export const getPublishersByComicBookId = async (
   }
 };
 
+/**
+ * Searches for publisher IDs by name filter
+ * @param filter The partial name to search for (case-insensitive)
+ * @returns An array of publisher IDs matching the filter
+ */
 export const getPublisherIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -110,7 +131,7 @@ export const getPublisherIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicPublishersTable.id })
       .from(comicPublishersTable)
       .where(ilike(comicPublishersTable.name, `%${filter}%`));
