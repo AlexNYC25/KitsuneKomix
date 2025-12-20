@@ -36,19 +36,26 @@ import {
   comicTeamsTable,
   comicWritersTable,
 } from "../schema.ts";
+
 import type {
   ComicBook,
   ComicBookFilteringAndSortingParams,
-  NewComicBook,
-} from "../../../types/index.ts";
+  NewComicBook
+} from "#types/index.ts";
+import type { ComicBookQueryParams } from "#interfaces/RequestParams.interface.ts";
+
 import {
   COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
-  // Constants (imported as values since they're used at runtime)
   COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
-} from "#types/index.ts";
-import type { ComicBookQueryParams } from "../../../interfaces/RequestParams.interface.ts";
+} from "#utilities/constants.ts";
+import { SQLiteColumn } from "drizzle-orm/sqlite-core";
 
-export const getComicBooksWithMetadataFilteringSoring = async (
+/**
+ * Gets comic books with metadata filtering and sorting
+ * @param serviceDetails - Filtering and sorting parameters
+ * @returns Promise resolving to an array of ComicBook objects 
+ */
+export const getComicBooksWithMetadataFilteringSorting = async (
   serviceDetails: ComicBookFilteringAndSortingParams,
 ): Promise<ComicBook[]> => {
   const { db, client } = getClient();
@@ -57,7 +64,7 @@ export const getComicBooksWithMetadataFilteringSoring = async (
     throw new Error("Database client is not initialized");
   }
 
-  const whereConditions = [];
+  const whereConditions: Array<ReturnType<typeof eq> | ReturnType<typeof inArray> | ReturnType<typeof ilike>> = [];
 
   // Determine which tables we need to join based on filters and sorting
   const requiredJoins = new Set<string>();
@@ -240,42 +247,41 @@ export const getComicBooksWithMetadataFilteringSoring = async (
   // Start with base query
   const selectFields = {
     id: comicBooksTable.id,
-    library_id: comicBooksTable.libraryId,
-    file_path: comicBooksTable.filePath,
+    libraryId: comicBooksTable.libraryId,
+    filePath: comicBooksTable.filePath,
     hash: comicBooksTable.hash,
     title: comicBooksTable.title,
     series: comicBooksTable.series,
-    issue_number: comicBooksTable.issueNumber,
+    issueNumber: comicBooksTable.issueNumber,
     count: comicBooksTable.count,
     volume: comicBooksTable.volume,
-    alternate_series: comicBooksTable.alternateSeries,
-    alternate_issue_number: comicBooksTable.alternateIssueNumber,
-    alternate_count: comicBooksTable.alternateCount,
-    page_count: comicBooksTable.pageCount,
-    file_size: comicBooksTable.fileSize,
+    alternateSeries: comicBooksTable.alternateSeries,
+    alternateIssueNumber: comicBooksTable.alternateIssueNumber,
+    alternateCount: comicBooksTable.alternateCount,
+    pageCount: comicBooksTable.pageCount,
+    fileSize: comicBooksTable.fileSize,
     summary: comicBooksTable.summary,
     notes: comicBooksTable.notes,
     year: comicBooksTable.year,
     month: comicBooksTable.month,
     day: comicBooksTable.day,
     publisher: comicBooksTable.publisher,
-    publication_date: comicBooksTable.publicationDate,
-    scan_info: comicBooksTable.scanInfo,
+    publicationDate: comicBooksTable.publicationDate,
+    scanInfo: comicBooksTable.scanInfo,
     language: comicBooksTable.language,
     format: comicBooksTable.format,
-    black_and_white: comicBooksTable.blackAndWhite,
+    blackAndWhite: comicBooksTable.blackAndWhite,
     manga: comicBooksTable.manga,
-    reading_direction: comicBooksTable.readingDirection,
+    readingDirection: comicBooksTable.readingDirection,
     review: comicBooksTable.review,
-    age_rating: comicBooksTable.ageRating,
-    community_rating: comicBooksTable.communityRating,
-    created_at: comicBooksTable.createdAt,
-    updated_at: comicBooksTable.updatedAt,
+    ageRating: comicBooksTable.ageRating,
+    communityRating: comicBooksTable.communityRating,
+    createdAt: comicBooksTable.createdAt,
+    updatedAt: comicBooksTable.updatedAt,
   };
 
   // Build the query with only the required joins
-  // deno-lint-ignore no-explicit-any
-  let dynamicQuery: any = db.selectDistinct(selectFields).from(comicBooksTable);
+  let dynamicQuery = db.selectDistinct(selectFields).from(comicBooksTable).$dynamic();
 
   // Add joins conditionally
   if (requiredJoins.has("writers")) {
@@ -482,8 +488,8 @@ export const getComicBooksWithMetadataFilteringSoring = async (
   }
 
   // Handle sorting
-  let orderByColumn;
-  const sortOrder = serviceDetails.sort?.order || "desc";
+  let orderByColumn: SQLiteColumn;
+  const sortOrder: "asc" | "desc" = serviceDetails.sort?.order || "desc";
 
   // Determine the column to sort by based on property type
   if (
@@ -615,8 +621,8 @@ export const getComicBooksWithMetadataFilteringSoring = async (
   }
 
   // Apply pagination defaults
-  const offset = serviceDetails.offset || 0;
-  const limit = serviceDetails.limit || 20;
+  const offset: number = serviceDetails.offset || 0;
+  const limit: number = serviceDetails.limit || 20;
 
   try {
     // Execute the query with sorting and pagination
@@ -638,6 +644,13 @@ export const getComicBooksWithMetadataFilteringSoring = async (
   }
 };
 
+/**
+ * Gets all comic books sorted by creation date
+ * @param offset number numberical offset for pagination
+ * @param limit number numerical limit for pagination
+ * @param sort string | undefined sort order, either 'asc' or 'desc'
+ * @returns Promise resolving to an array of ComicBook objects
+ */
 export const getAllComicBooksSortByDate = async (
   offset: number,
   limit: number,
@@ -650,7 +663,7 @@ export const getAllComicBooksSortByDate = async (
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).limit(limit).offset(
+    const result: ComicBook[] = await db.select().from(comicBooksTable).limit(limit).offset(
       offset,
     ).orderBy(
       sort === "asc"
@@ -665,6 +678,10 @@ export const getAllComicBooksSortByDate = async (
   }
 };
 
+/**
+ * Gets a random comic book from the database  
+ * @returns Promise resolving to a ComicBook object or null if none found
+ */
 export const getRandomBook = async (): Promise<ComicBook | null> => {
   const { db, client } = getClient();
 
@@ -686,7 +703,12 @@ export const getRandomBook = async (): Promise<ComicBook | null> => {
   }
 };
 
-export const insertComicBook = async (comicBook: NewComicBook) => {
+/**
+ * Inserts a new comic book into the database
+ * @param comicBook The comic book data to insert
+ * @returns The ID of the newly inserted comic book
+ */
+export const insertComicBook = async (comicBook: NewComicBook): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -694,7 +716,7 @@ export const insertComicBook = async (comicBook: NewComicBook) => {
   }
 
   try {
-    const insertQuery = await db
+    const insertQuery: { id: number }[] = await db
       .insert(comicBooksTable)
       .values(comicBook)
       .returning({ id: comicBooksTable.id });
@@ -706,6 +728,11 @@ export const insertComicBook = async (comicBook: NewComicBook) => {
   }
 };
 
+/**
+ * Gets the comic book by its ID
+ * @param id Id of the comic book
+ * @returns The comic book object or null if not found
+ */
 export const getComicBookById = async (
   id: number,
 ): Promise<ComicBook | null> => {
@@ -716,9 +743,13 @@ export const getComicBookById = async (
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).where(
-      eq(comicBooksTable.id, id),
-    );
+    const result: ComicBook[] = await db
+      .select()
+      .from(comicBooksTable)
+      .where(
+        eq(comicBooksTable.id, id),
+      );
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic book by ID:", error);
@@ -726,6 +757,11 @@ export const getComicBookById = async (
   }
 };
 
+/**
+ * Returns the comic book matching the given file path
+ * @param filePath String representing the internal path of the comic book file
+ * @returns The comic book object or null if not found
+ */
 export const getComicBookByFilePath = async (
   filePath: string,
 ): Promise<ComicBook | null> => {
@@ -736,9 +772,13 @@ export const getComicBookByFilePath = async (
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).where(
-      eq(comicBooksTable.filePath, filePath),
-    );
+    const result: ComicBook[] = await db
+      .select()
+      .from(comicBooksTable)
+      .where(
+        eq(comicBooksTable.filePath, filePath),
+      );
+    
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic book by file path:", error);
@@ -746,6 +786,11 @@ export const getComicBookByFilePath = async (
   }
 };
 
+/**
+ * Retrieves comic books by their hash value; note multiple comic books can share the same hash if they are duplicates.
+ * @param hash String representing the hash of the comic book
+ * @returns An array of comic book objects matching the given hash
+ */
 export const getComicBooksByHash = async (
   hash: string,
 ): Promise<ComicBook[]> => {
@@ -756,9 +801,13 @@ export const getComicBooksByHash = async (
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).where(
-      eq(comicBooksTable.hash, hash),
-    );
+    const result: ComicBook[] = await db
+      .select()
+      .from(comicBooksTable)
+      .where(
+        eq(comicBooksTable.hash, hash),
+      );
+
     return result;
   } catch (error) {
     console.error("Error fetching comic books by hash:", error);
@@ -766,6 +815,12 @@ export const getComicBooksByHash = async (
   }
 };
 
+/**
+ * Updates an existing comic book with the given updates
+ * @param id the ID of the comic book to update
+ * @param updates The fields to update in the comic book
+ * @returns A boolean indicating whether the update was successful
+ */
 export const updateComicBook = async (
   id: number,
   updates: Partial<NewComicBook>,
@@ -857,8 +912,14 @@ export const updateComicBook = async (
   }
 };
 
-// Add new query functions for enhanced schema
 
+/**
+ * Gets comic books by their library ID
+ * @param libraryId The ID of the library
+ * @returns An array of comic book objects belonging to the specified library
+ * 
+ * TODO: paginate this with new filtering/sorting system
+ */
 export const getComicBooksByLibrary = async (
   libraryId: number,
 ): Promise<ComicBook[]> => {
@@ -869,9 +930,13 @@ export const getComicBooksByLibrary = async (
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).where(
-      eq(comicBooksTable.libraryId, libraryId),
-    );
+    const result: ComicBook[] = await db
+      .select()
+      .from(comicBooksTable)
+      .where(
+        eq(comicBooksTable.libraryId, libraryId),
+      );
+
     return result;
   } catch (error) {
     console.error("Error fetching comic books by library:", error);
@@ -879,6 +944,11 @@ export const getComicBooksByLibrary = async (
   }
 };
 
+/**
+ * Returns comic books associated with a specific series ID
+ * @param seriesId The ID of the comic series
+ * @returns An array of comic book objects belonging to the specified series
+ */
 export const getComicBooksBySeriesId = async (
   seriesId: number,
 ): Promise<ComicBook[]> => {
@@ -889,7 +959,7 @@ export const getComicBooksBySeriesId = async (
   }
 
   try {
-    const result = await db
+    const result: ComicBook[] = await db
       .select(
         {
           id: comicBooksTable.id,
@@ -941,6 +1011,13 @@ export const getComicBooksBySeriesId = async (
   }
 };
 
+/**
+ * Gets comic books by their publisher name
+ * @param publisher The String publisher name 
+ * @returns An array of comic book objects published by the specified publisher
+ * 
+ * TODO: Add optional id parameter to get by publisher id instead of name as name may not be unique
+ */
 export const getComicBooksByPublisher = async (
   publisher: string,
 ): Promise<ComicBook[]> => {
@@ -961,6 +1038,11 @@ export const getComicBooksByPublisher = async (
   }
 };
 
+/**
+ * Gets comic books by their publication year
+ * @param year The numerical year of publication
+ * @returns An array of comic book objects published in the specified year
+ */
 export const getComicBooksByYear = async (
   year: number,
 ): Promise<ComicBook[]> => {
@@ -971,9 +1053,13 @@ export const getComicBooksByYear = async (
   }
 
   try {
-    const result = await db.select().from(comicBooksTable).where(
-      eq(comicBooksTable.year, year),
-    );
+    const result: ComicBook[] = await db
+      .select()
+      .from(comicBooksTable)
+      .where(
+        eq(comicBooksTable.year, year),
+      );
+
     return result;
   } catch (error) {
     console.error("Error fetching comic books by year:", error);
@@ -981,26 +1067,11 @@ export const getComicBooksByYear = async (
   }
 };
 
-export const getComicBookByHash = async (
-  hash: string,
-): Promise<ComicBook | null> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result = await db.select().from(comicBooksTable).where(
-      eq(comicBooksTable.hash, hash),
-    );
-    return result.length > 0 ? result[0] : null;
-  } catch (error) {
-    console.error("Error fetching comic book by hash:", error);
-    throw error;
-  }
-};
-
+/**
+ * Searches comic books by matching a query string against multiple fields
+ * @param query The search query string to match against title, series, publisher, and summary
+ * @returns An array of comic book objects matching the search criteria
+ */
 export const searchComicBooks = async (query: string): Promise<ComicBook[]> => {
   const { db, client } = getClient();
 
@@ -1009,8 +1080,8 @@ export const searchComicBooks = async (query: string): Promise<ComicBook[]> => {
   }
 
   try {
-    const likeQuery = `%${query}%`;
-    const result = await db
+    const likeQuery: string = `%${query}%`;
+    const result: ComicBook[] = await db
       .select()
       .from(comicBooksTable)
       .where(
@@ -1019,6 +1090,7 @@ export const searchComicBooks = async (query: string): Promise<ComicBook[]> => {
           eq(comicBooksTable.publisher, likeQuery) ||
           eq(comicBooksTable.summary, likeQuery),
       );
+
     return result;
   } catch (error) {
     console.error("Error searching comic books:", error);
@@ -1026,6 +1098,11 @@ export const searchComicBooks = async (query: string): Promise<ComicBook[]> => {
   }
 };
 
+/**
+ * Deletes a comic book from the database by its ID
+ * @param id The ID of the comic book to delete
+ * @returns A boolean indicating whether the deletion was successful
+ */
 export const deleteComicBook = async (id: number): Promise<boolean> => {
   const { db, client } = getClient();
 
@@ -1034,7 +1111,7 @@ export const deleteComicBook = async (id: number): Promise<boolean> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .delete(comicBooksTable)
       .where(eq(comicBooksTable.id, id))
       .returning({ id: comicBooksTable.id });
@@ -1046,6 +1123,12 @@ export const deleteComicBook = async (id: number): Promise<boolean> => {
   }
 };
 
+/**
+ * Retrieves duplicate comic books grouped by hash with pagination support
+ * @param offset The number of records to skip for pagination
+ * @param limit The maximum number of records to retrieve
+ * @returns An array of comic book objects that have duplicates (multiple books with same hash)
+ */
 export const getComicDuplicates = async (
   offset: number,
   limit: number,
@@ -1057,13 +1140,14 @@ export const getComicDuplicates = async (
   }
 
   try {
-    const result = await db
+    const result: ComicBook[] = await db
       .select()
       .from(comicBooksTable)
       .groupBy(comicBooksTable.hash)
       .having(sql`COUNT(*) > 1`)
       .limit(limit)
       .offset(offset);
+
     return result;
   } catch (error) {
     console.error("Error fetching duplicate comic books:", error);
@@ -1104,7 +1188,7 @@ export const getComicBooksWithMetadata = async (
 
   try {
     // Now we build up any where conditions we may have based on the filters provided
-    const whereConditions = [];
+    const whereConditions: Array<ReturnType<typeof eq> | ReturnType<typeof inArray> | ReturnType<typeof ilike> | ReturnType<typeof or>> = [];
 
     if (titleFilter) {
       whereConditions.push(
@@ -1178,7 +1262,7 @@ export const getComicBooksWithMetadata = async (
     }
 
     // Then we determine sorting similar to before instead we define the value of orderByColumn dynamically
-    let orderByColumn;
+    let orderByColumn: SQLiteColumn;
     switch (sortBy) {
       case "title":
         orderByColumn = comicBooksTable.title;
@@ -1404,12 +1488,12 @@ export const getComicBooksWithMetadata = async (
       .$dynamic();
 
     // Apply WHERE conditions if any
-    const finalQuery = whereConditions.length > 0
+    const finalQuery: typeof baseQuery = whereConditions.length > 0
       ? baseQuery.where(and(...whereConditions))
       : baseQuery;
 
     // Apply ordering and pagination
-    const result = await finalQuery
+    const result: ComicBook[] = await finalQuery
       .orderBy(sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn))
       .limit(limit)
       .offset(offset);
