@@ -2,9 +2,14 @@ import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { ComicColorist } from "../../../types/index.ts";
+import { ComicColorist } from "#types/index.ts";
 import { comicBookColoristsTable, comicColoristsTable } from "../schema.ts";
 
+/**
+ * Inserts a new comic colorist into the database or returns the ID of an existing colorist with the same name
+ * @param name The name of the colorist to insert
+ * @returns The ID of the newly inserted colorist or the ID of the existing colorist with the same name
+ */
 export const insertComicColorist = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -13,7 +18,7 @@ export const insertComicColorist = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicColoristsTable)
       .values({ name })
       .onConflictDoNothing()
@@ -22,7 +27,7 @@ export const insertComicColorist = async (name: string): Promise<number> => {
     // If result is empty, it means the colorist already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing colorist by name (which should be unique)
-      const existingColorist = await db
+      const existingColorist: { id: number }[] = await db
         .select({ id: comicColoristsTable.id })
         .from(comicColoristsTable)
         .where(eq(comicColoristsTable.name, name));
@@ -48,6 +53,12 @@ export const insertComicColorist = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Creates a link between a colorist and a comic book in the database
+ * @param coloristId The ID of the colorist to link
+ * @param comicBookId The ID of the comic book to link
+ * @returns A promise that resolves when the link has been created
+ */
 export const linkColoristToComicBook = async (
   coloristId: number,
   comicBookId: number,
@@ -69,6 +80,11 @@ export const linkColoristToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all colorists associated with a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicColorist objects associated with the comic book
+ */
 export const getColoristByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicColorist[]> => {
@@ -79,9 +95,9 @@ export const getColoristByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicColorist: ComicColorist }[] = await db
       .select({
-        comic_colorist: comicColoristsTable,
+        comicColorist: comicColoristsTable,
       })
       .from(comicColoristsTable)
       .innerJoin(
@@ -93,13 +109,18 @@ export const getColoristByComicBookId = async (
       )
       .where(eq(comicBookColoristsTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_colorist);
+    return result.map((row) => row.comicColorist);
   } catch (error) {
     console.error("Error fetching colorists by comic book ID:", error);
     throw error;
   }
 };
 
+/**
+ * Searches for colorist IDs matching a filter string
+ * @param filter The search filter string to match against colorist names (case-insensitive substring match)
+ * @returns An array of colorist IDs that match the filter, or an empty array if no matches found
+ */
 export const getColoristIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -110,7 +131,7 @@ export const getColoristIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicColoristsTable.id })
       .from(comicColoristsTable)
       .where(ilike(comicColoristsTable.name, `%${filter}%`));

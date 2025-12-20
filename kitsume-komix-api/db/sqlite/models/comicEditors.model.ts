@@ -2,9 +2,14 @@ import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { ComicEditor } from "../../../types/index.ts";
+import { ComicEditor } from "#types/index.ts";
 import { comicBookEditorsTable, comicEditorsTable } from "../schema.ts";
 
+/**
+ * Inserts a new comic editor into the database or returns the ID of an existing editor with the same name
+ * @param name The name of the editor to insert
+ * @returns The ID of the newly inserted editor or the ID of the existing editor with the same name
+ */
 export const insertComicEditor = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -13,7 +18,7 @@ export const insertComicEditor = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicEditorsTable)
       .values({ name })
       .onConflictDoNothing()
@@ -22,7 +27,7 @@ export const insertComicEditor = async (name: string): Promise<number> => {
     // If result is empty, it means the editor already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing editor by name (which should be unique)
-      const existingEditor = await db
+      const existingEditor: { id: number }[] = await db
         .select({ id: comicEditorsTable.id })
         .from(comicEditorsTable)
         .where(eq(comicEditorsTable.name, name));
@@ -48,6 +53,12 @@ export const insertComicEditor = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Creates a link between an editor and a comic book in the database
+ * @param editorId The ID of the editor to link
+ * @param comicBookId The ID of the comic book to link
+ * @returns A promise that resolves when the link has been created
+ */
 export const linkEditorToComicBook = async (
   editorId: number,
   comicBookId: number,
@@ -69,6 +80,11 @@ export const linkEditorToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all editors associated with a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicEditor objects associated with the comic book
+ */
 export const getEditorsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicEditor[]> => {
@@ -79,7 +95,7 @@ export const getEditorsByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicEditor: ComicEditor }[] = await db
       .select({
         comicEditor: comicEditorsTable,
       })
@@ -97,6 +113,11 @@ export const getEditorsByComicBookId = async (
   }
 };
 
+/**
+ * Searches for editor IDs matching a filter string
+ * @param filter The search filter string to match against editor names (case-insensitive substring match)
+ * @returns An array of editor IDs that match the filter, or an empty array if no matches found
+ */
 export const getEditorIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -107,7 +128,7 @@ export const getEditorIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicEditorsTable.id })
       .from(comicEditorsTable)
       .where(ilike(comicEditorsTable.name, `%${filter}%`));

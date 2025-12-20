@@ -2,12 +2,17 @@ import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import { ComicCoverArtist } from "../../../types/index.ts";
+import { ComicCoverArtist } from "#types/index.ts";
 import {
   comicBookCoverArtistsTable,
   comicCoverArtistsTable,
 } from "../schema.ts";
 
+/**
+ * Inserts a new comic cover artist into the database or returns the ID of an existing cover artist with the same name
+ * @param name The name of the cover artist to insert
+ * @returns The ID of the newly inserted cover artist or the ID of the existing cover artist with the same name
+ */
 export const insertComicCoverArtist = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -16,7 +21,7 @@ export const insertComicCoverArtist = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicCoverArtistsTable)
       .values({ name })
       .onConflictDoNothing()
@@ -25,7 +30,7 @@ export const insertComicCoverArtist = async (name: string): Promise<number> => {
     // If result is empty, it means the cover artist already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing cover artist by name (which should be unique)
-      const existingCoverArtist = await db
+      const existingCoverArtist: { id: number }[] = await db
         .select({ id: comicCoverArtistsTable.id })
         .from(comicCoverArtistsTable)
         .where(eq(comicCoverArtistsTable.name, name));
@@ -51,6 +56,12 @@ export const insertComicCoverArtist = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Creates a link between a cover artist and a comic book in the database
+ * @param coverArtistId The ID of the cover artist to link
+ * @param comicBookId The ID of the comic book to link
+ * @returns A promise that resolves when the link has been created
+ */
 export const linkCoverArtistToComicBook = async (
   coverArtistId: number,
   comicBookId: number,
@@ -75,6 +86,11 @@ export const linkCoverArtistToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all cover artists associated with a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicCoverArtist objects associated with the comic book
+ */
 export const getCoverArtistsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicCoverArtist[]> => {
@@ -85,7 +101,7 @@ export const getCoverArtistsByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicCoverArtist: ComicCoverArtist }[] = await db
       .select({
         comicCoverArtist: comicCoverArtistsTable,
       })
@@ -106,6 +122,11 @@ export const getCoverArtistsByComicBookId = async (
   }
 };
 
+/**
+ * Searches for cover artist IDs matching a filter string
+ * @param filter The search filter string to match against cover artist names (case-insensitive substring match)
+ * @returns An array of cover artist IDs that match the filter, or an empty array if no matches found
+ */
 export const getCoverArtistIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -116,7 +137,7 @@ export const getCoverArtistIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicCoverArtistsTable.id })
       .from(comicCoverArtistsTable)
       .where(ilike(comicCoverArtistsTable.name, `%${filter}%`));
