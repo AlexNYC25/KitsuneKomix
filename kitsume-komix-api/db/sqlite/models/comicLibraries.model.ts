@@ -1,13 +1,20 @@
+import { sql, eq } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
 import { comicLibrariesTable, userComicLibrariesTable } from "../schema.ts";
+
 import type {
   ComicLibrary,
   LibraryRegistrationInput,
   LibraryUpdateInput,
-} from "../../../types/index.ts";
-import { eq } from "drizzle-orm";
-import { sql } from "drizzle-orm";
+} from "#types/index.ts";
 
+
+/**
+ * Creates a new comic library in the database
+ * @param library The library registration input with name, path, and optional description
+ * @returns The ID of the newly created comic library
+ */
 export const createComicLibrary = async (
   library: LibraryRegistrationInput,
 ): Promise<number> => {
@@ -18,7 +25,7 @@ export const createComicLibrary = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicLibrariesTable)
       .values({
         name: library.name,
@@ -35,6 +42,10 @@ export const createComicLibrary = async (
   }
 };
 
+/**
+ * Retrieves all comic libraries from the database
+ * @returns An array of all ComicLibrary objects
+ */
 export const getAllComicLibraries = async (): Promise<ComicLibrary[]> => {
   const { db, client } = getClient();
 
@@ -43,7 +54,7 @@ export const getAllComicLibraries = async (): Promise<ComicLibrary[]> => {
   }
 
   try {
-    const result = await db.select().from(comicLibrariesTable);
+    const result: ComicLibrary[] = await db.select().from(comicLibrariesTable);
     return result;
   } catch (error) {
     console.error("Error fetching comic libraries:", error);
@@ -51,6 +62,11 @@ export const getAllComicLibraries = async (): Promise<ComicLibrary[]> => {
   }
 };
 
+/**
+ * Retrieves a specific comic library by its ID
+ * @param id The ID of the comic library to retrieve
+ * @returns The ComicLibrary object if found, null otherwise
+ */
 export const getComicLibraryById = async (
   id: number,
 ): Promise<ComicLibrary | null> => {
@@ -61,9 +77,13 @@ export const getComicLibraryById = async (
   }
 
   try {
-    const result = await db.select().from(comicLibrariesTable).where(
-      eq(comicLibrariesTable.id, id),
-    );
+    const result: ComicLibrary[] = await db
+      .select()
+      .from(comicLibrariesTable)
+      .where(
+        eq(comicLibrariesTable.id, id),
+      );
+
     if (result.length === 0) return null;
 
     return result[0];
@@ -73,6 +93,11 @@ export const getComicLibraryById = async (
   }
 };
 
+/**
+ * Retrieves a comic library by its file system path
+ * @param path The file system path to search for
+ * @returns The ComicLibrary object if found, null otherwise
+ */
 export const getComicLibraryByPath = async (
   path: string,
 ): Promise<ComicLibrary | null> => {
@@ -83,9 +108,13 @@ export const getComicLibraryByPath = async (
   }
 
   try {
-    const result = await db.select().from(comicLibrariesTable).where(
-      eq(comicLibrariesTable.path, path),
-    );
+    const result: ComicLibrary[] = await db
+      .select()
+      .from(comicLibrariesTable)
+      .where(
+        eq(comicLibrariesTable.path, path),
+      );
+
     if (result.length === 0) return null;
 
     return result[0];
@@ -95,6 +124,12 @@ export const getComicLibraryByPath = async (
   }
 };
 
+/**
+ * Finds the comic library that contains the given file path
+ * Searches through enabled libraries and returns the one whose path is a parent directory of the file path
+ * @param filePath The file path to search for
+ * @returns The ComicLibrary object containing the path, null if no library contains it
+ */
 export const getLibraryContainingPath = async (
   filePath: string,
 ): Promise<ComicLibrary | null> => {
@@ -106,17 +141,20 @@ export const getLibraryContainingPath = async (
 
   try {
     // Get all enabled libraries
-    const libraries = await db.select().from(comicLibrariesTable).where(
-      eq(comicLibrariesTable.enabled, 1),
-    );
+    const libraries: ComicLibrary[] = await db
+      .select()
+      .from(comicLibrariesTable)
+      .where(
+        eq(comicLibrariesTable.enabled, 1),
+      );
 
     // Find the library whose path is a parent of the file path
     for (const library of libraries) {
       // Normalize paths by ensuring they end with / for proper comparison
-      const libraryPath = library.path.endsWith("/")
+      const libraryPath: string = library.path.endsWith("/")
         ? library.path
         : library.path + "/";
-      const normalizedFilePath = filePath.endsWith("/")
+      const normalizedFilePath: string = filePath.endsWith("/")
         ? filePath
         : filePath + "/";
 
@@ -124,6 +162,7 @@ export const getLibraryContainingPath = async (
         return library;
       }
     }
+
     return null;
   } catch (error) {
     console.error("Error finding library containing path:", error);
@@ -131,6 +170,11 @@ export const getLibraryContainingPath = async (
   }
 };
 
+/**
+ * Retrieves the last changed timestamp of a comic library
+ * @param id The ID of the comic library
+ * @returns The timestamp string of when the library was last changed, null if not found
+ */
 export const getComicLibraryLastChangedTime = async (
   id: number,
 ): Promise<string | null> => {
@@ -141,7 +185,7 @@ export const getComicLibraryLastChangedTime = async (
   }
 
   try {
-    const result = await db
+    const result: { changedAt: string }[] = await db
       .select({ changedAt: comicLibrariesTable.changedAt })
       .from(comicLibrariesTable)
       .where(eq(comicLibrariesTable.id, id));
@@ -153,6 +197,11 @@ export const getComicLibraryLastChangedTime = async (
   }
 };
 
+/**
+ * Updates the changed timestamp of a comic library to the current time
+ * @param id The ID of the comic library to update
+ * @returns A promise that resolves when the timestamp has been updated
+ */
 export const setComicLibraryChangedTime = async (id: number): Promise<void> => {
   const { db, client } = getClient();
 
@@ -171,6 +220,12 @@ export const setComicLibraryChangedTime = async (id: number): Promise<void> => {
   }
 };
 
+/**
+ * Updates an existing comic library with the provided changes
+ * @param id The ID of the comic library to update
+ * @param updates The fields to update (name, path, description, enabled)
+ * @returns A boolean indicating whether the update was successful
+ */
 export const updateComicLibrary = async (
   id: number,
   updates: LibraryUpdateInput,
@@ -192,7 +247,7 @@ export const updateComicLibrary = async (
       updateData.enabled = updates.enabled ? 1 : 0;
     }
 
-    const result = await db
+    const result: { id: number }[] = await db
       .update(comicLibrariesTable)
       .set(updateData)
       .where(eq(comicLibrariesTable.id, id))
@@ -205,6 +260,11 @@ export const updateComicLibrary = async (
   }
 };
 
+/**
+ * Deletes a comic library from the database
+ * @param id The ID of the comic library to delete
+ * @returns A boolean indicating whether the deletion was successful
+ */
 export const deleteComicLibrary = async (id: number): Promise<boolean> => {
   const { db, client } = getClient();
 
@@ -213,7 +273,7 @@ export const deleteComicLibrary = async (id: number): Promise<boolean> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .delete(comicLibrariesTable)
       .where(eq(comicLibrariesTable.id, id))
       .returning({ id: comicLibrariesTable.id });
@@ -240,18 +300,9 @@ export const getUsersComicLibraries = async (
   }
 
   try {
-    const result = await db
+    const result: { comicLibrary: ComicLibrary }[] = await db
       .select(
-        {
-          id: comicLibrariesTable.id,
-          name: comicLibrariesTable.name,
-          description: comicLibrariesTable.description,
-          path: comicLibrariesTable.path,
-          enabled: comicLibrariesTable.enabled,
-          changedAt: comicLibrariesTable.changedAt,
-          createdAt: comicLibrariesTable.createdAt,
-          updatedAt: comicLibrariesTable.updatedAt,
-        },
+        { comicLibrary: comicLibrariesTable },
       )
       .from(comicLibrariesTable)
       .innerJoin(
@@ -260,8 +311,10 @@ export const getUsersComicLibraries = async (
       )
       .where(eq(userComicLibrariesTable.userId, userId))
       .groupBy(comicLibrariesTable.id);
+      
+    const libraries: ComicLibrary[] = result.map(row => row.comicLibrary);
 
-    return result;
+    return libraries;
   } catch (error) {
     console.error("Error fetching user's comic libraries:", error);
     throw error;

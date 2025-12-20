@@ -2,9 +2,14 @@ import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
-import type { ComicGenre } from "../../../types/index.ts";
+import type { ComicGenre } from "#types/index.ts";
 import { comicBookGenresTable, comicGenresTable } from "../schema.ts";
 
+/**
+ * Inserts a new comic genre into the database or returns the ID of an existing genre with the same name
+ * @param genreName The name of the genre to insert
+ * @returns The ID of the newly inserted genre or the ID of the existing genre with the same name
+ */
 export const insertComicGenre = async (genreName: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -13,7 +18,7 @@ export const insertComicGenre = async (genreName: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicGenresTable)
       .values({ name: genreName })
       .onConflictDoNothing()
@@ -48,6 +53,12 @@ export const insertComicGenre = async (genreName: string): Promise<number> => {
   }
 };
 
+/**
+ * Creates a link between a genre and a comic book in the database
+ * @param genreId The ID of the genre to link
+ * @param comicBookId The ID of the comic book to link
+ * @returns A promise that resolves when the link has been created
+ */
 export const linkGenreToComicBook = async (
   genreId: number,
   comicBookId: number,
@@ -69,6 +80,11 @@ export const linkGenreToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all genres associated with a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicGenre objects associated with the comic book
+ */
 export const getGenresForComicBook = async (
   comicBookId: number,
 ): Promise<ComicGenre[]> => {
@@ -79,7 +95,7 @@ export const getGenresForComicBook = async (
   }
 
   try {
-    const result = await db
+    const result: { comicGenre: ComicGenre }[] = await db
       .select({
         comicGenre: comicGenresTable,
       })
@@ -97,6 +113,11 @@ export const getGenresForComicBook = async (
   }
 };
 
+/**
+ * Searches for genre IDs matching a filter string
+ * @param filter The search filter string to match against genre names (case-insensitive substring match)
+ * @returns An array of genre IDs that match the filter, or an empty array if no matches found
+ */
 export const getGenreIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -107,7 +128,7 @@ export const getGenreIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicGenresTable.id })
       .from(comicGenresTable)
       .where(ilike(comicGenresTable.name, `%${filter}%`));

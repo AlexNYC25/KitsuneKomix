@@ -1,10 +1,15 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-
 import { comicBookImprintsTable, comicImprintsTable } from "../schema.ts";
-import type { ComicImprint } from "../../../types/index.ts";
 
+import type { ComicImprint } from "#types/index.ts";
+
+/**
+ * Inserts a new comic imprint into the database or returns the ID of an existing imprint with the same name
+ * @param name The name of the imprint to insert
+ * @returns The ID of the newly inserted imprint or the ID of the existing imprint with the same name
+ */
 export const insertComicImprint = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -13,7 +18,7 @@ export const insertComicImprint = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicImprintsTable)
       .values({ name })
       .onConflictDoNothing()
@@ -22,7 +27,7 @@ export const insertComicImprint = async (name: string): Promise<number> => {
     // If result is empty, it means the imprint already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing imprint by name (which should be unique)
-      const existingImprint = await db
+      const existingImprint: { id: number }[] = await db
         .select({ id: comicImprintsTable.id })
         .from(comicImprintsTable)
         .where(eq(comicImprintsTable.name, name));
@@ -48,6 +53,12 @@ export const insertComicImprint = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Creates a link between an imprint and a comic book in the database
+ * @param imprintId The ID of the imprint to link
+ * @param comicBookId The ID of the comic book to link
+ * @returns A promise that resolves when the link has been created
+ */
 export const linkImprintToComicBook = async (
   imprintId: number,
   comicBookId: number,
@@ -69,6 +80,11 @@ export const linkImprintToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all imprints associated with a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicImprint objects associated with the comic book
+ */
 export const getImprintsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicImprint[]> => {
@@ -79,7 +95,7 @@ export const getImprintsByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicImprint: ComicImprint }[] = await db
       .select({
         comicImprint: comicImprintsTable,
       })
@@ -97,6 +113,11 @@ export const getImprintsByComicBookId = async (
   }
 };
 
+/**
+ * Searches for imprint IDs matching a filter string
+ * @param filter The search filter string to match against imprint names (case-insensitive substring match)
+ * @returns An array of imprint IDs that match the filter, or an empty array if no matches found
+ */
 export const getImprintIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -107,7 +128,7 @@ export const getImprintIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicImprintsTable.id })
       .from(comicImprintsTable)
       .where(ilike(comicImprintsTable.name, `%${filter}%`));

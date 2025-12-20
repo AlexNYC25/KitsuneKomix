@@ -1,10 +1,15 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-
 import { comicBookLocationsTable, comicLocationsTable } from "../schema.ts";
+
 import type { ComicLocation } from "#types/index.ts";
 
+/**
+ * Inserts a new comic location into the database or returns the ID of an existing location with the same name
+ * @param name The name of the location to insert
+ * @returns The ID of the newly inserted location or the ID of the existing location with the same name
+ */
 export const insertComicLocation = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -13,7 +18,7 @@ export const insertComicLocation = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicLocationsTable)
       .values({ name })
       .onConflictDoNothing()
@@ -22,7 +27,7 @@ export const insertComicLocation = async (name: string): Promise<number> => {
     // If result is empty, it means the location already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing location by name (which should be unique)
-      const existingLocation = await db
+      const existingLocation: { id: number }[] = await db
         .select({ id: comicLocationsTable.id })
         .from(comicLocationsTable)
         .where(eq(comicLocationsTable.name, name));
@@ -48,6 +53,12 @@ export const insertComicLocation = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Creates a link between a location and a comic book in the database
+ * @param locationId The ID of the location to link
+ * @param comicBookId The ID of the comic book to link
+ * @returns A promise that resolves when the link has been created
+ */
 export const linkLocationToComicBook = async (
   locationId: number,
   comicBookId: number,
@@ -69,6 +80,11 @@ export const linkLocationToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all locations associated with a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicLocation objects associated with the comic book
+ */
 export const getLocationsByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicLocation[]> => {
@@ -79,9 +95,9 @@ export const getLocationsByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicLocation: ComicLocation }[] = await db
       .select({
-        comic_location: comicLocationsTable,
+        comicLocation: comicLocationsTable,
       })
       .from(comicLocationsTable)
       .innerJoin(
@@ -93,7 +109,7 @@ export const getLocationsByComicBookId = async (
       )
       .where(eq(comicBookLocationsTable.comicBookId, comicBookId));
 
-    return result.map((row) => row.comic_location);
+    return result.map((row) => row.comicLocation);
   } catch (error) {
     console.error(
       "Error fetching comic locations by comic book ID:",
@@ -103,6 +119,11 @@ export const getLocationsByComicBookId = async (
   }
 };
 
+/**
+ * Searches for location IDs matching a filter string
+ * @param filter The search filter string to match against location names (case-insensitive substring match)
+ * @returns An array of location IDs that match the filter, or an empty array if no matches found
+ */
 export const getLocationIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -113,7 +134,7 @@ export const getLocationIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicLocationsTable.id })
       .from(comicLocationsTable)
       .where(ilike(comicLocationsTable.name, `%${filter}%`));

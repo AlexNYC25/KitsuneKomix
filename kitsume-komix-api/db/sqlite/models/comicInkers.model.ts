@@ -1,9 +1,15 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-import { ComicInker } from "../../../types/index.ts";
 import { comicBookInkersTable, comicInkersTable } from "../schema.ts";
 
+import { ComicInker } from "#types/index.ts";
+
+/**
+ * Inserts a new comic inker into the database or returns the ID of an existing inker with the same name
+ * @param name The name of the inker to insert
+ * @returns The ID of the newly inserted inker or the ID of the existing inker with the same name
+ */
 export const insertComicInker = async (name: string): Promise<number> => {
   const { db, client } = getClient();
 
@@ -12,7 +18,7 @@ export const insertComicInker = async (name: string): Promise<number> => {
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .insert(comicInkersTable)
       .values({ name })
       .onConflictDoNothing()
@@ -21,7 +27,7 @@ export const insertComicInker = async (name: string): Promise<number> => {
     // If result is empty, it means the inker already exists due to onConflictDoNothing
     if (result.length === 0) {
       // Find the existing inker by name (which should be unique)
-      const existingInker = await db
+      const existingInker: { id: number }[] = await db
         .select({ id: comicInkersTable.id })
         .from(comicInkersTable)
         .where(eq(comicInkersTable.name, name));
@@ -47,6 +53,12 @@ export const insertComicInker = async (name: string): Promise<number> => {
   }
 };
 
+/**
+ * Creates a link between an inker and a comic book in the database
+ * @param inkerId The ID of the inker to link
+ * @param comicBookId The ID of the comic book to link
+ * @returns A promise that resolves when the link has been created
+ */
 export const linkInkerToComicBook = async (
   inkerId: number,
   comicBookId: number,
@@ -68,6 +80,11 @@ export const linkInkerToComicBook = async (
   }
 };
 
+/**
+ * Retrieves all inkers associated with a specific comic book
+ * @param comicBookId The ID of the comic book
+ * @returns An array of ComicInker objects associated with the comic book
+ */
 export const getInkersByComicBookId = async (
   comicBookId: number,
 ): Promise<ComicInker[]> => {
@@ -78,7 +95,7 @@ export const getInkersByComicBookId = async (
   }
 
   try {
-    const result = await db
+    const result: { comicInker: ComicInker }[] = await db
       .select({
         comicInker: comicInkersTable,
       })
@@ -96,6 +113,11 @@ export const getInkersByComicBookId = async (
   }
 };
 
+/**
+ * Searches for inker IDs matching a filter string
+ * @param filter The search filter string to match against inker names (case-insensitive substring match)
+ * @returns An array of inker IDs that match the filter, or an empty array if no matches found
+ */
 export const getInkerIdsByFilter = async (
   filter: string,
 ): Promise<number[]> => {
@@ -106,7 +128,7 @@ export const getInkerIdsByFilter = async (
   }
 
   try {
-    const result = await db
+    const result: { id: number }[] = await db
       .select({ id: comicInkersTable.id })
       .from(comicInkersTable)
       .where(ilike(comicInkersTable.name, `%${filter}%`));
