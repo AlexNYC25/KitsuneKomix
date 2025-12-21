@@ -1,20 +1,96 @@
-import { getClient } from "../../db/sqlite/client.ts";
+import { getClient } from "#sqlite/client.ts";
+
+import {
+  getAllComicBooksSortByDate,
+  getComicBookById,
+  getComicBooksWithMetadata,
+  getComicBooksWithMetadataFilteringSorting,
+  getComicDuplicates,
+  getRandomBook,
+} from "#sqlite/models/comicBooks.model.ts";
+import {
+  getWriterIdsByFilter,
+  getWritersByComicBookId,
+} from "#sqlite/models/comicWriters.model.ts";
+import {
+  getColoristByComicBookId,
+  getColoristIdsByFilter,
+} from "#sqlite/models/comicColorists.model.ts";
+import {
+  getPencillerIdsByFilter,
+  getPencillersByComicBookId,
+} from "#sqlite/models/comicPencillers.model.ts";
+import {
+  getInkerIdsByFilter,
+  getInkersByComicBookId,
+} from "#sqlite/models/comicInkers.model.ts";
+import {
+  getLettererIdsByFilter,
+  getLetterersByComicBookId,
+} from "#sqlite/models/comicLetterers.model.ts";
+import {
+  getEditorIdsByFilter,
+  getEditorsByComicBookId,
+} from "#sqlite/models/comicEditors.model.ts";
+import {
+  getCoverArtistIdsByFilter,
+  getCoverArtistsByComicBookId,
+} from "#sqlite/models/comicCoverArtists.model.ts";
+import {
+  getPublisherIdsByFilter,
+  getPublishersByComicBookId,
+} from "#sqlite/models/comicPublishers.model.ts";
+import {
+  getImprintIdsByFilter,
+  getImprintsByComicBookId,
+} from "#sqlite/models/comicImprints.model.ts";
+import {
+  getGenreIdsByFilter,
+  getGenresForComicBook,
+} from "#sqlite/models/comicGenres.model.ts";
+import {
+  getCharactersByComicBookId,
+  getCharactersIdsByFilter,
+} from "#sqlite/models/comicCharacters.model.ts";
+import {
+  getTeamIdsByFilter,
+  getTeamsByComicBookId,
+} from "#sqlite/models/comicTeams.model.ts";
+import {
+  getLocationIdsByFilter,
+  getLocationsByComicBookId,
+} from "#sqlite/models/comicLocations.model.ts";
+import { getStoryArcsByComicBookId } from "#sqlite/models/comicStoryArcs.model.ts";
+import { getSeriesGroupsByComicBookId } from "#sqlite/models/comicSeriesGroups.model.ts";
+import { getComicPagesByComicBookId } from "#sqlite/models/comicPages.model.ts";
+import {
+  deleteComicBookThumbnail,
+  getComicThumbnailById,
+  getThumbnailsByComicBookId,
+  insertCustomComicBookThumbnail,
+} from "#sqlite/models/comicBookThumbnails.model.ts";
+import {
+  getComicBooksInSeries,
+  getSeriesIdFromComicBook,
+} from "#sqlite/models/comicSeries.model.ts";
+import {
+  getComicBookHistoryByUserAndComic,
+  insertComicBookHistory,
+  updateComicBookHistory,
+} from "#sqlite/models/comicBookHistory.model.ts";
 
 import {
   extractComicBookByStreaming,
   extractComicPage,
-} from "../../utilities/extract.ts";
+} from "#utilities/extract.ts";
 
 import {
   buildComicBookQueryParams,
   validatePaginationParameters,
-} from "../../utilities/parameters.ts";
+} from "#utilities/parameters.ts";
 
 import {
   AllowedSortProperties,
-  COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
-  // Constants
-  COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
   ComicBook,
   ComicBookExternalFilterItem,
   ComicBookFilterItem,
@@ -30,162 +106,17 @@ import {
   RequestPaginationParameters,
   RequestSortParameters,
   RequestPaginationParametersValidated
-} from "../../types/index.ts";
-import {
-  getAllComicBooksSortByDate,
-  getComicBookById,
-  getComicBooksWithMetadata,
-  getComicBooksWithMetadataFilteringSoring,
-  getComicDuplicates,
-  getRandomBook,
-} from "../../db/sqlite/models/comicBooks.model.ts";
-import type { ComicBookQueryParams } from "../../interfaces/RequestParams.interface.ts";
+} from "#types/index.ts";
+import type { ComicBookQueryParams } from "#interfaces/index.ts";
 
 import {
-  getWriterIdsByFilter,
-  getWritersByComicBookId,
-} from "../../db/sqlite/models/comicWriters.model.ts";
-import {
-  getColoristByComicBookId,
-  getColoristIdsByFilter,
-} from "../../db/sqlite/models/comicColorists.model.ts";
-import {
-  getPencillerIdsByFilter,
-  getPencillersByComicBookId,
-} from "../../db/sqlite/models/comicPencillers.model.ts";
-import {
-  getInkerIdsByFilter,
-  getInkersByComicBookId,
-} from "../../db/sqlite/models/comicInkers.model.ts";
-import {
-  getLettererIdsByFilter,
-  getLetterersByComicBookId,
-} from "../../db/sqlite/models/comicLetterers.model.ts";
-import {
-  getEditorIdsByFilter,
-  getEditorsByComicBookId,
-} from "../../db/sqlite/models/comicEditors.model.ts";
-import {
-  getCoverArtistIdsByFilter,
-  getCoverArtistsByComicBookId,
-} from "../../db/sqlite/models/comicCoverArtists.model.ts";
+  COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
+  // Constants
+  COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
+} from "#utilities/constants.ts";
 
-import {
-  getPublisherIdsByFilter,
-  getPublishersByComicBookId,
-} from "../../db/sqlite/models/comicPublishers.model.ts";
-import {
-  getImprintIdsByFilter,
-  getImprintsByComicBookId,
-} from "../../db/sqlite/models/comicImprints.model.ts";
 
-import {
-  getGenreIdsByFilter,
-  getGenresForComicBook,
-} from "../../db/sqlite/models/comicGenres.model.ts";
-import {
-  getCharactersByComicBookId,
-  getCharactersIdsByFilter,
-} from "../../db/sqlite/models/comicCharacters.model.ts";
-import {
-  getTeamIdsByFilter,
-  getTeamsByComicBookId,
-} from "../../db/sqlite/models/comicTeams.model.ts";
-import {
-  getLocationIdsByFilter,
-  getLocationsByComicBookId,
-} from "../../db/sqlite/models/comicLocations.model.ts";
 
-import { getStoryArcsByComicBookId } from "../../db/sqlite/models/comicStoryArcs.model.ts";
-import { getSeriesGroupsByComicBookId } from "../../db/sqlite/models/comicSeriesGroups.model.ts";
-
-import { getComicPagesByComicBookId } from "../../db/sqlite/models/comicPages.model.ts";
-
-import {
-  deleteComicBookThumbnail,
-  getComicThumbnailById,
-  getThumbnailsByComicBookId,
-  insertCustomComicBookThumbnail,
-} from "../../db/sqlite/models/comicBookThumbnails.model.ts";
-
-import {
-  getComicBooksInSeries,
-  getSeriesIdFromComicBook,
-} from "../../db/sqlite/models/comicSeries.model.ts";
-
-import {
-  getComicBookHistoryByUserAndComic,
-  insertComicBookHistory,
-  updateComicBookHistory,
-} from "../../db/sqlite/models/comicBookHistory.model.ts";
-
-export const getComicBooksWithRelatedMetadata = async (
-  filters: ComicBookFilterItem[] = [],
-  sortProperty: AllowedSortProperties = "created_at",
-  sortOrder: "asc" | "desc" = "desc",
-  offset: number = 0,
-  limit: number = 20,
-): Promise<ComicBook[]> => {
-  try {
-    // first we determine what tables we need to filter on based on the filter properties
-    const filtersCheckList: ComicBookFiltersCheckList = {};
-    for (const filter of filters) {
-      if (
-        COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(
-          filter.filterProperty as ExternalFilterProperties,
-        )
-      ) {
-        filtersCheckList[filter.filterProperty as ExternalFilterProperties] =
-          true;
-      }
-    }
-
-    // now for each external filter property we need to get the ids that match the filter value
-    const externalFilters: ComicBookExternalFilterItem[] = [];
-    for (const property in filtersCheckList) {
-      const filter = filters.find((f) => f.filterProperty === property);
-      if (filter) {
-        const matchingIds = await getMatchingComicBookIdsByExternalFilter(
-          property as ExternalFilterProperties,
-          filter.filterValue,
-        );
-        if (matchingIds.length > 0) {
-          externalFilters.push({
-            filterProperty: property as ExternalFilterProperties,
-            filterIds: matchingIds,
-          });
-        }
-      }
-    }
-
-    // separate internal filters from external filters
-    const internalFilters = filters.filter((f) =>
-      f.filterProperty &&
-      COMIC_BOOK_INTERNAL_METADATA_PROPERTIES.includes(
-        f.filterProperty as typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[
-          number
-        ],
-      )
-    );
-
-    // now we pass these filters + the sorting details to the new optimized database function
-    const comicsFromDb = await getComicBooksWithMetadataFilteringSoring({
-      internalFilters,
-      externalFilters,
-      sort: {
-        property: sortProperty,
-        order: sortOrder,
-      },
-      offset,
-      limit,
-    });
-
-    return comicsFromDb;
-  } catch (error) {
-    console.error("Error fetching comic books with related metadata:", error);
-    throw error;
-  }
-};
 
 // helper function to get the actual filtering ids for each external property
 const getMatchingComicBookIdsByExternalFilter = async (
@@ -298,6 +229,74 @@ export const fetchAllComicBooksWithRelatedData = async (
     };
   } catch (error) {
     console.error("Error fetching all comic books:", error);
+    throw error;
+  }
+};
+
+export const getComicBooksWithRelatedMetadata = async (
+  filters: ComicBookFilterItem[] = [],
+  sortProperty: AllowedSortProperties = "created_at",
+  sortOrder: "asc" | "desc" = "desc",
+  offset: number = 0,
+  limit: number = 20,
+): Promise<ComicBook[]> => {
+  try {
+    // first we determine what tables we need to filter on based on the filter properties
+    const filtersCheckList: ComicBookFiltersCheckList = {};
+    for (const filter of filters) {
+      if (
+        COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(
+          filter.filterProperty as ExternalFilterProperties,
+        )
+      ) {
+        filtersCheckList[filter.filterProperty as ExternalFilterProperties] =
+          true;
+      }
+    }
+
+    // now for each external filter property we need to get the ids that match the filter value
+    const externalFilters: ComicBookExternalFilterItem[] = [];
+    for (const property in filtersCheckList) {
+      const filter = filters.find((f) => f.filterProperty === property);
+      if (filter) {
+        const matchingIds = await getMatchingComicBookIdsByExternalFilter(
+          property as ExternalFilterProperties,
+          filter.filterValue,
+        );
+        if (matchingIds.length > 0) {
+          externalFilters.push({
+            filterProperty: property as ExternalFilterProperties,
+            filterIds: matchingIds,
+          });
+        }
+      }
+    }
+
+    // separate internal filters from external filters
+    const internalFilters = filters.filter((f) =>
+      f.filterProperty &&
+      COMIC_BOOK_INTERNAL_METADATA_PROPERTIES.includes(
+        f.filterProperty as typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[
+          number
+        ],
+      )
+    );
+
+    // now we pass these filters + the sorting details to the new optimized database function
+    const comicsFromDb = await getComicBooksWithMetadataFilteringSorting({
+      internalFilters,
+      externalFilters,
+      sort: {
+        property: sortProperty,
+        order: sortOrder,
+      },
+      offset,
+      limit,
+    });
+
+    return comicsFromDb;
+  } catch (error) {
+    console.error("Error fetching comic books with related metadata:", error);
     throw error;
   }
 };
@@ -466,7 +465,7 @@ export const startStreamingComicBookFile = async (
     throw new Error("Comic book not found.");
   }
 
-  const filePath = comic.file_path;
+  const filePath = comic.filePath;
 
   // Check if file exists
   try {
@@ -483,7 +482,7 @@ export const startStreamingComicBookFile = async (
   if (page < 1) {
     throw new Error("Invalid page number requested.");
   }
-  if (comic.page_count && page > comic.page_count) {
+  if (comic.pageCount && page > comic.pageCount) {
     throw new Error(
       "Requested page exceeds total number of pages in the comic test.",
     );
@@ -517,11 +516,11 @@ export const startStreamingComicBookFile = async (
       // Use streaming extraction for large files
       const pageRange = Math.min(
         preloadPages,
-        comic.page_count || preloadPages,
+        comic.pageCount || preloadPages,
       );
       const startPage = Math.max(0, page - 1); // Convert to 0-based
       const endPage = Math.min(
-        (comic.page_count || page) - 1,
+        (comic.pageCount || page) - 1,
         startPage + pageRange,
       );
 
@@ -607,7 +606,7 @@ export const startStreamingComicBookFile = async (
         page,
         preloadPages,
         targetFormat,
-        comic.page_count || 0,
+        comic.pageCount || 0,
       )
         .catch((error: unknown) => console.warn(`Preloading failed: ${error}`));
     }
@@ -640,7 +639,7 @@ export const getComicPagesInfo = async (comicId: number) => {
 
   return {
     comicId,
-    totalPages: comic.page_count || comicPages.length,
+    totalPages: comic.pageCount || comicPages.length,
     pagesInDb: comicPages.length,
     pages: comicPages,
   };
@@ -677,13 +676,13 @@ export const getNextComicBookId = async (
       comicsInSeries.map(async (comicId) => {
         const comic = await getComicBookById(comicId);
         return comic
-          ? { id: comic.id, issueNumber: comic.issue_number || 0 }
+          ? { id: comic.id, issueNumber: comic.issueNumber || 0 }
           : null;
       }),
     );
 
     // Find the next comic book in the same series with a higher issue number
-    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) ||
+    const currentIssueNumber = parseInt(currentComic.issueNumber || "0", 10) ||
       0;
     const nextComic = sortedComics
       .filter((c): c is { id: number; issueNumber: number } => c !== null)
@@ -728,13 +727,13 @@ export const getPreviousComicBookId = async (
       comicsInSeries.map(async (comicId) => {
         const comic = await getComicBookById(comicId);
         return comic
-          ? { id: comic.id, issueNumber: comic.issue_number || 0 }
+          ? { id: comic.id, issueNumber: comic.issueNumber || 0 }
           : null;
       }),
     );
 
     // Find the previous comic book in the same series with a lower issue number
-    const currentIssueNumber = parseInt(currentComic.issue_number || "0", 10) ||
+    const currentIssueNumber = parseInt(currentComic.issueNumber || "0", 10) ||
       0;
     const previousComics = sortedComics
       .filter((c): c is { id: number; issueNumber: number } => c !== null)
@@ -893,7 +892,7 @@ export const setComicReadByUser = async (
     // Update the existing record
     const comicbookHistoryId = await updateComicBookHistory(
       existingHistory.id,
-      { read: readValue, last_read_page: null },
+      { read: readValue, lastReadPage: null },
     );
 
     if (!comicbookHistoryId) {
@@ -908,10 +907,10 @@ export const setComicReadByUser = async (
   } else {
     // Create a new history record
     const newHistory = {
-      user_id: userId,
-      comic_book_id: comicId,
+      userId: userId,
+      comicBookId: comicId,
       read: read ? 1 : 0,
-      last_read_page: null,
+      lastReadPage: null,
     };
     const comicbookHistoryId = await insertComicBookHistory(newHistory);
 
@@ -936,7 +935,7 @@ export const attachThumbnailToComicBook = async (
   const comicWithThumbnail: ComicBookWithThumbnail = {
     ...comic,
     thumbnailUrl: thumbnails && thumbnails.length > 0
-      ? `/api/image/thumbnails/${thumbnails[0].file_path.split("/").pop()}`
+      ? `/api/image/thumbnails/${thumbnails[0].filePath.split("/").pop()}`
       : undefined,
   };
 
@@ -1009,7 +1008,7 @@ async function preloadAdjacentPages(
     for (const pageNum of pagesToPreload) {
       try {
         const extractedPagePath = await extractComicPage(
-          comic.file_path,
+          comic.filePath,
           pageNum - 1,
         ); // Convert to 0-based
 
