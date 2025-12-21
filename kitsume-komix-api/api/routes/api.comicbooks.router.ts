@@ -778,7 +778,7 @@ app.openapi(
         return c.json({ message: "Comic book not found" }, 404);
       }
 
-      const filePath = comic.file_path;
+      const filePath = comic.filePath;
       const originalFileName = basename(filePath);
 
       // Sanitize filename but preserve the original extension and more characters
