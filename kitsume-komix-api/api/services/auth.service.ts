@@ -1,4 +1,4 @@
-import { getUserByEmail } from "../../db/sqlite/models/users.model.ts";
+import { getUserByEmail } from "#sqlite/models/users.model.ts";
 
 import { verifyPassword } from "#utilities/hash.ts";
 import { User } from "#types/index.ts";
