@@ -4,7 +4,7 @@ import {
   MetadataCompiled,
   readComicFileMetadata,
 } from "comic-metadata-tool";
-import { StandardizedComicMetadata } from "../interfaces/StandardizedComicMetadata.interface.ts";
+import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
 /**
  * Uses the comic-metadata-tool to read metadata from a comic file.

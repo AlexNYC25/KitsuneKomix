@@ -5,7 +5,7 @@ import { getClient } from "../client.ts";
 import { comicBookStoryArcsTable, comicStoryArcsTable } from "../schema.ts";
 
 import type { ComicStoryArc} from "#types/index.ts";
-import type { ComicStoryArcQueryParams } from "#interfaces/RequestParams.interface.ts";
+import type { ComicStoryArcQueryParams } from "#interfaces/index.ts";
 
 import { PAGE_SIZE_DEFAULT } from "#utilities/constants.ts";
 

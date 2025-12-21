@@ -10,7 +10,7 @@ import {
 
 import { getAllComicStoryArcs, getComicStoryArcById, insertComicStoryArc, deleteComicStoryArcById } from "../../db/sqlite/models/comicStoryArcs.model.ts";
 import { validatePaginationParameters, buildStoryArcQueryParams } from "../../utilities/parameters.ts";
-import { ComicStoryArcQueryParams } from "../../interfaces/RequestParams.interface.ts";
+import { ComicStoryArcQueryParams } from "#interfaces/index.ts";
 
 export const fetchAllComicStoryArcs = async (
 	requestPaginationParameters: RequestPaginationParameters,

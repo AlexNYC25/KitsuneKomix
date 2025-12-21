@@ -25,7 +25,7 @@ import { redisConnection } from "../../db/redis/redisConnection.ts";
 import { apiLogger, queueLogger } from "../../logger/loggers.ts";
 
 // Interface imports
-import { ComicMetadata } from "../../interfaces/ComicMetadata.interface.ts";
+import { ComicMetadata } from "#interfaces/index.ts";
 
 // Database model imports - Core models
 import {
@@ -107,7 +107,7 @@ import {
   insertComicSeriesGroup,
   linkSeriesGroupToComicBook,
 } from "../../db/sqlite/models/comicSeriesGroups.model.ts";
-import { StandardizedComicMetadata } from "../../interfaces/StandardizedComicMetadata.interface.ts";
+import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS

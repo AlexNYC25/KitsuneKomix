@@ -42,7 +42,7 @@ import type {
   ComicBookFilteringAndSortingParams,
   NewComicBook
 } from "#types/index.ts";
-import type { ComicBookQueryParams } from "#interfaces/RequestParams.interface.ts";
+import type { ComicBookQueryParams } from "#interfaces/index.ts";
 
 import {
   COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,

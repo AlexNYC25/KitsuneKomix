@@ -11,7 +11,7 @@ import {
 	FILTER_SORT_DEFAULT
 } from "../utilities/constants.ts";
 
-import type { ComicBookQueryParams, ComicStoryArcQueryParams } from "../interfaces/RequestParams.interface.ts";
+import type { ComicBookQueryParams, ComicStoryArcQueryParams } from "#interfaces/index.ts";
 
 /**
  * Validates and sanitizes filter parameters.
