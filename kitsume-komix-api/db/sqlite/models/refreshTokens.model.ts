@@ -1,25 +1,14 @@
 import { and, eq, gte, lt } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
 import { refreshTokensTable } from "../schema.ts";
 
-export interface RefreshToken {
-  id: number;
-  userId: number;
-  tokenId: string;
-  expiresAt: string;
-  revoked: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateRefreshTokenInput {
-  userId: number;
-  tokenId: string;
-  expiresAt: string;
-}
+import {RefreshToken, CreateRefreshTokenInput} from "#interfaces/index.ts";
 
 /**
- * Stores a refresh token in the database
+ * Stores a new refresh token in the database
+ * @param tokenData The refresh token data to store
+ * @returns The ID of the newly created refresh token
  */
 export async function storeRefreshToken(
   tokenData: CreateRefreshTokenInput,
@@ -30,7 +19,7 @@ export async function storeRefreshToken(
     throw new Error("Database is not initialized.");
   }
 
-  const result = await db
+  const result: { id: number }[] = await db
     .insert(refreshTokensTable)
     .values(tokenData)
     .returning({ id: refreshTokensTable.id });
@@ -40,18 +29,20 @@ export async function storeRefreshToken(
 
 /**
  * Retrieves a valid (non-revoked, non-expired) refresh token by token ID
+ * @param tokenId The token ID to search for
+ * @returns The valid RefreshToken object or null if not found
  */
 export async function getValidRefreshToken(
   tokenId: string,
 ): Promise<RefreshToken | null> {
   const { db } = getClient();
-  const currentTime = new Date().toISOString();
+  const currentTime: string = new Date().toISOString();
 
   if (!db) {
     throw new Error("Database is not initialized.");
   }
 
-  const result = await db
+  const result: RefreshToken[] = await db
     .select()
     .from(refreshTokensTable)
     .where(
@@ -68,6 +59,8 @@ export async function getValidRefreshToken(
 
 /**
  * Revokes a refresh token by setting revoked = 1
+ * @param tokenId The token ID to revoke
+ * @returns True if a token was revoked, false otherwise
  */
 export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
   const { db } = getClient();
@@ -76,7 +69,7 @@ export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
     throw new Error("Database is not initialized.");
   }
 
-  const result = await db
+  const result: { id: number }[] = await db
     .update(refreshTokensTable)
     .set({
       revoked: 1,
@@ -90,6 +83,8 @@ export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
 
 /**
  * Revokes all refresh tokens for a specific user (useful for logout all devices)
+ * @param userId The user ID whose tokens should be revoked
+ * @returns The number of tokens revoked
  */
 export async function revokeAllUserRefreshTokens(
   userId: number,
@@ -100,7 +95,7 @@ export async function revokeAllUserRefreshTokens(
     throw new Error("Database is not initialized.");
   }
 
-  const result = await db
+  const result: { id: number }[] = await db
     .update(refreshTokensTable)
     .set({
       revoked: 1,
@@ -114,16 +109,17 @@ export async function revokeAllUserRefreshTokens(
 
 /**
  * Cleanup expired refresh tokens from the database
+ * @returns The number of tokens deleted
  */
 export async function cleanupExpiredTokens(): Promise<number> {
   const { db } = getClient();
-  const currentTime = new Date().toISOString();
+  const currentTime: string = new Date().toISOString();
 
   if (!db) {
     throw new Error("Database is not initialized.");
   }
 
-  const result = await db
+  const result: { id: number }[] = await db
     .delete(refreshTokensTable)
     .where(
       and(
@@ -138,12 +134,14 @@ export async function cleanupExpiredTokens(): Promise<number> {
 
 /**
  * Get all active refresh tokens for a user (for admin/debugging purposes)
+ * @param userId The user ID to fetch tokens for
+ * @returns An array of active RefreshToken objects
  */
 export async function getUserActiveRefreshTokens(
   userId: number,
 ): Promise<RefreshToken[]> {
   const { db } = getClient();
-  const currentTime = new Date().toISOString();
+  const currentTime: string = new Date().toISOString();
 
   if (!db) {
     throw new Error("Database is not initialized.");
