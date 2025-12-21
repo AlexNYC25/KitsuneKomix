@@ -204,6 +204,7 @@ export const fetchAllComicBooksWithRelatedData = async (
 
     const hasNextPage =
       comicsFromDb.length > validatedPaginationParameters.pageSize;
+
     const comics = hasNextPage
       ? comicsFromDb.slice(0, validatedPaginationParameters.pageSize)
       : comicsFromDb;
@@ -222,10 +223,8 @@ export const fetchAllComicBooksWithRelatedData = async (
       currentPage: requestPaginationParameters.page,
       pageSize: requestPaginationParameters.pageSize,
       totalResults: comics.length,
-      isFiltered: !!(requestFilterParameters.filterProperty &&
-        requestFilterParameters.filter),
-      isSorted:
-        !!(requestSortParameters.sortProperty && requestSortParameters.sortOrder),
+      isFiltered: !!(requestFilterParameters.filterProperty && requestFilterParameters.filter),
+      isSorted: !!(requestSortParameters.sortProperty && requestSortParameters.sortOrder),
     };
   } catch (error) {
     console.error("Error fetching all comic books:", error);
