@@ -100,3 +100,21 @@ export const ComicBookUpdateSchema = z.object({
   title: "ComicBookUpdate",
   description: "Partial comic book updates for PATCH/PUT requests",
 });
+
+// TODO: Check these if this can be replaced by existing schemas from the db table generated schemas
+export const ComicLibrarySchema = z.object({
+  id: z.number().int().positive().optional(),
+  name: z.string().min(1).max(100),
+  description: z.string().max(255).nullable().optional(),
+  path: z.string().min(1).max(255),
+  enabled: z.boolean(),
+});
+
+export const UserSchema = z.object({
+  id: z.number().int().positive().optional(),
+  username: z.string().min(3).max(30),
+  email: z.email(),
+  password: z.string().min(8).max(100),
+  first_name: z.string().max(50).nullable().optional(),
+  last_name: z.string().max(50).nullable().optional(),
+});
