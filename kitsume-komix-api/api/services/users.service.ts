@@ -1,15 +1,17 @@
-import { hashPassword } from "../../utilities/hash.ts";
-import { UserRegistrationInput } from "../../types/index.ts";
 import {
   createUser,
   deleteUser,
   getUserByEmail,
   getUserById,
-} from "../../db/sqlite/models/users.model.ts";
+} from "#sqlite/models/users.model.ts";
 import {
   assignLibraryToUser,
   getComicLibraryById,
-} from "../../db/sqlite/models/comicLibraries.model.ts";
+} from "#sqlite/models/comicLibraries.model.ts";
+
+import { hashPassword } from "#utilities/hash.ts";
+
+import { UserRegistrationInput } from "#types/index.ts";
 
 export async function createUserService(
   user: UserRegistrationInput,
@@ -35,9 +37,9 @@ export async function createUserService(
   const newUserId = await createUser({
     username: user.username,
     email: user.email,
-    password_hash: hashedPassword,
-    first_name: user.firstName ?? null,
-    last_name: user.lastName ?? null,
+    passwordHash: hashedPassword,
+    firstName: user.firstName ?? null,
+    lastName: user.lastName ?? null,
     admin: 0, // Default to non-admin
   });
 
