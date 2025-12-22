@@ -1,21 +1,14 @@
 import { generateTokenPair, verifyRefreshToken } from "../../auth/auth.ts";
+
 import {
   cleanupExpiredTokens,
   getValidRefreshToken,
   revokeAllUserRefreshTokens,
   revokeRefreshToken,
   storeRefreshToken,
-} from "../../db/sqlite/models/refreshTokens.model.ts";
+} from "#sqlite/models/refreshTokens.model.ts";
 
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface RefreshTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-}
+import { TokenPair, RefreshTokenResponse } from "#interfaces/index.ts";
 
 /**
  * Creates and stores a new refresh token pair for a user
@@ -36,9 +29,9 @@ export async function createRefreshTokenPair(
 
   // Store the refresh token in the database
   await storeRefreshToken({
-    user_id: userId,
-    token_id: refreshTokenId,
-    expires_at: expiresAt.toISOString(),
+    userId: userId,
+    tokenId: refreshTokenId,
+    expiresAt: expiresAt.toISOString(),
   });
 
   return {
