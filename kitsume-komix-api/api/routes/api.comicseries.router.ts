@@ -131,9 +131,9 @@ app.openapi(
         id: series.id,
         name: series.name,
         description: series.description,
-        folder_path: series.folder_path, // Fixed property name
-        created_at: series.created_at,   // Fixed property name
-        updated_at: series.updated_at,   // Fixed property name
+        folder_path: series.folderPath, // Fixed property name
+        created_at: series.createdAt,   // Fixed property name
+        updated_at: series.updatedAt,   // Fixed property name
         thumbnailUrl: series.thumbnailUrl ?? null,
       }, { deep: true });
     });
