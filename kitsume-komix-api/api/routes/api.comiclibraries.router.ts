@@ -5,7 +5,7 @@ import { requireAuth } from "../middleware/authChecks.ts";
 import { createComicLibrary } from "../../db/sqlite/models/comicLibraries.model.ts";
 import { getComicLibrariesAvailableToUser } from "../services/comicLibraries.service.ts";
 
-import { ComicLibrarySchema } from "../../schemas/comicLibrary.schema.ts";
+import { ComicLibrarySchema } from "../../zod/schemas/request.schema.ts";
 import {
   ErrorResponseSchema,
   LibraryResponseSchema,

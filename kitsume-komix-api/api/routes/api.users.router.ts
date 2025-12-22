@@ -7,7 +7,7 @@ import {
   createUserService,
   deleteUserService,
 } from "../services/users.service.ts";
-import { UserSchema } from "../../schemas/user.schema.ts";
+import { UserSchema } from "../../zod/schemas/request.schema.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import { AppEnv, UserRegistrationInput } from "../../types/index.ts";
 
