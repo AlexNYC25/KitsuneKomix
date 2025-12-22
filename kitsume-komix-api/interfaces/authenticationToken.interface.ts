@@ -14,3 +14,13 @@ export interface CreateRefreshTokenInput {
   tokenId: string;
   expiresAt: string;
 }
+
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+}
