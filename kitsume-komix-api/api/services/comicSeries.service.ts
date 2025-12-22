@@ -1,37 +1,24 @@
-import { getUsersComicLibraries } from "../../db/sqlite/models/comicLibraries.model.ts";
+import { getUsersComicLibraries } from "#sqlite/models/comicLibraries.model.ts";
 import {
   getComicSeriesById,
   getComicSeriesMetadataById,
   getLatestComicSeries,
   getUpdatedComicSeries,
-} from "../../db/sqlite/models/comicSeries.model.ts";
-import { getComicBooksBySeriesId } from "../../db/sqlite/models/comicBooks.model.ts";
-import { getThumbnailsByComicBookId } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
+} from "#sqlite/models/comicSeries.model.ts";
+import { getComicBooksBySeriesId } from "#sqlite/models/comicBooks.model.ts";
+import { getThumbnailsByComicBookId } from "#sqlite/models/comicBookThumbnails.model.ts";
+
+import { attachThumbnailToComicBook } from "./comicbooks.service.ts";
 
 import type {
   ComicBook,
   ComicBookWithThumbnail,
   ComicSeries,
   ComicSeriesWithMetadata,
-} from "../../types/index.ts";
-
-import { attachThumbnailToComicBook } from "./comicbooks.service.ts";
-
-// Extended type including optional thumbnail URL
-type ComicSeriesWithThumbnail = ComicSeries & { thumbnailUrl?: string };
-
-// Extended type including thumbnail URL and metadata object who may be empty or be a full metadata record
-type ComicSeriesWithMetadataAndThumbnail = ComicSeriesWithThumbnail & {
-  metadata: ComicSeriesWithMetadata | Record<PropertyKey, never>;
-};
-
-type ComicSeriesWithComicsMetadataAndThumbnail =
-  & ComicSeriesWithMetadataAndThumbnail
-  & {
-    comics: Array<ComicBookWithThumbnail>;
-  };
-
-const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
+  ComicSeriesWithThumbnail,
+  ComicSeriesWithMetadataAndThumbnail,
+  ComicSeriesWithComicsMetadataAndThumbnail,
+} from "#types/index.ts";
 
 export const getLatestComicSeriesUserCanAccess = async (
   userId: number,
@@ -57,7 +44,7 @@ export const getLatestComicSeriesUserCanAccess = async (
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
       const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].file_path.split("/").pop()}`;
+      seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].filePath.split("/").pop()}`;
       latestSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
       latestSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
@@ -91,7 +78,7 @@ export const getUpdatedComicSeriesUserCanAccess = async (
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
       const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
-      seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].file_path.split("/").pop()}`;
+      seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].filePath.split("/").pop()}`;
       updatedSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
       updatedSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
