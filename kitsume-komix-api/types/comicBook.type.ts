@@ -39,28 +39,6 @@ export type ComicBookWithMetadata = ComicBook & {
   seriesGroups?: ComicSeriesGroup[];
 };
 
-// Request parameter types for service layer
-export type RequestPaginationParameters = {
-  page?: number;
-  pageSize?: number;
-};
-
-export type RequestPaginationParametersValidated = {
-  page: number;
-  pageSize: number;
-};
-
-export type RequestSortParameters = {
-  sortProperty?: string;
-  sortOrder?: "asc" | "desc";
-};
-
-export type RequestFilterParameters = {
-  filter?: string;
-  filterProperty?: string;
-};
-
-
 
 export type AllowedFilterProperties =
   | typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number]
