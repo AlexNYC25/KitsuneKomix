@@ -2,8 +2,9 @@ import {
 	RequestFilterParameters,
   RequestSortParameters,
 	RequestPaginationParameters,
-  RequestPaginationParametersValidated
-} from "../types/index.ts";
+  RequestPaginationParametersValidated,
+	QueryData
+} from "#types/index.ts";
 
 import {
 	PAGE_SIZE_DEFAULT, 
@@ -384,4 +385,22 @@ export const buildStoryArcQueryParams = (
 	}
 
 	return queryParams;
+}
+
+///////////// Start of rewrite for unified query param validation /////////////
+
+export const validateAndBuildServiceQueryParams = (
+	q: QueryData,
+) => {
+	// First we validate and sanitize each set of parameters
+	
+	// Pagination
+
+	// filter
+
+	// sort
+
+	// Then we build the final query params object
+
+	return null;
 }
