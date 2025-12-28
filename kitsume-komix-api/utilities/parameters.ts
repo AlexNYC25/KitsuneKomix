@@ -3,7 +3,8 @@ import {
   RequestSortParameters,
 	RequestPaginationParameters,
   RequestPaginationParametersValidated,
-	QueryData
+	QueryData,
+  RequestParametersValidated
 } from "#types/index.ts";
 
 import {
@@ -389,9 +390,13 @@ export const buildStoryArcQueryParams = (
 
 ///////////// Start of rewrite for unified query param validation /////////////
 
+/**
+ * The Top-level function to validate and build service query parameters
+ * from raw request query data.
+ */
 export const validateAndBuildServiceQueryParams = (
 	q: QueryData,
-) => {
+) : RequestParametersValidated => {
 	// First we validate and sanitize each set of parameters
 	
 	// Pagination
