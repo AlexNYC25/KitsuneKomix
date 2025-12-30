@@ -15,6 +15,8 @@ import {
 
 import type { ComicBookQueryParams, ComicStoryArcQueryParams } from "#interfaces/index.ts";
 
+import { QueryableColumns } from "../constants/index.ts";
+
 /**
  * Validates and sanitizes filter parameters.
  * 
@@ -390,13 +392,23 @@ export const buildStoryArcQueryParams = (
 
 ///////////// Start of rewrite for unified query param validation /////////////
 
+export const buildServiceDataParmamter = (
+	q: QueryData,
+	dataType: "comicBooks" | "storyArcs"
+) => {
+	// first we get the queryable columns depending on the data type
+	let allowedFilterFields: string[] = [];
+	let allowedSortFields: string[] = [];
+}
+
+
 /**
  * The Top-level function to validate and build service query parameters
  * from raw request query data.
  */
 export const validateAndBuildServiceQueryParams = (
 	q: QueryData,
-) : RequestParametersValidated => {
+) : RequestParametersValidated<string,string> => {
 	// First we validate and sanitize each set of parameters
 	
 	// Pagination
