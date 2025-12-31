@@ -17,6 +17,14 @@ import type { ComicBookQueryParams, ComicStoryArcQueryParams } from "#interfaces
 
 import { QueryableColumns } from "../constants/index.ts";
 
+
+const comicQueryableColumns = QueryableColumns["comics"];
+const comicQueryableColumnsFiltering: string[] = Object.values(comicQueryableColumns.filter);
+const comicQueryableColumnsSorting: string[] = Object.values(comicQueryableColumns.sort);
+
+type ComicSortField = typeof comicQueryableColumnsSorting[number];
+type ComicFilterField = typeof comicQueryableColumnsFiltering[number];
+
 /**
  * Validates and sanitizes filter parameters.
  * 
@@ -394,11 +402,18 @@ export const buildStoryArcQueryParams = (
 
 export const buildServiceDataParmamter = (
 	q: QueryData,
-	dataType: "comicBooks" | "storyArcs"
+	dataType: "comics"
 ) => {
-	// first we get the queryable columns depending on the data type
-	let allowedFilterFields: string[] = [];
-	let allowedSortFields: string[] = [];
+	// switch here depending on the datatype
+	switch (dataType) {
+		case "comics":
+			// build comic book query params
+			break;
+		default:
+			return null;
+	}
+	
+
 }
 
 
@@ -406,9 +421,9 @@ export const buildServiceDataParmamter = (
  * The Top-level function to validate and build service query parameters
  * from raw request query data.
  */
-export const validateAndBuildServiceQueryParams = (
+export const validateAndBuildServiceQueryParamsForComics = (
 	q: QueryData,
-) : RequestParametersValidated<string,string> => {
+) : RequestParametersValidated<ComicSortField,ComicFilterField> => {
 	// First we validate and sanitize each set of parameters
 	
 	// Pagination
