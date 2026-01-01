@@ -407,8 +407,7 @@ export const buildServiceDataParmamter = (
 	// switch here depending on the datatype
 	switch (dataType) {
 		case "comics":
-			// build comic book query params
-			break;
+			return validateAndBuildServiceQueryParamsForComics(q);
 		default:
 			return null;
 	}
