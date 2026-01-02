@@ -25,6 +25,13 @@ const comicQueryableColumnsSorting: string[] = Object.values(comicQueryableColum
 type ComicSortField = typeof comicQueryableColumnsSorting[number];
 type ComicFilterField = typeof comicQueryableColumnsFiltering[number];
 
+// Type helper to extract sort and filter field types from QueryableColumns
+type ExtractSortField<T extends keyof typeof QueryableColumns> = 
+	typeof QueryableColumns[T]["sort"][keyof typeof QueryableColumns[T]["sort"]];
+
+type ExtractFilterField<T extends keyof typeof QueryableColumns> = 
+	typeof QueryableColumns[T]["filter"][keyof typeof QueryableColumns[T]["filter"]];
+
 /**
  * Validates and sanitizes filter parameters.
  * 
@@ -400,38 +407,48 @@ export const buildStoryArcQueryParams = (
 
 ///////////// Start of rewrite for unified query param validation /////////////
 
-export const buildServiceDataParmamter = (
+// Function overloads for type-safe data type handling
+export function buildServiceDataParmamter(
 	q: QueryData,
 	dataType: "comics"
-) => {
+): RequestParametersValidated<ComicSortField, ComicFilterField>;
+
+/**
+ * Builds validated service query parameters based on data type.
+ * Returns RequestParametersValidated with generics specific to the data type.
+ * 
+ * @param q The raw query data from the request
+ * @param dataType The type of data being queried ("comics", "series", etc.)
+ * @returns RequestParametersValidated object with type-specific sort and filter fields
+ */
+export function buildServiceDataParmamter(
+	q: QueryData,
+	dataType: keyof typeof QueryableColumns
+): RequestParametersValidated<string, string>;
+
+export function buildServiceDataParmamter(
+	q: QueryData,
+	dataType: keyof typeof QueryableColumns
+): RequestParametersValidated<string, string> {
 	// switch here depending on the datatype
 	switch (dataType) {
 		case "comics":
 			return validateAndBuildServiceQueryParamsForComics(q);
 		default:
-			return null;
+			throw new Error(`Unknown data type: ${dataType}`);
 	}
-	
-
 }
 
-
 /**
- * The Top-level function to validate and build service query parameters
- * from raw request query data.
+ * Validates and builds service query parameters for comics.
+ * Combines pagination, filter, and sort parameters into a RequestParametersValidated object.
+ * 
+ * @param q The raw query data from the request
+ * @returns RequestParametersValidated object with comic-specific sort and filter fields
  */
 export const validateAndBuildServiceQueryParamsForComics = (
 	q: QueryData,
-) : RequestParametersValidated<ComicSortField,ComicFilterField> => {
-	// First we validate and sanitize each set of parameters
-	
-	// Pagination
-
-	// filter
-
-	// sort
-
-	// Then we build the final query params object
-
-	return null;
-}
+): RequestParametersValidated<ComicSortField, ComicFilterField> => {
+	// TODO: Implement validation logic
+	throw new Error("Not yet implemented");
+};
