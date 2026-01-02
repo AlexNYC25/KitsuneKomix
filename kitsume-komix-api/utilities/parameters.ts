@@ -1,10 +1,8 @@
 import {
-	RequestFilterParameters,
-  RequestSortParameters,
-	RequestPaginationParameters,
-  RequestPaginationParametersValidated,
+	RequestPaginationParametersValidated,
 	QueryData,
-  RequestParametersValidated
+  RequestParametersValidated,
+  SortOrder
 } from "#types/index.ts";
 
 import {
@@ -13,442 +11,181 @@ import {
 	FILTER_SORT_DEFAULT
 } from "../utilities/constants.ts";
 
-import type { ComicBookQueryParams, ComicStoryArcQueryParams } from "#interfaces/index.ts";
-
 import { QueryableColumns } from "../constants/index.ts";
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 
-const comicQueryableColumns = QueryableColumns["comics"];
-const comicQueryableColumnsFiltering: string[] = Object.values(comicQueryableColumns.filter);
-const comicQueryableColumnsSorting: string[] = Object.values(comicQueryableColumns.sort);
-
-type ComicSortField = typeof comicQueryableColumnsSorting[number];
-type ComicFilterField = typeof comicQueryableColumnsFiltering[number];
-
-// Type helper to extract sort and filter field types from QueryableColumns
+/**
+ * Type helpers to extract sort and filter field types from QueryableColumns
+ * for any data type (comics, series, readlists, etc.)
+ */
 type ExtractSortField<T extends keyof typeof QueryableColumns> = 
 	typeof QueryableColumns[T]["sort"][keyof typeof QueryableColumns[T]["sort"]];
 
 type ExtractFilterField<T extends keyof typeof QueryableColumns> = 
 	typeof QueryableColumns[T]["filter"][keyof typeof QueryableColumns[T]["filter"]];
 
-/**
- * Validates and sanitizes filter parameters.
- * 
- * @param params RequestFilterParameters
- * @param allowedFilterFields An array of allowed fields to filter by
- * @returns RequestFilterParameters
- */
-export const validateFilterParameters = (
-	params: RequestFilterParameters,
-	allowedFilterFields: string[],
-): RequestFilterParameters => {
-	const filterProperty = params.filterProperty && allowedFilterFields.includes(params.filterProperty)
-		? params.filterProperty
-		: undefined;
 
-	const filter = params.filter && filterProperty ? params.filter : undefined;
+type ComicSortField = ExtractSortField<"comics">;
+type ComicFilterField = ExtractFilterField<"comics">;
 
-	params.filterProperty = filterProperty;
-	params.filter = filter;
 
-	return params;
-}
+// ============================================================================
+// PARAMETER VALIDATION FUNCTIONS
+// ============================================================================
 
 /**
- * Validates and sanitizes sort parameters.
- * 
- * @param params RequestSortParameters
- * @param allowedSortFields An array of allowed fields to sort by
- * @param defaultSortBy A string representing the default sort field
- * @returns RequestSortParameters
+ * Validates pagination parameters (page, pageSize)
+ * @param page Raw page number from request
+ * @param pageSize Raw page size from request
+ * @returns Validated pagination parameters with defaults applied
  */
-export const validateSortParameters = (
-	params: RequestSortParameters,
-	allowedSortFields: string[],
-	defaultSortBy: string
-): RequestSortParameters => {
-	const sortProperty = params.sortProperty && allowedSortFields.includes(params.sortProperty)
-		? params.sortProperty
-		: defaultSortBy;
-
-	const sortOrder = params.sortOrder && (params.sortOrder === "asc" || params.sortOrder === "desc")
-		? params.sortOrder
-		: FILTER_SORT_DEFAULT;
-
-	params.sortProperty = sortProperty;
-	params.sortOrder = sortOrder;
-
-	return params;
-}
-
-/**
- * Validates and sanitizes pagination parameters.
- * 
- * @param params 
- * @returns 
- */
-export const validatePaginationParameters = (
-	params: RequestPaginationParameters,
+const validatePagination = (
+	page?: number,
+	pageSize?: number,
 ): RequestPaginationParametersValidated => {
-	const page = params.page && params.page > 0 ? params.page : PAGE_NUMBER_DEFAULT;
-	const pageSize = params.pageSize && params.pageSize > 0 ? params.pageSize : PAGE_SIZE_DEFAULT;
+	const validPage = page && page > 0 ? page : PAGE_NUMBER_DEFAULT;
+	const validPageSize = pageSize && pageSize > 0 ? pageSize : PAGE_SIZE_DEFAULT;
 
-	return {page, pageSize};
-}
-
-/**
- * Maps filter property names to their corresponding query parameter names.
- * Handles aliases for common filter fields.
- * 
- * @param filterProperty The filter property name to map
- * @param filterValue The filter value to apply
- * @returns Object with mapped query parameter key and value, or null if invalid
- */
-export const mapComicFilterPropertyToQueryParam = (
-	filterProperty: string,
-	filterValue: string
-): { key: string; value: string | number } | null => {
-	if (!filterProperty || !filterValue) {
-		return null;
-	}
-
-	const trimmedValue = filterValue.trim();
-	const normalizedProperty = filterProperty.toLowerCase();
-
-	switch (normalizedProperty) {
-		case "title":
-			return { key: "titleFilter", value: trimmedValue };
-		case "series":
-		case "series_name":
-			return { key: "seriesFilter", value: trimmedValue };
-		case "writer":
-		case "writers":
-			return { key: "writerFilter", value: trimmedValue };
-		case "artist":
-		case "penciller":
-		case "inker":
-		case "colorist":
-		case "cover_artist":
-			return { key: "artistFilter", value: trimmedValue };
-		case "publisher":
-		case "publishers":
-			return { key: "publisherFilter", value: trimmedValue };
-		case "genre":
-		case "genres":
-			return { key: "genreFilter", value: trimmedValue };
-		case "character":
-		case "characters":
-			return { key: "characterFilter", value: trimmedValue };
-		case "year":
-		case "publication_year": {
-			const yearNum = parseInt(trimmedValue, 10);
-			return !isNaN(yearNum) 
-				? { key: "yearFilter", value: yearNum }
-				: null;
-		}
-		default:
-			// Use general filter for unrecognized properties
-			return { key: "generalFilter", value: trimmedValue };
-	}
+	return { page: validPage, pageSize: validPageSize };
 };
 
 /**
- * Maps sort property names to their corresponding database column names.
- * Handles aliases for common sort fields and defaults to "created_at" if unrecognized.
- * 
- * @param sortProperty The sort property name to map
- * @param sortOrder The sort order (asc/desc), defaults to "asc"
- * @returns Object with mapped sortBy column name and sortOrder, or null if invalid
+ * Validates sort parameters against allowed columns for a data type
+ * @param sortProperty The column to sort by
+ * @param sortDirection The sort direction (asc/desc)
+ * @param allowedSortFields Array of allowed sort field names
+ * @param defaultSort Default sort field to use if invalid
+ * @returns Validated sort property and order
  */
-export const mapComicSortPropertyToQueryParam = (
-	sortProperty: string,
-	sortOrder: string = FILTER_SORT_DEFAULT
-): { sortBy: string; sortOrder: string } | null => {
-	if (!sortProperty) {
-		return null;
+const validateSort = (
+	sortProperty: string | undefined,
+	sortDirection: "asc" | "desc" | undefined,
+	allowedSortFields: string[],
+	defaultSort: string,
+): { sortProperty: string; sortOrder: SortOrder } => {
+	// Validate sort property is in allowed list
+	const validSortProperty = sortProperty && allowedSortFields.includes(sortProperty)
+		? sortProperty
+		: defaultSort;
+
+	// Validate sort order is asc or desc
+	const validSortOrder: SortOrder = (sortDirection === "asc" || sortDirection === "desc")
+		? sortDirection
+		: FILTER_SORT_DEFAULT as SortOrder;
+
+	return {
+		sortProperty: validSortProperty,
+		sortOrder: validSortOrder,
+	};
+};
+
+/**
+ * Validates filter parameters against allowed columns for a data type
+ * @param filterProperty The column to filter by
+ * @param filterValue The filter value
+ * @param allowedFilterFields Array of allowed filter field names
+ * @returns Validated filter property and value, or undefined if invalid
+ */
+const validateFilter = (
+	filterProperty: string | undefined,
+	filterValue: string | undefined,
+	allowedFilterFields: string[],
+): { filterProperty: string; filterValue: string } | undefined => {
+	// Both property and value must be present
+	if (!filterProperty || !filterValue) {
+		return undefined;
 	}
 
-	const normalizedProperty = sortProperty.toLowerCase();
-	const normalizedOrder = sortOrder.toLowerCase();
-
-	// Validate sort order
-	const validSortOrder = (normalizedOrder === "asc" || normalizedOrder === "desc") 
-		? normalizedOrder 
-		: FILTER_SORT_DEFAULT;
-
-	// Map sort properties to database columns
-	let sortByColumn: string;
-	switch (normalizedProperty) {
-		case "title":
-			sortByColumn = "title";
-			break;
-		case "series":
-		case "series_name":
-			sortByColumn = "series";
-			break;
-		case "issue_number":
-			sortByColumn = "issue_number";
-			break;
-		case "publication_year":
-		case "year":
-			sortByColumn = "publication_year";
-			break;
-		case "created_at":
-			sortByColumn = "created_at";
-			break;
-		case "updated_at":
-			sortByColumn = "updated_at";
-			break;
-		case "file_name":
-		case "file_path":
-			sortByColumn = "file_name";
-			break;
-		case "writer":
-			sortByColumn = "writer";
-			break;
-		case "publisher":
-			sortByColumn = "publisher";
-			break;
-		case "genre":
-			sortByColumn = "genre";
-			break;
-		default:
-			// Default to created_at for unrecognized properties
-			sortByColumn = "created_at";
-			break;
+	// Property must be in allowed list
+	if (!allowedFilterFields.includes(filterProperty)) {
+		return undefined;
 	}
 
 	return {
-		sortBy: sortByColumn,
-		sortOrder: validSortOrder
+		filterProperty,
+		filterValue: filterValue.trim(),
 	};
 };
 
-/**
- * Maps filter property names to their corresponding query parameter names.
- * Handles aliases for common filter fields.
- * 
- * @param filterProperty The filter property name to map
- * @param filterValue The filter value to apply
- * @returns Object with mapped query parameter key and value, or null if invalid
- */
-export const mapReadlistFilterPropertyToQueryParam = (
-	filterProperty: string,
-	filterValue: string
-): { key: string; value: string | number } | null => {
-	if (!filterProperty || !filterValue) {
-		return null;
-	}
 
-	const trimmedValue = filterValue.trim();
-	const normalizedProperty = filterProperty.toLowerCase();
-
-	switch (normalizedProperty) {
-		case "name":
-			return { key: "nameFilter", value: trimmedValue };
-		case "description":
-			return { key: "descriptionFilter", value: trimmedValue };
-		default:
-			// Use general filter for unrecognized properties
-			return { key: "generalFilter", value: trimmedValue };
-	}
-};
+// ============================================================================
+// MAIN PARAMETER BUILDER - FUNCTION OVERLOADS
+// ============================================================================
 
 /**
- * Maps sort property names to their corresponding database column names.
- * Handles aliases for common sort fields and defaults to "created_at" if unrecognized.
- * 
- * @param sortProperty The sort property name to map
- * @param sortOrder The sort order (asc/desc), defaults to "asc"
- * @returns Object with mapped sortBy column name and sortOrder, or null if invalid
+ * Overload signatures for type-safe parameter building based on data type.
+ * Each overload provides specific sort/filter field types for that data type.
  */
-export const mapReadlistSortPropertyToQueryParam = (
-	sortProperty: string,
-	sortOrder: string = FILTER_SORT_DEFAULT
-): { sortBy: string; sortOrder: string } | null => {
-	if (!sortProperty) {
-		return null;
-	}
 
-	const normalizedProperty = sortProperty.toLowerCase();
-	const normalizedOrder = sortOrder.toLowerCase();
-
-	// Validate sort order
-	const validSortOrder = (normalizedOrder === "asc" || normalizedOrder === "desc") 
-		? normalizedOrder 
-		: FILTER_SORT_DEFAULT;
-
-	// Map sort properties to database columns
-	let sortByColumn: string;
-	switch (normalizedProperty) {
-		case "name":
-			sortByColumn = "name";
-			break;
-		case "description":
-			sortByColumn = "description";
-			break;
-		default:
-			// Default to created_at for unrecognized properties
-			sortByColumn = "created_at";
-			break;
-	}
-
-	return {
-		sortBy: sortByColumn,
-		sortOrder: validSortOrder
-	};
-};
-
-/**
- * Builds a ComicBookQueryParams object from request parameters.
- * Combines pagination, filter, and sort parameters into a single query object.
- * 
- * @param paginationParams Validated pagination parameters (page, pageSize)
- * @param filterParams Filter parameters (filterProperty, filter)
- * @param sortParams Sort parameters (sortProperty, sortOrder)
- * @returns ComicBookQueryParams object ready for database query
- */
-export const buildComicBookQueryParams = (
-	paginationParams: RequestPaginationParametersValidated,
-	filterParams: RequestFilterParameters,
-	sortParams: RequestSortParameters
-): ComicBookQueryParams => {
-	// Calculate offset for pagination
-	const offset = (paginationParams.page - 1) * paginationParams.pageSize;
-
-	// Initialize query params with pagination
-	const queryParams: ComicBookQueryParams = {
-		offset,
-		limit: paginationParams.pageSize + 1, // +1 to check for next page
-	};
-
-	// Apply filter if provided
-	if (filterParams.filterProperty && filterParams.filter) {
-		const filterMapping = mapComicFilterPropertyToQueryParam(
-			filterParams.filterProperty,
-			filterParams.filter
-		);
-
-		if (filterMapping) {
-			queryParams[filterMapping.key as keyof ComicBookQueryParams] =
-				filterMapping.value as never;
-		}
-	}
-
-	// Apply sort if provided
-	if (sortParams.sortProperty && sortParams.sortOrder) {
-		const sortMapping = mapComicSortPropertyToQueryParam(
-			sortParams.sortProperty,
-			sortParams.sortOrder
-		);
-
-		if (sortMapping) {
-			queryParams.sortBy = sortMapping.sortBy as ComicBookQueryParams["sortBy"];
-			queryParams.sortOrder = sortMapping.sortOrder as "asc" | "desc";
-		}
-	}
-
-	return queryParams;
-};
-
-
-/**
- * Builds a ComicBookQueryParams object from request parameters.
- * Combines pagination, filter, and sort parameters into a single query object.
- * 
- * @param paginationParams Validated pagination parameters (page, pageSize)
- * @param filterParams Filter parameters (filterProperty, filter)
- * @param sortParams Sort parameters (sortProperty, sortOrder)
- * @returns ComicBookQueryParams object ready for database query
- */
-export const buildStoryArcQueryParams = (
-	paginationParams: RequestPaginationParametersValidated,
-	filterParams: RequestFilterParameters,
-	sortParams: RequestSortParameters
-): ComicStoryArcQueryParams => {
-	// Calculate offset for pagination
-	const offset = (paginationParams.page - 1) * paginationParams.pageSize;
-
-	// Initialize query params with pagination
-	const queryParams: ComicStoryArcQueryParams = {
-		offset,
-		limit: paginationParams.pageSize + 1, // +1 to check for next page
-	};
-
-	// Apply filter if provided
-	if (filterParams.filterProperty && filterParams.filter) {
-		const filterMapping = mapReadlistFilterPropertyToQueryParam(
-			filterParams.filterProperty,
-			filterParams.filter
-		);
-
-		if (filterMapping) {
-			queryParams[filterMapping.key as keyof ComicStoryArcQueryParams] =
-				filterMapping.value as never;
-		}
-	}
-
-	// Apply sort if provided
-	if (sortParams.sortProperty && sortParams.sortOrder) {
-		const sortMapping = mapReadlistSortPropertyToQueryParam(
-			sortParams.sortProperty,
-			sortParams.sortOrder
-		);
-
-		if (sortMapping) {
-			queryParams.sortBy = sortMapping.sortBy as ComicStoryArcQueryParams["sortBy"];
-			queryParams.sortOrder = sortMapping.sortOrder as "asc" | "desc";
-		}
-	}
-
-	return queryParams;
-}
-
-///////////// Start of rewrite for unified query param validation /////////////
-
-// Function overloads for type-safe data type handling
-export function buildServiceDataParmamter(
-	q: QueryData,
+export function validateAndBuildQueryParams(
+	queryData: QueryData,
 	dataType: "comics"
 ): RequestParametersValidated<ComicSortField, ComicFilterField>;
 
-/**
- * Builds validated service query parameters based on data type.
- * Returns RequestParametersValidated with generics specific to the data type.
- * 
- * @param q The raw query data from the request
- * @param dataType The type of data being queried ("comics", "series", etc.)
- * @returns RequestParametersValidated object with type-specific sort and filter fields
- */
-export function buildServiceDataParmamter(
-	q: QueryData,
+export function validateAndBuildQueryParams(
+	queryData: QueryData,
 	dataType: keyof typeof QueryableColumns
 ): RequestParametersValidated<string, string>;
 
-export function buildServiceDataParmamter(
-	q: QueryData,
-	dataType: keyof typeof QueryableColumns
-): RequestParametersValidated<string, string> {
-	// switch here depending on the datatype
-	switch (dataType) {
-		case "comics":
-			return validateAndBuildServiceQueryParamsForComics(q);
-		default:
-			throw new Error(`Unknown data type: ${dataType}`);
-	}
-}
-
 /**
- * Validates and builds service query parameters for comics.
- * Combines pagination, filter, and sort parameters into a RequestParametersValidated object.
+ * Validates and builds query parameters from raw request query data.
  * 
- * @param q The raw query data from the request
- * @returns RequestParametersValidated object with comic-specific sort and filter fields
+ * This function handles:
+ * - Pagination validation (page, pageSize)
+ * - Sort validation (ensures sortProperty is in allowed columns)
+ * - Filter validation (ensures filterProperty is in allowed columns)
+ * 
+ * Returns a RequestParametersValidated object ready to pass to service functions.
+ * The return type is specific to the data type requested, providing full type safety.
+ * 
+ * @param queryData The raw query data from the request (verified with Zod)
+ * @param dataType The type of data being queried ("comics", "series", etc.)
+ * @returns RequestParametersValidated with type-specific sort and filter fields
+ * @throws Error if dataType is not recognized in QueryableColumns
+ * 
+ * @example
+ * const params = validateAndBuildQueryParams(queryData, "comics");
+ * // params is now: RequestParametersValidated<ComicSortField, ComicFilterField>
+ * // Can safely pass to service functions
  */
-export const validateAndBuildServiceQueryParamsForComics = (
-	q: QueryData,
-): RequestParametersValidated<ComicSortField, ComicFilterField> => {
-	// TODO: Implement validation logic
-	throw new Error("Not yet implemented");
-};
+export function validateAndBuildQueryParams(
+	queryData: QueryData,
+	dataType: keyof typeof QueryableColumns,
+): RequestParametersValidated<string, string> {
+	// Get the queryable columns for this data type
+	const columnConfig = QueryableColumns[dataType];
+
+	if (!columnConfig) {
+		throw new Error(`Unknown data type: ${dataType}`);
+	}
+
+	// Extract allowed columns
+	const allowedSortFields = Object.values(columnConfig.sort);
+	const allowedFilterFields = Object.values(columnConfig.filter);
+
+	// Validate and build each parameter set
+	const pagination = validatePagination(queryData.page, queryData.pageSize);
+
+	const sort = validateSort(
+		queryData.sortProperty,
+		queryData.sortDirection,
+		allowedSortFields,
+		allowedSortFields[0] || "createdAt", // Use first allowed field as default
+	);
+
+	const filter = validateFilter(
+		queryData.filterProperty,
+		queryData.filter,
+		allowedFilterFields,
+	);
+
+	// Return the validated parameters object
+	return {
+		pagination,
+		sort,
+		filter,
+	};
+}
