@@ -31,6 +31,12 @@ type ExtractFilterField<T extends keyof typeof QueryableColumns> =
 type ComicSortField = ExtractSortField<"comics">;
 type ComicFilterField = ExtractFilterField<"comics">;
 
+type ComicSeriesSortField = ExtractSortField<"comicSeries">;
+type ComicSeriesFilterField = ExtractFilterField<"comicSeries">;
+
+type ComicReadlistsSortField = ExtractSortField<"comicReadlists">;
+type ComicReadlistsFilterField = ExtractFilterField<"comicReadlists">;
+
 
 // ============================================================================
 // PARAMETER VALIDATION FUNCTIONS
@@ -124,6 +130,16 @@ export function validateAndBuildQueryParams(
 	queryData: QueryData,
 	dataType: "comics"
 ): RequestParametersValidated<ComicSortField, ComicFilterField>;
+
+export function validateAndBuildQueryParams(
+	queryData: QueryData,
+	dataType: "comicSeries"
+): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
+
+export function validateAndBuildQueryParams(
+	queryData: QueryData,
+	dataType: "comicReadlists"
+): RequestParametersValidated<ComicReadlistsSortField, ComicReadlistsFilterField>;
 
 export function validateAndBuildQueryParams(
 	queryData: QueryData,
