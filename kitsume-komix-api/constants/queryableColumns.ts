@@ -53,4 +53,30 @@ export const QueryableColumns = {
 			updatedAt: "updatedAt",
 		},
 	},
+	comicSeries: {
+		filter: {
+			id: "id",
+			name: "name",
+			description: "description",
+		},
+		sort : {
+			id: "id",
+			name: "name",
+			createdAt: "createdAt",
+			updatedAt: "updatedAt",
+		}
+	},
+	comicReadlists: {
+		filter: {
+			id: "id",
+			name: "name",
+			description: "description",
+		},
+		sort : {
+			id: "id",
+			name: "name",
+			createdAt: "createdAt",
+			updatedAt: "updatedAt",
+		}
+	}
 } as const;
