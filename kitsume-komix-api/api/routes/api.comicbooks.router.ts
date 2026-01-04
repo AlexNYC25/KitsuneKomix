@@ -2,15 +2,16 @@ import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import z from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { basename } from "@std/path";
+import camelcasekeys from "camelcase-keys";
 
 import {
   deleteComicBook,
   getComicBookById,
   updateComicBook,
-} from "../../db/sqlite/models/comicBooks.model.ts";
+} from "#sqlite/models/comicBooks.model.ts";
 import {
   getComicBooksInSeries,
-} from "../../db/sqlite/models/comicSeries.model.ts";
+} from "#sqlite/models/comicSeries.model.ts";
 import {
   checkComicReadByUser,
   createCustomThumbnail,
@@ -30,17 +31,15 @@ import {
   startStreamingComicBookFile,
   attachThumbnailToComicBook,
 } from "../services/comicbooks.service.ts";
-import camelcasekeys from "camelcase-keys";
-import {
+import type {
   AllowedFilterProperties,
   AllowedSortProperties,
   ComicBook,
   ComicBookFilterItem,
   MultipleReturnResponse,
   ComicBookThumbnail,
-} from "../../types/index.ts";
-// ComicBookWithMetadata is re-exported via ../../types/index.ts if needed
-import type { AppEnv } from "../../types/index.ts";
+  AppEnv
+} from "#types/index.ts";
 
 import { ComicBooksResponseSchema, FlexibleResponseSchema, ComicBookMetadataResponseSchema, SuccessResponseSchema, ErrorResponseSchema, ComicBookReadByUserResponseSchema, ComicBookThumbnailsResponseSchema } from "../../zod/schemas/response.schema.ts";
 import { PaginationQuerySchema, ComicBookUpdateSchema, ParamIdSchema } from "../../zod/schemas/request.schema.ts";
