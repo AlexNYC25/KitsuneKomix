@@ -13,3 +13,5 @@ export * from "./comicSeries.type.ts";
 
 // Re-export auth types
 export * from "./auth.type.ts";
+
+export * from "./parameters.type.ts";
