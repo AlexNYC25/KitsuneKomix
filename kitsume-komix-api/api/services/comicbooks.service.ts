@@ -105,7 +105,10 @@ import {
   // Request parameter types
   RequestPaginationParameters,
   RequestSortParameters,
-  RequestPaginationParametersValidated
+  RequestPaginationParametersValidated,
+  RequestParametersValidated,
+  ComicSortField, 
+  ComicFilterField
 } from "#types/index.ts";
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
 
@@ -233,11 +236,7 @@ export const fetchAllComicBooksWithRelatedData = async (
 };
 
 export const getComicBooksWithRelatedMetadata = async (
-  filters: ComicBookFilterItem[] = [],
-  sortProperty: AllowedSortProperties = "created_at",
-  sortOrder: "asc" | "desc" = "desc",
-  offset: number = 0,
-  limit: number = 20,
+  queryData: RequestParametersValidated<ComicSortField, ComicFilterField>
 ): Promise<ComicBook[]> => {
   try {
     // first we determine what tables we need to filter on based on the filter properties
