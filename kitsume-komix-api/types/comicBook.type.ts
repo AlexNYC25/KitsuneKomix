@@ -18,6 +18,7 @@ import {
 } from "./database.types.ts";
 
 import { COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES, COMIC_BOOK_INTERNAL_METADATA_PROPERTIES } from "#utilities/constants.ts";
+import { ComicSortField } from "./index.ts";
 
 export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
 
@@ -71,7 +72,7 @@ export type ComicBookFilteringAndSortingParams = {
   internalFilters?: ComicBookFilterItem[];
   externalFilters?: ComicBookExternalFilterItem[];
   sort?: {
-    property: AllowedSortProperties;
+    property: ComicSortField;
     order: "asc" | "desc";
   };
   offset?: number;
