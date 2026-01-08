@@ -69,8 +69,7 @@ export type ComicBookFiltersCheckList = {
 
 // Service function parameter types
 export type ComicBookFilteringAndSortingParams = {
-  internalFilters?: ComicBookFilterItem[];
-  externalFilters?: ComicBookExternalFilterItem[];
+  filters?: ComicBookFilterItem[];
   sort?: {
     property: ComicSortField;
     order: "asc" | "desc";
