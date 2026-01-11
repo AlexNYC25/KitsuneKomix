@@ -108,72 +108,11 @@ import {
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   ComicSortField, 
-  ComicFilterField
+  ComicFilterField,
+  RequestFilterParametersValidated,
+  RequestSortParametersValidated,
 } from "#types/index.ts";
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
-
-import {
-  COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
-  // Constants
-  COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
-} from "#utilities/constants.ts";
-
-
-
-
-// helper function to get the actual filtering ids for each external property
-const getMatchingComicBookIdsByExternalFilter = async (
-  filterProperty: ExternalFilterProperties,
-  filterValue: string,
-): Promise<number[]> => {
-  switch (filterProperty) {
-    case "characters": {
-      return await getCharactersIdsByFilter(filterValue);
-    }
-    case "colorists": {
-      return await getColoristIdsByFilter(filterValue);
-    }
-    case "cover_artists": {
-      return await getCoverArtistIdsByFilter(filterValue);
-    }
-    case "editors": {
-      return await getEditorIdsByFilter(filterValue);
-    }
-    case "inkers": {
-      return await getInkerIdsByFilter(filterValue);
-    }
-    case "letterers": {
-      return await getLettererIdsByFilter(filterValue);
-    }
-    case "publishers": {
-      return await getPublisherIdsByFilter(filterValue);
-    }
-    case "imprints": {
-      return await getImprintIdsByFilter(filterValue);
-    }
-    case "genres": {
-      return await getGenreIdsByFilter(filterValue);
-    }
-    case "teams": {
-      return await getTeamIdsByFilter(filterValue);
-    }
-    case "locations": {
-      return await getLocationIdsByFilter(filterValue);
-    }
-    case "pencillers": {
-      return await getPencillerIdsByFilter(filterValue);
-    }
-    case "writers": {
-      return await getWriterIdsByFilter(filterValue);
-    }
-    default: {
-      console.warn(`No handler for filter property: ${filterProperty}`);
-      return [];
-    }
-  }
-};
-
-// ----- END EXPERIMENTAL PROTOTYPE -----
 
 // This should be the new main function to fetch comic books with all related data
 /**
@@ -188,108 +127,23 @@ const getMatchingComicBookIdsByExternalFilter = async (
  * -  /api/comic-books/latest (sorting by the created_at date)
  * -  /api/comic-books/newest (sorting by the publication_date)
  */
-export const fetchAllComicBooksWithRelatedData = async (
-  requestPaginationParameters: RequestPaginationParameters,
-  requestFilterParameters: RequestFilterParameters,
-  requestSortParameters: RequestSortParameters,
-) => {
-  // Set default pagination values
-  const validatedPaginationParameters: RequestPaginationParametersValidated = validatePaginationParameters(requestPaginationParameters);
-
-  const queryParams: ComicBookQueryParams = buildComicBookQueryParams(
-    validatedPaginationParameters,
-    requestFilterParameters,
-    requestSortParameters
-  );
-
-  try {
-    const comicsFromDb = await getComicBooksWithMetadata(queryParams);
-
-    const hasNextPage =
-      comicsFromDb.length > validatedPaginationParameters.pageSize;
-
-    const comics = hasNextPage
-      ? comicsFromDb.slice(0, validatedPaginationParameters.pageSize)
-      : comicsFromDb;
-
-    // Convert to ComicBookWithMetadata by attaching all related data
-    const booksWithMetadata: ComicBookWithMetadata[] = [];
-
-    for (const comic of comics) {
-      const comicWithMetadata = await attatchMetadataToComicBook(comic);
-      booksWithMetadata.push(comicWithMetadata);
-    }
-
-    return {
-      comics: booksWithMetadata,
-      hasNextPage,
-      currentPage: requestPaginationParameters.page,
-      pageSize: requestPaginationParameters.pageSize,
-      totalResults: comics.length,
-      isFiltered: !!(requestFilterParameters.filterProperty && requestFilterParameters.filter),
-      isSorted: !!(requestSortParameters.sortProperty && requestSortParameters.sortOrder),
-    };
-  } catch (error) {
-    console.error("Error fetching all comic books:", error);
-    throw error;
-  }
-};
-
-export const getComicBooksWithRelatedMetadata = async (
+export const fetchComicBooksWithRelatedMetadata = async (
   queryData: RequestParametersValidated<ComicSortField, ComicFilterField>
 ): Promise<ComicBook[]> => {
   try {
-    // first we determine what tables we need to filter on based on the filter properties
-    const filtersCheckList: ComicBookFiltersCheckList = {};
-    for (const filter of filters) {
-      if (
-        COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(
-          filter.filterProperty as ExternalFilterProperties,
-        )
-      ) {
-        filtersCheckList[filter.filterProperty as ExternalFilterProperties] =
-          true;
-      }
-    }
-
-    // now for each external filter property we need to get the ids that match the filter value
-    const externalFilters: ComicBookExternalFilterItem[] = [];
-    for (const property in filtersCheckList) {
-      const filter = filters.find((f) => f.filterProperty === property);
-      if (filter) {
-        const matchingIds = await getMatchingComicBookIdsByExternalFilter(
-          property as ExternalFilterProperties,
-          filter.filterValue,
-        );
-        if (matchingIds.length > 0) {
-          externalFilters.push({
-            filterProperty: property as ExternalFilterProperties,
-            filterIds: matchingIds,
-          });
-        }
-      }
-    }
-
-    // separate internal filters from external filters
-    const internalFilters = filters.filter((f) =>
-      f.filterProperty &&
-      COMIC_BOOK_INTERNAL_METADATA_PROPERTIES.includes(
-        f.filterProperty as typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[
-          number
-        ],
-      )
-    );
+    const serviceDataPagination: RequestPaginationParametersValidated = queryData.pagination;
+    const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = queryData.filter;
+    const serviceDataSort: RequestSortParametersValidated<ComicSortField> = queryData.sort;
 
     // now we pass these filters + the sorting details to the new optimized database function
     const comicsFromDb = await getComicBooksWithMetadataFilteringSorting({
-      internalFilters,
-      externalFilters,
+      filters: [serviceDataFilter] as ComicBookFilterItem[],
       sort: {
-        property: sortProperty,
-        order: sortOrder,
+        property: serviceDataSort.sortProperty,
+        order: serviceDataSort.sortOrder,
       },
-      offset,
-      limit,
+      offset: serviceDataPagination.page * serviceDataPagination.pageSize - serviceDataPagination.pageSize,
+      limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
     });
 
     return comicsFromDb;
