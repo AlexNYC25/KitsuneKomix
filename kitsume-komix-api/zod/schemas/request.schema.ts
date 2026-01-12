@@ -39,6 +39,16 @@ export const PaginationQuerySchema = z.object({
 });
 
 /**
+ * Pagination query schema without sortProperty
+ *
+ * Used in routes that support pagination but not sorting, such as routes that explicitly describe their own sorting behavior.
+ * For example, search routes that sort by latest added or date
+ */
+export const PaginationQuerySchemaWithoutSortProperty = PaginationQuerySchema.omit({
+  sortProperty: true,
+});
+
+/**
  * Common schema for path parameter 'id'
  *
  * Used in routes that require an 'id' parameter in the path.
