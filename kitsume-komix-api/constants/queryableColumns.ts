@@ -1,3 +1,4 @@
+import { date } from "zod";
 
 export const QueryableColumns = {
 	comics: {
@@ -16,6 +17,7 @@ export const QueryableColumns = {
 			year: "year",
 			month: "month",
 			day: "day",
+			date: "date",
 			publisher: "publisher",
 			publicationDate: "publicationDate",
 			scanInfo: "scanInfo",
@@ -40,6 +42,7 @@ export const QueryableColumns = {
 			year: "year",
 			month: "month",
 			day: "day",
+			date: "date",
 			publisher: "publisher",
 			publicationDate: "publicationDate",
 			language: "language",
