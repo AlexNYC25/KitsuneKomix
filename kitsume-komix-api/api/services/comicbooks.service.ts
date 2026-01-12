@@ -9,55 +9,42 @@ import {
   getRandomBook,
 } from "#sqlite/models/comicBooks.model.ts";
 import {
-  getWriterIdsByFilter,
   getWritersByComicBookId,
 } from "#sqlite/models/comicWriters.model.ts";
 import {
   getColoristByComicBookId,
-  getColoristIdsByFilter,
 } from "#sqlite/models/comicColorists.model.ts";
 import {
-  getPencillerIdsByFilter,
   getPencillersByComicBookId,
 } from "#sqlite/models/comicPencillers.model.ts";
 import {
-  getInkerIdsByFilter,
   getInkersByComicBookId,
 } from "#sqlite/models/comicInkers.model.ts";
 import {
-  getLettererIdsByFilter,
   getLetterersByComicBookId,
 } from "#sqlite/models/comicLetterers.model.ts";
 import {
-  getEditorIdsByFilter,
   getEditorsByComicBookId,
 } from "#sqlite/models/comicEditors.model.ts";
 import {
-  getCoverArtistIdsByFilter,
   getCoverArtistsByComicBookId,
 } from "#sqlite/models/comicCoverArtists.model.ts";
 import {
-  getPublisherIdsByFilter,
   getPublishersByComicBookId,
 } from "#sqlite/models/comicPublishers.model.ts";
 import {
-  getImprintIdsByFilter,
   getImprintsByComicBookId,
 } from "#sqlite/models/comicImprints.model.ts";
 import {
-  getGenreIdsByFilter,
   getGenresForComicBook,
 } from "#sqlite/models/comicGenres.model.ts";
 import {
   getCharactersByComicBookId,
-  getCharactersIdsByFilter,
 } from "#sqlite/models/comicCharacters.model.ts";
 import {
-  getTeamIdsByFilter,
   getTeamsByComicBookId,
 } from "#sqlite/models/comicTeams.model.ts";
 import {
-  getLocationIdsByFilter,
   getLocationsByComicBookId,
 } from "#sqlite/models/comicLocations.model.ts";
 import { getStoryArcsByComicBookId } from "#sqlite/models/comicStoryArcs.model.ts";
@@ -85,26 +72,14 @@ import {
 } from "#utilities/extract.ts";
 
 import {
-  buildComicBookQueryParams,
-  validatePaginationParameters,
-} from "#utilities/parameters.ts";
-
-import {
-  AllowedSortProperties,
   ComicBook,
-  ComicBookExternalFilterItem,
   ComicBookFilterItem,
-  ComicBookFiltersCheckList,
   ComicBookHistory,
   ComicBookThumbnail,
   ComicBookWithMetadata,
   ComicBookWithThumbnail,
-  // Filter and sort types
-  ExternalFilterProperties,
-  RequestFilterParameters,
   // Request parameter types
   RequestPaginationParameters,
-  RequestSortParameters,
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   ComicSortField, 
