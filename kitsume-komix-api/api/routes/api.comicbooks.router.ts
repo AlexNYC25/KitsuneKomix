@@ -189,6 +189,8 @@ app.openapi(
       filter?: string | undefined;
       filterProperty?: string | undefined;
     } = c.req.valid("query");
+    
+    queryData.sortProperty = "createdAt";
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
@@ -271,6 +273,8 @@ app.openapi(
       filterProperty?: string | undefined;
     } = c.req.valid("query");
 
+    queryData.sortProperty = "date";
+    
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
     try {
