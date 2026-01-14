@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
-import { SQLiteColumn } from "drizzle-orm/sqlite-core";
+import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 
@@ -33,6 +33,7 @@ import {
   comicPublishersTable,
   comicSeriesBooksTable,
   comicSeriesGroupsTable,
+  comicSeriesTable,
   comicStoryArcsTable,
   comicTeamsTable,
   comicWebLinksTable,
@@ -41,13 +42,174 @@ import {
 
 import type {
   ComicBook,
-  ComicBookWithMetadata,
   ComicBookFilteringAndSortingParams,
-  NewComicBook
+  NewComicBook,
+  ComicBookFilterItem,
+  ComicSortField,
 } from "#types/index.ts";
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
 import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 
+
+function addFilteringToQuery<T extends SQLiteSelect>(filter: ComicBookFilterItem, query: T): T {
+  const { filterProperty, filterValue } = filter;
+
+  switch (filterProperty) {
+    case "id":
+      query.where(eq(comicBooksTable.id, Number(filterValue)));
+      break;
+    case "seriesId":
+      query.where(eq(comicSeriesTable.id, Number(filterValue)));
+      break;
+    case "hash":
+      query.where(eq(comicBooksTable.hash, filterValue));
+      break;
+    case "title":
+      query.where(ilike(comicBooksTable.title, `%${filterValue}%`));
+      break;
+    case "series":
+      query.where(ilike(comicBooksTable.series, `%${filterValue}%`));
+      break;
+    case "issueNumber":
+      query.where(eq(comicBooksTable.issueNumber, filterValue));
+      break;
+    case "volume":
+      query.where(eq(comicBooksTable.volume, filterValue));
+      break;
+    case "alternateSeries":
+      query.where(ilike(comicBooksTable.alternateSeries, `%${filterValue}%`));
+      break;
+    case "alternateIssueNumber":
+      query.where(eq(comicBooksTable.alternateIssueNumber, filterValue));
+      break;
+    case "fileSize":
+      query.where(eq(comicBooksTable.fileSize, Number(filterValue)));
+      break;
+    case "year":
+      query.where(eq(comicBooksTable.year, Number(filterValue)));
+      break;
+    case "month":
+      query.where(eq(comicBooksTable.month, Number(filterValue)));
+      break;
+    case "day":
+      query.where(eq(comicBooksTable.day, Number(filterValue)));
+      break;
+    case "date":
+      query.where(eq(comicBooksTable.publicationDate, filterValue));
+      break;
+    case "publisher":
+      query.where(ilike(comicBooksTable.publisher, `%${filterValue}%`));
+      break;
+    case "publicationDate":
+      query.where(eq(comicBooksTable.publicationDate, filterValue));
+      break;
+    case "scanInfo":
+      query.where(ilike(comicBooksTable.scanInfo, `%${filterValue}%`));
+      break;
+    case "language":
+      query.where(ilike(comicBooksTable.language, `%${filterValue}%`));
+      break;
+    case "format":
+      query.where(ilike(comicBooksTable.format, `%${filterValue}%`));
+      break;
+    case "blackAndWhite":
+      query.where(eq(comicBooksTable.blackAndWhite, filterValue === "true" ? 1 : 0));
+      break;
+    case "manga":
+      query.where(eq(comicBooksTable.manga, filterValue === "true" ? 1 : 0));
+      break;
+    case "readingDirection":
+      query.where(ilike(comicBooksTable.readingDirection, `%${filterValue}%`));
+      break;
+    case "review":
+      query.where(ilike(comicBooksTable.review, `%${filterValue}%`));
+      break;
+    case "ageRating":
+      query.where(ilike(comicBooksTable.ageRating, `%${filterValue}%`));
+      break;
+    case "communityRating":
+      query.where(eq(comicBooksTable.communityRating, Number(filterValue)));
+      break;
+    case "createdAt":
+      query.where(eq(comicBooksTable.createdAt, filterValue));
+      break;
+    case "updatedAt":
+      query.where(eq(comicBooksTable.updatedAt, filterValue));
+      break;
+  }
+
+  return query;
+}
+
+function addSortingToQuery<T extends SQLiteSelect>(sortProperty: ComicSortField, sortDirection: string, query: T): T {
+  const direction = sortDirection === "asc" ? asc : desc;
+
+  switch (sortProperty) {
+    case "title":
+      query.orderBy(direction(comicBooksTable.title));
+      break;
+    case "issueNumber":
+      query.orderBy(direction(comicBooksTable.issueNumber));
+      break;
+    case "volume":
+      query.orderBy(direction(comicBooksTable.volume));
+      break;
+    case "alternateSeries":
+      query.orderBy(direction(comicBooksTable.alternateSeries));
+      break;
+    case "alternateIssueNumber":
+      query.orderBy(direction(comicBooksTable.alternateIssueNumber));
+      break;
+    case "fileSize":
+      query.orderBy(direction(comicBooksTable.fileSize));
+      break;
+    case "year":
+      query.orderBy(direction(comicBooksTable.year));
+      break;
+    case "month":
+      query.orderBy(direction(comicBooksTable.month));
+      break;
+    case "day":
+      query.orderBy(direction(comicBooksTable.day));
+      break;
+    case "date":
+    case "publicationDate":
+      query.orderBy(direction(comicBooksTable.publicationDate));
+      break;
+    case "publisher":
+      query.orderBy(direction(comicBooksTable.publisher));
+      break;
+    case "language":
+      query.orderBy(direction(comicBooksTable.language));
+      break;
+    case "format":
+      query.orderBy(direction(comicBooksTable.format));
+      break;
+    case "blackAndWhite":
+      query.orderBy(direction(comicBooksTable.blackAndWhite));
+      break;
+    case "manga":
+      query.orderBy(direction(comicBooksTable.manga));
+      break;
+    case "readingDirection":
+      query.orderBy(direction(comicBooksTable.readingDirection));
+      break;
+    case "ageRating":
+      query.orderBy(direction(comicBooksTable.ageRating));
+      break;
+    case "communityRating":
+      query.orderBy(direction(comicBooksTable.communityRating));
+      break;
+    case "createdAt":
+      query.orderBy(direction(comicBooksTable.createdAt));
+      break;
+    case "updatedAt":
+      query.orderBy(direction(comicBooksTable.updatedAt));
+      break;
+  }
+
+  return query;
+}
 
 
 /**
@@ -71,7 +233,7 @@ export const getComicBooksWithMetadataFilteringSorting = async (
   const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
 
   try {
-    const query = 
+    let query = 
       db.select(
         {
           id: comicBooksTable.id,
@@ -125,7 +287,16 @@ export const getComicBooksWithMetadataFilteringSorting = async (
       .leftJoin(comicWebLinksTable, eq(comicBooksTable.id, comicWebLinksTable.comicBookId))
       .groupBy(comicBooksTable.id)
       .offset(offset)
-      .limit(limit);
+      .limit(limit)
+      .$dynamic();
+
+      if (serviceDetails.sort?.property && serviceDetails.sort.order) {
+        query = addSortingToQuery(serviceDetails.sort.property, serviceDetails.sort.order, query);
+      }
+
+      if (serviceDetails.filters && serviceDetails.filters.length > 0) {
+        query = addFilteringToQuery(serviceDetails.filters[0], query);
+      }
 
 
     return query;
