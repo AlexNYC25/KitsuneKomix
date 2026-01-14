@@ -17,8 +17,7 @@ import {
   ComicWriter,
 } from "./database.types.ts";
 
-import { COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES, COMIC_BOOK_INTERNAL_METADATA_PROPERTIES } from "#utilities/constants.ts";
-import { ComicSortField } from "./index.ts";
+import { ComicSortField } from "./parameters.type.ts";
 
 export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
 
@@ -40,31 +39,16 @@ export type ComicBookWithMetadata = ComicBook & {
   seriesGroups?: ComicSeriesGroup[];
 };
 
+import { QueryableColumns } from "../constants/index.ts";
 
-export type AllowedFilterProperties =
-  | typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number]
-  | typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
+export type AllowedFilterProperties = keyof typeof QueryableColumns["comics"]["filter"];
 
-export type ExternalFilterProperties =
-  typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
-
-export type AllowedSortProperties =
-  | typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number]
-  | typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number];
+export type AllowedSortProperties = keyof typeof QueryableColumns["comics"]["sort"];
 
 // Filter types for advanced comic book querying
 export type ComicBookFilterItem = {
   filterProperty: AllowedFilterProperties;
   filterValue: string;
-};
-
-export type ComicBookExternalFilterItem = {
-  filterProperty: ExternalFilterProperties;
-  filterIds: number[];
-};
-
-export type ComicBookFiltersCheckList = {
-  [key in ExternalFilterProperties]?: boolean;
 };
 
 // Service function parameter types
