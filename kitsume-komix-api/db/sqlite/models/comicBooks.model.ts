@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { SQLiteColumn } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 
@@ -34,26 +35,28 @@ import {
   comicSeriesGroupsTable,
   comicStoryArcsTable,
   comicTeamsTable,
+  comicWebLinksTable,
   comicWritersTable,
 } from "../schema.ts";
 
 import type {
   ComicBook,
+  ComicBookWithMetadata,
   ComicBookFilteringAndSortingParams,
   NewComicBook
 } from "#types/index.ts";
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
+import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 
-import {
-  COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES,
-  COMIC_BOOK_INTERNAL_METADATA_PROPERTIES,
-} from "#utilities/constants.ts";
-import { SQLiteColumn } from "drizzle-orm/sqlite-core";
+
 
 /**
  * Gets comic books with metadata filtering and sorting
  * @param serviceDetails - Filtering and sorting parameters
  * @returns Promise resolving to an array of ComicBook objects 
+ * 
+ * Note: This function can be used to filter and sort on the metadata fields as well but not return them. i.e. we can filter by writer but not return the writer data with the comic book.
+ * This metadata must be fetched separately after getting the comic books and attached to the comic book objects upstream.
  */
 export const getComicBooksWithMetadataFilteringSorting = async (
   serviceDetails: ComicBookFilteringAndSortingParams,
@@ -64,577 +67,68 @@ export const getComicBooksWithMetadataFilteringSorting = async (
     throw new Error("Database client is not initialized");
   }
 
-  const whereConditions: Array<ReturnType<typeof eq> | ReturnType<typeof inArray> | ReturnType<typeof ilike>> = [];
-
-  // Determine which tables we need to join based on filters and sorting
-  const requiredJoins = new Set<string>();
-
-  // Check external filters to see which tables we need
-  if (serviceDetails.externalFilters) {
-    for (const filter of serviceDetails.externalFilters) {
-      requiredJoins.add(filter.filterProperty);
-
-      if (filter.filterProperty === "characters") {
-        whereConditions.push(
-          inArray(comicCharactersTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "colorists") {
-        whereConditions.push(
-          inArray(comicColoristsTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "cover_artists") {
-        whereConditions.push(
-          inArray(comicCoverArtistsTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "editors") {
-        whereConditions.push(
-          inArray(comicEditorsTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "genres") {
-        whereConditions.push(
-          inArray(comicGenresTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "imprints") {
-        whereConditions.push(
-          inArray(comicImprintsTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "inkers") {
-        whereConditions.push(
-          inArray(comicInkersTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "letterers") {
-        whereConditions.push(
-          inArray(comicLetterersTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "locations") {
-        whereConditions.push(
-          inArray(comicLocationsTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "pencillers") {
-        whereConditions.push(
-          inArray(comicPencillersTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "publishers") {
-        whereConditions.push(
-          inArray(comicPublishersTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "story_arcs") {
-        whereConditions.push(
-          inArray(comicStoryArcsTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "teams") {
-        whereConditions.push(
-          inArray(comicTeamsTable.id, filter.filterIds),
-        );
-      }
-
-      if (filter.filterProperty === "writers") {
-        whereConditions.push(
-          inArray(comicWritersTable.id, filter.filterIds),
-        );
-      }
-    }
-  }
-
-  // Check sort property to see if we need additional joins
-  const sortProperty = serviceDetails.sort?.property || "created_at";
-  if (
-    COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(
-      sortProperty as typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number],
-    )
-  ) {
-    requiredJoins.add(sortProperty);
-  }
-
-  // Handle internal filters (these don't require joins)
-  if (serviceDetails.internalFilters) {
-    for (const filter of serviceDetails.internalFilters) {
-      if (filter.filterProperty === "id") {
-        whereConditions.push(
-          eq(comicBooksTable.id, parseInt(filter.filterValue)),
-        );
-      }
-
-      if (filter.filterProperty === "title") {
-        whereConditions.push(
-          ilike(comicBooksTable.title, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "issue_number") {
-        whereConditions.push(
-          ilike(comicBooksTable.issueNumber, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "volume") {
-        whereConditions.push(
-          ilike(comicBooksTable.volume, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "summary") {
-        whereConditions.push(
-          ilike(comicBooksTable.summary, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "series") {
-        whereConditions.push(
-          ilike(comicBooksTable.series, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "alternate_series") {
-        whereConditions.push(
-          ilike(comicBooksTable.alternateSeries, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "alternate_issue_number") {
-        whereConditions.push(
-          ilike(
-            comicBooksTable.alternateIssueNumber,
-            `%${filter.filterValue}%`,
-          ),
-        );
-      }
-
-      if (filter.filterProperty === "publication_date") {
-        whereConditions.push(
-          ilike(comicBooksTable.publicationDate, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "created_at") {
-        whereConditions.push(
-          ilike(comicBooksTable.createdAt, `%${filter.filterValue}%`),
-        );
-      }
-
-      if (filter.filterProperty === "updated_at") {
-        whereConditions.push(
-          ilike(comicBooksTable.updatedAt, `%${filter.filterValue}%`),
-        );
-      }
-    }
-  }
-
-  // Start with base query
-  const selectFields = {
-    id: comicBooksTable.id,
-    libraryId: comicBooksTable.libraryId,
-    filePath: comicBooksTable.filePath,
-    hash: comicBooksTable.hash,
-    title: comicBooksTable.title,
-    series: comicBooksTable.series,
-    issueNumber: comicBooksTable.issueNumber,
-    count: comicBooksTable.count,
-    volume: comicBooksTable.volume,
-    alternateSeries: comicBooksTable.alternateSeries,
-    alternateIssueNumber: comicBooksTable.alternateIssueNumber,
-    alternateCount: comicBooksTable.alternateCount,
-    pageCount: comicBooksTable.pageCount,
-    fileSize: comicBooksTable.fileSize,
-    summary: comicBooksTable.summary,
-    notes: comicBooksTable.notes,
-    year: comicBooksTable.year,
-    month: comicBooksTable.month,
-    day: comicBooksTable.day,
-    publisher: comicBooksTable.publisher,
-    publicationDate: comicBooksTable.publicationDate,
-    scanInfo: comicBooksTable.scanInfo,
-    language: comicBooksTable.language,
-    format: comicBooksTable.format,
-    blackAndWhite: comicBooksTable.blackAndWhite,
-    manga: comicBooksTable.manga,
-    readingDirection: comicBooksTable.readingDirection,
-    review: comicBooksTable.review,
-    ageRating: comicBooksTable.ageRating,
-    communityRating: comicBooksTable.communityRating,
-    createdAt: comicBooksTable.createdAt,
-    updatedAt: comicBooksTable.updatedAt,
-  };
-
-  // Build the query with only the required joins
-  let dynamicQuery = db.selectDistinct(selectFields).from(comicBooksTable).$dynamic();
-
-  // Add joins conditionally
-  if (requiredJoins.has("writers")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookWritersTable,
-        eq(comicBooksTable.id, comicBookWritersTable.comicBookId),
-      )
-      .leftJoin(
-        comicWritersTable,
-        eq(comicBookWritersTable.comicWriterId, comicWritersTable.id),
-      );
-  }
-
-  if (requiredJoins.has("pencillers")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookPencillersTable,
-        eq(comicBooksTable.id, comicBookPencillersTable.comicBookId),
-      )
-      .leftJoin(
-        comicPencillersTable,
-        eq(
-          comicBookPencillersTable.comicPencillerId,
-          comicPencillersTable.id,
-        ),
-      );
-  }
-
-  if (requiredJoins.has("inkers")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookInkersTable,
-        eq(comicBooksTable.id, comicBookInkersTable.comicBookId),
-      )
-      .leftJoin(
-        comicInkersTable,
-        eq(comicBookInkersTable.comicInkerId, comicInkersTable.id),
-      );
-  }
-
-  if (requiredJoins.has("colorists")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookColoristsTable,
-        eq(comicBooksTable.id, comicBookColoristsTable.comicBookId),
-      )
-      .leftJoin(
-        comicColoristsTable,
-        eq(comicBookColoristsTable.comicColoristId, comicColoristsTable.id),
-      );
-  }
-
-  if (requiredJoins.has("letterers")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookLetterersTable,
-        eq(comicBooksTable.id, comicBookLetterersTable.comicBookId),
-      )
-      .leftJoin(
-        comicLetterersTable,
-        eq(comicBookLetterersTable.comicLetterId, comicLetterersTable.id),
-      );
-  }
-
-  if (requiredJoins.has("editors")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookEditorsTable,
-        eq(comicBooksTable.id, comicBookEditorsTable.comicBookId),
-      )
-      .leftJoin(
-        comicEditorsTable,
-        eq(comicBookEditorsTable.comicEditorId, comicEditorsTable.id),
-      );
-  }
-
-  if (requiredJoins.has("cover_artists")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookCoverArtistsTable,
-        eq(comicBooksTable.id, comicBookCoverArtistsTable.comicBookId),
-      )
-      .leftJoin(
-        comicCoverArtistsTable,
-        eq(
-          comicBookCoverArtistsTable.comicCoverArtistId,
-          comicCoverArtistsTable.id,
-        ),
-      );
-  }
-
-  if (requiredJoins.has("publishers")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookPublishersTable,
-        eq(comicBooksTable.id, comicBookPublishersTable.comicBookId),
-      )
-      .leftJoin(
-        comicPublishersTable,
-        eq(
-          comicBookPublishersTable.comicPublisherId,
-          comicPublishersTable.id,
-        ),
-      );
-  }
-
-  if (requiredJoins.has("imprints")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookImprintsTable,
-        eq(comicBooksTable.id, comicBookImprintsTable.comicBookId),
-      )
-      .leftJoin(
-        comicImprintsTable,
-        eq(comicBookImprintsTable.comicImprintId, comicImprintsTable.id),
-      );
-  }
-
-  if (requiredJoins.has("genres")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookGenresTable,
-        eq(comicBooksTable.id, comicBookGenresTable.comicBookId),
-      )
-      .leftJoin(
-        comicGenresTable,
-        eq(comicBookGenresTable.comicGenreId, comicGenresTable.id),
-      );
-  }
-
-  if (requiredJoins.has("characters")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookCharactersTable,
-        eq(comicBooksTable.id, comicBookCharactersTable.comicBookId),
-      )
-      .leftJoin(
-        comicCharactersTable,
-        eq(
-          comicBookCharactersTable.comicCharacterId,
-          comicCharactersTable.id,
-        ),
-      );
-  }
-
-  if (requiredJoins.has("teams")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookTeamsTable,
-        eq(comicBooksTable.id, comicBookTeamsTable.comicBookId),
-      )
-      .leftJoin(
-        comicTeamsTable,
-        eq(comicBookTeamsTable.comicTeamId, comicTeamsTable.id),
-      );
-  }
-
-  if (requiredJoins.has("locations")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookLocationsTable,
-        eq(comicBooksTable.id, comicBookLocationsTable.comicBookId),
-      )
-      .leftJoin(
-        comicLocationsTable,
-        eq(comicBookLocationsTable.comicLocationId, comicLocationsTable.id),
-      );
-  }
-
-  if (requiredJoins.has("story_arcs")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookStoryArcsTable,
-        eq(comicBooksTable.id, comicBookStoryArcsTable.comicBookId),
-      )
-      .leftJoin(
-        comicStoryArcsTable,
-        eq(comicBookStoryArcsTable.comicStoryArcId, comicStoryArcsTable.id),
-      );
-  }
-
-  if (requiredJoins.has("series_groups")) {
-    dynamicQuery = dynamicQuery
-      .leftJoin(
-        comicBookSeriesGroupsTable,
-        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comicBookId),
-      )
-      .leftJoin(
-        comicSeriesGroupsTable,
-        eq(
-          comicBookSeriesGroupsTable.comicSeriesGroupId,
-          comicSeriesGroupsTable.id,
-        ),
-      );
-  }
-
-  // Apply WHERE conditions if any exist
-  let finalQuery: typeof dynamicQuery;
-  if (whereConditions.length > 0) {
-    finalQuery = dynamicQuery.where(and(...whereConditions));
-  } else {
-    finalQuery = dynamicQuery;
-  }
-
-  // Handle sorting
-  let orderByColumn: SQLiteColumn;
-  const sortOrder: "asc" | "desc" = serviceDetails.sort?.order || "desc";
-
-  // Determine the column to sort by based on property type
-  if (
-    COMIC_BOOK_INTERNAL_METADATA_PROPERTIES.includes(
-      sortProperty as typeof COMIC_BOOK_INTERNAL_METADATA_PROPERTIES[number],
-    )
-  ) {
-    // Internal properties - sort directly on comic_books table
-    switch (sortProperty) {
-      case "id":
-        orderByColumn = comicBooksTable.id;
-        break;
-      case "title":
-        orderByColumn = comicBooksTable.title;
-        break;
-      case "issue_number":
-        orderByColumn = comicBooksTable.issueNumber;
-        break;
-      case "volume":
-        orderByColumn = comicBooksTable.volume;
-        break;
-      case "summary":
-        orderByColumn = comicBooksTable.summary;
-        break;
-      case "series":
-        orderByColumn = comicBooksTable.series;
-        break;
-      case "alternate_series":
-        orderByColumn = comicBooksTable.alternateSeries;
-        break;
-      case "alternate_issue_number":
-        orderByColumn = comicBooksTable.alternateIssueNumber;
-        break;
-      case "publication_date":
-        orderByColumn = comicBooksTable.publicationDate;
-        break;
-      case "created_at":
-        orderByColumn = comicBooksTable.createdAt;
-        break;
-      case "updated_at":
-        orderByColumn = comicBooksTable.updatedAt;
-        break;
-      default:
-        orderByColumn = comicBooksTable.createdAt;
-    }
-  } else if (
-    COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES.includes(
-      sortProperty as typeof COMIC_BOOK_EXTERNAL_METADATA_PROPERTIES[number],
-    )
-  ) {
-    // External properties - sort on joined table columns (only if we actually joined the table)
-    switch (sortProperty) {
-      case "characters":
-        orderByColumn = requiredJoins.has("characters")
-          ? comicCharactersTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "colorists":
-        orderByColumn = requiredJoins.has("colorists")
-          ? comicColoristsTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "cover_artists":
-        orderByColumn = requiredJoins.has("cover_artists")
-          ? comicCoverArtistsTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "editors":
-        orderByColumn = requiredJoins.has("editors")
-          ? comicEditorsTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "genres":
-        orderByColumn = requiredJoins.has("genres")
-          ? comicGenresTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "imprints":
-        orderByColumn = requiredJoins.has("imprints")
-          ? comicImprintsTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "inkers":
-        orderByColumn = requiredJoins.has("inkers")
-          ? comicInkersTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "letterers":
-        orderByColumn = requiredJoins.has("letterers")
-          ? comicLetterersTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "locations":
-        orderByColumn = requiredJoins.has("locations")
-          ? comicLocationsTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "pencillers":
-        orderByColumn = requiredJoins.has("pencillers")
-          ? comicPencillersTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "publishers":
-        orderByColumn = requiredJoins.has("publishers")
-          ? comicPublishersTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "story_arcs":
-        orderByColumn = requiredJoins.has("story_arcs")
-          ? comicStoryArcsTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "teams":
-        orderByColumn = requiredJoins.has("teams")
-          ? comicTeamsTable.name
-          : comicBooksTable.createdAt;
-        break;
-      case "writers":
-        orderByColumn = requiredJoins.has("writers")
-          ? comicWritersTable.name
-          : comicBooksTable.createdAt;
-        break;
-      default:
-        orderByColumn = comicBooksTable.createdAt;
-    }
-  } else {
-    // Fallback to default
-    orderByColumn = comicBooksTable.createdAt;
-  }
-
-  // Apply pagination defaults
-  const offset: number = serviceDetails.offset || 0;
-  const limit: number = serviceDetails.limit || 20;
+  const offset = serviceDetails.offset || 0;
+  const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
 
   try {
-    // Execute the query with sorting and pagination
-    // Use selectDistinct to ensure one row per comic book ID
-    const result = await finalQuery
-      .orderBy(sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn))
-      .limit(limit)
-      .offset(offset);
+    const query = 
+      db.select(
+        {
+          id: comicBooksTable.id,
+          libraryId: comicBooksTable.libraryId,
+          filePath: comicBooksTable.filePath,
+          hash: comicBooksTable.hash,
+          title: comicBooksTable.title,
+          series: comicBooksTable.series,
+          issueNumber: comicBooksTable.issueNumber,
+          count: comicBooksTable.count,
+          volume: comicBooksTable.volume,
+          alternateSeries: comicBooksTable.alternateSeries,
+          alternateIssueNumber: comicBooksTable.alternateIssueNumber,
+          alternateCount: comicBooksTable.alternateCount,
+          pageCount: comicBooksTable.pageCount,
+          fileSize: comicBooksTable.fileSize,
+          summary: comicBooksTable.summary,
+          notes: comicBooksTable.notes,
+          year: comicBooksTable.year,
+          month: comicBooksTable.month,
+          day: comicBooksTable.day,
+          publisher: comicBooksTable.publisher,
+          publicationDate: comicBooksTable.publicationDate,
+          scanInfo: comicBooksTable.scanInfo,
+          createdAt: comicBooksTable.createdAt,
+          updatedAt: comicBooksTable.updatedAt,
+          language: comicBooksTable.language,
+          format: comicBooksTable.format,
+          blackAndWhite: comicBooksTable.blackAndWhite,
+          manga: comicBooksTable.manga,
+          readingDirection: comicBooksTable.readingDirection,
+          review: comicBooksTable.review,
+          ageRating: comicBooksTable.ageRating,
+          communityRating: comicBooksTable.communityRating
+        }
+      ).from(comicBooksTable)
+      .leftJoin(comicBookWritersTable, eq(comicBooksTable.id, comicBookWritersTable.comicBookId))
+      .leftJoin(comicBookPencillersTable, eq(comicBooksTable.id, comicBookPencillersTable.comicBookId))
+      .leftJoin(comicBookInkersTable, eq(comicBooksTable.id, comicBookInkersTable.comicBookId))
+      .leftJoin(comicBookLetterersTable, eq(comicBooksTable.id, comicBookLetterersTable.comicBookId))
+      .leftJoin(comicBookEditorsTable, eq(comicBooksTable.id, comicBookEditorsTable.comicBookId))
+      .leftJoin(comicBookColoristsTable, eq(comicBooksTable.id, comicBookColoristsTable.comicBookId))
+      .leftJoin(comicBookCoverArtistsTable, eq(comicBooksTable.id, comicBookCoverArtistsTable.comicBookId))
+      .leftJoin(comicBookPublishersTable, eq(comicBooksTable.id, comicBookPublishersTable.comicBookId))
+      .leftJoin(comicBookImprintsTable, eq(comicBooksTable.id, comicBookImprintsTable.comicBookId))
+      .leftJoin(comicBookGenresTable, eq(comicBooksTable.id, comicBookGenresTable.comicBookId))
+      .leftJoin(comicBookStoryArcsTable, eq(comicBooksTable.id, comicBookStoryArcsTable.comicBookId))
+      .leftJoin(comicBookSeriesGroupsTable, eq(comicBooksTable.id, comicBookSeriesGroupsTable.comicBookId))
+      .leftJoin(comicBookTeamsTable, eq(comicBooksTable.id, comicBookTeamsTable.comicBookId))
+      .leftJoin(comicBookCharactersTable, eq(comicBooksTable.id, comicBookCharactersTable.comicBookId))
+      .leftJoin(comicWebLinksTable, eq(comicBooksTable.id, comicWebLinksTable.comicBookId))
+      .groupBy(comicBooksTable.id)
+      .offset(offset)
+      .limit(limit);
 
-    // TODO: here is where we attatch the metadata + convert the comicBook to comicBookWithMetadata
 
-    return result;
+    return query;
   } catch (error) {
     console.error(
       "Error fetching comic books with metadata filtering and sorting:",
