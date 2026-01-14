@@ -7,6 +7,7 @@ export const QueryableColumns = {
 			seriesId: "seriesId",
 			hash: "hash",
 			title: "title",
+			series: "series",
 			issueNumber: "issueNumber",
 			volume: "volume",
 			alternateSeries: "alternateSeries",
