@@ -14,13 +14,7 @@ export const PaginationQuerySchema = z.object({
     description: "Number of items per page (default is 20, max is 100)",
     example: 20,
   }),
-  // Optional sorting and filtering parameters. These are common but optional and
-  // will be ignored by routes that don't support them.
   sort: z.string().optional().openapi({
-    description: "A free-form sort string or 'relevance' style identifier",
-    example: "title",
-  }),
-  sortProperty: z.string().optional().openapi({
     description: "The specific property to sort by",
     example: "created_at",
   }),
@@ -45,7 +39,12 @@ export const PaginationQuerySchema = z.object({
  * For example, search routes that sort by latest added or date
  */
 export const PaginationQuerySchemaWithoutSortProperty = PaginationQuerySchema.omit({
-  sortProperty: true,
+  sort: true,
+});
+
+export const PaginationQueryNoFilterSchema = PaginationQuerySchema.omit({
+  filter: true,
+  filterProperty: true,
 });
 
 /**
