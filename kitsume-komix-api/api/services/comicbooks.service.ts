@@ -111,7 +111,7 @@ export const fetchComicBooksWithRelatedMetadata = async (
     const serviceDataSort: RequestSortParametersValidated<ComicSortField> = queryData.sort;
 
     // now we pass these filters + the sorting details to the new optimized database function
-    const comicsFromDb = await getComicBooksWithMetadataFilteringSorting({
+    const comicsFromDb: ComicBook[] = await getComicBooksWithMetadataFilteringSorting({
       filters: [serviceDataFilter] as ComicBookFilterItem[],
       sort: {
         property: serviceDataSort.sortProperty,
@@ -120,6 +120,8 @@ export const fetchComicBooksWithRelatedMetadata = async (
       offset: serviceDataPagination.page * serviceDataPagination.pageSize - serviceDataPagination.pageSize,
       limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
     });
+
+    // TODO: Attatch the related metadata directly below, initial query function above only returns ComicBook[] we need ComicBookWithMetadata[]
 
     return comicsFromDb;
   } catch (error) {
