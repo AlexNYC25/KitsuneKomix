@@ -169,7 +169,7 @@ export function validateAndBuildQueryParams(
 	const pagination = validatePagination(queryData.page, queryData.pageSize);
 
 	const sort = validateSort(
-		queryData.sortProperty,
+		queryData.sort,
 		queryData.sortDirection,
 		allowedSortFields,
 		allowedSortFields[0] || "createdAt", // Use first allowed field as default
