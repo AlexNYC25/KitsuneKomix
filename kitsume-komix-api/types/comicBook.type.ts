@@ -21,7 +21,7 @@ import { ComicSortField } from "./parameters.type.ts";
 
 export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
 
-export type ComicBookWithMetadata = ComicBook & {
+export type ComicBookMetadataOnly = {
   writers?: ComicWriter[];
   pencillers?: ComicPenciller[];
   inkers?: ComicInker[];
@@ -37,7 +37,9 @@ export type ComicBookWithMetadata = ComicBook & {
   locations?: ComicLocation[];
   storyArcs?: ComicStoryArc[];
   seriesGroups?: ComicSeriesGroup[];
-};
+}
+
+export type ComicBookWithMetadata = ComicBook & ComicBookMetadataOnly;
 
 import { QueryableColumns } from "../constants/index.ts";
 
