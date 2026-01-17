@@ -76,6 +76,7 @@ import {
   ComicBookFilterItem,
   ComicBookHistory,
   ComicBookThumbnail,
+  ComicBookMetadataOnly,
   ComicBookWithMetadata,
   ComicBookWithThumbnail,
   // Request parameter types
@@ -89,7 +90,6 @@ import {
 } from "#types/index.ts";
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
 
-// This should be the new main function to fetch comic books with all related data
 /**
  * Fetch all comic books with related metadata.
  * @param requestQueryParameters
@@ -104,7 +104,7 @@ import type { ComicBookQueryParams } from "#interfaces/index.ts";
  */
 export const fetchComicBooksWithRelatedMetadata = async (
   queryData: RequestParametersValidated<ComicSortField, ComicFilterField>
-): Promise<ComicBook[]> => {
+): Promise<ComicBookWithMetadata[]> => {
   try {
     const serviceDataPagination: RequestPaginationParametersValidated = queryData.pagination;
     const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = queryData.filter;
@@ -121,11 +121,98 @@ export const fetchComicBooksWithRelatedMetadata = async (
       limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
     });
 
-    // TODO: Attatch the related metadata directly below, initial query function above only returns ComicBook[] we need ComicBookWithMetadata[]
+    const comicsWithMetadata: ComicBookWithMetadata[] = [];
+    for (let i = 0; i < comicsFromDb.length; i++) {
+      const comic = comicsFromDb[i];
+      const metadata = await fetchAComicsAssociatedMetadataById(comic.id);
+      const comicWithMetadata: ComicBookWithMetadata = {
+        ...comic,
+        ...metadata,
+      }
+      comicsWithMetadata.push(comicWithMetadata);
+    }
 
-    return comicsFromDb;
+    return comicsWithMetadata;
   } catch (error) {
     console.error("Error fetching comic books with related metadata:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch associated metadata for a comic book by its ID.
+ * @param id - The ID of the comic book.
+ * @returns A promise that resolves to the associated metadata of the comic book of type ComicBookMetadataOnly.
+ */
+export const fetchAComicsAssociatedMetadataById = async (
+  id: number,
+): Promise<ComicBookMetadataOnly> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+
+    const metadata = {
+      writers: await getWritersByComicBookId(id),
+      pencillers: await getPencillersByComicBookId(id),
+      inkers: await getInkersByComicBookId(id),
+      letterers: await getLetterersByComicBookId(id),
+      editors: await getEditorsByComicBookId(id),
+      colorists: await getColoristByComicBookId(id),
+      coverArtists: await getCoverArtistsByComicBookId(id),
+      publishers: await getPublishersByComicBookId(id),
+      imprints: await getImprintsByComicBookId(id),
+      genres: await getGenresForComicBook(id),
+      characters: await getCharactersByComicBookId(id),
+      teams: await getTeamsByComicBookId(id),
+      locations: await getLocationsByComicBookId(id),
+      storyArcs: await getStoryArcsByComicBookId(id),
+      seriesGroups: await getSeriesGroupsByComicBookId(id),
+    };
+
+    return metadata;
+  } catch (error) {
+    console.error("Error fetching comic book metadata:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get comic book with metadata by its ID.
+ * @param id - The ID of the comic book.
+ * @returns A promise that resolves to the comic book with metadata or null if not found.
+ * 
+ * Note this function may end up geting deprecated in favor of fetchComicBooksWithRelatedMetadata
+ * TODO: Evaluate usage and possibly deprecate; Update the routes that call this function.
+ */
+export const fetchComicBookMetadataById = async (
+  id: number,
+): Promise<ComicBookWithMetadata | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const comicBook = await getComicBookById(id);
+    if (!comicBook) {
+      return null;
+    }
+
+    const metadata = await fetchAComicsAssociatedMetadataById(id);
+
+    const comicBookWithMetadataMergedIn : ComicBookWithMetadata = {
+      ...comicBook,
+      ...metadata,
+    };
+
+    return comicBookWithMetadataMergedIn;
+  } catch (error) {
+    console.error("Error fetching comic book metadata:", error);
     throw error;
   }
 };
@@ -233,46 +320,7 @@ export const fetchTheLatestsComicBooksAdded = async (
   }
 };
 
-export const fetchComicBookMetadataById = async (
-  id: number,
-): Promise<ComicBookWithMetadata | null> => {
-  const { db, client } = getClient();
 
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const comicBook = await getComicBookById(id);
-    if (!comicBook) {
-      return null;
-    }
-
-    const metadata: ComicBookWithMetadata = {
-      ...comicBook,
-      writers: await getWritersByComicBookId(id),
-      pencillers: await getPencillersByComicBookId(id),
-      inkers: await getInkersByComicBookId(id),
-      letterers: await getLetterersByComicBookId(id),
-      editors: await getEditorsByComicBookId(id),
-      colorists: await getColoristByComicBookId(id),
-      coverArtists: await getCoverArtistsByComicBookId(id),
-      publishers: await getPublishersByComicBookId(id),
-      imprints: await getImprintsByComicBookId(id),
-      genres: await getGenresForComicBook(id),
-      characters: await getCharactersByComicBookId(id),
-      teams: await getTeamsByComicBookId(id),
-      locations: await getLocationsByComicBookId(id),
-      storyArcs: await getStoryArcsByComicBookId(id),
-      seriesGroups: await getSeriesGroupsByComicBookId(id),
-    };
-
-    return metadata;
-  } catch (error) {
-    console.error("Error fetching comic book metadata:", error);
-    throw error;
-  }
-};
 
 /**
  * Start streaming the comic book file.
