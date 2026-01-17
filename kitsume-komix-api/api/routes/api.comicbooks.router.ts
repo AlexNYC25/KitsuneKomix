@@ -59,12 +59,13 @@ import {
 import {
   PaginationQuerySchema,
   PaginationQuerySchemaWithoutSortProperty,
+  PaginationQueryNoFilterNoSortSchema,
   ComicBookUpdateSchema,
   ParamIdSchema
 } from "../../zod/schemas/request.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
-import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
+import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -325,8 +326,6 @@ app.openapi(
   }
 );
 
-// HERE is the end of the current rewrite
-
 /**
  * GET /api/comic-books/duplicates
  *
@@ -340,21 +339,13 @@ app.openapi(
     description: "Retrieve duplicate comic books based on unique hash",
     tags: ["Comic Books"],
     request: {
-      query: z.object({
-        page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
-          description: "Page number for pagination",
-          example: 1,
-        }),
-        pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 20)).openapi({
-          description: "Number of items per page",
-          example: 20,
-        }),
-      }),
+      query: PaginationQueryNoFilterNoSortSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -362,6 +353,7 @@ app.openapi(
       },
       500: {
         content: {
+          //TODO: Update to proper schema
           "application/json": {
             schema: FlexibleResponseSchema,
           },
@@ -371,25 +363,34 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData = c.req.valid("query");
-    const page = queryData.page || 1;
-    const pageSize = queryData.pageSize || 20;
+    const queryData: {
+      page: number;
+      pageSize: number;
+    } = c.req.valid("query");
+
+    const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
 
     try {
-      const duplicates = await fetchComicDuplicatesInTheDb({
-        page: page,
-        pageSize: pageSize,
+      const duplicates: ComicBook[] = await fetchComicDuplicatesInTheDb({
+        page: paginationData.page,
+        pageSize: paginationData.pageSize,
       });
 
-      if (duplicates && Array.isArray(duplicates)) {
+      if (duplicates.length > 0) {
         return c.json({
           data: duplicates,
-          hasNextPage: duplicates.length >= pageSize,
+          count: duplicates.length,
+          hasNextPage: duplicates.length >= paginationData.pageSize,
+          currentPage: paginationData.page,
+          pageSize: paginationData.pageSize
         });
       } else {
         return c.json({
           data: [],
+          count: 0,
           hasNextPage: false,
+          currentPage: paginationData.page,
+          pageSize: paginationData.pageSize
         });
       }
     } catch (error) {
@@ -398,7 +399,7 @@ app.openapi(
     }
   });
 
-
+// HERE is the end of the current rewrite
 
 /**
  * Get a random comic book
