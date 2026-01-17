@@ -31,7 +31,7 @@ import { QueryableColumns } from "../constants/index.ts";
  * @param pageSize Raw page size from request
  * @returns Validated pagination parameters with defaults applied
  */
-const validatePagination = (
+export const validatePagination = (
 	page?: number,
 	pageSize?: number,
 ): RequestPaginationParametersValidated => {
