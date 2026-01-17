@@ -220,23 +220,23 @@ export const fetchComicBookMetadataById = async (
 /**
  * Get comic book duplicates in the database.
  *
- * @param requestQueryParameters - The query parameters for pagination.
+ * @param requestPaginationParameters - The query parameters for pagination.
  * @returns A promise that resolves to an array of duplicate comic books.
  *
  * used by /api/comic-books/duplicates
  */
 export const fetchComicDuplicatesInTheDb = async (
-  requestPaginationParameters: RequestPaginationParameters,
+  requestPaginationParameters: RequestPaginationParametersValidated,
 ): Promise<ComicBook[]> => {
-  const validatedPaginationParameters: RequestPaginationParametersValidated = validatePaginationParameters(requestPaginationParameters);
 
   // Calculate offset for pagination
-  const offset = (validatedPaginationParameters.page - 1) *
-    validatedPaginationParameters.pageSize;
+  const offset = (requestPaginationParameters.page - 1) *
+    requestPaginationParameters.pageSize;
+
   try {
     const duplicates = await getComicDuplicates(
       offset,
-      validatedPaginationParameters.pageSize,
+      requestPaginationParameters.pageSize,
     );
 
     return duplicates;
