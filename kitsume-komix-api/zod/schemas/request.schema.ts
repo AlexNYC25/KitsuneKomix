@@ -47,6 +47,13 @@ export const PaginationQueryNoFilterSchema = PaginationQuerySchema.omit({
   filterProperty: true,
 });
 
+export const PaginationQueryNoFilterNoSortSchema = PaginationQuerySchema.omit({
+  filter: true,
+  filterProperty: true,
+  sort: true,
+  sortDirection: true,
+});
+
 /**
  * Common schema for path parameter 'id'
  *
