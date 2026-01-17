@@ -74,9 +74,6 @@ app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   scheme: "bearer",
 });
 
-// This should be the expected json return type for routes that return multiple comic books with pagination info
-// Moved MultipleReturnResponse to `types/comicBook.type.ts` — use MultipleReturnResponse
-
 /**
  * GET /api/comic-books/all
  *
@@ -119,7 +116,6 @@ app.openapi(
       page: number;
       pageSize: number;
       sort?: string | undefined;
-      sortProperty?: string | undefined;
       sortDirection?: "asc" | "desc" | undefined;
       filter?: string | undefined;
       filterProperty?: string | undefined;
@@ -204,13 +200,12 @@ app.openapi(
       page: number;
       pageSize: number;
       sort?: string | undefined;
-      sortProperty?: string | undefined;
       sortDirection?: "asc" | "desc" | undefined;
       filter?: string | undefined;
       filterProperty?: string | undefined;
     } = c.req.valid("query");
 
-    queryData.sortProperty = "createdAt";
+    queryData.sort = "createdAt";
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
@@ -289,13 +284,12 @@ app.openapi(
       page: number;
       pageSize: number;
       sort?: string | undefined;
-      sortProperty?: string | undefined;
       sortDirection?: "asc" | "desc" | undefined;
       filter?: string | undefined;
       filterProperty?: string | undefined;
     } = c.req.valid("query");
 
-    queryData.sortProperty = "date";
+    queryData.sort = "date";
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
