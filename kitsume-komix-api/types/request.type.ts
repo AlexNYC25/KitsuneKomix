@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { PaginationQuerySchema } from "../zod/schemas/request.schema.ts";
+import { PaginationSortFilterQuerySchema } from "../zod/schemas/request.schema.ts";
 
 export type SortOrder = "asc" | "desc";
 
-// The type representation of the query data when the request query = PaginationQuerySchema is used.
-export type QueryData = z.infer<typeof PaginationQuerySchema>;
+// The type representation of the query data when the request query = PaginationSortFilterQuerySchema is used.
+export type QueryData = z.infer<typeof PaginationSortFilterQuerySchema>;
 
 /**
  * The inital type for request parameters related to pagination.
