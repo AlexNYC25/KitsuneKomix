@@ -12,7 +12,7 @@ import {
 import type { AppEnv } from "../../types/index.ts";
 import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
 import {
-  PaginationQuerySchema,
+  PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamLetterSchema,
 } from "../../zod/schemas/request.schema.ts";
@@ -79,7 +79,7 @@ app.openapi(
     summary: "Get latest comic series",
     tags: ["Comic Series"],
     middleware: [requireAuth],
-    request: { headers: AuthHeaderSchema, query: PaginationQuerySchema },
+    request: { headers: AuthHeaderSchema, query: PaginationSortFilterQuerySchema },
     responses: {
       200: {
         content: {
@@ -161,7 +161,7 @@ app.openapi(
     summary: "Get updated comic series",
     tags: ["Comic Series"],
     middleware: [requireAuth],
-    request: { headers: AuthHeaderSchema, query: PaginationQuerySchema },
+    request: { headers: AuthHeaderSchema, query: PaginationSortFilterQuerySchema },
     responses: {
       200: {
         content: {

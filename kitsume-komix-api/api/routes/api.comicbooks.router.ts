@@ -59,9 +59,9 @@ import {
   ComicBookThumbnailsResponseSchema
 } from "../../zod/schemas/response.schema.ts";
 import {
+  PaginationSortFilterQuerySchema,
+  PaginationFilterQuerySchema,
   PaginationQuerySchema,
-  PaginationQuerySchemaWithoutSortProperty,
-  PaginationQueryNoFilterNoSortSchema,
   ComicBookUpdateSchema,
   ParamIdSchema
 } from "../../zod/schemas/request.schema.ts";
@@ -90,7 +90,7 @@ app.openapi(
     description: "Retrieve all comic books in the database with pagination, sorting, and filtering",
     tags: ["Comic Books"],
     request: {
-      query: PaginationQuerySchema,
+      query: PaginationSortFilterQuerySchema,
     },
 
     responses: {
@@ -175,7 +175,7 @@ app.openapi(
     description: "Retrieve the latest comic books added to the database, sorted by creation date in descending order",
     tags: ["Comic Books"],
     request: {
-      query: PaginationQuerySchemaWithoutSortProperty,
+      query: PaginationFilterQuerySchema,
     },
     responses: {
       200: {
@@ -259,7 +259,7 @@ app.openapi(
     description: "Retrieve the newest comic books sorted by publication date in descending order",
     tags: ["Comic Books"],
     request: {
-      query: PaginationQuerySchemaWithoutSortProperty,
+      query: PaginationFilterQuerySchema,
     },
     responses: {
       200: {
@@ -341,7 +341,7 @@ app.openapi(
     description: "Retrieve duplicate comic books based on unique hash",
     tags: ["Comic Books"],
     request: {
-      query: PaginationQueryNoFilterNoSortSchema
+      query: PaginationQuerySchema
     },
     responses: {
       200: {
@@ -422,7 +422,7 @@ app.openapi(
     description: "Retrieve a random comic book from the database",
     tags: ["Comic Books"],
     request: {
-      query: PaginationQueryNoFilterNoSortSchema
+      query: PaginationQuerySchema
     },
     responses: {
       200: {
@@ -659,7 +659,7 @@ app.openapi(
           example: 1,
         }),
       }),
-      query: PaginationQuerySchema,
+      query: PaginationSortFilterQuerySchema,
     },
     responses: {
       200: {
@@ -1334,7 +1334,7 @@ app.openapi(
           example: 1,
         }),
       }),
-      query: PaginationQuerySchema,
+      query: PaginationSortFilterQuerySchema,
     },
     responses: {
       200: {
