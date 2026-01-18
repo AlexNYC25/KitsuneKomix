@@ -77,3 +77,11 @@ export type MultipleReturnResponse = {
   sortProperty: string | null;
   sortOrder?: string | null;
 };
+
+export type MultipleReturnResponseNoFilterNoSort = {
+  data: ComicBook[] | ComicBookWithMetadata[];
+  count: number;
+  hasNextPage: boolean;
+  currentPage: number;
+  pageSize: number;
+};
