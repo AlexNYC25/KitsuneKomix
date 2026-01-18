@@ -36,7 +36,9 @@ import {
 
 import type {
   ComicBook,
+  ComicBookWithMetadata,
   MultipleReturnResponse,
+  MultipleReturnResponseNoFilterNoSort,
   ComicBookThumbnail,
   AppEnv,
   RequestPaginationParametersValidated,
@@ -44,7 +46,7 @@ import type {
   RequestSortParametersValidated,
   ComicSortField,
   ComicFilterField,
-  RequestParametersValidated
+  RequestParametersValidated,
 } from "#types/index.ts";
 
 import {
@@ -377,21 +379,25 @@ app.openapi(
       });
 
       if (duplicates.length > 0) {
-        return c.json({
+        const returnData: MultipleReturnResponseNoFilterNoSort = {
           data: duplicates,
           count: duplicates.length,
           hasNextPage: duplicates.length >= paginationData.pageSize,
           currentPage: paginationData.page,
           pageSize: paginationData.pageSize
-        });
+        };
+
+        return c.json(returnData, 200);
       } else {
-        return c.json({
+        const returnDataNoResults: MultipleReturnResponseNoFilterNoSort = {
           data: [],
           count: 0,
           hasNextPage: false,
           currentPage: paginationData.page,
           pageSize: paginationData.pageSize
-        });
+        };
+
+        return c.json(returnDataNoResults, 200);
       }
     } catch (error) {
       console.error("Error fetching comic book duplicates:", error);
@@ -399,7 +405,7 @@ app.openapi(
     }
   });
 
-// HERE is the end of the current rewrite
+
 
 /**
  * Get a random comic book
@@ -416,25 +422,31 @@ app.openapi(
     description: "Retrieve a random comic book from the database",
     tags: ["Comic Books"],
     request: {
-      query: z.object({
-        count: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
-          description: "Number of random comics to fetch",
-          example: 1,
-        }),
-      }),
+      query: PaginationQueryNoFilterNoSortSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
         description: "Random comic book retrieved successfully",
       },
+      404: {
+        content: {
+          "application/json": {
+            //TODO: Update to proper schema
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Random comic book not found",
+      },
       500: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -443,17 +455,37 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData = c.req.valid("query");
-    const count = queryData.count || 1;
+    const queryData: {
+      page: number;
+      pageSize: number;
+    } = c.req.valid("query");
+
+    const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
 
     try {
-      const comic = await fetchRandomComicBook(count);
-      return c.json(comic);
+      const randomComics: ComicBookWithMetadata[] | null = await fetchRandomComicBook(paginationData);
+
+      if (!randomComics || randomComics.length === 0) {
+        return c.json({ message: "No comic books found" }, 404);
+      }
+
+      const returnData: MultipleReturnResponseNoFilterNoSort = {
+        data: randomComics,
+        count: randomComics.length,
+        hasNextPage: randomComics.length >= paginationData.pageSize,
+        currentPage: paginationData.page,
+        pageSize: paginationData.pageSize
+      };
+
+      return c.json(returnData, 200);
     } catch (error) {
       console.error("Error fetching random comic book:", error);
       return c.json({ error: "Failed to fetch random comic book" }, 500);
     }
-  });
+  }
+);
+
+// HERE is the end of the current rewrite
 
 /**
  * Get comic books filtered by first letter
