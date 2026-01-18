@@ -256,11 +256,12 @@ export const fetchComicDuplicatesInTheDb = async (
  * - /api/comic-books/random
  */
 export const fetchRandomComicBook = async (
-  count: number = 1,
+  requestPaginationParameters: RequestPaginationParametersValidated,
 ): Promise<ComicBookWithMetadata[] | null> => {
   try {
     const randomComics: ComicBookWithMetadata[] = [];
-    for (let i = 0; i < count; i++) {
+    
+    for (let i = 0; i < requestPaginationParameters.pageSize; i++) {
       const comicBook = await getRandomBook();
       if (comicBook) {
         const comicWithMetadata = await attatchMetadataToComicBook(comicBook);
