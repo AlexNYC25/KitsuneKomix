@@ -1,10 +1,5 @@
 import { z } from "@hono/zod-openapi";
 
-/**
- * Common schema for pagination query parameters
- *
- * Used in routes that support pagination.
- */
 export const PaginationQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1).openapi({
     description: "Page number for pagination (default is 1)",
@@ -13,7 +8,10 @@ export const PaginationQuerySchema = z.object({
   pageSize: z.coerce.number().min(1).max(100).default(20).openapi({
     description: "Number of items per page (default is 20, max is 100)",
     example: 20,
-  }),
+  })
+});
+
+export const SortQuerySchema = z.object({
   sort: z.string().optional().openapi({
     description: "The specific property to sort by",
     example: "created_at",
@@ -22,6 +20,9 @@ export const PaginationQuerySchema = z.object({
     description: "Sort direction",
     example: "desc",
   }),
+});
+
+export const FilterQuerySchema = z.object({
   filter: z.string().optional().openapi({
     description: "Filter value to search by",
     example: "Batman",
@@ -32,27 +33,19 @@ export const PaginationQuerySchema = z.object({
   }),
 });
 
+export const PaginationSortQuerySchema = PaginationQuerySchema.extend(SortQuerySchema.shape);
+
+export const PaginationFilterQuerySchema = PaginationQuerySchema.extend(FilterQuerySchema.shape);
+
 /**
- * Pagination query schema without sortProperty
+ * Common schema for pagination query parameters with sorting and filtering
  *
- * Used in routes that support pagination but not sorting, such as routes that explicitly describe their own sorting behavior.
- * For example, search routes that sort by latest added or date
+ * Used in routes that support pagination, sorting, and filtering.
+ * Combines pagination, sort, and filter parameters into a single schema.
  */
-export const PaginationQuerySchemaWithoutSortProperty = PaginationQuerySchema.omit({
-  sort: true,
-});
-
-export const PaginationQueryNoFilterSchema = PaginationQuerySchema.omit({
-  filter: true,
-  filterProperty: true,
-});
-
-export const PaginationQueryNoFilterNoSortSchema = PaginationQuerySchema.omit({
-  filter: true,
-  filterProperty: true,
-  sort: true,
-  sortDirection: true,
-});
+export const PaginationSortFilterQuerySchema = PaginationQuerySchema
+	.extend(SortQuerySchema.shape)
+	.extend(FilterQuerySchema.shape);
 
 /**
  * Common schema for path parameter 'id'
