@@ -136,6 +136,9 @@ function addFilteringToQuery<T extends SQLiteSelect>(filter: ComicBookFilterItem
     case "updatedAt":
       query.where(eq(comicBooksTable.updatedAt, filterValue));
       break;
+    case "listLetter":
+      query.where(ilike(comicBooksTable.title, `${filterValue}%`));
+      break;
   }
 
   return query;
