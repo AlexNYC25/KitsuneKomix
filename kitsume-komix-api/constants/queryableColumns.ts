@@ -32,6 +32,7 @@ export const QueryableColumns = {
 			communityRating: "communityRating",
 			createdAt: "createdAt",
 			updatedAt: "updatedAt",
+			listLetter: "listLetter", // Special filter for first letter of title
 		},
 		sort: {
 			title: "title",
