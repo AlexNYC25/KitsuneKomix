@@ -117,7 +117,7 @@ export const fetchComicBooksWithRelatedMetadata = async (
         property: serviceDataSort.sortProperty,
         order: serviceDataSort.sortOrder,
       },
-      offset: serviceDataPagination.page * serviceDataPagination.pageSize - serviceDataPagination.pageSize,
+      offset: serviceDataPagination.pageNumber * serviceDataPagination.pageSize - serviceDataPagination.pageSize,
       limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
     });
 
@@ -230,7 +230,7 @@ export const fetchComicDuplicatesInTheDb = async (
 ): Promise<ComicBook[]> => {
 
   // Calculate offset for pagination
-  const offset = (requestPaginationParameters.page - 1) *
+  const offset = (requestPaginationParameters.pageNumber - 1) *
     requestPaginationParameters.pageSize;
 
   try {

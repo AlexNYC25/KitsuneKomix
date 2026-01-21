@@ -144,9 +144,9 @@ app.openapi(
         data: resultComics,
         count: resultComics.length,
         hasNextPage,
-        currentPage: serviceDataPagination.page,
+        currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filter: serviceDataFilter?.filter || null,
+        filter: serviceDataFilter?.filterValue || null,
         filterProperty: serviceDataFilter?.filterProperty || null,
         sort: serviceDataSort.sortOrder === "desc" ? "desc" : "asc",
         sortProperty: serviceDataSort.sortProperty || null
@@ -228,9 +228,9 @@ app.openapi(
         data: resultComics,
         count: resultComics.length,
         hasNextPage,
-        currentPage: serviceDataPagination.page,
+        currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filter: serviceDataFilter?.filter || null,
+        filter: serviceDataFilter?.filterValue || null,
         filterProperty: serviceDataFilter?.filterProperty || null,
         sort: serviceDataSort.sortOrder === "desc" ? "desc" : "asc",
         sortProperty: serviceDataSort.sortProperty || null
@@ -312,9 +312,9 @@ app.openapi(
         data: resultComics,
         count: resultComics.length,
         hasNextPage,
-        currentPage: serviceDataPagination.page,
+        currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filter: serviceDataFilter?.filter || null,
+        filter: serviceDataFilter?.filterValue || null,
         filterProperty: serviceDataFilter?.filterProperty || null,
         sort: serviceDataSort.sortOrder === "desc" ? "desc" : "asc",
         sortProperty: serviceDataSort.sortProperty || null
@@ -374,7 +374,7 @@ app.openapi(
 
     try {
       const duplicates: ComicBook[] = await fetchComicDuplicatesInTheDb({
-        page: paginationData.page,
+        pageNumber: paginationData.pageNumber,
         pageSize: paginationData.pageSize,
       });
 
@@ -383,7 +383,7 @@ app.openapi(
           data: duplicates,
           count: duplicates.length,
           hasNextPage: duplicates.length >= paginationData.pageSize,
-          currentPage: paginationData.page,
+          currentPage: paginationData.pageNumber,
           pageSize: paginationData.pageSize
         };
 
@@ -393,7 +393,7 @@ app.openapi(
           data: [],
           count: 0,
           hasNextPage: false,
-          currentPage: paginationData.page,
+          currentPage: paginationData.pageNumber,
           pageSize: paginationData.pageSize
         };
 
@@ -471,7 +471,7 @@ app.openapi(
         data: randomComics,
         count: randomComics.length,
         hasNextPage: randomComics.length >= paginationData.pageSize,
-        currentPage: paginationData.page,
+        currentPage: paginationData.pageNumber,
         pageSize: paginationData.pageSize
       };
 
@@ -482,8 +482,6 @@ app.openapi(
     }
   }
 );
-
-// HERE is the end of the current rewrite
 
 /**
  * Get comic books filtered by first letter
@@ -545,7 +543,7 @@ app.openapi(
         data: comics,
         count: comics.length,
         hasNextPage: comics.length >= paginationData.pageSize,
-        currentPage: paginationData.page,
+        currentPage: paginationData.pageNumber,
         pageSize: paginationData.pageSize
       };
 
@@ -556,6 +554,8 @@ app.openapi(
     }
   }
 );
+
+// HERE is the end of the current rewrite
 
 /**
  * Batch update metadata
