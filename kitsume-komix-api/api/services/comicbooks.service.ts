@@ -275,39 +275,6 @@ export const fetchRandomComicBook = async (
   }
 };
 
-// we want to fetch comic books by the first letter of their title
-export const fetchComicBooksByLetter = async (
-  letter: string,
-  requestPaginationParameters: RequestPaginationParameters,
-): Promise<ComicBookWithMetadata[]> => {
-  const letterFormatted = letter.toLowerCase().trim();
-  
-  const validatedPaginationParameters: RequestPaginationParametersValidated = validatePaginationParameters(requestPaginationParameters);
-
-  // Calculate offset for pagination
-  const offset = (validatedPaginationParameters.page - 1) *
-    validatedPaginationParameters.pageSize;
-  try {
-    // Use the optimized getComicBooksWithMetadata with title filter for letter matching, passing a % wildcard after the specified letter
-    const queryParams: ComicBookQueryParams = {
-      titleFilter: `${letterFormatted}%`,
-      offset: offset,
-      limit: validatedPaginationParameters.pageSize,
-      sortBy: "title",
-      sortOrder: "asc",
-    };
-
-    // Now returns ComicBookWithMetadata[] directly - no need for manual metadata attachment!
-    const booksWithMetadata: ComicBookWithMetadata[] =
-      await getComicBooksWithMetadata(queryParams);
-
-    return booksWithMetadata;
-  } catch (error) {
-    console.error("Error fetching comic books by letter:", error);
-    throw error;
-  }
-};
-
 export const fetchTheLatestsComicBooksAdded = async (
   offset: number = 0,
   limit: number = 10,
