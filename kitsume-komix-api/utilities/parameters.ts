@@ -35,10 +35,10 @@ export const validatePagination = (
 	page?: number,
 	pageSize?: number,
 ): RequestPaginationParametersValidated => {
-	const validPage = page && page > 0 ? page : PAGE_NUMBER_DEFAULT;
+	const validPageNumber = page && page > 0 ? page : PAGE_NUMBER_DEFAULT;
 	const validPageSize = pageSize && pageSize > 0 ? pageSize : PAGE_SIZE_DEFAULT;
 
-	return { page: validPage, pageSize: validPageSize };
+	return { pageNumber: validPageNumber, pageSize: validPageSize };
 };
 
 /**
