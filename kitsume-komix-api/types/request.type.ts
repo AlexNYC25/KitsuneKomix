@@ -14,7 +14,7 @@ export type QueryData = z.infer<typeof PaginationSortFilterQuerySchema>;
  * and may be undefined if not provided by the client.
  */
 export type RequestPaginationParameters = {
-  page?: number;
+  pageNumber?: number;
   pageSize?: number;
 };
 
@@ -25,7 +25,7 @@ export type RequestPaginationParameters = {
  * to be defined when used in the application logic.
  */
 export type RequestPaginationParametersValidated = {
-  page: number;
+  pageNumber: number;
   pageSize: number;
 };
 
@@ -59,7 +59,7 @@ export type RequestSortParametersValidated<TSortField extends string> = {
  * and may be undefined if not provided by the client.
  */
 export type RequestFilterParameters<TFilterField extends string> = {
-  filter?: string;
+  filterValue?: string;
   filterProperty?: TFilterField;
 };
 
@@ -70,7 +70,7 @@ export type RequestFilterParameters<TFilterField extends string> = {
  * to be defined when used in the application logic.
  */
 export type RequestFilterParametersValidated<TFilterField extends string> = {
-  filter?: string;
+  filterValue?: string;
   filterProperty?: TFilterField;
 };
 
