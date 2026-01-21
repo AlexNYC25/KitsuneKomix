@@ -1,5 +1,29 @@
 import { z } from "@hono/zod-openapi";
 
+/**
+ * Common schema for path parameter 'id'
+ *
+ * Used in routes that require an 'id' parameter in the path.
+ */
+export const ParamIdSchema = z.object({
+  id: z.string().openapi({
+    param: { name: "id", in: "path" },
+    example: "1",
+  }),
+});
+
+/**
+ * Common schema for path parameter 'letter'
+ *
+ * Used in routes that require a 'letter' parameter in the path.
+ */
+export const ParamLetterSchema = z.object({
+  letter: z.string().openapi({
+    param: { name: "letter", in: "path" },
+    example: "A",
+  }),
+});
+
 export const PaginationQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1).openapi({
     description: "Page number for pagination (default is 1)",
@@ -37,6 +61,8 @@ export const PaginationSortQuerySchema = PaginationQuerySchema.extend(SortQueryS
 
 export const PaginationFilterQuerySchema = PaginationQuerySchema.extend(FilterQuerySchema.shape);
 
+export const PaginationLetterQuerySchema = PaginationQuerySchema.extend(ParamLetterSchema.shape);
+
 /**
  * Common schema for pagination query parameters with sorting and filtering
  *
@@ -47,29 +73,7 @@ export const PaginationSortFilterQuerySchema = PaginationQuerySchema
 	.extend(SortQuerySchema.shape)
 	.extend(FilterQuerySchema.shape);
 
-/**
- * Common schema for path parameter 'id'
- *
- * Used in routes that require an 'id' parameter in the path.
- */
-export const ParamIdSchema = z.object({
-  id: z.string().openapi({
-    param: { name: "id", in: "path" },
-    example: "1",
-  }),
-});
 
-/**
- * Common schema for path parameter 'letter'
- *
- * Used in routes that require a 'letter' parameter in the path.
- */
-export const ParamLetterSchema = z.object({
-  letter: z.string().openapi({
-    param: { name: "letter", in: "path" },
-    example: "A",
-  }),
-});
 
 /**
  * Common schema for path parameters 'id' and 'thumbnailId'
