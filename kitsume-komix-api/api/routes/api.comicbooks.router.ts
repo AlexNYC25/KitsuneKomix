@@ -20,7 +20,6 @@ import {
   createCustomThumbnail,
   deleteComicsThumbnailById,
   fetchComicBookMetadataById,
-  fetchComicBooksByLetter,
   fetchComicDuplicatesInTheDb,
   fetchRandomComicBook,
   fetchComicBooksWithRelatedMetadata,
@@ -63,6 +62,7 @@ import {
   PaginationFilterQuerySchema,
   PaginationQuerySchema,
   ComicBookUpdateSchema,
+  PaginationLetterQuerySchema,
   ParamIdSchema
 } from "../../zod/schemas/request.schema.ts";
 
@@ -405,8 +405,6 @@ app.openapi(
     }
   });
 
-
-
 /**
  * Get a random comic book
  *
@@ -498,20 +496,7 @@ app.openapi(
     description: "Retrieve comic books filtered by their first letter with pagination",
     tags: ["Comic Books"],
     request: {
-      query: z.object({
-        page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
-          description: "Page number for pagination",
-          example: 1,
-        }),
-        pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 20)).openapi({
-          description: "Number of items per page",
-          example: 20,
-        }),
-        letter: z.string().optional().transform((val) => val || "A").openapi({
-          description: "First letter to filter by",
-          example: "A",
-        }),
-      }),
+      query: PaginationLetterQuerySchema
     },
     responses: {
       200: {
@@ -533,61 +518,44 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData = c.req.valid("query");
-    const page = queryData.page || 1;
-    const pageSize = queryData.pageSize || 20;
-    const letter = queryData.letter || "A";
+    const queryData: {
+      page: number;
+      pageSize: number;
+      letter: string;
+      sort?: string | undefined;
+      sortDirection?: "asc" | "desc" | undefined;
+      filter?: string | undefined;
+      filterProperty?: string | undefined;
+    } = c.req.valid("query");
+
+    queryData.sort = "title";
+    queryData.sortDirection = "asc";
+    queryData.filter = queryData.letter;
+    queryData.filterProperty = "listLetter";
+
+    const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
+    const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
 
     try {
-      const comicsResult = await fetchComicBooksByLetter(
-        letter,
-        { page: page, pageSize: pageSize },
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
+        serviceData
       );
-      return c.json({
-        data: comicsResult,
-        count: comicsResult.length,
-        currentPage: page,
-        pageSize: pageSize,
-      });
+
+      const returnData: MultipleReturnResponseNoFilterNoSort = {
+        data: comics,
+        count: comics.length,
+        hasNextPage: comics.length >= paginationData.pageSize,
+        currentPage: paginationData.page,
+        pageSize: paginationData.pageSize
+      };
+
+      return c.json(returnData, 200);
     } catch (error) {
       console.error("Error fetching comic book list:", error);
       return c.json({ error: "Failed to fetch comic book list" }, 500);
     }
-  });
-
-/**
- * Get queue
- */
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/queue",
-    summary: "Get processing queue status",
-    description: "Retrieve the status of the comic book processing queue",
-    tags: ["Comic Books"],
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: FlexibleResponseSchema,
-          },
-        },
-        description: "Queue status retrieved",
-      },
-      501: {
-        content: {
-          "application/json": {
-            schema: FlexibleResponseSchema,
-          },
-        },
-        description: "Not implemented",
-      },
-    },
-  }),
-  (_c) => {
-    //TODO: implement queue logic
-    return _c.json({ message: "Queue not implemented yet" }, 501);
-  });
+  }
+);
 
 /**
  * Batch update metadata
