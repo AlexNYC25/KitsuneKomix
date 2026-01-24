@@ -1,6 +1,38 @@
 import { z } from "@hono/zod-openapi";
 
 /**
+ * Schema for modifiable comic metadata fields
+ * 
+ * Defines which fields can be modified in comic metadata
+ */
+export const modifyableComicMetadataFieldsSchema = z.enum([
+  "writers",
+  "pencillers",
+  "inkers",
+  "colorists",
+  "letterers",
+  "editors",
+  "coverArtists",
+  "publishers",
+  "imprints",
+  "genres",
+  "characters",
+  "teams",
+  "locations",
+  "storyArcs",
+  "seriesGroups",
+]);
+
+
+export const metadataUpdateSchema = z.object({
+  metadataType: modifyableComicMetadataFieldsSchema,
+  values: z.array(z.string()).nullable(),
+}).openapi({
+  title: "ComicMetadataUpdate",
+  description: "Schema for updating comic metadata fields",
+});
+
+/**
  * Schema for comic series metadata
  * 
  * Includes various optional fields for comic series information from the various
