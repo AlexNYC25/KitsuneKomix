@@ -85,20 +85,3 @@ export type MultipleReturnResponseNoFilterNoSort = {
   currentPage: number;
   pageSize: number;
 };
-
-export type modifyableComicMetadataFields =
-  | "writers"
-  | "pencillers"
-  | "inkers"
-  | "colorists"
-  | "letterers"
-  | "editors"
-  | "coverArtists"
-  | "publishers"
-  | "imprints"
-  | "genres"
-  | "characters"
-  | "teams"
-  | "locations"
-  | "storyArcs"
-  | "seriesGroups";
