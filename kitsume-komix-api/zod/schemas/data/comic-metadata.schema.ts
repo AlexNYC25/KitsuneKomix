@@ -27,6 +27,7 @@ export const modifyableComicMetadataFieldsSchema = z.enum([
 export const metadataUpdateSchema = z.object({
   metadataType: modifyableComicMetadataFieldsSchema,
   values: z.array(z.string()).nullable(),
+  replaceExisting: z.boolean().optional().default(false),
 }).openapi({
   title: "ComicMetadataUpdate",
   description: "Schema for updating comic metadata fields",
