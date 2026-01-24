@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { metadataUpdateSchema } from "./data/comic-metadata.schema.ts";
 
 /**
  * Common schema for path parameter 'id'
@@ -90,6 +91,34 @@ export const ParamIdThumbnailIdSchema = z.object({
     example: "1",
   }),
 });
+
+export const ComicMetadataUpdateSchema = metadataUpdateSchema.array().openapi({
+  title: "ComicMetadataUpdateArray",
+  description: "Array of comic metadata updates",
+});
+
+export const ComicMetadataSingleUpdateSchema = z.object({
+  metadataUpdates: ComicMetadataUpdateSchema,
+  comicBookId: z.string().openapi({
+    description: "ID of the comic book to update metadata for",
+    example: "1",
+  }),
+}).openapi({
+  title: "ComicMetadataSingleUpdate",
+  description: "Schema for updating metadata for a single comic book",
+});
+
+export const ComicMetadataBulkUpdateSchema = z.object({
+  metadataUpdates: ComicMetadataUpdateSchema,
+  comicBookIds: z.array(z.string()).openapi({
+    description: "Array of comic book IDs to update metadata for",
+    example: ["1", "2", "3"],
+  }),
+}).openapi({
+  title: "ComicMetadataBulkUpdate",
+  description: "Schema for updating metadata for multiple comic books",
+});
+
 
 // Schema for updating comic book partial fields in request body
 export const ComicBookUpdateSchema = z.object({
