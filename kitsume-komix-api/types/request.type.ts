@@ -13,10 +13,7 @@ export type QueryData = z.infer<typeof PaginationSortFilterQuerySchema>;
  * These parameters should be the raw values received from the request,
  * and may be undefined if not provided by the client.
  */
-export type RequestPaginationParameters = {
-  pageNumber?: number;
-  pageSize?: number;
-};
+export type RequestPaginationParameters = z.infer<typeof PaginationSortFilterQuerySchema>;
 
 /**
  * The validated type for request parameters related to pagination.
