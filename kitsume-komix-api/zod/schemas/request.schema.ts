@@ -25,6 +25,12 @@ export const ParamLetterSchema = z.object({
   }),
 });
 
+
+/**
+ * Common schema for pagination query parameters
+ *
+ * Used in routes that support pagination and as part of other pagination schemas.
+ */
 export const PaginationQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1).openapi({
     description: "Page number for pagination (default is 1)",
@@ -36,7 +42,12 @@ export const PaginationQuerySchema = z.object({
   })
 });
 
-export const SortQuerySchema = z.object({
+/**
+ * Common schema for sort query parameters
+ * 
+ * Used as part of pagination schemas for routes that support sorting.
+ */
+const SortQuerySchema = z.object({
   sort: z.string().optional().openapi({
     description: "The specific property to sort by",
     example: "created_at",
@@ -47,7 +58,12 @@ export const SortQuerySchema = z.object({
   }),
 });
 
-export const FilterQuerySchema = z.object({
+/**
+ * Common schema for filter query parameters
+ * 
+ * Used as part of pagination schemas for routes that support filtering.
+ */
+const FilterQuerySchema = z.object({
   filter: z.string().optional().openapi({
     description: "Filter value to search by",
     example: "Batman",
@@ -58,10 +74,26 @@ export const FilterQuerySchema = z.object({
   }),
 });
 
+/**
+ * Common schema for pagination query parameters with sorting
+ * 
+ * Used in routes that support pagination and sorting.
+ */
 export const PaginationSortQuerySchema = PaginationQuerySchema.extend(SortQuerySchema.shape);
 
+
+/**
+ * Common schema for pagination query parameters with filtering
+ * 
+ * Used in routes that support pagination and filtering.
+ */
 export const PaginationFilterQuerySchema = PaginationQuerySchema.extend(FilterQuerySchema.shape);
 
+/**
+ * Common schema for pagination query parameters with letter filtering
+ * 
+ * Used in routes that support pagination and filtering by first letter.
+ */
 export const PaginationLetterQuerySchema = PaginationQuerySchema.extend(ParamLetterSchema.shape);
 
 /**
@@ -73,6 +105,45 @@ export const PaginationLetterQuerySchema = PaginationQuerySchema.extend(ParamLet
 export const PaginationSortFilterQuerySchema = PaginationQuerySchema
 	.extend(SortQuerySchema.shape)
 	.extend(FilterQuerySchema.shape);
+
+/**
+ * Schema for comic metadata updates in request body
+ * 
+ * Used in routes that update comic metadata for single or multiple comic books.
+ */
+const ComicMetadataUpdateSchema = metadataUpdateSchema.array().openapi({
+  title: "ComicMetadataUpdateArray",
+  description: "Array of comic metadata updates",
+});
+
+/**
+ * Schema for updating comic metadata for a single comic book
+ * 
+ * Used in routes that update metadata for a single comic book.
+ */
+export const ComicMetadataSingleUpdateSchema = z.object({
+  metadataUpdates: ComicMetadataUpdateSchema,
+  comicBookId: ParamIdSchema
+}).openapi({
+  title: "ComicMetadataSingleUpdate",
+  description: "Schema for updating metadata for a single comic book",
+});
+
+/**
+ * Schema for updating comic metadata for multiple comic books
+ * 
+ * Used in routes that update metadata for multiple comic books.
+ */
+export const ComicMetadataBulkUpdateSchema = z.object({
+  metadataUpdates: ComicMetadataUpdateSchema,
+  comicBookIds: z.array(ParamIdSchema).openapi({
+    description: "Array of comic book IDs to update metadata for",
+    example: ["1", "2", "3"],
+  }),
+}).openapi({
+  title: "ComicMetadataBulkUpdate",
+  description: "Schema for updating metadata for multiple comic books",
+});
 
 
 
@@ -90,33 +161,6 @@ export const ParamIdThumbnailIdSchema = z.object({
     param: { name: "thumbnailId", in: "path" },
     example: "1",
   }),
-});
-
-export const ComicMetadataUpdateSchema = metadataUpdateSchema.array().openapi({
-  title: "ComicMetadataUpdateArray",
-  description: "Array of comic metadata updates",
-});
-
-export const ComicMetadataSingleUpdateSchema = z.object({
-  metadataUpdates: ComicMetadataUpdateSchema,
-  comicBookId: z.string().openapi({
-    description: "ID of the comic book to update metadata for",
-    example: "1",
-  }),
-}).openapi({
-  title: "ComicMetadataSingleUpdate",
-  description: "Schema for updating metadata for a single comic book",
-});
-
-export const ComicMetadataBulkUpdateSchema = z.object({
-  metadataUpdates: ComicMetadataUpdateSchema,
-  comicBookIds: z.array(z.string()).openapi({
-    description: "Array of comic book IDs to update metadata for",
-    example: ["1", "2", "3"],
-  }),
-}).openapi({
-  title: "ComicMetadataBulkUpdate",
-  description: "Schema for updating metadata for multiple comic books",
 });
 
 
