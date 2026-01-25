@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PaginationSortFilterQuerySchema } from "../zod/schemas/request.schema.ts";
+import { PaginationSortFilterQuerySchema, ComicMetadataBulkUpdateSchema } from "../zod/schemas/request.schema.ts";
 
 export type SortOrder = "asc" | "desc";
 
@@ -137,3 +137,5 @@ export type RequestParametersValidated<
   insertDetails?: RequestInsertionParametersValidated;
   updateDetails?: RequestUpdateParametersValidated;
 };
+
+export type ComicMetadataBulkUpdateSchemaData = z.infer<typeof ComicMetadataBulkUpdateSchema>;
