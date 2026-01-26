@@ -227,43 +227,6 @@ export const fetchAComicsAssociatedMetadataById = async (
 }
 
 /**
- * Get comic book with metadata by its ID.
- * @param id - The ID of the comic book.
- * @returns A promise that resolves to the comic book with metadata or null if not found.
- * 
- * Note this function may end up geting deprecated in favor of fetchComicBooksWithRelatedMetadata
- * TODO: Evaluate usage and possibly deprecate; Update the routes that call this function.
- */
-export const fetchComicBookMetadataById = async (
-  id: number,
-): Promise<ComicBookWithMetadata | null> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const comicBook = await getComicBookById(id);
-    if (!comicBook) {
-      return null;
-    }
-
-    const metadata = await fetchAComicsAssociatedMetadataById(id);
-
-    const comicBookWithMetadataMergedIn : ComicBookWithMetadata = {
-      ...comicBook,
-      ...metadata,
-    };
-
-    return comicBookWithMetadataMergedIn;
-  } catch (error) {
-    console.error("Error fetching comic book metadata:", error);
-    throw error;
-  }
-};
-
-/**
  * Get comic book duplicates in the database.
  *
  * @param requestPaginationParameters - The query parameters for pagination.
