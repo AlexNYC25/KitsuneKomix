@@ -81,6 +81,30 @@ export const linkImprintToComicBook = async (
 };
 
 /**
+ * Unlinks all imprints from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkImprintsToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookImprintsTable)
+      .where(eq(comicBookImprintsTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking imprints from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all imprints associated with a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicImprint objects associated with the comic book

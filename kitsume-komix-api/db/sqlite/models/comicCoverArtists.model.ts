@@ -87,6 +87,30 @@ export const linkCoverArtistToComicBook = async (
 };
 
 /**
+ * Unlinks all cover artists from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkCoverArtistsToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookCoverArtistsTable)
+      .where(eq(comicBookCoverArtistsTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking cover artists from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all cover artists associated with a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicCoverArtist objects associated with the comic book

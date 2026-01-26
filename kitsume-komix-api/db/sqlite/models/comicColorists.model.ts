@@ -81,6 +81,30 @@ export const linkColoristToComicBook = async (
 };
 
 /**
+ * Unlinks all colorists from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkColoristsToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookColoristsTable)
+      .where(eq(comicBookColoristsTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking colorists from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all colorists associated with a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicColorist objects associated with the comic book

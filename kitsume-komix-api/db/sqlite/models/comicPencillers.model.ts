@@ -85,6 +85,30 @@ export const linkPencillerToComicBook = async (
 };
 
 /**
+ * Unlinks all pencillers from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkPencillersToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookPencillersTable)
+      .where(eq(comicBookPencillersTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking pencillers from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all pencillers for a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicPenciller objects associated with the comic book

@@ -81,6 +81,30 @@ export const linkLettererToComicBook = async (
 };
 
 /**
+ * Unlinks all letterers from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkLetterersToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookLetterersTable)
+      .where(eq(comicBookLetterersTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking letterers from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all letterers associated with a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicLetterer objects associated with the comic book

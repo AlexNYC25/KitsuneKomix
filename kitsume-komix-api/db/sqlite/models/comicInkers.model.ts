@@ -81,6 +81,30 @@ export const linkInkerToComicBook = async (
 };
 
 /**
+ * Unlinks all inkers from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkInkersToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookInkersTable)
+      .where(eq(comicBookInkersTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking inkers from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all inkers associated with a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicInker objects associated with the comic book

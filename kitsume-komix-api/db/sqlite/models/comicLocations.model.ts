@@ -81,6 +81,30 @@ export const linkLocationToComicBook = async (
 };
 
 /**
+ * Unlinks all locations from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkLocationsToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookLocationsTable)
+      .where(eq(comicBookLocationsTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking locations from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all locations associated with a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicLocation objects associated with the comic book

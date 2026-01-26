@@ -81,6 +81,30 @@ export const linkPublisherToComicBook = async (
 };
 
 /**
+ * Unlinks all publishers from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkPublishersToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookPublishersTable)
+      .where(eq(comicBookPublishersTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking publishers from comic book:", error);
+    throw error;
+  }
+};
+
+/**
  * Retrieves all publishers for a specific comic book
  * @param comicBookId The ID of the comic book
  * @returns An array of ComicPublisher objects associated with the comic book

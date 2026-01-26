@@ -87,6 +87,30 @@ const whereConditions: Array<ReturnType<typeof eq>> = [];
  * @param storyArcId The ID of the story arc
  * @returns The ComicStoryArc object, or null if not found
  */
+/**
+ * Unlinks all story arcs from a comic book by removing all relationships in the junction table
+ * @param comicBookId The ID of the comic book
+ * @returns void
+ */
+export const unlinkStoryArcsToComicBook = async (
+  comicBookId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(comicBookStoryArcsTable)
+      .where(eq(comicBookStoryArcsTable.comicBookId, comicBookId));
+  } catch (error) {
+    console.error("Error unlinking story arcs from comic book:", error);
+    throw error;
+  }
+};
+
 export const getComicStoryArcById = async (
   storyArcId: number,
 ): Promise<ComicStoryArc | null> => {
