@@ -637,12 +637,8 @@ app.openapi(
 
 /**
  * Get a comic book by ID
- * ROUTE: GET /api/comic-books/:id
- *
- * This should return a single comic book by its ID
- *
- * At the moment it only returns the basic comic book info, but it can be expanded to include related metadata as needed
- * or for now just use this to get a shallow copy of the comic book and then call /:id/metadata to get the full metadata
+ * GET /api/comic-books/:id
+ * 
  * @param id - The ID of the comic book to retrieve
  * @return JSON object of the comic book
  */
@@ -654,18 +650,13 @@ app.openapi(
     description: "Retrieve a single comic book by its ID",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
-      query: PaginationSortFilterQuerySchema,
+      params: ParamIdSchema,
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -674,6 +665,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -682,6 +674,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -692,13 +685,27 @@ app.openapi(
   async (c) => {
     const id = Number(c.req.param("id"));
 
-    const comic: ComicBook | null = await getComicBookById(id);
-    if (comic) {
-      const camelData = camelcasekeys(comic, { deep: true });
-      return c.json(camelData);
+    try {
+      const comicWithMetadataSearchResults = await fetchComicBooksWithRelatedMetadata({
+        pagination: { pageNumber: 1, pageSize: 1 },
+        filter: { filterProperty: "id", filterValue: id.toString() },
+        sort: { sortProperty: "createdAt", sortOrder: "asc" }
+      })
+
+      const comicWithMetadata = comicWithMetadataSearchResults.length > 0 ? comicWithMetadataSearchResults[0] : null;
+
+      if (comicWithMetadata) {
+        return c.json(comicWithMetadata, 200);
+      }
+
+      return c.json({ error: "Comic book not found" }, 404);
+    } catch (error) {
+      console.error("Error fetching comic book by ID:", error);
+      return c.json({ error: "Failed to fetch comic book" }, 500);
     }
-    return c.json({ error: "Comic book not found" }, 404);
-  });
+    
+  }
+);
 
 /**
  * Get a comic book with its full metadata by ID
