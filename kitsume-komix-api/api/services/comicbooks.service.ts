@@ -10,45 +10,90 @@ import {
 } from "#sqlite/models/comicBooks.model.ts";
 import {
   getWritersByComicBookId,
+  insertComicWriter,
+  linkWriterToComicBook,
+  unlinkWritersToComicBook,
 } from "#sqlite/models/comicWriters.model.ts";
 import {
   getColoristByComicBookId,
+  insertComicColorist,
+  linkColoristToComicBook,
+  unlinkColoristsToComicBook,
 } from "#sqlite/models/comicColorists.model.ts";
 import {
   getPencillersByComicBookId,
+  insertComicPenciller,
+  linkPencillerToComicBook,
+  unlinkPencillersToComicBook,
 } from "#sqlite/models/comicPencillers.model.ts";
 import {
   getInkersByComicBookId,
+  insertComicInker,
+  linkInkerToComicBook,
+  unlinkInkersToComicBook,
 } from "#sqlite/models/comicInkers.model.ts";
 import {
   getLetterersByComicBookId,
+  insertComicLetterer,
+  linkLettererToComicBook,
+  unlinkLetterersToComicBook,
 } from "#sqlite/models/comicLetterers.model.ts";
 import {
   getEditorsByComicBookId,
+  insertComicEditor,
+  linkEditorToComicBook,
+  unlinkEditorsToComicBook,
 } from "#sqlite/models/comicEditors.model.ts";
 import {
   getCoverArtistsByComicBookId,
+  insertComicCoverArtist,
+  linkCoverArtistToComicBook,
+  unlinkCoverArtistsToComicBook,
 } from "#sqlite/models/comicCoverArtists.model.ts";
 import {
   getPublishersByComicBookId,
+  insertComicPublisher,
+  linkPublisherToComicBook,
+  unlinkPublishersToComicBook,
 } from "#sqlite/models/comicPublishers.model.ts";
 import {
   getImprintsByComicBookId,
+  insertComicImprint,
+  linkImprintToComicBook,
+  unlinkImprintsToComicBook,
 } from "#sqlite/models/comicImprints.model.ts";
 import {
   getGenresForComicBook,
+  insertComicGenre,
+  linkGenreToComicBook,
+  unlinkGenresToComicBook,
 } from "#sqlite/models/comicGenres.model.ts";
 import {
   getCharactersByComicBookId,
+  insertComicCharacter,
+  linkCharacterToComicBook,
+  unlinkCharactersToComicBook,
 } from "#sqlite/models/comicCharacters.model.ts";
 import {
   getTeamsByComicBookId,
+  insertComicTeam,
+  linkTeamToComicBook,
+  unlinkTeamsToComicBook,
 } from "#sqlite/models/comicTeams.model.ts";
 import {
   getLocationsByComicBookId,
+  insertComicLocation,
+  linkLocationToComicBook,
+  unlinkLocationsToComicBook,
 } from "#sqlite/models/comicLocations.model.ts";
-import { getStoryArcsByComicBookId } from "#sqlite/models/comicStoryArcs.model.ts";
-import { getSeriesGroupsByComicBookId } from "#sqlite/models/comicSeriesGroups.model.ts";
+import { 
+  getStoryArcsByComicBookId,
+  unlinkStoryArcsToComicBook,
+} from "#sqlite/models/comicStoryArcs.model.ts";
+import { 
+  getSeriesGroupsByComicBookId,
+  unlinkSeriesGroupsToComicBook,
+} from "#sqlite/models/comicSeriesGroups.model.ts";
 import { getComicPagesByComicBookId } from "#sqlite/models/comicPages.model.ts";
 import {
   deleteComicBookThumbnail,
@@ -87,6 +132,7 @@ import {
   ComicFilterField,
   RequestFilterParametersValidated,
   RequestSortParametersValidated,
+  ComicMetadataUpdateData,
 } from "#types/index.ts";
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
 
@@ -275,16 +321,209 @@ export const fetchRandomComicBook = async (
   }
 };
 
-export const fetchTheLatestsComicBooksAdded = async (
-  offset: number = 0,
-  limit: number = 10,
-) => {
+
+
+
+/**
+ * Service to update comic book metadata for a single comic book.
+ * @param comicId 
+ * @param metadataUpdates 
+ * @returns boolean indicating success or failure
+ */
+export const updateComicBookMetadata = async (
+  comicId: number,
+  metadataUpdates: Array<ComicMetadataUpdateData>
+): Promise<boolean> => {
   try {
-    const result = await getAllComicBooksSortByDate(offset, limit, "desc");
-    return result;
+    for (const update of metadataUpdates) {
+      const updateType = update.metadataType;
+      const replaceExisting = update.replaceExisting ?? false;
+      const values = update.values as string[];
+
+      if (!values || values.length === 0) {
+        console.warn(`No values provided for ${updateType} on comic ID ${comicId}`);
+        continue;
+      }
+
+      // Unlink all existing metadata if replaceExisting is true
+      if (replaceExisting) {
+        try {
+          switch (updateType) {
+            case "writers":
+              await unlinkWritersToComicBook(comicId);
+              break;
+            case "pencillers":
+              await unlinkPencillersToComicBook(comicId);
+              break;
+            case "inkers":
+              await unlinkInkersToComicBook(comicId);
+              break;
+            case "letterers":
+              await unlinkLetterersToComicBook(comicId);
+              break;
+            case "editors":
+              await unlinkEditorsToComicBook(comicId);
+              break;
+            case "colorists":
+              await unlinkColoristsToComicBook(comicId);
+              break;
+            case "coverArtists":
+              await unlinkCoverArtistsToComicBook(comicId);
+              break;
+            case "publishers":
+              await unlinkPublishersToComicBook(comicId);
+              break;
+            case "imprints":
+              await unlinkImprintsToComicBook(comicId);
+              break;
+            case "genres":
+              await unlinkGenresToComicBook(comicId);
+              break;
+            case "characters":
+              await unlinkCharactersToComicBook(comicId);
+              break;
+            case "teams":
+              await unlinkTeamsToComicBook(comicId);
+              break;
+            case "locations":
+              await unlinkLocationsToComicBook(comicId);
+              break;
+            case "storyArcs":
+              await unlinkStoryArcsToComicBook(comicId);
+              break;
+            case "seriesGroups":
+              await unlinkSeriesGroupsToComicBook(comicId);
+              break;
+          }
+        } catch (error) {
+          console.error(`Error unlinking ${updateType} from comic book:`, error);
+          throw error;
+        }
+      }
+
+      // Insert new metadata entries and link them to the comic book
+      try {
+        for (const value of values) {
+          let metadataId: number;
+
+          switch (updateType) {
+            case "writers": {
+              metadataId = await insertComicWriter(value);
+              await linkWriterToComicBook(metadataId, comicId);
+              break;
+            }
+            case "pencillers": {
+              metadataId = await insertComicPenciller(value);
+              await linkPencillerToComicBook(metadataId, comicId);
+              break;
+            }
+            case "inkers": {
+              metadataId = await insertComicInker(value);
+              await linkInkerToComicBook(metadataId, comicId);
+              break;
+            }
+            case "letterers": {
+              metadataId = await insertComicLetterer(value);
+              await linkLettererToComicBook(metadataId, comicId);
+              break;
+            }
+            case "editors": {
+              metadataId = await insertComicEditor(value);
+              await linkEditorToComicBook(metadataId, comicId);
+              break;
+            }
+            case "colorists": {
+              metadataId = await insertComicColorist(value);
+              await linkColoristToComicBook(metadataId, comicId);
+              break;
+            }
+            case "coverArtists": {
+              metadataId = await insertComicCoverArtist(value);
+              await linkCoverArtistToComicBook(metadataId, comicId);
+              break;
+            }
+            case "publishers": {
+              metadataId = await insertComicPublisher(value);
+              await linkPublisherToComicBook(metadataId, comicId);
+              break;
+            }
+            case "imprints": {
+              metadataId = await insertComicImprint(value);
+              await linkImprintToComicBook(metadataId, comicId);
+              break;
+            }
+            case "genres": {
+              metadataId = await insertComicGenre(value);
+              await linkGenreToComicBook(metadataId, comicId);
+              break;
+            }
+            case "characters": {
+              metadataId = await insertComicCharacter(value);
+              await linkCharacterToComicBook(metadataId, comicId);
+              break;
+            }
+            case "teams": {
+              metadataId = await insertComicTeam(value);
+              await linkTeamToComicBook(metadataId, comicId);
+              break;
+            }
+            case "locations": {
+              metadataId = await insertComicLocation(value);
+              await linkLocationToComicBook(metadataId, comicId);
+              break;
+            }
+            case "storyArcs": {
+              console.warn("Story arcs update not yet implemented");
+              break;
+            }
+            case "seriesGroups": {
+              console.warn("Series groups update not yet implemented");
+              break;
+            }
+            default:
+              console.warn(`Unknown metadata type: ${updateType}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error updating ${updateType} for comic book:`, error);
+        throw error;
+      }
+    }
+
+    return true;
   } catch (error) {
-    console.error("Error fetching the latest comic books added:", error);
-    throw error;
+    console.error("Error updating comic book metadata:", error);
+    return false;
+  }
+};
+
+/**
+ * Service to bulk update comic book metadata for multiple comic books using the same set of updates.
+ * 
+ * @param comicIds 
+ * @param metadataUpdates 
+ * @returns number of successful updates
+ */
+export const updateComicBookMetadataBulk = async (
+  comicIds: number[],
+  metadataUpdates: Array<ComicMetadataUpdateData>,
+): Promise<number> => {
+  let numberOfSuccessfulUpdates = 0;
+
+  try {
+    for (const comicId of comicIds) {
+      const success = await updateComicBookMetadata(comicId, metadataUpdates);
+      if (!success) {
+        console.error(`Failed to update metadata for comic ID ${comicId}`);
+        return numberOfSuccessfulUpdates;
+      } else {
+        numberOfSuccessfulUpdates++;
+      }
+    }
+    return numberOfSuccessfulUpdates;
+  } catch (error) {
+    console.error("Error updating comic book metadata in bulk:", error);
+    return 0;
   }
 };
 
