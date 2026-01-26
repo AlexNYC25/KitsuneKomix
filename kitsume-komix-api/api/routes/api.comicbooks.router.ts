@@ -489,6 +489,12 @@ app.openapi(
 
 /**
  * Get comic books filtered by first letter
+ * 
+ * GET /api/comic-books/list
+ * 
+ * This route returns comic books whose titles start with a specific letter, with pagination support
+ * @param letter - The first letter to filter comic book titles by
+ * @return JSON object containing the list of comic books starting with the specified letter
  */
 app.openapi(
   createRoute({
@@ -561,10 +567,16 @@ app.openapi(
   }
 );
 
-// HERE is the end of the current rewrite
+
 
 /**
- * Batch update metadata
+ * Batch update metadata for multiple comic books with multple metadata updates possible
+ * 
+ * POST /api/comic-books/metadata-batch
+ * 
+ * @param comicBookIds - Array of comic book IDs to update
+ * @param metadataUpdates - Array of metadata updates to apply
+ * @return JSON object indicating success or failure of the batch update
  */
 app.openapi(
   createRoute({
@@ -637,6 +649,7 @@ app.openapi(
 
 /**
  * Get a comic book by ID
+ * 
  * GET /api/comic-books/:id
  * 
  * @param id - The ID of the comic book to retrieve
@@ -706,6 +719,8 @@ app.openapi(
     
   }
 );
+
+// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Get a comic book with its full metadata by ID
