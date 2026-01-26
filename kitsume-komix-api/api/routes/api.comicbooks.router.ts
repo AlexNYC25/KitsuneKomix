@@ -31,6 +31,7 @@ import {
   setComicReadByUser,
   startStreamingComicBookFile,
   attachThumbnailToComicBook,
+  updateComicBookMetadataBulk,
 } from "../services/comicbooks.service.ts";
 
 import type {
@@ -47,6 +48,7 @@ import type {
   ComicFilterField,
   RequestParametersValidated,
   ComicMetadataBulkUpdateSchemaData,
+  ComicMetadataUpdateData,
 } from "#types/index.ts";
 
 import {
@@ -502,6 +504,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -510,6 +513,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -582,27 +586,54 @@ app.openapi(
       200: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
         description: "Metadata updated",
       },
-      501: {
+      500: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
-        description: "Not implemented",
+        description: "Internal Server Error",
       },
     },
   }),
   async (c) => {
     const data: ComicMetadataBulkUpdateSchemaData = await c.req.json();
 
-    //TODO: implement metadata update logic
-    return c.json({ message: "Metadata update not implemented yet" }, 501);
-  });
+    const comicBookIds: number[] = data.comicBookIds.map(idStr => Number(idStr));
+    const metadataUpdates: ComicMetadataUpdateData[] = data.metadataUpdates;
+
+    try {
+      const updateResult: number = await updateComicBookMetadataBulk(comicBookIds, metadataUpdates);
+      if (updateResult) {
+        return c.json(
+          { 
+            message: "Metadata updated successfully", 
+            totalUpdated: updateResult, 
+            totalRequested: comicBookIds.length,
+            successful: updateResult === comicBookIds.length
+          }, 200);
+      } else {
+        return c.json(
+          { 
+            message: "Failed to update some or all metadata",
+            totalUpdated: updateResult, 
+            totalRequested: comicBookIds.length,
+            successful: false
+          }, 500);
+      }
+    } catch (error) {
+      console.error("Error updating comic book metadata in batch:", error);
+      return c.json({ message: "Failed to update comic book metadata in batch" }, 500);
+    }
+  }
+);
 
 /**
  * Get a comic book by ID
