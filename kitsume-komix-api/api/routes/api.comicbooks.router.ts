@@ -19,7 +19,6 @@ import {
   checkComicReadByUser,
   createCustomThumbnail,
   deleteComicsThumbnailById,
-  fetchComicBookMetadataById,
   fetchComicDuplicatesInTheDb,
   fetchRandomComicBook,
   fetchComicBooksWithRelatedMetadata,
@@ -32,6 +31,7 @@ import {
   startStreamingComicBookFile,
   attachThumbnailToComicBook,
   updateComicBookMetadataBulk,
+  fetchAComicsAssociatedMetadataById,
 } from "../services/comicbooks.service.ts";
 
 import type {
@@ -696,7 +696,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = Number(c.req.param("id"));
+    const id = parseInt(c.req.param("id"), 10);
 
     try {
       const comicWithMetadataSearchResults = await fetchComicBooksWithRelatedMetadata({
@@ -724,7 +724,7 @@ app.openapi(
 
 /**
  * Get a comic book with its full metadata by ID
- * ROUTE: GET /api/comic-books/:id/metadata
+ * GET /api/comic-books/:id/metadata
  *
  * This should return a single comic book with its full metadata by its ID
  * @param id - The ID of the comic book to retrieve
@@ -738,12 +738,7 @@ app.openapi(
     description: "Retrieve a comic book with its full metadata by its ID",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -757,6 +752,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -765,6 +761,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -774,13 +771,22 @@ app.openapi(
   }),
   async (c) => {
     const id = parseInt(c.req.param("id"), 10);
-    const metadata = await fetchComicBookMetadataById(id);
-    if (metadata) {
-      const camelData = camelcasekeys(metadata, { deep: true });
-      return c.json(camelData);
+
+    try {
+      const comicBookMetadataOnly = await fetchAComicsAssociatedMetadataById(id);
+
+      if (comicBookMetadataOnly) {
+        return c.json(comicBookMetadataOnly);
+      }
+
+      return c.json({ error: "Comic book not found" }, 404);
+    } catch (error) {
+      console.error("Error fetching comic book metadata by ID:", error);
+      return c.json({ error: "Failed to fetch comic book metadata" }, 500);
     }
-    return c.json({ error: "Comic book not found" }, 404);
-  });
+
+  }
+);
 
 /**
  * Download a comic book by ID
@@ -1336,107 +1342,6 @@ app.openapi(
     }
   });
 
-/**
- * Get all comic books in a series
- *
- * GET /api/comic-books/series/:seriesId
- *
- * This route returns all comic book issues that belong to a given series
- */
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/series/{seriesId}",
-    summary: "Get comic books by series",
-    description: "Retrieve all comic book issues belonging to a specific series",
-    tags: ["Comic Books"],
-    request: {
-      params: z.object({
-        seriesId: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Series ID",
-          example: 1,
-        }),
-      }),
-      query: PaginationSortFilterQuerySchema,
-    },
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: ComicBooksResponseSchema,
-          },
-        },
-        description: "Comic books retrieved successfully",
-      },
-      404: {
-        content: {
-          "application/json": {
-            schema: FlexibleResponseSchema,
-          },
-        },
-        description: "Series not found",
-      },
-      500: {
-        content: {
-          "application/json": {
-            schema: FlexibleResponseSchema,
-          },
-        },
-        description: "Internal Server Error",
-      },
-    },
-  }),
-  async (c) => {
-    const seriesId = parseInt(c.req.param("seriesId"), 10);
-    const queryData = c.req.valid("query");
-    const page = queryData.page || 1;
-    const pageSize = queryData.pageSize || 20;
-
-    try {
-      const comicsInSeries = await getComicBooksInSeries(seriesId);
-      if (!comicsInSeries || comicsInSeries.length === 0) {
-        return c.json({ message: "No comic books found for this series" }, 404);
-      }
-
-      const total = comicsInSeries.length;
-      const offset = (page - 1) * pageSize;
-      const pageIds = comicsInSeries.slice(offset, offset + pageSize);
-
-      // Fetch full metadata for each comic in the page with thumbnails
-      const comicsWithMetadata = await Promise.all(
-        pageIds.map(async (comicId) => {
-          const data = await fetchComicBookMetadataById(comicId);
-          if (!data) return null;
-
-          const camelData = camelcasekeys(data, { deep: true });
-          // Attach thumbnail URL to the comic book data
-          const comicWithThumbnail = await attachThumbnailToComicBook(comicId);
-
-          return {
-            ...camelData,
-            thumbnailUrl: comicWithThumbnail?.thumbnailUrl || null,
-          };
-        }),
-      );
-
-      // Remove any null results
-      const filtered = comicsWithMetadata.filter((c) => c !== null);
-
-      return c.json({
-        data: filtered,
-        meta: {
-          total,
-          page,
-          pageSize: pageSize,
-          hasNextPage: offset + pageSize < total,
-        },
-        message: "Comic books retrieved successfully",
-      }, 200);
-    } catch (error) {
-      console.error("Error fetching comic books in series:", error);
-      return c.json({ message: "Internal server error" }, 500);
-    }
-  });
 
 /**
  * Get the next comic book in the series, returning back the comic book of the next issue number
