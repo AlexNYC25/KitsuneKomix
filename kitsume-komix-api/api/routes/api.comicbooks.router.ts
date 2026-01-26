@@ -46,6 +46,7 @@ import type {
   ComicSortField,
   ComicFilterField,
   RequestParametersValidated,
+  ComicMetadataBulkUpdateSchemaData,
 } from "#types/index.ts";
 
 import {
@@ -63,7 +64,8 @@ import {
   PaginationQuerySchema,
   ComicBookUpdateSchema,
   PaginationLetterQuerySchema,
-  ParamIdSchema
+  ParamIdSchema,
+  ComicMetadataBulkUpdateSchema
 } from "../../zod/schemas/request.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
@@ -571,7 +573,7 @@ app.openapi(
       body: {
         content: {
           "application/json": {
-            schema: z.any(),
+            schema: ComicMetadataBulkUpdateSchema,
           },
         },
       },
@@ -596,7 +598,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const _metadata = await c.req.json();
+    const data: ComicMetadataBulkUpdateSchemaData = await c.req.json();
 
     //TODO: implement metadata update logic
     return c.json({ message: "Metadata update not implemented yet" }, 501);
