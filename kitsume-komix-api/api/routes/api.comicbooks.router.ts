@@ -720,8 +720,6 @@ app.openapi(
   }
 );
 
-// HERE is the end of the current rewrite *****************************************************
-
 /**
  * Get a comic book with its full metadata by ID
  * GET /api/comic-books/:id/metadata
@@ -776,7 +774,7 @@ app.openapi(
       const comicBookMetadataOnly = await fetchAComicsAssociatedMetadataById(id);
 
       if (comicBookMetadataOnly) {
-        return c.json(comicBookMetadataOnly);
+        return c.json(comicBookMetadataOnly, 200);
       }
 
       return c.json({ error: "Comic book not found" }, 404);
@@ -787,6 +785,8 @@ app.openapi(
 
   }
 );
+
+// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Download a comic book by ID
@@ -809,16 +809,12 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema
     },
     responses: {
       200: {
         content: {
+          //TODO: Update to proper schema, need to look up how to represent file downloads in OpenAPI
           "application/octet-stream": {
             schema: z.any(),
           },
@@ -852,7 +848,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = Number(c.req.param("id"));
+    const id = parseInt(c.req.param("id"));
 
     // Verify user is authenticated (middleware checks this, but being explicit)
     const user = c.get("user");
@@ -861,12 +857,20 @@ app.openapi(
     }
 
     try {
-      const comic: ComicBook | null = await getComicBookById(id);
-      if (!comic) {
+      const comicWithMetadataSearchResults = await fetchComicBooksWithRelatedMetadata({
+        pagination: { pageNumber: 1, pageSize: 1 },
+        filter: { filterProperty: "id", filterValue: id.toString() },
+        sort: { sortProperty: "createdAt", sortOrder: "asc" }
+      })
+
+      const comicWithMetadata = comicWithMetadataSearchResults.length > 0 ? comicWithMetadataSearchResults[0] : null;
+
+      if (!comicWithMetadata) {
         return c.json({ message: "Comic book not found" }, 404);
       }
 
-      const filePath = comic.filePath;
+      // TODO: Convert this area to a service function
+      const filePath = comicWithMetadata.filePath;
       const originalFileName = basename(filePath);
 
       // Sanitize filename but preserve the original extension and more characters
