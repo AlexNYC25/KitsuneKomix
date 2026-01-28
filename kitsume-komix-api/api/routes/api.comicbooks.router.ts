@@ -1157,8 +1157,11 @@ app.openapi(
     }
 
     try {
-      const hasRead = await checkComicReadByUser(userId, id);
-      return c.json({ read: hasRead, id: id }, 200);
+      const hasRead: boolean = await checkComicReadByUser(userId, id);
+      return c.json({
+        id,
+        read: hasRead
+      }, 200);
     } catch (error) {
       console.error("Error checking read status:", error);
       return c.json({ message: "Failed to check read status" }, 500);
