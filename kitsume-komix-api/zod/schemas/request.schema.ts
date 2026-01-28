@@ -14,6 +14,18 @@ export const ParamIdSchema = z.object({
 });
 
 /**
+ * Schema specifically for use when request a specific page of a comic stream
+ * 
+ * Combines the 'id' and 'page' path parameters into a single schema.
+ */
+export const ParamIdStreamPageSchema = ParamIdSchema.extend({
+  page: z.string().openapi({
+    param: { name: "page", in: "path" },
+    example: "1",
+  }),
+});
+
+/**
  * Common schema for path parameter 'letter'
  *
  * Used in routes that require a 'letter' parameter in the path.
