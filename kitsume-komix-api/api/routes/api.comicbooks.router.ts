@@ -789,8 +789,6 @@ app.openapi(
   }
 );
 
-// HERE is the end of the current rewrite *****************************************************
-
 /**
  * Download a comic book by ID
  *
@@ -1035,6 +1033,8 @@ app.openapi(
   },
 );
 
+// HERE is the end of the current rewrite *****************************************************
+
 /**
  * Get information about the pages of a comic book by ID
  *
@@ -1053,17 +1053,13 @@ app.openapi(
     description: "Retrieve information about the pages of a comic book",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1072,6 +1068,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1083,6 +1080,7 @@ app.openapi(
     const id = parseInt(c.req.param("id"), 10);
 
     try {
+      // TODO: Define the proper return type
       const result = await getComicPagesInfo(id);
       return c.json(result);
     } catch (error) {
