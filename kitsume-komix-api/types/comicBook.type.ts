@@ -85,3 +85,18 @@ export type MultipleReturnResponseNoFilterNoSort = {
   currentPage: number;
   pageSize: number;
 };
+
+export type ComicBookStreamingServiceData = {
+  comicId: number;
+  pageNumber: number;
+  acceptHeader: string | null;
+  preloadPagesNumber: number;
+}
+
+export type ComicBookStreamingServiceResult = {
+  comicId: number;
+  pagePath: string;
+  pageNumber: number;
+  format: string;
+  cached: boolean;
+};
