@@ -49,6 +49,8 @@ import type {
   RequestParametersValidated,
   ComicMetadataBulkUpdateSchemaData,
   ComicMetadataUpdateData,
+  ComicBookStreamingServiceData,
+  ComicBookStreamingServiceResult
 } from "#types/index.ts";
 
 import {
@@ -67,7 +69,8 @@ import {
   ComicBookUpdateSchema,
   PaginationLetterQuerySchema,
   ParamIdSchema,
-  ComicMetadataBulkUpdateSchema
+  ComicMetadataBulkUpdateSchema,
+  ParamIdStreamPageSchema
 } from "../../zod/schemas/request.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
@@ -912,29 +915,59 @@ app.openapi(
  *  - TODO: Set the progress of the reading session in the db
  *  - TODO: Look into adding a flag to set the request to private so we don't log the reading progress in the db
  */
-app.get(
-  "/:id/stream",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
-    }),
-  ),
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}/stream",
+    summary: "Start streaming comic book",
+    description: "Start streaming a comic book from the first page",
+    tags: ["Comic Books"],
+    request: {
+      params: ParamIdSchema
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            //TODO: Update to proper schema
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Comic book streaming started successfully",
+      },
+      500: {
+        content: {
+          "application/json": {
+            //TODO: Update to proper schema
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
+    },
+  }),
   async (c) => {
-    const id = c.req.param("id");
-
+    const comicBookId = parseInt(c.req.param("id"), 10);
     const requestImageHeader = c.req.header("Accept") || "";
-    console.log("Request Accept Header:", requestImageHeader);
 
-    const result = await startStreamingComicBookFile(
-      parseInt(id, 10),
-      1,
-      requestImageHeader,
-      10,
-    );
+    const streamingDataOptions: ComicBookStreamingServiceData = {
+      comicId: comicBookId,
+      pageNumber: 1,
+      acceptHeader: requestImageHeader,
+      preloadPagesNumber: 10,
+    };
 
-    return c.json(result);
-  },
+    try {
+      const streamingResult: ComicBookStreamingServiceResult = await startStreamingComicBookFile(
+        streamingDataOptions
+      );
+
+      return c.json(streamingResult);
+    } catch (error) {
+      console.error("Error starting comic book streaming:", error);
+      return c.json({ error: "Failed to start comic book streaming" }, 500);
+    }
+  }
 );
 
 /**
@@ -946,33 +979,58 @@ app.get(
  *  - Continues the preloading of the next comic book pages in the background
  *  - TODO: Either sets or updates the progress of the reading session in the db
  */
-app.get(
-  "/:id/stream/:page",
-  zValidator(
-    "param",
-    z.object({
-      id: z.string().regex(/^\d+$/).transform(Number),
-      page: z.string().regex(/^\d+$/).transform(Number),
-    }),
-  ),
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}/stream/{page}",
+    request: {
+      params: ParamIdStreamPageSchema
+    },
+    summary: "Stream comic book page",
+    description: "Stream a specific page of a comic book by its ID",
+    tags: ["Comic Books"],
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            //TODO: Update to proper schema
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Comic book page streamed successfully",
+      },
+      500: {
+        content: {
+          "application/json": {
+            //TODO: Update to proper schema
+            schema: FlexibleResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
+    },
+  }),
   async (c) => {
     const id = c.req.param("id");
     const page = c.req.param("page");
+    const requestImageHeader = c.req.header("Accept") || "";
+
+    const streamingDataOptions: ComicBookStreamingServiceData = {
+      comicId: parseInt(id, 10),
+      pageNumber: parseInt(page, 10),
+      acceptHeader: requestImageHeader,
+      preloadPagesNumber: 10,
+    };
 
     try {
-      const requestImageHeader = c.req.header("Accept") || "";
-
-      const result = await startStreamingComicBookFile(
-        parseInt(id, 10),
-        parseInt(page, 10),
-        requestImageHeader,
-        10,
+      const streamingResult: ComicBookStreamingServiceResult = await startStreamingComicBookFile(
+        streamingDataOptions
       );
 
-      return c.json(result);
+      return c.json(streamingResult);
     } catch (error) {
       console.error("Error streaming comic book file:", error);
-      return c.json({ error: "Failed to stream comic book file test" }, 500);
+      return c.json({ error: "Failed to stream comic book file" }, 500);
     }
   },
 );
