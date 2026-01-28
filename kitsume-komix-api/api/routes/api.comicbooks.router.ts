@@ -30,6 +30,7 @@ import {
   setComicReadByUser,
   startStreamingComicBookFile,
   attachThumbnailToComicBook,
+  updateComicBookMetadata,
   updateComicBookMetadataBulk,
   fetchAComicsAssociatedMetadataById,
 } from "../services/comicbooks.service.ts";
@@ -50,7 +51,8 @@ import type {
   ComicMetadataBulkUpdateSchemaData,
   ComicMetadataUpdateData,
   ComicBookStreamingServiceData,
-  ComicBookStreamingServiceResult
+  ComicBookStreamingServiceResult,
+  ComicMetadataSingleUpdateSchemaData
 } from "#types/index.ts";
 
 import {
@@ -69,6 +71,7 @@ import {
   ComicBookUpdateSchema,
   PaginationLetterQuerySchema,
   ParamIdSchema,
+  ComicMetadataSingleUpdateSchema,
   ComicMetadataBulkUpdateSchema,
   ParamIdStreamPageSchema
 } from "../../zod/schemas/request.schema.ts";
@@ -1033,7 +1036,7 @@ app.openapi(
   },
 );
 
-// HERE is the end of the current rewrite *****************************************************
+
 
 /**
  * Get information about the pages of a comic book by ID
@@ -1278,16 +1281,11 @@ app.openapi(
     description: "Update comic book metadata with partial updates allowed",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema,
       body: {
         content: {
           "application/json": {
-            schema: ComicBookUpdateSchema,
+            schema: ComicMetadataSingleUpdateSchema,
           },
         },
       },
@@ -1296,6 +1294,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1304,6 +1303,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1312,6 +1312,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            //TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1320,11 +1321,13 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = Number(c.req.param("id"));
-    const updates = await c.req.json();
+    const id = parseInt(c.req.param("id"));
+    const updateRequestBody: ComicMetadataSingleUpdateSchemaData = await c.req.json();
 
     try {
-      const success = await updateComicBook(id, updates);
+      const metadataUpdates = updateRequestBody.metadataUpdates;
+
+      const success = await updateComicBookMetadata(id, metadataUpdates);
       if (success) {
         return c.json({
           message: `Comic book with ID ${id} updated successfully`,
@@ -1337,6 +1340,8 @@ app.openapi(
       return c.json({ message: "Internal server error" }, 500);
     }
   });
+
+// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Delete a comic book by ID
