@@ -133,6 +133,8 @@ import {
   RequestFilterParametersValidated,
   RequestSortParametersValidated,
   ComicMetadataUpdateData,
+  ComicBookStreamingServiceData,
+  ComicBookStreamingServiceResult
 } from "#types/index.ts";
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
 
@@ -501,13 +503,10 @@ export const updateComicBookMetadataBulk = async (
  * @param preloadPages Number of additional pages to preload for caching
  */
 export const startStreamingComicBookFile = async (
-  comicId: number,
-  page: number = 1,
-  acceptHeader?: string,
-  preloadPages: number = 5,
+  data: ComicBookStreamingServiceData
 ) => {
   // Get the comic book record from the database
-  const comic = await getComicBookById(comicId);
+  const comic = await getComicBookById(data.comicId);
   if (!comic) {
     throw new Error("Comic book not found.");
   }
@@ -526,23 +525,23 @@ export const startStreamingComicBookFile = async (
   }
 
   // Validate page number
-  if (page < 1) {
+  if (data.pageNumber < 1) {
     throw new Error("Invalid page number requested.");
   }
-  if (comic.pageCount && page > comic.pageCount) {
+  if (comic.pageCount && data.pageNumber > comic.pageCount) {
     throw new Error(
       "Requested page exceeds total number of pages in the comic test.",
     );
   }
 
   // Determine best output format for browser compatibility
-  const targetFormat = determineBestOutputFormat(acceptHeader);
+  const targetFormat = determineBestOutputFormat(data.acceptHeader || undefined);
   const formatExtension = targetFormat.split("/")[1];
 
   // Check if page exists in cache (with correct format)
   const cacheDir = "./cache/pages";
-  const comicCacheDir = `${cacheDir}/${comicId}`;
-  const cachedPagePath = `${comicCacheDir}/${page}.${formatExtension}`;
+  const comicCacheDir = `${cacheDir}/${data.comicId}`;
+  const cachedPagePath = `${comicCacheDir}/${data.pageNumber}.${formatExtension}`;
 
   // Create cache directory if it doesn't exist
   await Deno.mkdir(comicCacheDir, { recursive: true });
@@ -550,10 +549,10 @@ export const startStreamingComicBookFile = async (
   let pagePath = cachedPagePath;
 
   // Check if page is already in cache
-  const pageInCache = await checkIfPageInCache(comicId, page, formatExtension);
+  const pageInCache = await checkIfPageInCache(data.comicId, data.pageNumber, formatExtension);
 
   if (!pageInCache) {
-    console.log(`Page ${page} not in cache, extracting...`);
+    console.log(`Page ${data.pageNumber} not in cache, extracting...`);
 
     // Determine if we should use streaming extraction for large files
     const fileSize = (await Deno.stat(filePath)).size;
@@ -562,12 +561,12 @@ export const startStreamingComicBookFile = async (
     if (isLargeFile) {
       // Use streaming extraction for large files
       const pageRange = Math.min(
-        preloadPages,
-        comic.pageCount || preloadPages,
+        data.preloadPagesNumber,
+        comic.pageCount || data.preloadPagesNumber,
       );
-      const startPage = Math.max(0, page - 1); // Convert to 0-based
+      const startPage = Math.max(0, data.pageNumber - 1); // Convert to 0-based
       const endPage = Math.min(
-        (comic.pageCount || page) - 1,
+        (comic.pageCount || data.pageNumber) - 1,
         startPage + pageRange,
       );
 
@@ -603,7 +602,7 @@ export const startStreamingComicBookFile = async (
             console.log(`Cached page ${pageNumber} in ${targetFormat} format`);
 
             // Set the path for the requested page
-            if (pageNumber === page) {
+            if (pageNumber === data.pageNumber) {
               pagePath = outputPath;
             }
           }
@@ -624,9 +623,9 @@ export const startStreamingComicBookFile = async (
       }
     } else {
       // Use single page extraction for smaller files
-      console.log(`Small file, extracting single page ${page}`);
+      console.log(`Small file, extracting single page ${data.pageNumber}`);
 
-      const extractedPagePath = await extractComicPage(filePath, page - 1); // Convert to 0-based
+      const extractedPagePath = await extractComicPage(filePath, data.pageNumber - 1); // Convert to 0-based
 
       if (!extractedPagePath) {
         throw new Error("Failed to extract page from comic archive");
@@ -643,15 +642,15 @@ export const startStreamingComicBookFile = async (
         throw new Error("Failed to convert image to browser-compatible format");
       }
 
-      console.log(`Cached page ${page} in ${targetFormat} format`);
+      console.log(`Cached page ${data.pageNumber} in ${targetFormat} format`);
     }
 
     // Background preloading for better UX (don't await this)
-    if (!isLargeFile && preloadPages > 0) {
+    if (!isLargeFile && data.preloadPagesNumber > 0) {
       preloadAdjacentPages(
-        comicId,
-        page,
-        preloadPages,
+        data.comicId,
+        data.pageNumber,
+        data.preloadPagesNumber,
         targetFormat,
         comic.pageCount || 0,
       )
@@ -659,14 +658,15 @@ export const startStreamingComicBookFile = async (
     }
   }
 
-  // Return the path to the cached page
-  return {
+  const streamingDataResult: ComicBookStreamingServiceResult = {
     pagePath,
+    pageNumber: data.pageNumber,
     format: targetFormat,
-    comicId,
-    page,
+    comicId: data.comicId,
     cached: pageInCache,
   };
+
+  return streamingDataResult;
 };
 
 export const getComicPagesInfo = async (comicId: number) => {
