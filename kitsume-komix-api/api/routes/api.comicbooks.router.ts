@@ -576,9 +576,9 @@ app.openapi(
 
 
 /**
- * Batch update metadata for multiple comic books with multple metadata updates possible
+ * Batch update metadata for multiple comic books with multiple metadata updates possible
  * 
- * POST /api/comic-books/metadata-batch
+ * POST /api/comic-books/update-batch
  * 
  * @param comicBookIds - Array of comic book IDs to update
  * @param metadataUpdates - Array of metadata updates to apply
@@ -587,7 +587,7 @@ app.openapi(
 app.openapi(
   createRoute({
     method: "post",
-    path: "/metadata-batch",
+    path: "/update-batch",
     summary: "Batch update metadata",
     description: "Update metadata for multiple comic books",
     tags: ["Comic Books"],
@@ -1358,17 +1358,13 @@ app.openapi(
     description: "Delete a comic book by its ID",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1377,6 +1373,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1385,6 +1382,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1393,7 +1391,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = Number(c.req.param("id"));
+    const id: number = parseInt(c.req.param("id"));
 
     try {
       const success = await deleteComicBook(id);
