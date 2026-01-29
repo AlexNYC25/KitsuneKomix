@@ -125,7 +125,6 @@ import {
   ComicBookWithMetadata,
   ComicBookWithThumbnail,
   // Request parameter types
-  RequestPaginationParameters,
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   ComicSortField, 
@@ -136,7 +135,6 @@ import {
   ComicBookStreamingServiceData,
   ComicBookStreamingServiceResult
 } from "#types/index.ts";
-import type { ComicBookQueryParams } from "#interfaces/index.ts";
 
 /**
  * Fetch all comic books with related metadata.
@@ -191,6 +189,9 @@ export const fetchComicBooksWithRelatedMetadata = async (
  * Fetch associated metadata for a comic book by its ID.
  * @param id - The ID of the comic book.
  * @returns A promise that resolves to the associated metadata of the comic book of type ComicBookMetadataOnly.
+ * 
+ * used by
+ * - /api/comic-books/:id/metadata
  */
 export const fetchAComicsAssociatedMetadataById = async (
   id: number,
@@ -234,7 +235,8 @@ export const fetchAComicsAssociatedMetadataById = async (
  * @param requestPaginationParameters - The query parameters for pagination.
  * @returns A promise that resolves to an array of duplicate comic books.
  *
- * used by /api/comic-books/duplicates
+ * used by 
+ * - /api/comic-books/duplicates
  */
 export const fetchComicDuplicatesInTheDb = async (
   requestPaginationParameters: RequestPaginationParametersValidated,
@@ -286,14 +288,14 @@ export const fetchRandomComicBook = async (
   }
 };
 
-
-
-
 /**
  * Service to update comic book metadata for a single comic book.
  * @param comicId 
  * @param metadataUpdates 
  * @returns boolean indicating success or failure
+ * 
+ * used by
+ * - /api/comic-books/{id}/update
  */
 export const updateComicBookMetadata = async (
   comicId: number,
@@ -468,6 +470,9 @@ export const updateComicBookMetadata = async (
  * @param comicIds 
  * @param metadataUpdates 
  * @returns number of successful updates
+ * 
+ * used by
+ * - /api/comic-books/update-batch
  */
 export const updateComicBookMetadataBulk = async (
   comicIds: number[],
@@ -492,8 +497,6 @@ export const updateComicBookMetadataBulk = async (
   }
 };
 
-
-
 /**
  * Start streaming the comic book file.
  *
@@ -501,6 +504,10 @@ export const updateComicBookMetadataBulk = async (
  * @param page Page number to stream (1-based)
  * @param acceptHeader Browser's Accept header for format negotiation
  * @param preloadPages Number of additional pages to preload for caching
+ * 
+ * used by
+ * - /api/comic-books/{id}/stream
+ * - /api/comic-books/{id}/stream/{page}
  */
 export const startStreamingComicBookFile = async (
   data: ComicBookStreamingServiceData
@@ -530,7 +537,7 @@ export const startStreamingComicBookFile = async (
   }
   if (comic.pageCount && data.pageNumber > comic.pageCount) {
     throw new Error(
-      "Requested page exceeds total number of pages in the comic test.",
+      "Requested page exceeds total number of pages in the comic book.",
     );
   }
 
@@ -669,6 +676,14 @@ export const startStreamingComicBookFile = async (
   return streamingDataResult;
 };
 
+/**
+ * Gets information about the pages of a comic book.
+ * @param comicId ID of the comic book
+ * @returns an object containing total pages, pages in DB, and page details
+ * 
+ * used by
+ * - /api/comic-books/{id}/pages-info
+ */
 export const getComicPagesInfo = async (comicId: number) => {
   const { db, client } = getClient();
 
