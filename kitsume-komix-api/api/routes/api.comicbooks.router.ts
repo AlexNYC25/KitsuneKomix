@@ -1267,6 +1267,100 @@ app.openapi(
 );
 
 /**
+ * Mark a comic book as unread by a user
+ * 
+ * POST /api/comic-books/:id/unread
+ * 
+ * This should mark the comic book as unread by the user
+ */
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/{id}/unread",
+    summary: "Mark comic book as unread",
+    description: "Mark a comic book as unread by the current user",
+    tags: ["Comic Books"],
+    middleware: [requireAuth],
+    request: {
+      params: ParamIdSchema
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: SuccessResponseSchema,
+          },
+        },
+        description: "Comic book marked as unread",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+      404: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Not Found",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
+    },
+  }),
+  async (c) => {
+    const id = parseInt(c.req.param("id"), 10);
+
+    const user = c.get("user");
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized - Missing or invalid user information" }, 401);
+    }
+
+    const userId = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    try {
+      const setComicToReadSuccess = await setComicReadByUser(id, userId, false);
+
+      if (setComicToReadSuccess) {
+        return c.json({ success: true }, 200);
+      } else {
+        return c.json({ message: "Failed to mark comic book as unread" }, 500);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      if (errorMessage.includes("FOREIGN KEY")) {
+        return c.json({ message: "User or comic book not found" }, 404);
+      }
+
+      return c.json({ message: "Failed to mark comic book as unread" }, 500);
+    }
+  }
+);
+
+/**
  * Update a comic book by ID, partial updates allowed
  *
  * PUT /api/comic-books/:id/update
