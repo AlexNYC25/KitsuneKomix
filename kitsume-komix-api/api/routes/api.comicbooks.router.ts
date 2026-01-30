@@ -1222,7 +1222,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
 
     const user = c.get("user");
     if (!user || !user.sub) {
@@ -1235,7 +1235,7 @@ app.openapi(
     }
 
     try {
-      const setComicToReadSuccess = await setComicReadByUser(id, userId, true);
+      const setComicToReadSuccess: boolean = await setComicReadByUser(id, userId, true);
 
       if (setComicToReadSuccess) {
         return c.json({ success: true }, 200);
@@ -1316,20 +1316,20 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
 
     const user = c.get("user");
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized - Missing or invalid user information" }, 401);
     }
 
-    const userId = parseInt(user.sub, 10);
+    const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
     try {
-      const setComicToReadSuccess = await setComicReadByUser(id, userId, false);
+      const setComicToReadSuccess: boolean = await setComicReadByUser(id, userId, false);
 
       if (setComicToReadSuccess) {
         return c.json({ success: true }, 200);
@@ -1403,13 +1403,13 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"));
+    const id: number = parseInt(c.req.param("id"));
     const updateRequestBody: ComicMetadataSingleUpdateSchemaData = await c.req.json();
 
     try {
       const metadataUpdates = updateRequestBody.metadataUpdates;
 
-      const success = await updateComicBookMetadata(id, metadataUpdates);
+      const success: boolean = await updateComicBookMetadata(id, metadataUpdates);
       if (success) {
         return c.json({
           message: `Comic book with ID ${id} updated successfully`,
@@ -1476,7 +1476,8 @@ app.openapi(
     const id: number = parseInt(c.req.param("id"));
 
     try {
-      const success = await processComicBookDeletion(id);
+      const success: boolean = await processComicBookDeletion(id);
+
       if (success) {
         return c.json({
           message: `Comic book with ID ${id} deleted successfully`,
@@ -1490,8 +1491,6 @@ app.openapi(
     }
   }
 );
-
-// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Get the next comic book in the series, returning back the comic book of the next issue number
@@ -1508,17 +1507,13 @@ app.openapi(
     description: "Retrieve the next comic book in the same series based on issue number",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1527,6 +1522,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1538,7 +1534,8 @@ app.openapi(
     const id = parseInt(c.req.param("id"), 10);
 
     try {
-      const nextComic = await getNextComicBookId(id);
+      const nextComic: ComicBook | null = await getNextComicBookId(id);
+      
       if (nextComic) {
         return c.json({
           nextComic: nextComic,
@@ -1570,17 +1567,13 @@ app.openapi(
     description: "Retrieve the previous comic book in the same series based on issue number",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1589,6 +1582,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1600,7 +1594,8 @@ app.openapi(
     const id = parseInt(c.req.param("id"), 10);
 
     try {
-      const previousComic = await getPreviousComicBookId(id);
+      const previousComic: ComicBook | null = await getPreviousComicBookId(id);
+
       if (previousComic) {
         return c.json({
           previousComic: previousComic,
@@ -1615,7 +1610,10 @@ app.openapi(
       console.error("Error fetching previous comic book:", error);
       return c.json({ error: "Failed to fetch previous comic book" }, 500);
     }
-  });
+  }
+);
+
+// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Get all thumbnails for a comic book by ID
