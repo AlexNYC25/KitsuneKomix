@@ -61,7 +61,8 @@ import {
   ParamIdSchema,
   ComicMetadataSingleUpdateSchema,
   ComicMetadataBulkUpdateSchema,
-  ParamIdStreamPageSchema
+  ParamIdStreamPageSchema,
+  ParamIdThumbnailIdSchema
 } from "../../zod/schemas/request.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
@@ -1613,8 +1614,6 @@ app.openapi(
   }
 );
 
-// HERE is the end of the current rewrite *****************************************************
-
 /**
  * Get all thumbnails for a comic book by ID
  *
@@ -1645,6 +1644,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1653,6 +1653,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1665,6 +1666,7 @@ app.openapi(
 
     try {
       const thumbnails: ComicBookThumbnail[] | null = await getComicThumbnails(id);
+
       if (thumbnails) {
         return c.json({
           thumbnails: thumbnails,
@@ -1697,21 +1699,13 @@ app.openapi(
     description: "Retrieve a specific thumbnail for a comic book",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-        thumbId: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Thumbnail ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdThumbnailIdSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1720,6 +1714,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1728,6 +1723,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1736,27 +1732,31 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
-    const thumbId = parseInt(c.req.param("thumbId"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
+    const thumbId: number = parseInt(c.req.param("thumbnailId") || "", 10);
 
     try {
-      const thumbnail = await getComicThumbnailByComicIdThumbnailId(id, thumbId);
+      const thumbnail: ComicBookThumbnail | null = await getComicThumbnailByComicIdThumbnailId(id, thumbId);
+
       if (thumbnail) {
         return c.json({
           thumbnail: thumbnail,
           message: "Fetched comic book thumbnail successfully",
-        });
+        }, 200);
       } else {
         return c.json({
           message:
             "No thumbnail found for this comic book with the provided thumbnail ID",
-        });
+        }, 404);
       }
     } catch (error) {
       console.error("Error fetching comic book thumbnail:", error);
       return c.json({ error: "Failed to fetch comic book thumbnail" }, 500);
     }
-  });
+  }
+);
+
+// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Delete a specific thumbnail for a comic book by ID and thumbnail ID
