@@ -1,19 +1,6 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import z from "zod";
-import { zValidator } from "@hono/zod-validator";
 import { basename } from "@std/path";
-import camelcasekeys from "camelcase-keys";
-
-// TODO: Check if these model functions can be replaced with the appropriate service functions
-import {
-  deleteComicBook,
-  getComicBookById,
-  updateComicBook,
-} from "#sqlite/models/comicBooks.model.ts";
-import {
-  getComicBooksInSeries,
-} from "#sqlite/models/comicSeries.model.ts";
-
 
 import {
   checkComicReadByUser,
@@ -33,6 +20,7 @@ import {
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
   fetchAComicsAssociatedMetadataById,
+  processComicBookDeletion,
 } from "../services/comicbooks.service.ts";
 
 import type {
@@ -1433,9 +1421,9 @@ app.openapi(
       console.error("Error updating comic book:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  });
+  }
+);
 
-// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Delete a comic book by ID
@@ -1488,7 +1476,7 @@ app.openapi(
     const id: number = parseInt(c.req.param("id"));
 
     try {
-      const success = await deleteComicBook(id);
+      const success = await processComicBookDeletion(id);
       if (success) {
         return c.json({
           message: `Comic book with ID ${id} deleted successfully`,
@@ -1500,8 +1488,10 @@ app.openapi(
       console.error("Error deleting comic book:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  });
+  }
+);
 
+// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Get the next comic book in the series, returning back the comic book of the next issue number
