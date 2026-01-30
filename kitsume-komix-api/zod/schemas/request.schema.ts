@@ -157,23 +157,19 @@ export const ComicMetadataBulkUpdateSchema = z.object({
   description: "Schema for updating metadata for multiple comic books",
 });
 
-
-
 /**
  * Common schema for path parameters 'id' and 'thumbnailId'
  *
  * Used in routes that require both 'id' and 'thumbnailId' parameters in the path.
  */
-export const ParamIdThumbnailIdSchema = z.object({
-  id: z.string().openapi({
-    param: { name: "id", in: "path" },
-    example: "1",
-  }),
+export const ParamIdThumbnailIdSchema = ParamIdSchema.extend({
   thumbnailId: z.string().openapi({
     param: { name: "thumbnailId", in: "path" },
     example: "1",
   }),
 });
+
+
 
 
 // Schema for updating comic book partial fields in request body
