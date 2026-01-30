@@ -1774,21 +1774,13 @@ app.openapi(
     description: "Delete a specific thumbnail for a comic book",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-        thumbId: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Thumbnail ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdThumbnailIdSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1797,6 +1789,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1805,12 +1798,13 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
-    const thumbId = parseInt(c.req.param("thumbId"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
+    const thumbId: number = parseInt(c.req.param("thumbnailId") || "", 10);
 
     try {
       await deleteComicsThumbnailById(id, thumbId);
-      return c.json({ message: "Comic book thumbnail deleted successfully" });
+      
+      return c.json({ message: "Comic book thumbnail deleted successfully" }, 200);
     } catch (error) {
       console.error("Error deleting comic book thumbnail:", error);
       return c.json({ error: "Failed to delete comic book thumbnail" }, 500);
@@ -1823,6 +1817,9 @@ app.openapi(
  * POST /api/comic-books/:id/thumbnails
  *
  * This should create a custom thumbnail for a comic book by its ID
+ * 
+ * TODO: Update the authentication to use the proper user from the auth system
+ * TODO: Migrate the logic to service layer
  */
 app.openapi(
   createRoute({
@@ -1832,17 +1829,32 @@ app.openapi(
     description: "Create a custom thumbnail for a comic book via multipart form data",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema,
+      body: {
+        content: {
+          "multipart/form-data": {
+            schema: z.object({
+              image: z.instanceof(File).openapi({
+                description: "Image file for the custom thumbnail (JPEG, PNG, WebP)",
+              }),
+              name: z.string().optional().openapi({
+                description: "Optional name for the custom thumbnail",
+              }),
+              description: z.string().optional().openapi({
+                description: "Optional description for the custom thumbnail",
+              }),
+            }).openapi({
+              description: "Multipart form data for creating a custom thumbnail",
+            }),
+          },
+        },
+      },
     },
     responses: {
       201: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1851,6 +1863,7 @@ app.openapi(
       400: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1859,6 +1872,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1867,6 +1881,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1875,7 +1890,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const comicId = parseInt(c.req.param("id"), 10);
+    const comicId: number = parseInt(c.req.param("id"), 10);
 
     if (isNaN(comicId)) {
       return c.json({ error: "Invalid comic book ID" }, 400);
@@ -1961,17 +1976,13 @@ app.openapi(
     description: "Retrieve readlists that contain this comic book",
     tags: ["Comic Books"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/).transform(Number).openapi({
-          description: "Comic book ID",
-          example: 1,
-        }),
-      }),
+      params: ParamIdSchema
     },
     responses: {
       200: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
@@ -1980,6 +1991,7 @@ app.openapi(
       501: {
         content: {
           "application/json": {
+            // TODO: Update to proper schema
             schema: FlexibleResponseSchema,
           },
         },
