@@ -707,6 +707,105 @@ export const getComicPagesInfo = async (comicId: number) => {
   };
 };
 
+/**
+ * Gets whether a comic book has been marked as read by a user.
+ * @param comicId ID of the comic book
+ * @param userId ID of the user
+ * @returns boolean indicating if the comic book has been marked as read by the user
+ * 
+ * used by
+ * - /api/comic-books/:id/read
+ */
+export const checkComicReadByUser = async (
+  comicId: number,
+  userId: number,
+): Promise<boolean> => {
+  const history: ComicBookHistory | null =
+    await getComicBookHistoryByUserAndComic(userId, comicId);
+  if (history && history.read === 1) {
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Marks a comic book as read or unread by a user.
+ * @param comicId ID of the comic book
+ * @param userId ID of the user we want to set read/unread status for 
+ * @param read The boolean value indicating if we want to set the book to be read or unread
+ * @returns boolean indicating if this update was successful
+ * 
+ * used by
+ * - /api/comic-books/:id/read
+ * - /api/comic-books/:id/unread
+ */
+export const setComicReadByUser = async (
+  comicId: number,
+  userId: number,
+  read: boolean,
+): Promise<boolean> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  // check if there is a comicbook with that id
+  const comic = await getComicBookById(comicId);
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  // Check if a history record already exists
+  const existingHistory = await getComicBookHistoryByUserAndComic(
+    userId,
+    comicId,
+  );
+
+  if (existingHistory) {
+    // Update the existing record
+    const readValue = read ? 1 : 0;
+    // Update the existing record
+    const comicbookHistoryId = await updateComicBookHistory(
+      existingHistory.id,
+      { read: readValue, lastReadPage: null },
+    );
+
+    if (!comicbookHistoryId) {
+      throw new Error("Failed to update comic book history.");
+    }
+
+    if (!existingHistory.id) {
+      throw new Error("Failed to update comic book history.");
+    }
+
+    return true;
+  } else {
+    // Create a new history record
+    const newHistory = {
+      userId: userId,
+      comicBookId: comicId,
+      read: read ? 1 : 0,
+      lastReadPage: null,
+    };
+    const comicbookHistoryId = await insertComicBookHistory(newHistory);
+
+    if (!comicbookHistoryId) {
+      throw new Error("Failed to create comic book history.");
+    }
+
+    return true;
+  }
+};
+
+/**
+ * Get the next comic book ID in the same series based on issue number.
+ * @param currentComicId Current comic book ID
+ * @returns Next comic book object or null if not found
+ * 
+ * used by
+ * - /api/comic-books/:id/next
+ */
 export const getNextComicBookId = async (
   currentComicId: number,
 ): Promise<ComicBook | null> => {
@@ -910,77 +1009,6 @@ export const createCustomThumbnail = async (
   } catch (error) {
     console.error("Error creating custom thumbnail:", error);
     throw new Error("Failed to create custom thumbnail.");
-  }
-};
-
-export const checkComicReadByUser = async (
-  comicId: number,
-  userId: number,
-): Promise<boolean> => {
-  const history: ComicBookHistory | null =
-    await getComicBookHistoryByUserAndComic(userId, comicId);
-  if (history && history.read === 1) {
-    return true;
-  }
-  return false;
-};
-
-export const setComicReadByUser = async (
-  comicId: number,
-  userId: number,
-  read: boolean,
-): Promise<boolean> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  // check if there is a comicbook with that id
-  const comic = await getComicBookById(comicId);
-  if (!comic) {
-    throw new Error("Comic book not found.");
-  }
-
-  // Check if a history record already exists
-  const existingHistory = await getComicBookHistoryByUserAndComic(
-    userId,
-    comicId,
-  );
-
-  if (existingHistory) {
-    // Update the existing record
-    const readValue = read ? 1 : 0;
-    // Update the existing record
-    const comicbookHistoryId = await updateComicBookHistory(
-      existingHistory.id,
-      { read: readValue, lastReadPage: null },
-    );
-
-    if (!comicbookHistoryId) {
-      throw new Error("Failed to update comic book history.");
-    }
-
-    if (!existingHistory.id) {
-      throw new Error("Failed to update comic book history.");
-    }
-
-    return true;
-  } else {
-    // Create a new history record
-    const newHistory = {
-      userId: userId,
-      comicBookId: comicId,
-      read: read ? 1 : 0,
-      lastReadPage: null,
-    };
-    const comicbookHistoryId = await insertComicBookHistory(newHistory);
-
-    if (!comicbookHistoryId) {
-      throw new Error("Failed to create comic book history.");
-    }
-
-    return true;
   }
 };
 
