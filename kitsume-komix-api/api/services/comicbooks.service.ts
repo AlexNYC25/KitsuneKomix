@@ -7,6 +7,7 @@ import {
   getComicBooksWithMetadataFilteringSorting,
   getComicDuplicates,
   getRandomBook,
+  deleteComicBook
 } from "#sqlite/models/comicBooks.model.ts";
 import {
   getWritersByComicBookId,
@@ -796,6 +797,65 @@ export const setComicReadByUser = async (
 
     return true;
   }
+};
+
+/**
+ * Service to process the deletion of a comic book and its associated data.
+ * 
+ * @param comicId ID of the Comic Book to be deleted
+ * @returns Boolean representing if the deletion succeeded
+ * 
+ * used by
+ * - /api/comic-books/{id}/delete
+ */
+export const processComicBookDeletion = async (
+  comicId: number,
+): Promise<boolean> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  // check if there is a comicbook with that id
+  const comic = await getComicBookById(comicId);
+
+  if (!comic) {
+    throw new Error("Comic book not found.");
+  }
+
+  // Delete associated thumbnails from filesystem and database
+  const thumbnails = await getThumbnailsByComicBookId(comicId);
+  if (!thumbnails || thumbnails.length === 0) {
+    console.log("No thumbnails found for this comic book.");
+    return false;
+  }
+
+  for (const thumbnail of thumbnails) {
+    try {
+      await deleteComicBookThumbnail(thumbnail.id);
+    } catch (error) {
+      console.error(
+        `Error deleting thumbnail ID ${thumbnail.id} for comic ID ${comicId}:`,
+        error,
+      );
+    }
+  }
+
+  // Additional cleanup logic can be added here (e.g., deleting pages, metadata links, etc.)
+  // ok maybe not the metadata links, as we might want to keep those for other comics and even if we don't
+  // have comics for those metadata entries right now, we might in the future
+
+  // Finally, delete the comic book record itself
+  try {
+    await deleteComicBook(comicId);
+  } catch (error) {
+    console.error(`Error deleting comic book ID ${comicId}:`, error);
+    throw error;
+  }
+  
+
+  return true;
 };
 
 /**
