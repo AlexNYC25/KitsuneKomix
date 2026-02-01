@@ -917,6 +917,15 @@ export const getNextComicBookId = async (
   }
 };
 
+
+/**
+ * Get the previous comic book ID in the same series based on issue number.
+ * @param currentComicId 
+ * @returns Previous comic book object or null if not found
+ * 
+ * used by
+ * - /api/comic-books/:id/previous
+ */
 export const getPreviousComicBookId = async (
   currentComicId: number,
 ): Promise<ComicBook | null> => {
@@ -970,6 +979,14 @@ export const getPreviousComicBookId = async (
   }
 };
 
+/**
+ * Get the thumbnails for a specific comic book.
+ * @param comicId The comic id we want to get the thumbnails for
+ * @returns an array of ComicBookThumbnail objects or null if none found
+ * 
+ * used by
+ * - /api/comic-books/:id/thumbnails
+ */
 export const getComicThumbnails = async (
   comicId: number,
 ): Promise<ComicBookThumbnail[] | null> => {
@@ -984,6 +1001,16 @@ export const getComicThumbnails = async (
   return comicThumbnails;
 };
 
+
+/**
+ * Get the specific thumbnail for a comic book by thumbnail ID.
+ * @param comicId The comic id we want to get the thumbnail for
+ * @param thumbnailId The specific thumbnail id we want to get
+ * @returns the ComicBookThumbnail object or null if not found
+ * 
+ * used by
+ * - /api/comic-books/:id/thumbnails/:thumbId
+ */
 export const getComicThumbnailByComicIdThumbnailId = async (
   comicId: number,
   thumbnailId: number,
@@ -998,7 +1025,18 @@ export const getComicThumbnailByComicIdThumbnailId = async (
   return comicThumbnail;
 };
 
-//FIXME: Updated function to also delete the thumbnail from the filesystem
+/**
+ * Delete a specific thumbnail for a comic book by thumbnail ID.
+ * 
+ * @param comicId The specific comic id we want to remove the thumbnail for
+ * @param thumbnailId The specific thumbnail we want to remove
+ * @returns A boolean indicating if the deletion was successful
+ * 
+ * used by
+ * - /api/comic-books/:id/thumbnails/:thumbId
+ * 
+ * FIXME: Updated function to also delete the thumbnail from the filesystem
+ */
 export const deleteComicsThumbnailById = async (
   comicId: number,
   thumbnailId: number,
@@ -1030,6 +1068,19 @@ export const deleteComicsThumbnailById = async (
   }
 };
 
+/**
+ * The service to create a custom thumbnail for a specific comic book.
+ * 
+ * @param comicId The specific comic id we want to create a custom thumbnail for
+ * @param imageData The image data for the custom thumbnail
+ * @param userId The user id who is creating the custom thumbnail
+ * @param name Optional name for the custom thumbnail
+ * @param description Optional description for the custom thumbnail
+ * @returns The newly created thumbnail's ID and file path
+ * 
+ * used by
+ * - /api/comic-books/:id/thumbnails
+ */
 export const createCustomThumbnail = async (
   comicId: number,
   imageData: ArrayBuffer,
@@ -1072,6 +1123,15 @@ export const createCustomThumbnail = async (
   }
 };
 
+
+/**
+ * Compiles the comic book data along with its thumbnail URL.
+ * 
+ * @param comicId The Comic book id who's data we want to attatch it's thumbnail data
+ * @returns an object containing the comic book data along with the thumbnail URL or null if comic not found
+ * 
+ * Note: currently only used by the comic series service, may not be needed anymore or be moved elsewhere
+ */
 export const attachThumbnailToComicBook = async (
   comicId: number,
 ): Promise<ComicBookWithThumbnail | null> => {
@@ -1122,13 +1182,13 @@ const checkIfPageInCache = async (
 /**
  * Preload adjacent pages for better user experience
  */
-async function preloadAdjacentPages(
+const preloadAdjacentPages = async (
   comicId: number,
   currentPage: number,
   preloadCount: number,
   targetFormat: string,
   totalPages: number,
-): Promise<void> {
+): Promise<void> => {
   const formatExtension = targetFormat.split("/")[1];
   const cacheDir = `./cache/pages/${comicId}`;
 
@@ -1184,7 +1244,7 @@ async function preloadAdjacentPages(
 /**
  * Determine the best output format based on browser capabilities
  */
-function determineBestOutputFormat(acceptHeader?: string): string {
+const determineBestOutputFormat = (acceptHeader?: string): string => {
   if (!acceptHeader) {
     return "image/jpeg"; // Default fallback
   }
@@ -1202,11 +1262,11 @@ function determineBestOutputFormat(acceptHeader?: string): string {
 /**
  * Convert image to browser-compatible format if needed
  */
-async function convertImageForBrowser(
+const convertImageForBrowser = async (
   inputPath: string,
   outputPath: string,
   targetFormat: string,
-): Promise<boolean> {
+): Promise<boolean> => {
   try {
     const inputExt = inputPath.toLowerCase().split(".").pop();
     const targetExt = targetFormat.split("/")[1];
@@ -1228,6 +1288,11 @@ async function convertImageForBrowser(
   }
 }
 
+/**
+ * Attaches metadata to a comic book object.
+ * @param comic The comic book object to which metadata will be attached.
+ * @returns A promise that resolves to a comic book object with attached metadata.
+ */
 const attatchMetadataToComicBook = async (
   comic: ComicBook,
 ): Promise<ComicBookWithMetadata> => {
