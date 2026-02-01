@@ -16,7 +16,6 @@ import {
   getPreviousComicBookId,
   setComicReadByUser,
   startStreamingComicBookFile,
-  attachThumbnailToComicBook,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
   fetchAComicsAssociatedMetadataById,
@@ -1755,8 +1754,6 @@ app.openapi(
     }
   }
 );
-
-// HERE is the end of the current rewrite *****************************************************
 
 /**
  * Delete a specific thumbnail for a comic book by ID and thumbnail ID
