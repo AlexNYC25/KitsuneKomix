@@ -20,6 +20,7 @@ import {
   updateComicBookMetadataBulk,
   fetchAComicsAssociatedMetadataById,
   processComicBookDeletion,
+  getTheReadlistsContainingComicBook
 } from "../services/comicbooks.service.ts";
 
 import type {
@@ -39,7 +40,8 @@ import type {
   ComicMetadataUpdateData,
   ComicBookStreamingServiceData,
   ComicBookStreamingServiceResult,
-  ComicMetadataSingleUpdateSchemaData
+  ComicMetadataSingleUpdateSchemaData,
+  ComicStoryArc
 } from "#types/index.ts";
 
 import {
@@ -1996,11 +1998,22 @@ app.openapi(
       },
     },
   }),
-  (c) => {
-    // TODO: implement comic book readlists retrieval logic
-    return c.json({
-      message: "Comic book readlists retrieval not implemented yet",
-    }, 501);
-  });
+  async (c) => {
+    const comicId: number = parseInt(c.req.param("id"), 10);
+    
+    try {
+      const comicStoryArcs: ComicStoryArc[] = await getTheReadlistsContainingComicBook(comicId);
+
+      return c.json({
+        comicId: comicId,
+        readlists: comicStoryArcs,
+      }, 200);
+
+    } catch (error) {
+      console.error("Error fetching comic book readlists:", error);
+      return c.json({ error: "Failed to fetch comic book readlists" }, 501);
+    }
+  }
+);
 
 export default app;
