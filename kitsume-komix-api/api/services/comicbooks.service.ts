@@ -134,7 +134,8 @@ import {
   RequestSortParametersValidated,
   ComicMetadataUpdateData,
   ComicBookStreamingServiceData,
-  ComicBookStreamingServiceResult
+  ComicBookStreamingServiceResult,
+  ComicStoryArc
 } from "#types/index.ts";
 
 /**
@@ -1150,6 +1151,24 @@ export const attachThumbnailToComicBook = async (
   };
 
   return comicWithThumbnail;
+};
+
+/**
+ * Get the readlists/comic story arcs that a specific comic book belongs to.
+ * 
+ * @param comicId The comic in question we want to see what readlists/comic story arcs it belongs to
+ * @returns An array of comic story arc objects the comic belongs to
+ */
+export const getTheReadlistsContainingComicBook = async (
+  comicId: number,
+): Promise<ComicStoryArc[]> => {
+  const readlists: ComicStoryArc[] = await getStoryArcsByComicBookId(comicId);
+
+  if (!readlists || readlists.length === 0) {
+    return [];
+  }
+
+  return readlists;
 };
 
 // ******************************************************************************
