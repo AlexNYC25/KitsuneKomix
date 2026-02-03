@@ -4,8 +4,8 @@ import { createSelectSchema } from "drizzle-zod";
 import { 
   comicBookSelectJoinedWithThumbnailSchema,
   comicBookSelectJoinedWithThumbnailCamelCaseSchema 
-} from "./comic-books.schema.ts";
-import { metadataSchema } from "./comic-metadata.schema.ts";
+} from "./comicBooks.schema.ts";
+import { metadataSchema } from "./comicMetadata.schema.ts";
 import { toCamelCaseSchema } from "../../utils/openapi-helpers.ts";
 
 import { comicSeriesTable } from "../../../db/sqlite/schema.ts";

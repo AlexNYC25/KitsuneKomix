@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { PaginationSortFilterQuerySchema, ComicMetadataSingleUpdateSchema, ComicMetadataBulkUpdateSchema } from "../zod/schemas/request.schema.ts";
-import { metadataUpdateSchema } from "../zod/schemas/data/comic-metadata.schema.ts";
+import { metadataUpdateSchema } from "../zod/schemas/data/comicMetadata.schema.ts";
 
 export type SortOrder = "asc" | "desc";
 

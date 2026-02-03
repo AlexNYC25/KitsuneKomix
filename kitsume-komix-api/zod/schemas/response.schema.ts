@@ -1,11 +1,11 @@
 import { z } from "@hono/zod-openapi";
 
-import { metadataSchema } from "./data/comic-metadata.schema.ts";
-import { comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comic-books.schema.ts";
-import { comicSeriesSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comic-series.schema.ts";
-import { comicLibrariesArraySelectSchema } from "./data/comic-libraries.schema.ts";
-import { comicBookThumbnailSchema } from "./data/comic-thumbnails.schema.ts";
-import { comicStoryArcSelectSchema } from "./data/comic-story-arcs.schema.ts";
+import { metadataSchema } from "./data/comicMetadata.schema.ts";
+import { comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comicBooks.schema.ts";
+import { comicSeriesSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comicSeries.schema.ts";
+import { comicLibrariesArraySelectSchema } from "./data/comicLibraries.schema.ts";
+import { comicBookThumbnailSchema } from "./data/comicThumbnails.schema.ts";
+import { comicStoryArcSelectSchema } from "./data/comicStoryArcs.schema.ts";
 
 // **** Basic response schemas **** //
 export const MessageResponseSchema = z.object({

@@ -1,5 +1,5 @@
 import { z } from "@hono/zod-openapi";
-import { metadataUpdateSchema } from "./data/comic-metadata.schema.ts";
+import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 /**
  * Common schema for path parameter 'id'
