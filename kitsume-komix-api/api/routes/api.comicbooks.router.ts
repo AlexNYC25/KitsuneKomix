@@ -3,67 +3,66 @@ import z from "zod";
 import { basename } from "@std/path";
 
 import {
-  checkComicReadByUser,
-  createCustomThumbnail,
-  deleteComicsThumbnailById,
-  fetchComicDuplicatesInTheDb,
-  fetchRandomComicBook,
   fetchComicBooksWithRelatedMetadata,
+  fetchAComicsAssociatedMetadataById,
+  fetchRandomComicBook,
+  fetchComicDuplicatesInTheDb,
   getComicPagesInfo,
-  getComicThumbnailByComicIdThumbnailId,
-  getComicThumbnails,
+  getTheReadlistsContainingComicBook,
+  checkComicReadByUser,
+  setComicReadByUser,
   getNextComicBookId,
   getPreviousComicBookId,
-  setComicReadByUser,
+  getComicThumbnailByComicIdThumbnailId,
+  getComicThumbnails,
+  createCustomThumbnail,
+  deleteComicsThumbnailById,
   startStreamingComicBookFile,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
-  fetchAComicsAssociatedMetadataById,
   processComicBookDeletion,
-  getTheReadlistsContainingComicBook
 } from "../services/comicbooks.service.ts";
 
 import type {
+  AppEnv,
   ComicBook,
   ComicBookWithMetadata,
-  MultipleReturnResponse,
-  MultipleReturnResponseNoFilterNoSort,
   ComicBookThumbnail,
-  AppEnv,
+  ComicStoryArc,
+  ComicSortField,
+  ComicFilterField,
+  ComicMetadataUpdateData,
+  ComicMetadataBulkUpdateSchemaData,
+  ComicMetadataSingleUpdateSchemaData,
+  ComicBookStreamingServiceData,
+  ComicBookStreamingServiceResult,
   RequestPaginationParametersValidated,
   RequestFilterParametersValidated,
   RequestSortParametersValidated,
-  ComicSortField,
-  ComicFilterField,
   RequestParametersValidated,
-  ComicMetadataBulkUpdateSchemaData,
-  ComicMetadataUpdateData,
-  ComicBookStreamingServiceData,
-  ComicBookStreamingServiceResult,
-  ComicMetadataSingleUpdateSchemaData,
-  ComicStoryArc
+  MultipleReturnResponse,
+  MultipleReturnResponseNoFilterNoSort,
 } from "#types/index.ts";
 
 import {
-  ComicBooksResponseSchema,
   FlexibleResponseSchema,
-  ComicBookMetadataResponseSchema,
   SuccessResponseSchema,
   ErrorResponseSchema,
+  ComicBookMetadataResponseSchema,
   ComicBookReadByUserResponseSchema,
   ComicBookThumbnailsResponseSchema
 } from "../../zod/schemas/response.schema.ts";
+
 import {
+  ParamIdSchema,
+  ParamIdStreamPageSchema,
+  ParamIdThumbnailIdSchema,
+  PaginationQuerySchema,
   PaginationSortFilterQuerySchema,
   PaginationFilterQuerySchema,
-  PaginationQuerySchema,
-  ComicBookUpdateSchema,
   PaginationLetterQuerySchema,
-  ParamIdSchema,
   ComicMetadataSingleUpdateSchema,
   ComicMetadataBulkUpdateSchema,
-  ParamIdStreamPageSchema,
-  ParamIdThumbnailIdSchema
 } from "../../zod/schemas/request.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
