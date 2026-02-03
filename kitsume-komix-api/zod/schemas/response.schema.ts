@@ -1,12 +1,8 @@
 import { z } from "@hono/zod-openapi";
 
-import {
-  comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
-  comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
-  comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
-} from "./data/comic-series.schema.ts";
 import { metadataSchema } from "./data/comic-metadata.schema.ts";
 import { comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comic-books.schema.ts";
+import { comicSeriesSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comic-series.schema.ts";
 import { comicLibrariesArraySelectSchema } from "./data/comic-libraries.schema.ts";
 import { comicBookThumbnailSchema } from "./data/comic-thumbnails.schema.ts";
 import { comicStoryArcSelectSchema } from "./data/comic-story-arcs.schema.ts";
@@ -44,22 +40,9 @@ export const ComicSeriesResponseSchema = z.object({
   message: z.string(),
 });
 
-/**
- * Schema for paginated comic books response
- */
-export const ComicBooksResponseSchema = z.object({
-  data: z.array(comicBookWithMetadataCamelCaseSchema),
-  meta: z.object({
-    total: z.number(),
-    page: z.number(),
-    pageSize: z.number(),
-    hasNextPage: z.boolean(),
-  }),
-  message: z.string(),
-}).openapi({
-  title: "ComicBooksResponse",
-  description: "A paginated list of comic books with metadata",
-});
+
+// ** HERE IS THE END OF THE VERIFED GOOD PART ** //
+
 
 /**
  * Schema for the comic book's thumbnails response, as a standalone response
@@ -91,23 +74,6 @@ export const ComicBookMetadataResponseSchema = comicBookWithMetadataCamelCaseSch
   title: "ComicBookMetadataResponse",
   description: "A single comic book with its full metadata including all related creator and content information",
 });
-
-/**
- * Schema for single comic series with metadata and thumbnails response
- */
-export const ComicSeriesWithMetadataAndThumbnailsResponseSchema = z.object({
-  data: comicSeriesSelectJoinedWithThumbnailAndMetadataSchema,
-  message: z.string(),
-});
-
-/**
- * Schema for single comic series with comics, metadata, and thumbnails response
- */
-export const ComicSeriesWithComicsMetadataAndThumbnailsResponseSchema =
-  z.object({
-    data: comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema,
-    message: z.string(),
-  });
 
 // CamelCase version for API responses - explicitly defined schema for OpenAPI compatibility
 export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema = z.object({
