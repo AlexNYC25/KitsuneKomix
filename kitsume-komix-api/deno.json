@@ -2,6 +2,7 @@
   "imports": {
     "#types/": "./types/",
     "#interfaces/": "./interfaces/",
+    "#schemas/": "./zod/schemas/",
     "#utilities/": "./utilities/",
     "#sqlite/": "./db/sqlite/",
     "@hono/swagger-ui": "npm:@hono/swagger-ui@^0.5.2",
