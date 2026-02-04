@@ -1,8 +1,9 @@
 // Re-export all database types
 export * from "./database.types.ts";
 
-//
+// Re-export request and response types
 export * from "./request.type.ts";
+export * from "./responses.type.ts";
 
 // Re-export specific domain types
 export * from "./user.type.ts";
