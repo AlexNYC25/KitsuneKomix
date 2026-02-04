@@ -4,7 +4,7 @@ import camelcasekeys from "camelcase-keys";
 import { requireAuth } from "../middleware/authChecks.ts";
 
 import type { AppEnv } from "#types/index.ts";
-import type { RequestPaginationParameters, RequestFilterParameters, RequestSortParameters } from "#types/index.ts";
+import type { QueryData, RequestFilterParameters, RequestSortParameters } from "#types/index.ts";
 
 import { fetchAllComicStoryArcs } from "../services/comicStoryArcs.service.ts";
 import { ComicArcResponseSchema } from "../../zod/schemas/response.schema.ts";
@@ -115,7 +115,7 @@ app.openapi(
 
     // Extract and construct pagination parameters
     const query = c.req.valid("query");
-    const paginationParams: RequestPaginationParameters = {
+    const paginationParams: QueryData = {
       page: query.page,
       pageSize: query.pageSize,
     };
