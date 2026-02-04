@@ -3,6 +3,7 @@ import type { Context, Next } from "hono";
 import { verifyAccessToken, verifyRefreshToken } from "../../auth/auth.ts";
 import { getValidRefreshToken } from "../../db/sqlite/models/refreshTokens.model.ts";
 import { apiLogger } from "../../logger/loggers.ts";
+import type { AccessRefreshTokenCombinedPayload } from "#types/index.ts";
 
 /**
  * Middleware to require authentication for a route.
@@ -11,15 +12,15 @@ import { apiLogger } from "../../logger/loggers.ts";
  * @returns A response indicating whether the user is authenticated.
  */
 export const requireAuth = async (c: Context, next: Next) => {
-  const authHeader = c.req.header("authorization");
+  const authHeader: string | undefined = c.req.header("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return c.json({ message: "Unauthorized - Missing or invalid Authorization header" }, 401);
   }
 
-  const token = authHeader.split(" ")[1];
+  const token: string = authHeader.split(" ")[1];
 
   try {
-    const payload = await verifyAccessToken(token);
+    const payload: AccessRefreshTokenCombinedPayload = await verifyAccessToken(token);
     c.set("user", payload);
     return next();
   } catch (error) {
