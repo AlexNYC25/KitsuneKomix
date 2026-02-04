@@ -56,7 +56,7 @@ import {
   ComicBookThumbnailsResponseSchema,
   //
   ComicBookMultipleResponseSchema
-} from "../../zod/schemas/response.schema.ts";
+} from "#schemas/response.schema.ts";
 
 import {
   ParamIdSchema,
@@ -68,7 +68,7 @@ import {
   PaginationLetterQuerySchema,
   ComicMetadataSingleUpdateSchema,
   ComicMetadataBulkUpdateSchema,
-} from "../../zod/schemas/request.schema.ts";
+} from "#schemas/request.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
@@ -93,10 +93,10 @@ app.openapi(
     summary: "Get all comic books",
     description: "Retrieve all comic books in the database with pagination, sorting, and filtering",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       query: PaginationSortFilterQuerySchema,
     },
-
     responses: {
       200: {
         content: {
@@ -105,6 +105,22 @@ app.openapi(
           },
         },
         description: "Comic books retrieved successfully",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
       },
       500: {
         content: {
@@ -125,6 +141,17 @@ app.openapi(
       filter?: string | undefined;
       filterProperty?: string | undefined;
     } = c.req.valid("query");
+
+    const user = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
