@@ -9,14 +9,6 @@ export type SortOrder = "asc" | "desc";
 export type QueryData = z.infer<typeof PaginationSortFilterQuerySchema>;
 
 /**
- * The inital type for request parameters related to pagination.
- * 
- * These parameters should be the raw values received from the request,
- * and may be undefined if not provided by the client.
- */
-export type RequestPaginationParameters = z.infer<typeof PaginationSortFilterQuerySchema>;
-
-/**
  * The validated type for request parameters related to pagination.
  * 
  * These parameters should have default values applied and be guaranteed

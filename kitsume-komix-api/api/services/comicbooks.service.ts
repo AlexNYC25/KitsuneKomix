@@ -234,7 +234,7 @@ export const fetchAComicsAssociatedMetadataById = async (
 /**
  * Get comic book duplicates in the database.
  *
- * @param requestPaginationParameters - The query parameters for pagination.
+ * @param RequestPaginationParametersValidated - The query parameters for pagination.
  * @returns A promise that resolves to an array of duplicate comic books.
  *
  * used by 
