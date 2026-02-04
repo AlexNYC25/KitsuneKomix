@@ -42,6 +42,9 @@ import type {
   RequestParametersValidated,
   MultipleReturnResponse,
   MultipleReturnResponseNoFilterNoSort,
+  ComicBookMultipleResponse,
+  ComicBookMultipleResponseData,
+  ComicBookMultipleResponseMeta,
 } from "#types/index.ts";
 
 import {
@@ -50,7 +53,9 @@ import {
   ErrorResponseSchema,
   ComicBookMetadataResponseSchema,
   ComicBookReadByUserResponseSchema,
-  ComicBookThumbnailsResponseSchema
+  ComicBookThumbnailsResponseSchema,
+  //
+  ComicBookMultipleResponseSchema
 } from "../../zod/schemas/response.schema.ts";
 
 import {
@@ -96,8 +101,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookMultipleResponseSchema
           },
         },
         description: "Comic books retrieved successfully",
@@ -105,8 +109,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -126,8 +129,7 @@ app.openapi(
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
     try {
-
-      const comics = await fetchComicBooksWithRelatedMetadata(
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
         serviceData
       );
 
@@ -137,18 +139,22 @@ app.openapi(
 
       // Check if there's a next page
       const hasNextPage = comics.length > serviceDataPagination.pageSize;
-      const resultComics = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
+      const resultComics: ComicBookMultipleResponseData = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
 
-      const returnObj: MultipleReturnResponse = {
-        data: resultComics,
+      const requestMetadata: ComicBookMultipleResponseMeta = {
         count: resultComics.length,
-        hasNextPage,
+        hasNextPage: hasNextPage,
         currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filter: serviceDataFilter?.filterValue || null,
         filterProperty: serviceDataFilter?.filterProperty || null,
-        sort: serviceDataSort.sortOrder === "desc" ? "desc" : "asc",
-        sortProperty: serviceDataSort.sortProperty || null
+        filterValue: serviceDataFilter?.filterValue || null,
+        sortProperty: serviceDataSort.sortProperty || null,
+        sortOrder: serviceDataSort.sortOrder || null,
+      }
+ 
+      const returnObj: ComicBookMultipleResponse = {
+        data: resultComics,
+        meta: requestMetadata
       };
 
       return c.json(returnObj, 200);
