@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { metadataSchema } from "./data/comicMetadata.schema.ts";
-import { comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comicBooks.schema.ts";
+import { comicBookSelectSchema, comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comicBooks.schema.ts";
 import { comicSeriesSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comicSeries.schema.ts";
 import { comicLibrariesArraySelectSchema } from "./data/comicLibraries.schema.ts";
 import { comicBookThumbnailSchema } from "./data/comicThumbnails.schema.ts";
@@ -32,12 +32,22 @@ export const ComicSeriesResponseSchema = z.object({
     comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
   ),
   meta: z.object({
-    total: z.number(),
-    page: z.number(),
-    pageSize: z.number(),
-    hasNextPage: z.boolean(),
+    total: z.number().min(0),
+    page: z.number().min(1),
+    pageSize: z.number().min(1),
+    hasNextPage: z.boolean().default(false),
   }),
   message: z.string(),
+});
+
+/**
+ * Schema for returning multiple comic books as part of a response
+ */
+export const ComicBookMultipleResponseSchema = z.object({
+  data: z.array(comicBookSelectSchema) || z.array(comicBookWithMetadataCamelCaseSchema),
+}).openapi({
+  title: "ComicBookMultipleResponse",
+  description: "Response containing multiple comic books",
 });
 
 
