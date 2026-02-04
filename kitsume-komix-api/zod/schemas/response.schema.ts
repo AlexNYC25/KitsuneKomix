@@ -54,10 +54,10 @@ export const FlexibleResponseSchema = z.unknown().openapi({
  * Schema for pagination metadata in responses
  */
 export const PaginationMetaSchema = z.object({
-  count: z.number().min(0),
+  count: z.number().min(0).default(0),
   hasNextPage: z.boolean().default(false),
-  currentPage: z.number().min(1),
-  pageSize: z.number().min(1),
+  currentPage: z.number().min(1).default(1),
+  pageSize: z.number().min(1).default(1),
 }).openapi({
   title: "PaginationMeta",
   description: "Metadata for paginated responses",
@@ -78,8 +78,8 @@ export const FilterMetaSchema = z.object({
  * Schema for sort metadata in responses
  */
 export const SortMetaSchema = z.object({
-  sortProperty: z.string(),
-  sortOrder: z.enum(["asc", "desc"]),
+  sortProperty: z.string().nullable().optional(),
+  sortOrder: z.enum(["asc", "desc"]).nullable().optional(),
 }).openapi({
   title: "SortMeta",
   description: "Metadata for sorted responses",
@@ -94,7 +94,7 @@ export const ComicSeriesResponseSchema = z.object({
     comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
   ),
   meta: z.object({
-    total: z.number().min(0),
+    total: z.number().min(0).default(0),
     page: z.number().min(1),
     pageSize: z.number().min(1),
     hasNextPage: z.boolean().default(false),
@@ -104,9 +104,12 @@ export const ComicSeriesResponseSchema = z.object({
 
 /**
  * Schema for returning multiple comic books as part of a response
+ * 
+ * TODO: Expand the data type to allow for the schemas with comic book data + thumbnails (+ metadata)
  */
 export const ComicBookMultipleResponseSchema = z.object({
   data: z.array(comicBookSelectSchema) || z.array(comicBookWithMetadataCamelCaseSchema),
+  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
 }).openapi({
   title: "ComicBookMultipleResponse",
   description: "Response containing multiple comic books",
