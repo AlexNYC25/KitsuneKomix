@@ -1,12 +1,22 @@
 import { z } from "zod";
 
-import { PaginationSortFilterQuerySchema, ComicMetadataSingleUpdateSchema, ComicMetadataBulkUpdateSchema } from "../zod/schemas/request.schema.ts";
-import { metadataUpdateSchema } from "../zod/schemas/data/comicMetadata.schema.ts";
+import {
+  PaginationSortFilterQuerySchema, 
+  PaginationLetterQuerySchema,
+  ComicMetadataSingleUpdateSchema, 
+  ComicMetadataBulkUpdateSchema 
+} from "#schemas/request.schema.ts";
+
+import { metadataUpdateSchema } from "#schemas/data/comicMetadata.schema.ts";
 
 export type SortOrder = "asc" | "desc";
 
 // The type representation of the query data when the request query = PaginationSortFilterQuerySchema is used.
 export type QueryData = z.infer<typeof PaginationSortFilterQuerySchema>;
+
+// The type representation of the query data when the request query = PaginationSortFilterQuerySchema + PaginationLetterQuerySchema is used.
+// Basically adds the letter param value to the QueryData type.
+export type QueryDataWithLetter = z.infer<typeof PaginationSortFilterQuerySchema> & z.infer<typeof PaginationLetterQuerySchema>;
 
 /**
  * The validated type for request parameters related to pagination.
