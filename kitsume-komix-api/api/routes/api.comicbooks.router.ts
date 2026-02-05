@@ -25,6 +25,7 @@ import {
 
 import type {
   AppEnv,
+  AccessRefreshTokenCombinedPayload,
   ComicBook,
   ComicBookWithMetadata,
   ComicBookThumbnail,
@@ -45,6 +46,7 @@ import type {
   ComicBookMultipleResponse,
   ComicBookMultipleResponseData,
   ComicBookMultipleResponseMeta,
+  QueryData,
 } from "#types/index.ts";
 
 import {
@@ -133,22 +135,15 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: {
-      page: number;
-      pageSize: number;
-      sort?: string | undefined;
-      sortDirection?: "asc" | "desc" | undefined;
-      filter?: string | undefined;
-      filterProperty?: string | undefined;
-    } = c.req.valid("query");
+    const queryData: QueryData = c.req.valid("query");
 
-    const user = c.get("user");
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
 
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const userId = parseInt(user.sub, 10);
+    const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
@@ -165,7 +160,7 @@ app.openapi(
       const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
 
       // Check if there's a next page
-      const hasNextPage = comics.length > serviceDataPagination.pageSize;
+      const hasNextPage: boolean = comics.length > serviceDataPagination.pageSize;
       const resultComics: ComicBookMultipleResponseData = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
 
       const requestMetadata: ComicBookMultipleResponseMeta = {
@@ -177,7 +172,7 @@ app.openapi(
         filterValue: serviceDataFilter?.filterValue || null,
         sortProperty: serviceDataSort.sortProperty || null,
         sortOrder: serviceDataSort.sortOrder || null,
-      }
+      };
  
       const returnObj: ComicBookMultipleResponse = {
         data: resultComics,
