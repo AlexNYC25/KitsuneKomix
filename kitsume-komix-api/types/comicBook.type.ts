@@ -65,6 +65,7 @@ export type ComicBookFilteringAndSortingParams = {
 };
 
 // Response contract for routes that return lists of comic books
+// TODO: Depreate in favor of specific type infered from the zod schemas
 export type MultipleReturnResponse = {
   data: ComicBook[] | ComicBookWithMetadata[];
   count: number;
