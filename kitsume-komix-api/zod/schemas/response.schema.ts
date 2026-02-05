@@ -53,7 +53,7 @@ export const FlexibleResponseSchema = z.unknown().openapi({
 /**
  * Schema for pagination metadata in responses
  */
-export const PaginationMetaSchema = z.object({
+const PaginationMetaSchema = z.object({
   count: z.number().min(0).default(0),
   hasNextPage: z.boolean().default(false),
   currentPage: z.number().min(1).default(1),
@@ -66,7 +66,7 @@ export const PaginationMetaSchema = z.object({
 /**
  * Schema for filter metadata in responses
  */
-export const FilterMetaSchema = z.object({
+const FilterMetaSchema = z.object({
   filterProperty: z.string().optional(),
   filterValue: z.string().optional(),
 }).openapi({
@@ -77,7 +77,7 @@ export const FilterMetaSchema = z.object({
 /**
  * Schema for sort metadata in responses
  */
-export const SortMetaSchema = z.object({
+const SortMetaSchema = z.object({
   sortProperty: z.string().optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 }).openapi({
@@ -85,9 +85,20 @@ export const SortMetaSchema = z.object({
   description: "Metadata for sorted responses",
 });
 
+const UpdatedResultsSchema = z.object({
+  totalUpdated: z.number().min(0).default(0),
+  totalRequested: z.number().min(0).default(0),
+  successful: z.boolean().default(false),
+}).openapi({
+  title: "UpdatedResults",
+  description: "Information about the results of an update operation",
+});
+
+// **** Full response schemas **** //
 
 /**
  * Schema for paginated comic series response
+ * TODO: Look into if this can be consolidated with other paginated response schemas
  */
 export const ComicSeriesResponseSchema = z.object({
   data: z.array(
@@ -113,6 +124,11 @@ export const ComicBookMultipleResponseSchema = z.object({
 }).openapi({
   title: "ComicBookMultipleResponse",
   description: "Response containing multiple comic books",
+});
+
+export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResultsSchema.shape).openapi({
+  title: "BulkUpdateResponse",
+  description: "Response for bulk update operations with results summary",
 });
 
 
