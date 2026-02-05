@@ -168,10 +168,10 @@ app.openapi(
         hasNextPage: hasNextPage,
         currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filterProperty: serviceDataFilter?.filterProperty || null,
-        filterValue: serviceDataFilter?.filterValue || null,
-        sortProperty: serviceDataSort.sortProperty || null,
-        sortOrder: serviceDataSort.sortOrder || null,
+        filterProperty: serviceDataFilter?.filterProperty,
+        filterValue: serviceDataFilter?.filterValue,
+        sortProperty: serviceDataSort.sortProperty,
+        sortOrder: serviceDataSort.sortOrder,
       };
  
       const returnObj: ComicBookMultipleResponse = {
@@ -201,6 +201,7 @@ app.openapi(
     summary: "Get latest comic books",
     description: "Retrieve the latest comic books added to the database, sorted by creation date in descending order",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       query: PaginationFilterQuerySchema,
     },
@@ -208,17 +209,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookMultipleResponseSchema
           },
         },
         description: "Latest comic books retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -226,21 +241,24 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: {
-      page: number;
-      pageSize: number;
-      sort?: string | undefined;
-      sortDirection?: "asc" | "desc" | undefined;
-      filter?: string | undefined;
-      filterProperty?: string | undefined;
-    } = c.req.valid("query");
-
+    const queryData: QueryData = c.req.valid("query");
     queryData.sort = "createdAt";
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
     try {
-      const comics = await fetchComicBooksWithRelatedMetadata(
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
         serviceData
       );
 
@@ -248,25 +266,29 @@ app.openapi(
       const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = serviceData.filter;
       const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
 
-      const hasNextPage = comics.length > serviceDataPagination.pageSize;
-      const resultComics = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
+      const hasNextPage: boolean = comics.length > serviceDataPagination.pageSize;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
 
-      const returnObj: MultipleReturnResponse = {
-        data: resultComics,
+      const requestMetadata: ComicBookMultipleResponseMeta = {
         count: resultComics.length,
-        hasNextPage,
+        hasNextPage: hasNextPage,
         currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filter: serviceDataFilter?.filterValue || null,
-        filterProperty: serviceDataFilter?.filterProperty || null,
-        sort: serviceDataSort.sortOrder === "desc" ? "desc" : "asc",
-        sortProperty: serviceDataSort.sortProperty || null
+        filterProperty: serviceDataFilter?.filterProperty,
+        filterValue: serviceDataFilter?.filterValue,
+        sortProperty: serviceDataSort.sortProperty,
+        sortOrder: serviceDataSort.sortOrder,
+      };
+ 
+      const returnObj: ComicBookMultipleResponse = {
+        data: resultComics,
+        meta: requestMetadata
       };
 
       return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching latest comic books:", error);
-      return c.json({ error: "Failed to fetch latest comic books" }, 500);
+      return c.json({ message: "Failed to fetch latest comic books" }, 500);
     }
   }
 );
@@ -285,6 +307,7 @@ app.openapi(
     summary: "Get newest comic books",
     description: "Retrieve the newest comic books sorted by publication date in descending order",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       query: PaginationFilterQuerySchema,
     },
@@ -292,17 +315,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookMultipleResponseSchema
           },
         },
-        description: "Newest comic books retrieved successfully",
+        description: "Latest comic books retrieved successfully",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
       },
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -310,21 +347,24 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: {
-      page: number;
-      pageSize: number;
-      sort?: string | undefined;
-      sortDirection?: "asc" | "desc" | undefined;
-      filter?: string | undefined;
-      filterProperty?: string | undefined;
-    } = c.req.valid("query");
-
+    const queryData: QueryData = c.req.valid("query");
     queryData.sort = "date";
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
 
     try {
-      const comics = await fetchComicBooksWithRelatedMetadata(
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
         serviceData
       );
 
@@ -332,25 +372,29 @@ app.openapi(
       const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = serviceData.filter;
       const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
 
-      const hasNextPage = comics.length > serviceDataPagination.pageSize;
-      const resultComics = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
+      const hasNextPage: boolean = comics.length > serviceDataPagination.pageSize;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
 
-      const returnObj: MultipleReturnResponse = {
-        data: resultComics,
+      const requestMetadata: ComicBookMultipleResponseMeta = {
         count: resultComics.length,
-        hasNextPage,
+        hasNextPage: hasNextPage,
         currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filter: serviceDataFilter?.filterValue || null,
-        filterProperty: serviceDataFilter?.filterProperty || null,
-        sort: serviceDataSort.sortOrder === "desc" ? "desc" : "asc",
-        sortProperty: serviceDataSort.sortProperty || null
+        filterProperty: serviceDataFilter?.filterProperty,
+        filterValue: serviceDataFilter?.filterValue,
+        sortProperty: serviceDataSort.sortProperty,
+        sortOrder: serviceDataSort.sortOrder,
+      };
+ 
+      const returnObj: ComicBookMultipleResponse = {
+        data: resultComics,
+        meta: requestMetadata
       };
 
       return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching latest comic books:", error);
-      return c.json({ error: "Failed to fetch latest comic books" }, 500);
+      return c.json({ message: "Failed to fetch latest comic books" }, 500);
     }
   }
 );
