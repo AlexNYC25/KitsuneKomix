@@ -9,6 +9,8 @@ import {
 
 import { metadataUpdateSchema } from "#schemas/data/comicMetadata.schema.ts";
 
+// *** Zod Inferred Types ***
+
 export type SortOrder = "asc" | "desc";
 
 // The type representation of the query data when the request query = PaginationSortFilterQuerySchema is used.
@@ -17,6 +19,13 @@ export type QueryData = z.infer<typeof PaginationSortFilterQuerySchema>;
 // The type representation of the query data when the request query = PaginationSortFilterQuerySchema + PaginationLetterQuerySchema is used.
 // Basically adds the letter param value to the QueryData type.
 export type QueryDataWithLetter = z.infer<typeof PaginationSortFilterQuerySchema> & z.infer<typeof PaginationLetterQuerySchema>;
+
+export type ComicMetadataSingleUpdateData = z.infer<typeof ComicMetadataSingleUpdateSchema >;
+export type ComicMetadataBulkUpdateData = z.infer<typeof ComicMetadataBulkUpdateSchema>;
+
+export type ComicMetadataUpdateData = z.infer<typeof metadataUpdateSchema>;
+
+// *** Service Request Parameter Types ***
 
 /**
  * The validated type for request parameters related to pagination.
@@ -78,34 +87,12 @@ export type RequestFilterParametersValidated<TFilterField extends string> = {
  * Type for request parameters related to data insertion.
  * 
  * Used in routes that support inserting new records.
- * At the initial stage, the data is represented as a generic record,
- * with key/value pairs, to be validated and processed later.
- */
-export type RequestInsertionParameters = {
-	insertData: Record<string, unknown>;
-};
-
-/**
- * Type for request parameters related to data insertion.
- * 
- * Used in routes that support inserting new records.
  * At this stage, the data has been validated and typed accordingly.
  * Such as making sure that the inserted data matches the expected structure.
  * T represents the specific type of the data to be inserted.
  */
-export type RequestInsertionParametersValidated = {
+type RequestInsertionParametersValidated = {
 	insertData: Record<string, string | number | boolean | null>;
-};
-
-/**
- * Type for request parameters related to data updating.
- * 
- * Used in routes that support updating existing records.
- * At the initial stage, the data is represented as a generic record,
- * with key/value pairs, to be validated and processed later.
- */
-export type RequestUpdateParameters = {
-	updateData: Record<string, unknown>;
 };
 
 /**
@@ -137,8 +124,3 @@ export type RequestParametersValidated<
   insertDetails?: RequestInsertionParametersValidated;
   updateDetails?: RequestUpdateParametersValidated;
 };
-
-export type ComicMetadataSingleUpdateSchemaData = z.infer<typeof ComicMetadataSingleUpdateSchema >;
-export type ComicMetadataBulkUpdateSchemaData = z.infer<typeof ComicMetadataBulkUpdateSchema>;
-
-export type ComicMetadataUpdateData = z.infer<typeof metadataUpdateSchema>;
