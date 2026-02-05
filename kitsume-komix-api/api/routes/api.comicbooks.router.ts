@@ -33,8 +33,8 @@ import type {
   ComicSortField,
   ComicFilterField,
   ComicMetadataUpdateData,
-  ComicMetadataBulkUpdateSchemaData,
-  ComicMetadataSingleUpdateSchemaData,
+  ComicMetadataBulkUpdateData,
+  ComicMetadataSingleUpdateData,
   ComicBookStreamingServiceData,
   ComicBookStreamingServiceResult,
   RequestPaginationParametersValidated,
@@ -772,7 +772,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const data: ComicMetadataBulkUpdateSchemaData = await c.req.json();
+    const data: ComicMetadataBulkUpdateData = await c.req.json();
 
     const comicBookIds: number[] = data.comicBookIds.map(idStr => Number(idStr));
     const metadataUpdates: ComicMetadataUpdateData[] = data.metadataUpdates;
@@ -1566,7 +1566,7 @@ app.openapi(
   }),
   async (c) => {
     const id: number = parseInt(c.req.param("id"));
-    const updateRequestBody: ComicMetadataSingleUpdateSchemaData = await c.req.json();
+    const updateRequestBody: ComicMetadataSingleUpdateData = await c.req.json();
 
     try {
       const metadataUpdates = updateRequestBody.metadataUpdates;
