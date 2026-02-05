@@ -67,8 +67,8 @@ export const PaginationMetaSchema = z.object({
  * Schema for filter metadata in responses
  */
 export const FilterMetaSchema = z.object({
-  filterProperty: z.string().nullable().optional(),
-  filterValue: z.string().nullable().optional(),
+  filterProperty: z.string().optional(),
+  filterValue: z.string().optional(),
 }).openapi({
   title: "FilterMeta",
   description: "Metadata for filtered responses",
@@ -78,8 +78,8 @@ export const FilterMetaSchema = z.object({
  * Schema for sort metadata in responses
  */
 export const SortMetaSchema = z.object({
-  sortProperty: z.string().nullable().optional(),
-  sortOrder: z.enum(["asc", "desc"]).nullable().optional(),
+  sortProperty: z.string().optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
 }).openapi({
   title: "SortMeta",
   description: "Metadata for sorted responses",
