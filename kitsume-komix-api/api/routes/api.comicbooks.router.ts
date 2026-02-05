@@ -47,6 +47,7 @@ import type {
   ComicBookMultipleResponseData,
   ComicBookMultipleResponseMeta,
   QueryData,
+  QueryDataWithLetter
 } from "#types/index.ts";
 
 import {
@@ -411,6 +412,7 @@ app.openapi(
     summary: "Get duplicate comic books",
     description: "Retrieve duplicate comic books based on unique hash",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       query: PaginationQuerySchema
     },
@@ -418,17 +420,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookMultipleResponseSchema,
           },
         },
         description: "Duplicate comic books retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       500: {
         content: {
-          //TODO: Update to proper schema
           "application/json": {
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -436,10 +452,18 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: {
-      page: number;
-      pageSize: number;
-    } = c.req.valid("query");
+    const queryData: QueryData = c.req.valid("query");
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
 
@@ -450,31 +474,43 @@ app.openapi(
       });
 
       if (duplicates.length > 0) {
-        const returnData: MultipleReturnResponseNoFilterNoSort = {
-          data: duplicates,
+        const hasNextPage: boolean = duplicates.length > paginationData.pageSize;
+        const resultComics: ComicBookWithMetadata[] = hasNextPage ? duplicates.slice(0, paginationData.pageSize) : duplicates;
+
+        const requestMetadata: ComicBookMultipleResponseMeta = {
           count: duplicates.length,
-          hasNextPage: duplicates.length >= paginationData.pageSize,
+          hasNextPage: hasNextPage,
           currentPage: paginationData.pageNumber,
           pageSize: paginationData.pageSize
         };
+  
+        const returnObj: ComicBookMultipleResponse = {
+          data: resultComics,
+          meta: requestMetadata
+        };
 
-        return c.json(returnData, 200);
+        return c.json(returnObj, 200);
       } else {
-        const returnDataNoResults: MultipleReturnResponseNoFilterNoSort = {
-          data: [],
+        const requestMetadata: ComicBookMultipleResponseMeta = {
           count: 0,
           hasNextPage: false,
-          currentPage: paginationData.pageNumber,
-          pageSize: paginationData.pageSize
+          currentPage: 0,
+          pageSize: 0
+        };
+  
+        const returnObj: ComicBookMultipleResponse = {
+          data: [],
+          meta: requestMetadata
         };
 
-        return c.json(returnDataNoResults, 200);
+        return c.json(returnObj, 200);
       }
     } catch (error) {
       console.error("Error fetching comic book duplicates:", error);
       return c.json({ message: "Failed to fetch comic book duplicates" }, 500);
     }
-  });
+  }
+);
 
 /**
  * Get a random comic book
@@ -490,6 +526,7 @@ app.openapi(
     summary: "Get random comic book",
     description: "Retrieve a random comic book from the database",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       query: PaginationQuerySchema
     },
@@ -497,17 +534,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookMultipleResponseSchema
           },
         },
         description: "Random comic book retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       404: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Random comic book not found",
@@ -515,8 +566,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -524,10 +574,18 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: {
-      page: number;
-      pageSize: number;
-    } = c.req.valid("query");
+    const queryData: QueryData = c.req.valid("query");
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
 
@@ -538,18 +596,25 @@ app.openapi(
         return c.json({ message: "No comic books found" }, 404);
       }
 
-      const returnData: MultipleReturnResponseNoFilterNoSort = {
-        data: randomComics,
+      const hasNextPage: boolean = randomComics.length > paginationData.pageSize;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage ? randomComics.slice(0, paginationData.pageSize) : randomComics;
+
+      const requestMetadata: ComicBookMultipleResponseMeta = {
         count: randomComics.length,
-        hasNextPage: randomComics.length >= paginationData.pageSize,
+        hasNextPage: hasNextPage,
         currentPage: paginationData.pageNumber,
         pageSize: paginationData.pageSize
       };
 
-      return c.json(returnData, 200);
+      const returnObj: ComicBookMultipleResponse = {
+        data: resultComics,
+        meta: requestMetadata
+      };
+
+      return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching random comic book:", error);
-      return c.json({ error: "Failed to fetch random comic book" }, 500);
+      return c.json({ message: "Failed to fetch random comic book" }, 500);
     }
   }
 );
@@ -577,17 +642,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookMultipleResponseSchema
           },
         },
         description: "Comic books retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -595,20 +674,23 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: {
-      page: number;
-      pageSize: number;
-      letter: string;
-      sort?: string | undefined;
-      sortDirection?: "asc" | "desc" | undefined;
-      filter?: string | undefined;
-      filterProperty?: string | undefined;
-    } = c.req.valid("query");
+    const queryData: QueryDataWithLetter = c.req.valid("query");
 
     queryData.sort = "title";
     queryData.sortDirection = "asc";
     queryData.filter = queryData.letter;
     queryData.filterProperty = "listLetter";
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
     const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
@@ -618,18 +700,25 @@ app.openapi(
         serviceData
       );
 
-      const returnData: MultipleReturnResponseNoFilterNoSort = {
-        data: comics,
+      const hasNextPage: boolean = comics.length > paginationData.pageSize;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage ? comics.slice(0, paginationData.pageSize) : comics;
+
+      const requestMetadata: ComicBookMultipleResponseMeta = {
         count: comics.length,
-        hasNextPage: comics.length >= paginationData.pageSize,
+        hasNextPage: hasNextPage,
         currentPage: paginationData.pageNumber,
         pageSize: paginationData.pageSize
       };
 
-      return c.json(returnData, 200);
+      const returnObj: ComicBookMultipleResponse = {
+        data: resultComics,
+        meta: requestMetadata
+      };
+
+      return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching comic book list:", error);
-      return c.json({ error: "Failed to fetch comic book list" }, 500);
+      return c.json({ message: "Failed to fetch comic book list" }, 500);
     }
   }
 );
