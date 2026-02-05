@@ -28,6 +28,7 @@ import type {
   AccessRefreshTokenCombinedPayload,
   ComicBook,
   ComicBookWithMetadata,
+  ComicBookMetadataOnly,
   ComicBookThumbnail,
   ComicStoryArc,
   ComicSortField,
@@ -58,7 +59,8 @@ import {
   ComicBookReadByUserResponseSchema,
   ComicBookThumbnailsResponseSchema,
   //
-  ComicBookMultipleResponseSchema
+  ComicBookMultipleResponseSchema,
+  BulkUpdateResponseSchema
 } from "#schemas/response.schema.ts";
 
 import {
@@ -72,6 +74,10 @@ import {
   ComicMetadataSingleUpdateSchema,
   ComicMetadataBulkUpdateSchema,
 } from "#schemas/request.schema.ts";
+
+import {
+  comicBookWithMetadataCamelCaseSchema
+} from "#schemas/data/comicBooks.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
@@ -741,6 +747,7 @@ app.openapi(
     summary: "Batch update metadata",
     description: "Update metadata for multiple comic books",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       body: {
         content: {
@@ -754,17 +761,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: BulkUpdateResponseSchema,
           },
         },
         description: "Metadata updated",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -773,6 +794,17 @@ app.openapi(
   }),
   async (c) => {
     const data: ComicMetadataBulkUpdateData = await c.req.json();
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const comicBookIds: number[] = data.comicBookIds.map(idStr => Number(idStr));
     const metadataUpdates: ComicMetadataUpdateData[] = data.metadataUpdates;
@@ -818,6 +850,7 @@ app.openapi(
     summary: "Get comic book by ID",
     description: "Retrieve a single comic book by its ID",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       params: ParamIdSchema,
     },
@@ -825,17 +858,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookMetadataResponseSchema,
           },
         },
         description: "Comic book retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       404: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Comic book not found",
@@ -843,8 +890,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -852,27 +898,37 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     try {
-      const comicWithMetadataSearchResults = await fetchComicBooksWithRelatedMetadata({
+      const comicWithMetadataSearchResults: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata({
         pagination: { pageNumber: 1, pageSize: 1 },
         filter: { filterProperty: "id", filterValue: id.toString() },
         sort: { sortProperty: "createdAt", sortOrder: "asc" }
       })
 
-      const comicWithMetadata = comicWithMetadataSearchResults.length > 0 ? comicWithMetadataSearchResults[0] : null;
+      const comicWithMetadata: ComicBookWithMetadata | null = comicWithMetadataSearchResults.length > 0 ? comicWithMetadataSearchResults[0] : null;
 
       if (comicWithMetadata) {
         return c.json(comicWithMetadata, 200);
       }
 
-      return c.json({ error: "Comic book not found" }, 404);
+      return c.json({ message: "Comic book not found" }, 404);
     } catch (error) {
       console.error("Error fetching comic book by ID:", error);
-      return c.json({ error: "Failed to fetch comic book" }, 500);
+      return c.json({ message: "Failed to fetch comic book" }, 500);
     }
-    
   }
 );
 
@@ -903,11 +959,26 @@ app.openapi(
         },
         description: "Comic book metadata retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       404: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema
           },
         },
         description: "Comic book not found",
@@ -915,8 +986,7 @@ app.openapi(
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -924,21 +994,31 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     try {
-      const comicBookMetadataOnly = await fetchAComicsAssociatedMetadataById(id);
+      const comicBookMetadataOnly: ComicBookMetadataOnly = await fetchAComicsAssociatedMetadataById(id);
 
       if (comicBookMetadataOnly) {
         return c.json(comicBookMetadataOnly, 200);
       }
 
-      return c.json({ error: "Comic book not found" }, 404);
+      return c.json({ message: "Comic book not found" }, 404);
     } catch (error) {
       console.error("Error fetching comic book metadata by ID:", error);
-      return c.json({ error: "Failed to fetch comic book metadata" }, 500);
+      return c.json({ message: "Failed to fetch comic book metadata" }, 500);
     }
-
   }
 );
 
