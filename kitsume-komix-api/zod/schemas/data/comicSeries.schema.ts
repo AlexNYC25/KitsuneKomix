@@ -1,93 +1,20 @@
-import { z } from "@hono/zod-openapi";
-import { createSelectSchema } from "drizzle-zod";
-
+import {
+  ComicSeriesSelectSchema,
+  ComicBookThumbnailSelectSchema
+} from "./database.schema.ts";
 import { 
-  comicBookSelectJoinedWithThumbnailSchema,
-  comicBookSelectJoinedWithThumbnailCamelCaseSchema 
-} from "./comicBooks.schema.ts";
-import { metadataSchema } from "./comicMetadata.schema.ts";
-import { toCamelCaseSchema } from "../../utils/openapi-helpers.ts";
-
-import { comicSeriesTable } from "../../../db/sqlite/schema.ts";
+  MetadataSchema 
+} from "./comicMetadata.schema.ts";
 
 /**
- * Schemas for comic series
- * 
- * Direct schema from the comicSeriesTable
+ * Schema for comic series, extending the base ComicSeriesSelectSchema with additional fields for thumbnail and metadata. This schema represents the structure of a comic series as it will be returned in API responses, including optional fields for a thumbnail image and associated metadata.
  */
-export const comicSeriesSelectSchema: z.ZodObject = createSelectSchema(
-  comicSeriesTable,
-);
-
-/**
- * Schema for comic series joined with their thumbnail URL
- * 
- * Extends the base comic series schema with a nullable thumbnailUrl field
- */
-export const comicSeriesSelectJoinedWithThumbnailSchema = createSelectSchema(
-  comicSeriesTable,
-).extend({
-  thumbnailUrl: z.string().nullable().optional(),
-});
-
-/**
- * CamelCase version for OpenAPI compatibility of the comic series with thumbnail schema
- */
-export const comicSeriesSelectJoinedWithThumbnailCamelCaseSchema = toCamelCaseSchema(
-  comicSeriesSelectJoinedWithThumbnailSchema,
+export const ComicSeriesSchema = ComicSeriesSelectSchema.extend(
   {
-    title: "ComicSeriesWithThumbnail",
-    description: "A comic series with its thumbnail URL in camelCase format",
-  }
-);
-
-/**
- * Schema for comic series joined with their thumbnail URL and metadata
- * 
- * Extends the base comic series schema with a nullable thumbnailUrl field and metadata
- */
-export const comicSeriesSelectJoinedWithThumbnailAndMetadataSchema =
-  comicSeriesSelectJoinedWithThumbnailSchema.extend({
-    metadata: z.union([
-      metadataSchema,
-      z.record(z.string(), z.undefined()),
-    ]),
-  });
-
-/**
- * Schema for comic series joined with their thumbnails, metadata, and associated comics
- * 
- * Extends the comic series with thumbnail and metadata schema to include an array of comics
- */
-export const comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema =
-  comicSeriesSelectJoinedWithThumbnailAndMetadataSchema.extend({
-    comics: z.array(
-      comicBookSelectJoinedWithThumbnailSchema,
-    ),
-  });
-
-
-/**
- * Explicit camelCase schema for series with comics, metadata, and thumbnails for OpenAPI compatibility
- * 
- * manual copy of the comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsSchema schema with camelCase keys due
- * to complexity in converting the properties from snake_case to camelCase automatically
- * 
- * TODO: Consider deleting this if not used
- */
-export const comicSeriesSelectJoinedWithThumbnailsMetadataAndComicsCamelCaseSchema = z.object({
-  id: z.number().openapi({ example: 1 }),
-  name: z.string().openapi({ example: "Example Series" }),
-  description: z.string().nullable().openapi({ example: "A comic series" }),
-  folderPath: z.string().openapi({ example: "/path/to/series" }),
-  createdAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
-  updatedAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
-  thumbnailUrl: z.string().nullable().optional().openapi({ example: "/api/image/thumbnail.jpg" }),
-  metadata: metadataSchema.optional(),
-  comics: z.array(comicBookSelectJoinedWithThumbnailCamelCaseSchema).openapi({
-    description: "Array of comic books in this series",
-  }),
-}).openapi({
-  title: "ComicSeriesWithComicsMetadataAndThumbnails",
-  description: "A comic series with its metadata, thumbnail, and associated comic books in camelCase format",
+    thumbnail: ComicBookThumbnailSelectSchema.shape.filePath.optional(),
+    metadata: MetadataSchema.optional(),
+  },
+).openapi({
+  title: "ComicSeries",
+  description: "Schema representing a comic series",
 });
