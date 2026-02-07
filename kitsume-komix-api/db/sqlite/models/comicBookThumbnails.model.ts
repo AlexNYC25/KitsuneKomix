@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicBookThumbnails } from "../schema.ts";
+import { comicBookThumbnailsTable } from "../schema.ts";
 
 import { eq } from "drizzle-orm";
 import type { ComicBookThumbnail } from "#types/index.ts";
@@ -34,14 +34,14 @@ export const insertComicBookThumbnail = async (
     if (hasComicBookIdColumn) {
       // Use new schema
       const result: { id: number }[] = await db
-        .insert(comicBookThumbnails)
+        .insert(comicBookThumbnailsTable)
         .values({
           comicBookId: comicBookId,
           comicBookCoverId: comicBookCoverId,
           filePath: filePath,
           thumbnailType: "generated",
         })
-        .returning({ id: comicBookThumbnails.id });
+        .returning({ id: comicBookThumbnailsTable.id });
 
       if (result.length === 0) {
         throw new Error(
@@ -53,13 +53,13 @@ export const insertComicBookThumbnail = async (
     } else {
       // Use old schema (backwards compatibility during migration)
       const result: { id: number }[] = await db
-        .insert(comicBookThumbnails)
+        .insert(comicBookThumbnailsTable)
         .values({
           comicBookId: comicBookId,
           comicBookCoverId: comicBookCoverId,
           filePath: filePath,
         })
-        .returning({ id: comicBookThumbnails.id });
+        .returning({ id: comicBookThumbnailsTable.id });
 
       if (result.length === 0) {
         throw new Error(
@@ -94,9 +94,9 @@ export const getThumbnailsByComicBookId = async (
     // Prefer generated thumbnails (actual thumbnail files in cache) over custom ones
     const result: ComicBookThumbnail[] = await db
       .select()
-      .from(comicBookThumbnails)
+      .from(comicBookThumbnailsTable)
       .where(
-        eq(comicBookThumbnails.comicBookId, comicBookId),
+        eq(comicBookThumbnailsTable.comicBookId, comicBookId),
       );
 
     // Sort to prefer generated thumbnails that look like cache paths
@@ -105,7 +105,7 @@ export const getThumbnailsByComicBookId = async (
       const aIsGenerated: number = a.filePath?.includes("_thumb.") ? 0 : 1;
       const bIsGenerated: number = b.filePath?.includes("_thumb.") ? 0 : 1;
       return aIsGenerated - bIsGenerated;
-    });
+    }) as ComicBookThumbnail[];
 
     return sorted.length > 0 ? sorted : null;
   } catch (error) {
@@ -131,8 +131,8 @@ export const getComicThumbnailById = async (
   try {
     const result: ComicBookThumbnail[] = await db
       .select()
-      .from(comicBookThumbnails)
-      .where(eq(comicBookThumbnails.id, thumbnailId));
+      .from(comicBookThumbnailsTable)
+      .where(eq(comicBookThumbnailsTable.id, thumbnailId));
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
@@ -159,7 +159,7 @@ export const insertCustomComicBookThumbnail = async (
 
   try {
     const result: { id: number }[] = await db
-      .insert(comicBookThumbnails)
+      .insert(comicBookThumbnailsTable)
       .values({
         comicBookId: comicBookId,
         comicBookCoverId: null, // Custom thumbnails aren't linked to covers
@@ -169,7 +169,7 @@ export const insertCustomComicBookThumbnail = async (
         description: description,
         uploadedBy: uploadedBy,
       })
-      .returning({ id: comicBookThumbnails.id });
+      .returning({ id: comicBookThumbnailsTable.id });
 
     if (result.length === 0) {
       throw new Error(
@@ -199,8 +199,8 @@ export const deleteComicBookThumbnail = async (
 
   try {
     await db
-      .delete(comicBookThumbnails)
-      .where(eq(comicBookThumbnails.id, thumbnailId));
+      .delete(comicBookThumbnailsTable)
+      .where(eq(comicBookThumbnailsTable.id, thumbnailId));
   } catch (error) {
     console.error("Error deleting comic book thumbnail:", error);
     throw error;

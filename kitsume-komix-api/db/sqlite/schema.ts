@@ -147,7 +147,7 @@ export const comicBookCovers = sqliteTable("comic_book_covers", {
   updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const comicBookThumbnails = sqliteTable("comic_book_thumbnails", {
+export const comicBookThumbnailsTable = sqliteTable("comic_book_thumbnails", {
   id: int().primaryKey({ autoIncrement: true }),
   comicBookId: int().notNull().references(() => comicBooksTable.id, {
     onDelete: "cascade",

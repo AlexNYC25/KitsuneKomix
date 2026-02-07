@@ -17,7 +17,7 @@ import {
   comicBooksTable,
   comicBookStoryArcsTable,
   comicBookTeamsTable,
-  comicBookThumbnails,
+  comicBookThumbnailsTable,
   comicBookWritersTable,
   comicCharactersTable,
   comicColoristsTable,
@@ -38,7 +38,7 @@ import {
   comicTeamsTable,
   comicWritersTable,
   usersTable,
-} from "../db/sqlite/schema.ts";
+} from "#sqlite/schema.ts";
 
 // Inferred types from Drizzle schema
 export type User = InferSelectModel<typeof usersTable>;
@@ -58,9 +58,9 @@ export type NewComicBookHistory = InferInsertModel<
   typeof comicBookHistoryTable
 >;
 
-export type ComicBookThumbnail = InferSelectModel<typeof comicBookThumbnails>;
+export type ComicBookThumbnail = InferSelectModel<typeof comicBookThumbnailsTable>;
 export type NewComicBookThumbnail = InferInsertModel<
-  typeof comicBookThumbnails
+  typeof comicBookThumbnailsTable
 >;
 
 export type ComicSeries = InferSelectModel<typeof comicSeriesTable>;
