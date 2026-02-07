@@ -1,31 +1,8 @@
 import { z } from "@hono/zod-openapi";
 
-/**
- * Schema for modifiable comic metadata fields
- * 
- * Defines which fields can be modified in comic metadata
- */
-export const modifyableComicMetadataFieldsSchema = z.enum([
-  "writers",
-  "pencillers",
-  "inkers",
-  "colorists",
-  "letterers",
-  "editors",
-  "coverArtists",
-  "publishers",
-  "imprints",
-  "genres",
-  "characters",
-  "teams",
-  "locations",
-  "storyArcs",
-  "seriesGroups",
-]);
-
 
 export const metadataUpdateSchema = z.object({
-  metadataType: modifyableComicMetadataFieldsSchema,
+  metadataType: z.string(),
   values: z.array(z.string()).nullable(),
   replaceExisting: z.boolean().optional().default(false),
 }).openapi({
@@ -38,8 +15,10 @@ export const metadataUpdateSchema = z.object({
  * 
  * Includes various optional fields for comic series information from the various
  * metadata categories from their respective databases tables.
+ * 
+ * Note: At this point the metadata rows are read and parsed for the name/publisher/arc name and stored as comma-separated strings in the metadata fields of the comic series. This is to avoid the complexity of joining with multiple metadata tables for each category and instead just have a single metadata field that can be easily queried and updated. In the future, if we want to support more complex querying and updating of metadata, we can consider normalizing the metadata into separate tables and joining them with the comic series table.
  */
-export const metadataSchema = z.object({
+export const MetadataSchema = z.object({
   writers: z.string().nullable().optional(),
   pencillers: z.string().nullable().optional(),
   inkers: z.string().nullable().optional(),
