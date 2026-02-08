@@ -52,10 +52,17 @@ import type {
 } from "#types/index.ts";
 
 import {
+  ComicBookSchema,
+} from "#schemas/data/comicBooks.schema.ts";
+
+import {
+  MetadataExpandedSchema
+} from "#schemas/data/comicMetadata.schema.ts";
+
+import {
   FlexibleResponseSchema,
   SuccessResponseSchema,
   ErrorResponseSchema,
-  ComicBookMetadataResponseSchema,
   ComicBookReadByUserResponseSchema,
   ComicBookThumbnailsResponseSchema,
   //
@@ -74,10 +81,6 @@ import {
   ComicMetadataSingleUpdateSchema,
   ComicMetadataBulkUpdateSchema,
 } from "#schemas/request.schema.ts";
-
-import {
-  comicBookWithMetadataCamelCaseSchema
-} from "#schemas/data/comicBooks.schema.ts";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
@@ -729,8 +732,6 @@ app.openapi(
   }
 );
 
-
-
 /**
  * Batch update metadata for multiple comic books with multiple metadata updates possible
  * 
@@ -858,7 +859,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicBookMetadataResponseSchema,
+            schema: ComicBookSchema,
           },
         },
         description: "Comic book retrieved successfully",
@@ -954,7 +955,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicBookMetadataResponseSchema,
+            schema: MetadataExpandedSchema,
           },
         },
         description: "Comic book metadata retrieved successfully",
