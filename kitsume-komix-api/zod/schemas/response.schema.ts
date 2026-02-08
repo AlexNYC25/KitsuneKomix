@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { MetadataSchema } from "./data/comicMetadata.schema.ts";
-import { ComicStoryArcSelectSchema, ComicLibrarySelectSchema } from "./data/database.schema.ts";
+import { ComicStoryArcSelectSchema, ComicLibrarySelectSchema, ComicBookThumbnailSelectSchema } from "./data/database.schema.ts";
 import { ComicBookSchema } from "./data/comicBooks.schema.ts";
 import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
 
@@ -120,22 +120,10 @@ export const ComicBookMultipleResponseSchema = z.object({
 });
 
 /**
- * Schema for bulk update response with results summary
- */
-export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResultsSchema.shape).openapi({
-  title: "BulkUpdateResponse",
-  description: "Response for bulk update operations with results summary",
-});
-
-
-// ** HERE IS THE END OF THE VERIFED GOOD PART ** //
-
-
-/**
- * Schema for the comic book's thumbnails response, as a standalone response
+ * Schema for a comic book's thumbnails as part of a response
  */
 export const ComicBookThumbnailsResponseSchema = z.object({
-  thumbnails: z.array(ComicBookSchema),
+  thumbnails: z.array(ComicBookThumbnailSelectSchema),
   message: z.string(),
 }).openapi({
   title: "ComicBookThumbnailsResponse",
@@ -154,40 +142,16 @@ export const ComicBookReadByUserResponseSchema = z.object({
 });
 
 /**
- * Schema for single comic book metadata response
- * Used for GET /api/comic-books/:id/metadata endpoint
+ * Schema for bulk update response with results summary
  */
-export const ComicBookMetadataResponseSchema = ComicBookSchema.catchall(z.any()).openapi({
-  title: "ComicBookMetadataResponse",
-  description: "A single comic book with its full metadata including all related creator and content information",
+export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResultsSchema.shape).openapi({
+  title: "BulkUpdateResponse",
+  description: "Response for bulk update operations with results summary",
 });
 
-// CamelCase version for API responses - explicitly defined schema for OpenAPI compatibility
-export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema = z.object({
-  message: z.string().openapi({ example: "Series retrieved successfully" }),
-  data: z.object({
-    id: z.number().openapi({ example: 1 }),
-    name: z.string().openapi({ example: "Example Series" }),
-    description: z.string().nullable().openapi({ example: "A comic series" }),
-    folderPath: z.string().openapi({ example: "/path/to/series" }),
-    createdAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
-    updatedAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
-    thumbnailUrl: z.string().nullable().optional().openapi({ example: "/api/image/thumbnail.jpg" }),
-    metadata: MetadataSchema.optional().openapi({
-      title: "ComicSeriesMetadata",
-      description: "Metadata for a comic series",
-    }),
-    comics: z.array(ComicBookSchema).openapi({
-      description: "Array of comic books in this series",
-    }),
-  }).openapi({
-    title: "ComicSeriesWithComicsMetadataAndThumbnailsData",
-    description: "The data object containing series details",
-  }),
-}).openapi({
-  title: "ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponse",
-  description: "A camelCase response containing a comic series with its metadata, thumbnail, and associated comic books.",
-});
+
+// ** HERE IS THE END OF THE VERIFED GOOD PART ** //
+
 
 /**
  * Schema for library list response
