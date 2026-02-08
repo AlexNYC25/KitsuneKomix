@@ -130,6 +130,14 @@ export const ComicBookMultipleResponseSchema = z.object({
   description: "Response containing multiple comic books",
 });
 
+export const ComicStoryArcMultipleResponseSchema = z.object({
+  data: z.array(ComicStoryArcSelectSchema),
+  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
+}).openapi({
+  title: "ComicStoryArcMultipleResponse",
+  description: "Response containing multiple comic story arcs",
+});
+
 /**
  * Schema for a comic book's thumbnails as part of a response
  */
@@ -180,20 +188,4 @@ export const FileDownloadResponseSchema = z.object({
 }).openapi({
   title: "FileDownloadResponse",
   description: "Response metadata for file downloads containing file information and headers",
-});
-
-
-// ** HERE IS THE END OF THE VERIFED GOOD PART ** //
-
-export const ComicArcResponseSchema = z.object({
-  storyArcs: z.array(ComicStoryArcSelectSchema),
-  hasNextPage: z.boolean(),
-  currentPage: z.number(),
-  pageSize: z.number(),
-  totalResults: z.number(),
-  isFiltered: z.boolean(),
-  isSorted: z.boolean(),
-}).openapi({
-  title: "ComicArcResponse",
-  description: "Response containing comic story arcs with pagination info",
 });
