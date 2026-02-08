@@ -142,7 +142,7 @@ export const ComicBookReadByUserResponseSchema = z.object({
 });
 
 /**
- * Schema for bulk update response with results summary
+ * Schema for bulk update response with results summary including total updated, total requested, and success status
  */
 export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResultsSchema.shape).openapi({
   title: "BulkUpdateResponse",
@@ -151,19 +151,6 @@ export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResu
 
 
 // ** HERE IS THE END OF THE VERIFED GOOD PART ** //
-
-
-/**
- * Schema for library list response
- * Returns an array of comic libraries
- */
-export const LibraryResponseSchema = z.object({
-  message: z.string(),
-  data: z.array(ComicLibrarySelectSchema),
-}).openapi({
-  title: "LibraryListResponse",
-  description: "Response containing a message and array of comic library data",
-});
 
 /**
  * Schema for create library response
