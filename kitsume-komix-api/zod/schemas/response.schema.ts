@@ -37,6 +37,17 @@ export const SuccessResponseSchema = z.object({
   description: "A response indicating success or failure",
 });
 
+/**
+ * 
+ */
+export const SuccessCreationResponseSchema = z.object({
+  success: z.boolean(),
+  id: z.number().optional(),
+}).openapi({
+  title: "SuccessCreationResponse",
+  description: "A response indicating success of a creation operation, optionally including the ID of the created resource",
+});
+
 // Flexible schema for responses we don't want to type strictly in OpenAPI
 /**
  * Schema for a flexible response structure, allowing any data shape
@@ -149,20 +160,30 @@ export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResu
   description: "Response for bulk update operations with results summary",
 });
 
+/**
+ * Schema for file download response metadata
+ * Represents the headers and metadata sent with a file download response
+ */
+export const FileDownloadResponseSchema = z.object({
+  fileName: z.string().openapi({
+    description: "The name of the file being downloaded",
+    example: "comic_book.cbz"
+  }),
+  contentType: z.string().openapi({
+    description: "The MIME type of the file",
+    example: "application/octet-stream"
+  }),
+  contentLength: z.number().openapi({
+    description: "The size of the file in bytes",
+    example: 5242880
+  }),
+}).openapi({
+  title: "FileDownloadResponse",
+  description: "Response metadata for file downloads containing file information and headers",
+});
+
 
 // ** HERE IS THE END OF THE VERIFED GOOD PART ** //
-
-/**
- * Schema for create library response
- * Returns the ID of the newly created library
- */
-export const CreateLibraryResponseSchema = z.object({
-  message: z.string(),
-  libraryId: z.number(),
-}).openapi({
-  title: "CreateLibraryResponse",
-  description: "Response containing a message and the ID of the newly created library",
-});
 
 export const ComicArcResponseSchema = z.object({
   storyArcs: z.array(ComicStoryArcSelectSchema),
