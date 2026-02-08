@@ -83,6 +83,9 @@ const SortMetaSchema = z.object({
   description: "Metadata for sorted responses",
 });
 
+/**
+ * Schema for update results in bulk update responses
+ */
 const UpdatedResultsSchema = z.object({
   totalUpdated: z.number().min(0).default(0),
   totalRequested: z.number().min(0).default(0),
@@ -96,25 +99,17 @@ const UpdatedResultsSchema = z.object({
 
 /**
  * Schema for paginated comic series response
- * TODO: Look into if this can be consolidated with other paginated response schemas
  */
 export const ComicSeriesResponseSchema = z.object({
-  data: z.array(
-    ComicSeriesSchema,
-  ),
-  meta: z.object({
-    total: z.number().min(0).default(0),
-    page: z.number().min(1),
-    pageSize: z.number().min(1),
-    hasNextPage: z.boolean().default(false),
-  }),
-  message: z.string(),
+  data: z.array(ComicSeriesSchema),
+  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
+}).openapi({
+  title: "ComicSeriesResponse",
+  description: "Response containing paginated comic series data",
 });
 
 /**
  * Schema for returning multiple comic books as part of a response
- * 
- * TODO: Expand the data type to allow for the schemas with comic book data + thumbnails (+ metadata)
  */
 export const ComicBookMultipleResponseSchema = z.object({
   data: z.array(ComicBookSchema),
@@ -124,6 +119,9 @@ export const ComicBookMultipleResponseSchema = z.object({
   description: "Response containing multiple comic books",
 });
 
+/**
+ * Schema for bulk update response with results summary
+ */
 export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResultsSchema.shape).openapi({
   title: "BulkUpdateResponse",
   description: "Response for bulk update operations with results summary",
