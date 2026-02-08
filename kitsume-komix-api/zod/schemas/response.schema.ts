@@ -1,11 +1,9 @@
 import { z } from "@hono/zod-openapi";
 
-import { metadataSchema } from "./data/comicMetadata.schema.ts";
-import { comicBookSelectSchema, comicBookSelectJoinedWithThumbnailCamelCaseSchema, comicBookWithMetadataCamelCaseSchema } from "./data/comicBooks.schema.ts";
-import { comicSeriesSelectJoinedWithThumbnailCamelCaseSchema } from "./data/comicSeries.schema.ts";
-import { comicLibrariesArraySelectSchema } from "./data/comicLibraries.schema.ts";
-import { comicBookThumbnailSchema } from "./data/comicThumbnails.schema.ts";
-import { comicStoryArcSelectSchema } from "./data/comicStoryArcs.schema.ts";
+import { MetadataSchema } from "./data/comicMetadata.schema.ts";
+import { ComicStoryArcSelectSchema, ComicLibrarySelectSchema } from "./data/database.schema.ts";
+import { ComicBookSchema } from "./data/comicBooks.schema.ts";
+import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
 
 // **** Basic response schemas **** //
 /**
@@ -102,7 +100,7 @@ const UpdatedResultsSchema = z.object({
  */
 export const ComicSeriesResponseSchema = z.object({
   data: z.array(
-    comicSeriesSelectJoinedWithThumbnailCamelCaseSchema,
+    ComicSeriesSchema,
   ),
   meta: z.object({
     total: z.number().min(0).default(0),
@@ -119,7 +117,7 @@ export const ComicSeriesResponseSchema = z.object({
  * TODO: Expand the data type to allow for the schemas with comic book data + thumbnails (+ metadata)
  */
 export const ComicBookMultipleResponseSchema = z.object({
-  data: z.array(comicBookSelectSchema) || z.array(comicBookWithMetadataCamelCaseSchema),
+  data: z.array(ComicBookSchema),
   meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
 }).openapi({
   title: "ComicBookMultipleResponse",
@@ -139,7 +137,7 @@ export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResu
  * Schema for the comic book's thumbnails response, as a standalone response
  */
 export const ComicBookThumbnailsResponseSchema = z.object({
-  thumbnails: z.array(comicBookThumbnailSchema),
+  thumbnails: z.array(ComicBookSchema),
   message: z.string(),
 }).openapi({
   title: "ComicBookThumbnailsResponse",
@@ -161,7 +159,7 @@ export const ComicBookReadByUserResponseSchema = z.object({
  * Schema for single comic book metadata response
  * Used for GET /api/comic-books/:id/metadata endpoint
  */
-export const ComicBookMetadataResponseSchema = comicBookWithMetadataCamelCaseSchema.catchall(z.any()).openapi({
+export const ComicBookMetadataResponseSchema = ComicBookSchema.catchall(z.any()).openapi({
   title: "ComicBookMetadataResponse",
   description: "A single comic book with its full metadata including all related creator and content information",
 });
@@ -177,11 +175,11 @@ export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema =
     createdAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
     updatedAt: z.string().openapi({ example: "2024-01-01T00:00:00Z" }),
     thumbnailUrl: z.string().nullable().optional().openapi({ example: "/api/image/thumbnail.jpg" }),
-    metadata: metadataSchema.optional().openapi({
+    metadata: MetadataSchema.optional().openapi({
       title: "ComicSeriesMetadata",
       description: "Metadata for a comic series",
     }),
-    comics: z.array(comicBookSelectJoinedWithThumbnailCamelCaseSchema).openapi({
+    comics: z.array(ComicBookSchema).openapi({
       description: "Array of comic books in this series",
     }),
   }).openapi({
@@ -199,7 +197,7 @@ export const ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema =
  */
 export const LibraryResponseSchema = z.object({
   message: z.string(),
-  data: comicLibrariesArraySelectSchema,
+  data: z.array(ComicLibrarySelectSchema),
 }).openapi({
   title: "LibraryListResponse",
   description: "Response containing a message and array of comic library data",
@@ -218,7 +216,7 @@ export const CreateLibraryResponseSchema = z.object({
 });
 
 export const ComicArcResponseSchema = z.object({
-  storyArcs: z.array(comicStoryArcSelectSchema),
+  storyArcs: z.array(ComicStoryArcSelectSchema),
   hasNextPage: z.boolean(),
   currentPage: z.number(),
   pageSize: z.number(),
