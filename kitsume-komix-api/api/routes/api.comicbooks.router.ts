@@ -65,9 +65,9 @@ import {
   ErrorResponseSchema,
   ComicBookReadByUserResponseSchema,
   ComicBookThumbnailsResponseSchema,
-  //
   ComicBookMultipleResponseSchema,
-  BulkUpdateResponseSchema
+  BulkUpdateResponseSchema,
+  FileDownloadResponseSchema
 } from "#schemas/response.schema.ts";
 
 import {
@@ -1032,8 +1032,6 @@ app.openapi(
  * Requires authentication - only logged in users can download files
  * @param id - The ID of the comic book to download
  * @return The comic book file as a download
- *
- * TODO: TEST for large files
  */
 app.openapi(
   createRoute({
@@ -1049,9 +1047,8 @@ app.openapi(
     responses: {
       200: {
         content: {
-          //TODO: Update to proper schema, need to look up how to represent file downloads in OpenAPI
           "application/octet-stream": {
-            schema: z.any(),
+            schema: FileDownloadResponseSchema,
           },
         },
         description: "Comic book file downloaded successfully",
@@ -1083,12 +1080,17 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"));
+    const id: number = parseInt(c.req.param("id"), 10);
 
-    // Verify user is authenticated (middleware checks this, but being explicit)
-    const user = c.get("user");
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
     if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized - Must be logged in to download files" }, 401);
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
     }
 
     try {
