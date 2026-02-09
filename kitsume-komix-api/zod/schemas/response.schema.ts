@@ -1,7 +1,7 @@
 import { z } from "@hono/zod-openapi";
 
 import { MetadataSchema } from "./data/comicMetadata.schema.ts";
-import { ComicStoryArcSelectSchema, ComicLibrarySelectSchema, ComicBookThumbnailSelectSchema } from "./data/database.schema.ts";
+import { ComicStoryArcSelectSchema, ComicLibrarySelectSchema, ComicBookThumbnailSelectSchema, ComicPageSelectSchema } from "./data/database.schema.ts";
 import { ComicBookSchema } from "./data/comicBooks.schema.ts";
 import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
 
@@ -218,4 +218,28 @@ export const ComicBookStreamingResponseSchema = z.object({
 }).openapi({
   title: "ComicBookStreamingResponse",
   description: "Response containing a single page of a comic book stream",
+});
+
+/**
+ * Schema for comic book pages info response
+ */
+export const ComicBookPagesInfoResponseSchema = z.object({
+  comicId: z.number().openapi({
+    description: "The ID of the comic book",
+    example: 1
+  }),
+  totalPages: z.number().openapi({
+    description: "The total number of pages in the comic book",
+    example: 100
+  }),
+  pagesInDb: z.number().openapi({
+    description: "The number of pages currently stored in the database",
+    example: 80
+  }),
+  pages: z.array(ComicPageSelectSchema).openapi({
+    description: "An array of comic pages",
+  }),
+}).openapi({
+  title: "ComicBookPagesInfoResponse",
+  description: "Response containing information about comic book pages",
 });
