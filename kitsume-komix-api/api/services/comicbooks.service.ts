@@ -135,7 +135,9 @@ import {
   ComicMetadataUpdateData,
   ComicBookStreamingServiceData,
   ComicBookStreamingServiceResult,
-  ComicStoryArc
+  ComicStoryArc,
+  ComicPage,
+  ComicBookPagesInfo,
 } from "#types/index.ts";
 
 /**
@@ -686,7 +688,7 @@ export const startStreamingComicBookFile = async (
  * used by
  * - /api/comic-books/{id}/pages-info
  */
-export const getComicPagesInfo = async (comicId: number) => {
+export const getComicPagesInfo = async (comicId: number): Promise<ComicBookPagesInfo> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -694,12 +696,12 @@ export const getComicPagesInfo = async (comicId: number) => {
   }
 
   // check if there is a comicbook with that id
-  const comic = await getComicBookById(comicId);
+  const comic: ComicBook | null = await getComicBookById(comicId);
   if (!comic) {
     throw new Error("Comic book not found.");
   }
 
-  const comicPages = await getComicPagesByComicBookId(comicId);
+  const comicPages: ComicPage[] = await getComicPagesByComicBookId(comicId);
 
   return {
     comicId,
