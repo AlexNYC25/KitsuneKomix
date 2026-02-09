@@ -48,7 +48,8 @@ import type {
   ComicBookMultipleResponseData,
   ComicBookMultipleResponseMeta,
   QueryData,
-  QueryDataWithLetter
+  QueryDataWithLetter,
+  ComicBookPagesInfo
 } from "#types/index.ts";
 
 import {
@@ -68,7 +69,8 @@ import {
   ComicBookMultipleResponseSchema,
   BulkUpdateResponseSchema,
   FileDownloadResponseSchema,
-  ComicBookStreamingResponseSchema
+  ComicBookStreamingResponseSchema,
+  ComicBookPagesInfoResponseSchema
 } from "#schemas/response.schema.ts";
 
 import {
@@ -1341,6 +1343,7 @@ app.openapi(
     summary: "Get comic book pages information",
     description: "Retrieve information about the pages of a comic book",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       params: ParamIdSchema
     },
@@ -1348,17 +1351,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookPagesInfoResponseSchema,
           },
         },
         description: "Comic pages information retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -1366,15 +1383,25 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.param("id"), 10);
+    const id: number = parseInt(c.req.param("id"), 10);
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     try {
-      // TODO: Define the proper return type
-      const result = await getComicPagesInfo(id);
-      return c.json(result);
+      const result: ComicBookPagesInfo = await getComicPagesInfo(id);
+      return c.json(result, 200);
     } catch (error) {
       console.error("Error fetching comic book pages info:", error);
-      return c.json({ error: "Failed to fetch comic book pages info" }, 500);
+      return c.json({ message: "Failed to fetch comic book pages info" }, 500);
     }
   });
 
