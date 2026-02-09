@@ -67,7 +67,8 @@ import {
   ComicBookThumbnailsResponseSchema,
   ComicBookMultipleResponseSchema,
   BulkUpdateResponseSchema,
-  FileDownloadResponseSchema
+  FileDownloadResponseSchema,
+  ComicBookStreamingResponseSchema
 } from "#schemas/response.schema.ts";
 
 import {
@@ -1156,6 +1157,7 @@ app.openapi(
     summary: "Start streaming comic book",
     description: "Start streaming a comic book from the first page",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     request: {
       params: ParamIdSchema
     },
@@ -1163,17 +1165,31 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookStreamingResponseSchema,
           },
         },
         description: "Comic book streaming started successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -1181,8 +1197,19 @@ app.openapi(
     },
   }),
   async (c) => {
-    const comicBookId = parseInt(c.req.param("id"), 10);
-    const requestImageHeader = c.req.header("Accept") || "";
+    const comicBookId: number = parseInt(c.req.param("id"), 10);
+    const requestImageHeader: string = c.req.header("Accept") || "";
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const streamingDataOptions: ComicBookStreamingServiceData = {
       comicId: comicBookId,
@@ -1196,10 +1223,10 @@ app.openapi(
         streamingDataOptions
       );
 
-      return c.json(streamingResult);
+      return c.json(streamingResult, 200);
     } catch (error) {
       console.error("Error starting comic book streaming:", error);
-      return c.json({ error: "Failed to start comic book streaming" }, 500);
+      return c.json({ message: "Failed to start comic book streaming" }, 500);
     }
   }
 );
@@ -1223,21 +1250,36 @@ app.openapi(
     summary: "Stream comic book page",
     description: "Stream a specific page of a comic book by its ID",
     tags: ["Comic Books"],
+    middleware: [requireAuth],
     responses: {
       200: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ComicBookStreamingResponseSchema,
           },
         },
         description: "Comic book page streamed successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
       500: {
         content: {
           "application/json": {
-            //TODO: Update to proper schema
-            schema: FlexibleResponseSchema,
+            schema: ErrorResponseSchema,
           },
         },
         description: "Internal Server Error",
@@ -1245,13 +1287,24 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = c.req.param("id");
-    const page = c.req.param("page");
-    const requestImageHeader = c.req.header("Accept") || "";
+    const id: number = parseInt(c.req.param("id"), 10);
+    const page: number = parseInt(c.req.param("page"), 10);
+    const requestImageHeader: string = c.req.header("Accept") || "";
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     const streamingDataOptions: ComicBookStreamingServiceData = {
-      comicId: parseInt(id, 10),
-      pageNumber: parseInt(page, 10),
+      comicId: id,
+      pageNumber: page,
       acceptHeader: requestImageHeader,
       preloadPagesNumber: 10,
     };
@@ -1261,10 +1314,10 @@ app.openapi(
         streamingDataOptions
       );
 
-      return c.json(streamingResult);
+      return c.json(streamingResult, 200);
     } catch (error) {
       console.error("Error streaming comic book file:", error);
-      return c.json({ error: "Failed to stream comic book file" }, 500);
+      return c.json({ message: "Failed to stream comic book file" }, 500);
     }
   },
 );
