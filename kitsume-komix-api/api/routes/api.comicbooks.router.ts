@@ -1461,13 +1461,13 @@ app.openapi(
   async (c) => {
     const id = parseInt(c.req.param("id"), 10);
 
-    const user = c.get("user");
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
 
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const userId = parseInt(user.sub, 10);
+    const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
