@@ -189,3 +189,33 @@ export const FileDownloadResponseSchema = z.object({
   title: "FileDownloadResponse",
   description: "Response metadata for file downloads containing file information and headers",
 });
+
+/**
+ * Schema for comic book streaming response
+ * Represents a single page being streamed during a reading session
+ */
+export const ComicBookStreamingResponseSchema = z.object({
+  comicId: z.number().openapi({
+    description: "The ID of the comic book being streamed",
+    example: 1
+  }),
+  pagePath: z.string().openapi({
+    description: "The file path to the current page image",
+    example: "/path/to/page/image.png"
+  }),
+  pageNumber: z.number().openapi({
+    description: "The current page number being streamed",
+    example: 1
+  }),
+  format: z.string().openapi({
+    description: "The image format of the page",
+    example: "image/png"
+  }),
+  cached: z.boolean().openapi({
+    description: "Whether the page is cached locally",
+    example: true
+  }),
+}).openapi({
+  title: "ComicBookStreamingResponse",
+  description: "Response containing a single page of a comic book stream",
+});
