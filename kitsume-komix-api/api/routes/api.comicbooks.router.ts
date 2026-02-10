@@ -1,5 +1,4 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import z from "zod";
 import { basename } from "@std/path";
 
 import {
@@ -30,26 +29,24 @@ import type {
   ComicBookWithMetadata,
   ComicBookMetadataOnly,
   ComicBookThumbnail,
+  ComicBookPagesInfo,
+  ComicBookStreamingServiceData,
+  ComicBookStreamingServiceResult,
+  ComicBookMultipleResponse,
+  ComicBookMultipleResponseData,
+  ComicBookMultipleResponseMeta,
   ComicStoryArc,
   ComicSortField,
   ComicFilterField,
   ComicMetadataUpdateData,
   ComicMetadataBulkUpdateData,
   ComicMetadataSingleUpdateData,
-  ComicBookStreamingServiceData,
-  ComicBookStreamingServiceResult,
   RequestPaginationParametersValidated,
   RequestFilterParametersValidated,
   RequestSortParametersValidated,
   RequestParametersValidated,
-  MultipleReturnResponse,
-  MultipleReturnResponseNoFilterNoSort,
-  ComicBookMultipleResponse,
-  ComicBookMultipleResponseData,
-  ComicBookMultipleResponseMeta,
   QueryData,
   QueryDataWithLetter,
-  ComicBookPagesInfo
 } from "#types/index.ts";
 
 import {
@@ -61,17 +58,16 @@ import {
 } from "#schemas/data/comicMetadata.schema.ts";
 
 import {
-  FlexibleResponseSchema,
   SuccessResponseSchema,
   ErrorResponseSchema,
   ComicBookReadByUserResponseSchema,
   ComicBookThumbnailsResponseSchema,
   ComicBookMultipleResponseSchema,
-  BulkUpdateResponseSchema,
-  FileDownloadResponseSchema,
   ComicBookStreamingResponseSchema,
   ComicBookPagesInfoResponseSchema,
-  ComicBookReadListsResponseSchema
+  ComicBookReadListsResponseSchema,
+  BulkUpdateResponseSchema,
+  FileDownloadResponseSchema,
 } from "#schemas/response.schema.ts";
 
 import {
