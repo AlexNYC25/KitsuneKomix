@@ -64,29 +64,6 @@ export type ComicBookFilteringAndSortingParams = {
   limit?: number;
 };
 
-// Response contract for routes that return lists of comic books
-// TODO: Depreate in favor of specific type infered from the zod schemas
-export type MultipleReturnResponse = {
-  data: ComicBook[] | ComicBookWithMetadata[];
-  count: number;
-  hasNextPage: boolean;
-  currentPage: number;
-  pageSize: number;
-  filter: string | null;
-  filterProperty: string | null;
-  sort: string | null;
-  sortProperty: string | null;
-  sortOrder?: string | null;
-};
-
-export type MultipleReturnResponseNoFilterNoSort = {
-  data: ComicBook[] | ComicBookWithMetadata[];
-  count: number;
-  hasNextPage: boolean;
-  currentPage: number;
-  pageSize: number;
-};
-
 export type ComicBookStreamingServiceData = {
   comicId: number;
   pageNumber: number;

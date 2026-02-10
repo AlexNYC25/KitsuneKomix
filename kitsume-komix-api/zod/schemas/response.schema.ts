@@ -51,15 +51,6 @@ export const SuccessCreationResponseSchema = z.object({
   description: "A response indicating success of a creation operation, optionally including the ID of the created resource",
 });
 
-// Flexible schema for responses we don't want to type strictly in OpenAPI
-/**
- * Schema for a flexible response structure, allowing any data shape
- */
-export const FlexibleResponseSchema = z.unknown().openapi({
-  title: "FlexibleResponse",
-  description: "A flexible response schema for various data structures",
-});
-
 // **** Modular schemas **** //
 
 /**
