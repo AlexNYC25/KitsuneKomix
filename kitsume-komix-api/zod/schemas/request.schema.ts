@@ -212,3 +212,26 @@ export const UserSchema = z.object({
   first_name: z.string().max(50).nullable().optional(),
   last_name: z.string().max(50).nullable().optional(),
 });
+
+/**
+ * Schema for creating a custom thumbnail for a comic book
+ * 
+ * Expects a multipart form data request with:
+ * - image: The image file (JPEG, PNG, WebP)
+ * - name: Optional name for the thumbnail
+ * - description: Optional description for the thumbnail
+ */
+export const CreateCustomThumbnailSchema = z.object({
+  image: z.instanceof(File).openapi({
+    description: "Image file for the custom thumbnail (JPEG, PNG, WebP)",
+  }),
+  name: z.string().optional().openapi({
+    description: "Optional name for the custom thumbnail",
+  }),
+  description: z.string().optional().openapi({
+    description: "Optional description for the custom thumbnail",
+  }),
+}).openapi({
+  title: "CreateCustomThumbnail",
+  description: "Multipart form data for creating a custom thumbnail",
+});
