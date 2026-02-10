@@ -1,35 +1,89 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { purgeAllData } from "../../db/sqlite/models/admin.model.ts";
+import { requireAuth } from "../middleware/authChecks.ts";
 
-const app = new OpenAPIHono();
+import { purgeAllData } from "#sqlite/models/admin.model.ts";
 
-const MessageResponseSchema = z.object({
-  message: z.string(),
+import { MessageResponseSchema } from "#schemas/response.schema.ts";
+
+import { 
+  AppEnv, 
+  AccessRefreshTokenCombinedPayload 
+} from "#types/index.ts";
+
+const app = new OpenAPIHono<AppEnv>();
+
+// Register Bearer Auth security scheme for OpenAPI
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
 });
 
-const purgeDataRoute = createRoute({
-  method: "post",
-  path: "/purge-data",
-  summary: "Purge all data",
-  description: "Delete all data from the system (admin only)",
-  tags: ["Admin"],
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: MessageResponseSchema,
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/purge-data",
+    summary: "Purge all data",
+    description: "Delete all data from the system (admin only)",
+    tags: ["Admin"],
+    middleware: [requireAuth],
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
         },
+        description: "All data purged successfully",
       },
-      description: "All data purged successfully",
+      400: {
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
+        },
+        description: "Invalid user ID",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
+        },
+        description: "Internal server error",
+      },
     },
-  },
-});
+  }), 
+  async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+    
+    // TODO: Add additional check to verify that the user has admin privileges before allowing data purge
 
-app.openapi(purgeDataRoute, async (c) => {
-  await purgeAllData();
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
 
-  return c.json({ message: "All data purged successfully" }, 200);
-});
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    try {
+      await purgeAllData();
+      return c.json({ message: "All data purged successfully" }, 200);
+    } catch (error) {
+      console.error("Error purging data:", error);
+      return c.json({ message: "Internal server error" }, 500);
+    }
+  }
+);
 
 export default app;
