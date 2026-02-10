@@ -1,7 +1,10 @@
 import { z } from "@hono/zod-openapi";
 
-import { MetadataSchema } from "./data/comicMetadata.schema.ts";
-import { ComicStoryArcSelectSchema, ComicLibrarySelectSchema, ComicBookThumbnailSelectSchema, ComicPageSelectSchema } from "./data/database.schema.ts";
+import { 
+  ComicStoryArcSelectSchema, 
+  ComicBookThumbnailSelectSchema, 
+  ComicPageSelectSchema 
+} from "./data/database.schema.ts";
 import { ComicBookSchema } from "./data/comicBooks.schema.ts";
 import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
 
@@ -130,12 +133,26 @@ export const ComicBookMultipleResponseSchema = z.object({
   description: "Response containing multiple comic books",
 });
 
+/**
+ * Schema for returning multiple comic story arcs as part of a response
+ */
 export const ComicStoryArcMultipleResponseSchema = z.object({
   data: z.array(ComicStoryArcSelectSchema),
   meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
 }).openapi({
   title: "ComicStoryArcMultipleResponse",
   description: "Response containing multiple comic story arcs",
+});
+
+/**
+ * Schema for comic book readlists response associated with a specific comic book
+ */
+export const ComicBookReadListsResponseSchema = z.object({
+  comicId: z.number(),
+  readLists: z.array(ComicStoryArcSelectSchema),
+}).openapi({
+  title: "ComicBookReadListsResponse",
+  description: "Response containing readlists that include a specific comic book",
 });
 
 /**
