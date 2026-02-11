@@ -289,3 +289,41 @@ export const RefreshTokenRequestSchema = z.object({
   description: "Request body for refreshing access token",
 });
 
+/**
+ * Schema for adding a new readlist
+ */
+export const AddReadlistSchema = z.object({
+  name: z.string().min(2).max(100).openapi({
+    example: "My Readlist",
+  }),
+}).openapi({
+  title: "AddReadlist",
+  description: "Request body for adding a new readlist",
+});
+
+/**
+ * Schema for comic book ID path parameter
+ *
+ * Used in routes that require a 'comicBookId' parameter in the path.
+ */
+export const ParamComicBookIdSchema = z.object({
+  comicBookId: z.string().openapi({
+    param: { name: "comicBookId", in: "path" },
+    example: "1",
+  }),
+});
+
+/** Schema for user library ID path parameters
+ *
+ * Used in routes that require both 'userId' and 'libraryId' parameters in the path.
+ */
+export const ParamUserLibraryIdSchema = z.object({
+  userId: z.string().openapi({
+    param: { name: "userId", in: "path" },
+    example: "1",
+  }),
+  libraryId: z.string().openapi({
+    param: { name: "libraryId", in: "path" },
+    example: "1",
+  }),
+});

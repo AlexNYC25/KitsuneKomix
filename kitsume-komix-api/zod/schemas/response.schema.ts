@@ -313,3 +313,30 @@ export const ImageResponseSchema = z.any().openapi({
   type: "string",
   format: "binary",
 });
+
+/**
+ * Schema for readlists response containing an array of readlists
+ * Each readlist has an id and name
+ */
+export const ReadlistsResponseSchema = z.array(z.object({
+  id: z.number().openapi({
+    example: 1,
+  }),
+  name: z.string().openapi({
+    example: "My Readlist",
+  }),
+})).openapi({
+  title: "ReadlistsResponse",
+  description: "Array of readlists with id and name",
+});
+
+/**
+ * Schema for user creation response containing a success message and the new user's ID
+ */
+export const UserCreationResponseSchema = z.object({
+  message: z.string(),
+  userId: z.number(),
+}).openapi({
+  title: "UserCreationResponse",
+  description: "Response for successful user creation containing a message and the new user's ID",
+});
