@@ -1,6 +1,8 @@
 import { z } from "@hono/zod-openapi";
 import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
+import { AuthRefreshToken } from "./data/auth.schema.ts";
+
 /**
  * Common schema for path parameter 'id'
  *
@@ -234,4 +236,25 @@ export const CreateCustomThumbnailSchema = z.object({
 }).openapi({
   title: "CreateCustomThumbnail",
   description: "Multipart form data for creating a custom thumbnail",
+});
+
+/**
+ * Schema for logging in a user
+ */
+export const LoginRequestSchema = z.object({
+  email: z.email().openapi({ example: "user@example.com" }),
+  password: z.string().min(6).openapi({ example: "password123" }),
+}).openapi({
+  title: "LoginRequest",
+  description: "Request body for user login",
+});
+
+/**
+ * Schema for refreshing access token using a refresh token
+ */
+export const RefreshTokenRequestSchema = z.object({
+  refreshToken: AuthRefreshToken,
+}).openapi({
+  title: "RefreshTokenRequest",
+  description: "Request body for refreshing access token",
 });

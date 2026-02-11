@@ -1,6 +1,10 @@
 import { z } from "@hono/zod-openapi";
 
 import { 
+  AuthRefreshToken,
+  AuthAccessToken
+} from "./data/auth.schema.ts";
+import { 
   ComicStoryArcSelectSchema, 
   ComicBookThumbnailSelectSchema, 
   ComicPageSelectSchema 
@@ -98,6 +102,15 @@ const UpdatedResultsSchema = z.object({
 }).openapi({
   title: "UpdatedResults",
   description: "Information about the results of an update operation",
+});
+
+const BasicUserInfoSchema = z.object({
+  id: z.number(),
+  email: z.email(),
+  admin: z.boolean().default(false),
+}).openapi({
+  title: "BasicUserInfo",
+  description: "Basic information about a user",
 });
 
 // **** Full response schemas **** //
@@ -250,4 +263,42 @@ export const ComicBookPagesInfoResponseSchema = z.object({
 }).openapi({
   title: "ComicBookPagesInfoResponse",
   description: "Response containing information about comic book pages",
+});
+
+/**
+ * Schema for login response containing user info and tokens
+ */
+export const LoginResponseSchema = z.object({
+  message: z.string().openapi({ example: "Login successful" }),
+  user: BasicUserInfoSchema,
+  accessToken: AuthAccessToken,
+  refreshToken: AuthRefreshToken,
+}).openapi({
+  title: "LoginResponse",
+  description: "Response for successful login containing user info and tokens",
+});
+
+/**
+ * Schema for refresh token response containing new access and refresh tokens
+ */
+export const RefreshTokenResponseSchema = z.object({
+  message: z.string().openapi({ example: "Token refreshed successfully" }),
+  accessToken: AuthAccessToken,
+  refreshToken: AuthRefreshToken,
+}).openapi({
+  title: "RefreshTokenResponse",
+  description: "Response for successful token refresh containing new tokens",
+});
+
+/**
+ * Schema for logout response indicating successful logout
+ */
+export const LogoutAllResponseSchema = z.object({
+  message: z.string().openapi({
+    example: "Logged out from all devices successfully",
+  }),
+  revokedTokens: z.number().openapi({ example: 3 }),
+}).openapi({
+  title: "LogoutAllResponse",
+  description: "Response for logging out from all devices, including the number of revoked tokens",
 });
