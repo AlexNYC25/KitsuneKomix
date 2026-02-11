@@ -3,11 +3,27 @@ import camelcasekeys from "camelcase-keys";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
-import type { AppEnv } from "#types/index.ts";
-import type { QueryData, RequestFilterParameters, RequestSortParameters } from "#types/index.ts";
 
 import { fetchAllComicStoryArcs } from "../services/comicStoryArcs.service.ts";
-import { ComicArcResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { 
+  ComicStoryArcMultipleResponseSchema,
+  MessageResponseSchema,
+  ErrorResponseSchema,
+  ReadlistsResponseSchema,
+} from "#schemas/response.schema.ts";
+import { 
+  ParamIdSchema,
+  AddReadlistSchema,
+  PaginationSortFilterQuerySchema,
+  ParamComicBookIdSchema,
+} from "#schemas/request.schema.ts";
+
+import type { 
+  AppEnv, 
+  QueryData,
+  AccessRefreshTokenCombinedPayload,
+} from "#types/index.ts";
+
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -15,28 +31,6 @@ const app = new OpenAPIHono<AppEnv>();
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",
   scheme: "bearer",
-});
-
-const MessageResponseSchema = z.object({
-  message: z.string(),
-});
-
-const ErrorResponseSchema = z.object({
-  message: z.string(),
-  errors: z.any().optional(),
-});
-
-const ParamIdSchema = z.object({
-  id: z.string().openapi({
-    param: { name: "id", in: "path" },
-    example: "1",
-  }),
-});
-
-const AddReadlistSchema = z.object({
-  name: z.string().min(2).max(100).openapi({
-    example: "My Readlist",
-  }),
 });
 
 /**
@@ -50,42 +44,26 @@ app.openapi(
     path: "/",
     summary: "Get all readlists",
     tags: ["Readlists"],
+    middleware: [requireAuth],
     request: {
-      query: z.object({
-        page: z.string().optional().transform((val) => (val ? parseInt(val) : 1)).openapi({
-          description: "Page number for pagination",
-          example: 1,
-        }),
-        pageSize: z.string().optional().transform((val) => (val ? parseInt(val) : 10)).openapi({
-          description: "Number of items per page",
-          example: 10,
-        }),
-        filter: z.string().optional().openapi({
-          description: "Filter readlists by name",
-          example: "My Readlist",
-        }),
-        filterProperty: z.string().optional().openapi({
-          description: "Property to filter readlists by",
-          example: "name",
-        }),
-        sort: z.string().optional().openapi({
-          description: "Sort readlists by a specific property",
-          example: "name",
-        }),
-        sortDirection: z.enum(["asc", "desc"]).optional().openapi({
-          description: "Sort direction",
-          example: "asc",
-        }), 
-      }),
+      query: PaginationSortFilterQuerySchema,
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: ComicArcResponseSchema,
+            schema: ComicStoryArcMultipleResponseSchema,
           },
         },
         description: "Readlists retrieved successfully",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Invalid request parameters",
       },
       401: {
         content: {
@@ -105,12 +83,15 @@ app.openapi(
       },
     },
   }), async (c) => {
-    const user = c.get("user");
-    if (!user) {
-      return c.json(
-        { message: "Unauthorized" },
-        401,
-      );
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+    
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
     }
 
     // Extract and construct pagination parameters
@@ -120,6 +101,7 @@ app.openapi(
       pageSize: query.pageSize,
     };
 
+    /*
     // Construct filter parameters
     const filterParams: RequestFilterParameters = {
       filterProperty: query.filterProperty,
@@ -131,8 +113,12 @@ app.openapi(
       sortProperty: query.sort,
       sortOrder: query.sortDirection,
     };
+    */
+  
 
-    const readlists = await fetchAllComicStoryArcs(paginationParams, filterParams, sortParams);
+    //const readlists = await fetchAllComicStoryArcs(paginationParams, filterParams, sortParams);
+
+    const readlists = null; //TODO: implement readlist fetching logic
 
     if (!readlists) {
       return c.json(
@@ -156,6 +142,7 @@ app.openapi(
     path: "/{id}",
     summary: "Get a readlist by ID",
     tags: ["Readlists"],
+    middlware: [requireAuth],
     request: { params: ParamIdSchema },
     responses: {
       200: {
@@ -166,12 +153,49 @@ app.openapi(
         },
         description: "Readlist retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Invalid readlist ID",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },  
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
     },
   }), (c) => {
     const { id } = c.req.valid("param");
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+    
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+
     //TODO: implement readlist retrieval logic
     const readlist = { id, name: "Default Readlist" };
-    return c.json(readlist);
+    return c.json(readlist, 200);
   }
 );
 
@@ -186,6 +210,7 @@ app.openapi(
     path: "/{id}",
     summary: "Delete a readlist",
     tags: ["Readlists"],
+    middleware: [requireAuth],
     request: { params: ParamIdSchema },
     responses: {
       501: {
@@ -210,14 +235,47 @@ app.openapi(
     path: "/{id}/download",
     summary: "Download a readlist",
     tags: ["Readlists"],
+    middleware: [requireAuth],
     request: { params: ParamIdSchema },
     responses: {
+      400: {
+        content: { 
+          "application/json": { 
+            schema: ErrorResponseSchema
+          }
+        },
+        description: "Invalid readlist ID",
+      },
+      401: {
+        content: { 
+          "application/json": { 
+            schema: ErrorResponseSchema 
+          } 
+        },
+        description: "Unauthorized",
+      },
       501: {
-        content: { "application/json": { schema: MessageResponseSchema } },
+        content: { 
+          "application/json": { 
+            schema: MessageResponseSchema 
+          } 
+        },
         description: "Not implemented",
       },
     },
   }), (_c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = _c.get("user");
+    
+    if (!user || !user.sub) {
+      return _c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return _c.json({ message: "Invalid user ID" }, 400);
+    }
+
+
     //TODO: implement readlist download logic
     return _c.json({ message: "Readlist download not implemented yet" }, 501);
   }
@@ -234,6 +292,7 @@ app.openapi(
     path: "/add-readlist",
     summary: "Add a new readlist",
     tags: ["Readlists"],
+    middleware: [requireAuth],
     request: {
       body: {
         content: {
@@ -244,17 +303,45 @@ app.openapi(
       },
     },
     responses: {
-      501: {
-        content: { "application/json": { schema: MessageResponseSchema } },
-        description: "Not implemented",
-      },
       400: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
+        content: { 
+          "application/json": { 
+            schema: ErrorResponseSchema 
+          } 
+        },
         description: "Invalid request body",
+      },
+      401: {
+        content: { 
+          "application/json": { 
+            schema: ErrorResponseSchema 
+          } 
+        },
+        description: "Unauthorized",
+      },
+      501: {
+        content: { 
+          "application/json": { 
+            schema: MessageResponseSchema 
+          } 
+        },
+        description: "Not implemented",
       },
     },
   }), (c) => {
     const body = c.req.valid("json");
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+    
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
     const result = AddReadlistSchema.safeParse(body);
     if (!result.success) {
       return c.json(
@@ -278,23 +365,33 @@ app.openapi(
     path: "/comic-book/{comicBookId}",
     summary: "Get readlists containing a specific comic book",
     tags: ["Readlists"],
-    request: { 
-      params: z.object({
-        comicBookId: z.string().openapi({
-          param: { name: "comicBookId", in: "path" },
-          example: "1",
-        }),
-      }) 
-    },
+    middleware: [requireAuth],
+    request: { params: ParamComicBookIdSchema },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: z.array(z.object({ id: z.number(), name: z.string() })),
+            schema: ReadlistsResponseSchema,
           },
         },
         description: "Readlists retrieved successfully",
       },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Invalid comic book ID",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },  
       501: {
         content: { "application/json": { schema: MessageResponseSchema } },
         description: "Not implemented",
@@ -302,6 +399,17 @@ app.openapi(
     },
   }), (c) => {
     const { comicBookId } = c.req.valid("param");
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+    
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
 
     return c.json(
       { message: `Readlists for comic book ID ${comicBookId} not implemented yet` },
