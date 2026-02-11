@@ -302,3 +302,14 @@ export const LogoutAllResponseSchema = z.object({
   title: "LogoutAllResponse",
   description: "Response for logging out from all devices, including the number of revoked tokens",
 });
+
+/**
+ * Schema for image file response
+ * Represents binary image data (JPEG, PNG, WebP)
+ */
+export const ImageResponseSchema = z.any().openapi({
+  title: "ImageResponse",
+  description: "Binary image file response (JPEG, PNG, or WebP format)",
+  type: "string",
+  format: "binary",
+});

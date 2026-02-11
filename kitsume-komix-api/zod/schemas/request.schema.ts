@@ -39,6 +39,32 @@ export const ParamLetterSchema = z.object({
   }),
 });
 
+/**
+ * Schema for image file path parameter
+ * 
+ * Used in routes that retrieve image files by path, supporting subdirectories
+ */
+export const ParamImagePathSchema = z.object({
+  imagePath: z.string().openapi({
+    param: { name: "imagePath", in: "path" },
+    description: "The path to the image file (can include subdirectories)",
+    example: "daa25f429c0da574fddec515c0aefb581d7079afa2c55dae7a07955800152ef7_thumb.jpg",
+  }),
+});
+
+/**
+ * Schema for comic book page image path parameters
+ * 
+ * Extends ParamImagePathSchema with comicId for retrieving specific comic pages
+ */
+export const ParamComicPageImageSchema = ParamImagePathSchema.extend({
+  comicId: z.string().openapi({
+    param: { name: "comicId", in: "path" },
+    description: "The ID of the comic book",
+    example: "42",
+  }),
+});
+
 
 /**
  * Common schema for pagination query parameters
@@ -262,3 +288,4 @@ export const RefreshTokenRequestSchema = z.object({
   title: "RefreshTokenRequest",
   description: "Request body for refreshing access token",
 });
+
