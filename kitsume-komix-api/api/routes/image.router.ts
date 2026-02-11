@@ -2,8 +2,13 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { apiLogger } from "../../logger/loggers.ts";
 import { existsSync } from "@std/fs";
 import { join } from "@std/path";
+import { requireAuth } from "../middleware/authChecks.ts";
 
-const imageRouter = new OpenAPIHono();
+import type { AppEnv, AccessRefreshTokenCombinedPayload } from "#types/index.ts";
+import { ErrorResponseSchema, ImageResponseSchema } from "#schemas/response.schema.ts";
+import { ParamImagePathSchema, ParamComicPageImageSchema } from "#schemas/request.schema.ts";
+
+const imageRouter = new OpenAPIHono<AppEnv>();
 
 const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
 
@@ -21,22 +26,35 @@ imageRouter.openapi(
       summary: "Get thumbnail image",
       description: "Retrieve a thumbnail image from the cache directory.",
       tags: ["Images"],
+      middleware: [requireAuth],
       request: {
-        params: z.object({
-          imagePath: z.string().describe(
-            "The path to the image (can include subdirectories)",
-          ),
-        }),
+        params: ParamImagePathSchema,
       },
       responses: {
         200: {
           description: "The thumbnail image",
           content: {
             "image/jpeg": {
-              schema: z.any(),
+              schema: ImageResponseSchema,
             },
             "image/png": {
-              schema: z.any(),
+              schema: ImageResponseSchema,
+            },
+          },
+        },
+        400: {
+          description: "Bad Request - Invalid user ID",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
+        401: {
+          description: "Unauthorized - User must be logged in",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
             },
           },
         },
@@ -44,9 +62,15 @@ imageRouter.openapi(
           description: "Image not found",
           content: {
             "application/json": {
-              schema: z.object({
-                error: z.string(),
-              }),
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
+        500: {
+          description: "Internal Server Error",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
             },
           },
         },
@@ -54,11 +78,22 @@ imageRouter.openapi(
     },
   ),
   async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
     try {
-      const { imagePath } = c.req.valid("param");
+      const { imagePath }: { imagePath: string } = c.req.valid("param");
 
       // Construct the full thumbnail path
-      const thumbnailPath = join(CACHE_DIRECTORY, "thumbnails", imagePath);
+      const thumbnailPath: string = join(CACHE_DIRECTORY, "thumbnails", imagePath);
 
       apiLogger.info(`Attempting to serve thumbnail: ${thumbnailPath}`);
 
@@ -69,8 +104,8 @@ imageRouter.openapi(
       }
 
       // Determine content type based on file extension
-      const ext = imagePath.toLowerCase().split(".").pop();
-      const contentType = ext === "png" ? "image/png" : "image/jpeg";
+      const ext: string | undefined = imagePath.toLowerCase().split(".").pop();
+      const contentType: string = ext === "png" ? "image/png" : "image/jpeg";
 
       // Read and serve the file
       const fileContent = await Deno.readFile(thumbnailPath);
@@ -105,26 +140,38 @@ imageRouter.openapi(
       summary: "Get comic book page image",
       description: "Retrieve a comic book page image from the cache directory.",
       tags: ["Images"],
+      middleware: [requireAuth],
       request: {
-        params: z.object({
-          comicId: z.string().describe("The ID of the comic book"),
-          imagePath: z.string().describe(
-            "The name of the page image file",
-          ),
-        }),
+        params: ParamComicPageImageSchema,
       },
       responses: {
         200: {
           description: "The comic book page image",
           content: {
             "image/jpeg": {
-              schema: z.any(),
+              schema: ImageResponseSchema,
             },
             "image/png": {
-              schema: z.any(),
+              schema: ImageResponseSchema,
             },
             "image/webp": {
-              schema: z.any(),
+              schema: ImageResponseSchema,
+            },
+          },
+        },
+        400: {
+          description: "Bad Request - Invalid user ID",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
+        401: {
+          description: "Unauthorized - User must be logged in",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
             },
           },
         },
@@ -132,9 +179,15 @@ imageRouter.openapi(
           description: "Image not found",
           content: {
             "application/json": {
-              schema: z.object({
-                error: z.string(),
-              }),
+              schema: ErrorResponseSchema,
+            },
+          },
+        },
+        500: {
+          description: "Internal Server Error",
+          content: {
+            "application/json": {
+              schema: ErrorResponseSchema,
             },
           },
         },
@@ -142,11 +195,22 @@ imageRouter.openapi(
     },
   ),
   async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
     try {
-      const { comicId, imagePath } = c.req.valid("param");
+      const { comicId, imagePath }: { comicId: string; imagePath: string } = c.req.valid("param");
 
       // Construct the full page image path: cache/pages/{comicId}/{imagePath}
-      const pagePath = join(CACHE_DIRECTORY, "pages", comicId, imagePath);
+      const pagePath: string = join(CACHE_DIRECTORY, "pages", comicId, imagePath);
 
       apiLogger.info(`Attempting to serve comic page: ${pagePath}`);
 
@@ -157,8 +221,8 @@ imageRouter.openapi(
       }
 
       // Determine content type based on file extension
-      const ext = imagePath.toLowerCase().split(".").pop();
-      let contentType = "image/jpeg";
+      const ext: string | undefined = imagePath.toLowerCase().split(".").pop();
+      let contentType: string = "image/jpeg";
       if (ext === "png") {
         contentType = "image/png";
       } else if (ext === "webp") {
