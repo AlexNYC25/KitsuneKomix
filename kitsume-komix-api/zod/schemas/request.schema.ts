@@ -171,7 +171,11 @@ export const ParamIdThumbnailIdSchema = ParamIdSchema.extend({
   }),
 });
 
-
+export const AddCollectionSchema = z.object({
+  name: z.string().min(2).max(100).openapi({
+    example: "My Collection",
+  }),
+});
 
 
 // Schema for updating comic book partial fields in request body
