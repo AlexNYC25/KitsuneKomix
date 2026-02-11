@@ -7,9 +7,16 @@ import {
   createUserService,
   deleteUserService,
 } from "../services/users.service.ts";
-import { UserSchema } from "../../zod/schemas/request.schema.ts";
-import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
-import { AppEnv, UserRegistrationInput } from "../../types/index.ts";
+
+import { UserSchema, ParamUserLibraryIdSchema, ParamIdSchema } from "#schemas/request.schema.ts";
+import { AuthHeaderSchema } from "#schemas/header.schema.ts";
+import { ErrorResponseSchema, MessageResponseSchema, UserCreationResponseSchema } from "#schemas/response.schema.ts";
+
+import { 
+  AccessRefreshTokenCombinedPayload, 
+  AppEnv, 
+  UserRegistrationInput 
+} from "#types/index.ts";
 
 const apiUsersRouter = new OpenAPIHono<AppEnv>();
 
@@ -26,6 +33,7 @@ apiUsersRouter.openapi(
     summary: "Create a new user",
     description: "Endpoint to create a new user in the system.",
     tags: ["Users"],
+    middleware: [requireAuth],
     request: {
       body: {
         content: {
@@ -40,10 +48,7 @@ apiUsersRouter.openapi(
         description: "User created successfully",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-              userId: z.number(),
-            }),
+            schema: UserCreationResponseSchema
           },
         },
       },
@@ -51,10 +56,15 @@ apiUsersRouter.openapi(
         description: "Invalid user data",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-              errors: z.record(z.string(), z.any()).optional(),
-            }),
+            schema: ErrorResponseSchema
+          },
+        },
+      },
+      401: {
+        description: "Unauthorized - User must be logged in",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -62,9 +72,7 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -73,6 +81,18 @@ apiUsersRouter.openapi(
   async (c) => {
     try {
       const userData: UserRegistrationInput = await c.req.json();
+
+      const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+      if (!user || !user.sub) {
+        return c.json({ message: "Unauthorized" }, 401);
+      }
+
+      const userId: number = parseInt(user.sub, 10);
+      if (isNaN(userId)) {
+        return c.json({ message: "Invalid user ID" }, 400);
+      }
+      
       const parsed: ZodSafeParseResult<UserRegistrationInput> = UserSchema
         .safeParse(userData);
 
@@ -112,14 +132,12 @@ apiUsersRouter.openapi(
     description:
       "Endpoint to assign a library to a user. Requires authentication.",
     tags: ["Users"],
+    middleware: [requireAuth],
     request: {
       body: {
         content: {
           "application/json": {
-            schema: z.object({
-              userId: z.number().int().positive(),
-              libraryId: z.number().int().positive(),
-            }),
+            schema: ParamUserLibraryIdSchema
           },
         },
       },
@@ -129,9 +147,7 @@ apiUsersRouter.openapi(
         description: "Library assigned successfully",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: MessageResponseSchema
           },
         },
       },
@@ -139,9 +155,7 @@ apiUsersRouter.openapi(
         description: "Invalid request data",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -149,9 +163,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -159,19 +171,22 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
     },
   }),
   async (c) => {
-    // Check authentication
-    const authHeader = c.req.header("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
     }
 
     try {
@@ -209,23 +224,15 @@ apiUsersRouter.openapi(
       "Assign a comic library to the authenticated user. Requires authentication.",
     tags: ["Users"],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/, "ID must be a positive integer string"),
-      }),
-      headers: AuthHeaderSchema,
+      params: ParamIdSchema,
     },
     middleware: [requireAuth],
-    security: [
-      { Bearer: [] },
-    ],
     responses: {
       200: {
         description: "Library assigned successfully",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: MessageResponseSchema
           },
         },
       },
@@ -233,9 +240,7 @@ apiUsersRouter.openapi(
         description: "Invalid request data",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -243,9 +248,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -253,23 +256,26 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
     },
   }),
   async (c) => {
-    const user = c.get("user");
-    if (!user) {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
     }
 
     const paramId = c.req.param("id");
     const libraryId = parseInt(paramId, 10);
-    const userId = parseInt(user.sub, 10);
 
     if (isNaN(libraryId) || libraryId <= 0) {
       return c.json({ message: "Invalid library ID" }, 400);
@@ -297,21 +303,16 @@ apiUsersRouter.openapi(
     summary: "Delete the currently authenticated user",
     description: "Deletes the currently authenticated user.",
     tags: ["Users"],
+    middleware: [requireAuth],
     request: {
       headers: AuthHeaderSchema,
     },
-    middleware: [requireAuth],
-    security: [
-      { Bearer: [] },
-    ],
     responses: {
       200: {
         description: "User deleted successfully",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: MessageResponseSchema
           },
         },
       },
@@ -319,9 +320,7 @@ apiUsersRouter.openapi(
         description: "Invalid user ID",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -329,9 +328,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -339,22 +336,21 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
     },
   }),
   async (c) => {
-    const user = c.get("user");
-    if (!user) {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const userId = parseInt(user.sub, 10);
-    if (isNaN(userId) || userId <= 0) {
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
@@ -384,25 +380,15 @@ apiUsersRouter.openapi(
     description: "Delete a user from the system. Requires authentication.",
     tags: ["Users"],
     middleware: [requireAuth],
-    security: [
-      { Bearer: [] },
-    ],
     request: {
-      params: z.object({
-        id: z.string().regex(/^\d+$/, "ID must be a positive integer string"),
-      }),
-      headers: z.object({
-        Authorization: z.string().startsWith("Bearer "),
-      }),
+      params: ParamIdSchema,
     },
     responses: {
       200: {
         description: "User deleted successfully",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: MessageResponseSchema
           },
         },
       },
@@ -410,9 +396,7 @@ apiUsersRouter.openapi(
         description: "Invalid user ID",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -420,9 +404,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
@@ -430,23 +412,25 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: z.object({
-              message: z.string(),
-            }),
+            schema: ErrorResponseSchema
           },
         },
       },
     },
   }),
   async (c) => {
-    const user = c.get("user");
-    if (!user) {
+    const paramId = c.req.param("id");
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const paramId = c.req.param("id");
-
-    const userId = parseInt(user.sub, 10);
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+    
     const deleteUserId = parseInt(paramId, 10);
 
     if (isNaN(deleteUserId) || deleteUserId <= 0) {
