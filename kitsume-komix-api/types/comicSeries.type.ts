@@ -1,11 +1,10 @@
+import { QueryableColumns } from "../constants/index.ts";
 import type {
 	ComicSeries,
 	ComicSeriesWithMetadata,
-} from "#types/database.types.ts";
-
-import type {
 	ComicBookWithThumbnail,
-} from "#types/comicBook.type.ts";
+	ComicSeriesSortField,
+} from "#types/index.ts";
 
 // Extended type including optional thumbnail URL
 export type ComicSeriesWithThumbnail = ComicSeries & { thumbnailUrl?: string };
@@ -20,3 +19,22 @@ export type ComicSeriesWithComicsMetadataAndThumbnail =
 	& {
 		comics: Array<ComicBookWithThumbnail>;
 	};
+
+export type AllowedComicSeriesSortFilterProperties = keyof typeof QueryableColumns["comicSeries"]["filter"];
+
+export type AllowedComicSeriesSortProperties = keyof typeof QueryableColumns["comicSeries"]["sort"];
+
+export type ComicSeriesFilterItem = {
+	filterProperty: AllowedComicSeriesSortFilterProperties;
+	filterValue: string;
+};
+
+export type ComicSeriesFilteringAndSortingParams = {
+	filters?: ComicSeriesFilterItem[];
+	sort?: {
+		property: ComicSeriesSortField;
+		order: "asc" | "desc";
+	};
+	offset?: number;
+	limit?: number;
+};
