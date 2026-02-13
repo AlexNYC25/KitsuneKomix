@@ -4,6 +4,7 @@ import {
   getComicSeriesMetadataById,
   getLatestComicSeries,
   getUpdatedComicSeries,
+  getComicSeriesWithMetadataFilteringSorting,
 } from "#sqlite/models/comicSeries.model.ts";
 import { getComicBooksBySeriesId } from "#sqlite/models/comicBooks.model.ts";
 import { getThumbnailsByComicBookId } from "#sqlite/models/comicBookThumbnails.model.ts";
@@ -16,9 +17,43 @@ import type {
   ComicSeries,
   ComicSeriesWithMetadata,
   ComicSeriesWithThumbnail,
+  ComicSeriesFilterItem,
   ComicSeriesWithMetadataAndThumbnail,
   ComicSeriesWithComicsMetadataAndThumbnail,
+  RequestParametersValidated,
+  ComicSeriesSortField,
+  ComicSeriesFilterField,
+  RequestPaginationParametersValidated,
+  RequestFilterParametersValidated,
+  RequestSortParametersValidated,
 } from "#types/index.ts";
+
+export const fetchComicSeries = async (
+  queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>,
+): Promise<ComicSeriesWithThumbnail[]> => {
+  try {
+    const serviceDataPagination: RequestPaginationParametersValidated = queryData.pagination;
+    const serviceDataFilter: RequestFilterParametersValidated<ComicSeriesFilterField> | undefined = queryData.filter;
+    const serviceDataSort: RequestSortParametersValidated<ComicSeriesSortField> = queryData.sort;
+
+    const comicSeriesFromDb: ComicSeries[] = await getComicSeriesWithMetadataFilteringSorting({
+      filters: [serviceDataFilter] as ComicSeriesFilterItem[], // Cast to expected type
+      sort: {
+        property: serviceDataSort.sortProperty,
+        order: serviceDataSort.sortOrder
+      },
+      offset: serviceDataPagination.pageNumber * serviceDataPagination.pageSize,
+      limit: serviceDataPagination.pageSize + 1
+    });
+
+    // Request the overview comic series data i.e. how many books, date range, writers, artists, etc
+    // and attatch the thumbnail url for the first comic book in the series if it exists
+
+    return []
+  } catch (error) {
+    throw new Error("Error fetching comic series: " + (error instanceof Error ? error.message : String(error)));
+  }
+};
 
 export const getLatestComicSeriesUserCanAccess = async (
   userId: number,
