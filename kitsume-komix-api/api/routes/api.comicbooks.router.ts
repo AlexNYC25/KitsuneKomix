@@ -1,6 +1,8 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { basename } from "@std/path";
 
+import { requireAuth } from "../middleware/authChecks.ts";
+
 import {
   fetchComicBooksWithRelatedMetadata,
   fetchAComicsAssociatedMetadataById,
@@ -21,33 +23,6 @@ import {
   updateComicBookMetadataBulk,
   processComicBookDeletion,
 } from "../services/comicbooks.service.ts";
-
-import type {
-  AppEnv,
-  AccessRefreshTokenCombinedPayload,
-  ComicBook,
-  ComicBookWithMetadata,
-  ComicBookMetadataOnly,
-  ComicBookThumbnail,
-  ComicBookPagesInfo,
-  ComicBookStreamingServiceData,
-  ComicBookStreamingServiceResult,
-  ComicBookMultipleResponse,
-  ComicBookMultipleResponseData,
-  ComicBookMultipleResponseMeta,
-  ComicStoryArc,
-  ComicSortField,
-  ComicFilterField,
-  ComicMetadataUpdateData,
-  ComicMetadataBulkUpdateData,
-  ComicMetadataSingleUpdateData,
-  RequestPaginationParametersValidated,
-  RequestFilterParametersValidated,
-  RequestSortParametersValidated,
-  RequestParametersValidated,
-  QueryData,
-  QueryDataWithLetter,
-} from "#types/index.ts";
 
 import {
   ComicBookSchema,
@@ -83,7 +58,33 @@ import {
   CreateCustomThumbnailSchema,
 } from "#schemas/request.schema.ts";
 
-import { requireAuth } from "../middleware/authChecks.ts";
+import type {
+  AppEnv,
+  AccessRefreshTokenCombinedPayload,
+  ComicBook,
+  ComicBookWithMetadata,
+  ComicBookMetadataOnly,
+  ComicBookThumbnail,
+  ComicBookPagesInfo,
+  ComicBookStreamingServiceData,
+  ComicBookStreamingServiceResult,
+  ComicBookMultipleResponse,
+  ComicBookMultipleResponseData,
+  ComicBookMultipleResponseMeta,
+  ComicStoryArc,
+  ComicSortField,
+  ComicFilterField,
+  ComicMetadataUpdateData,
+  ComicMetadataBulkUpdateData,
+  ComicMetadataSingleUpdateData,
+  RequestPaginationParametersValidated,
+  RequestFilterParametersValidated,
+  RequestSortParametersValidated,
+  RequestParametersValidated,
+  QueryData,
+  QueryDataWithLetter,
+} from "#types/index.ts";
+
 import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
