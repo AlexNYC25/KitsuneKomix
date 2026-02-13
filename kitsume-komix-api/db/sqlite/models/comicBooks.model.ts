@@ -50,8 +50,14 @@ import type {
 import type { ComicBookQueryParams } from "#interfaces/index.ts";
 import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 
-
-function addFilteringToQuery<T extends SQLiteSelect>(filter: ComicBookFilterItem, query: T): T {
+/**
+ * Exclusive dynamic filtering function specifcally for getComicBooksWithMetadataFilteringSorting
+ * This is necessary as the filtering can be applied to any of the fields in the comic book table and we need to dynamically apply it to the query builder.
+ * @param filter 
+ * @param query
+ * @returns the query with the filter applied
+ */
+const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicBookFilterItem, query: T): T => {
   const { filterProperty, filterValue } = filter;
 
   switch (filterProperty) {
@@ -142,9 +148,17 @@ function addFilteringToQuery<T extends SQLiteSelect>(filter: ComicBookFilterItem
   }
 
   return query;
-}
+};
 
-function addSortingToQuery<T extends SQLiteSelect>(sortProperty: ComicSortField, sortDirection: string, query: T): T {
+/**
+ * Exclusive dynamic sorting function specifcally for getComicBooksWithMetadataFilteringSorting
+ * This is necessary as the sorting can be applied to any of the fields in the comic book table and we need to dynamically apply it to the query builder.
+ * @param sortProperty 
+ * @param sortDirection 
+ * @param query 
+ * @returns the query with the sorting applied
+ */
+const addSortingToQuery = <T extends SQLiteSelect>(sortProperty: ComicSortField, sortDirection: string, query: T): T => {
   const direction = sortDirection === "asc" ? asc : desc;
 
   switch (sortProperty) {
@@ -212,7 +226,7 @@ function addSortingToQuery<T extends SQLiteSelect>(sortProperty: ComicSortField,
   }
 
   return query;
-}
+};
 
 
 /**
