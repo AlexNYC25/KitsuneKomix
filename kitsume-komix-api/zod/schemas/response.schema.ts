@@ -118,11 +118,11 @@ const BasicUserInfoSchema = z.object({
 /**
  * Schema for paginated comic series response
  */
-export const ComicSeriesResponseSchema = z.object({
+export const ComicSeriesMultipleResponseSchema = z.object({
   data: z.array(ComicSeriesSchema),
   meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
 }).openapi({
-  title: "ComicSeriesResponse",
+  title: "ComicSeriesMultipleResponse",
   description: "Response containing paginated comic series data",
 });
 
