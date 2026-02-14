@@ -142,9 +142,7 @@ import {
 
 /**
  * Fetch all comic books with related metadata.
- * @param requestQueryParameters
- * @param requestFilterParameters
- * @param requestSortParameters
+ * @param queryData - The validated query parameters for pagination, sorting, and filtering.
  * @returns A promise that resolves to an array of ComicBook objects with related metadata
  *
  * used by
