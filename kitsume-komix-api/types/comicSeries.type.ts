@@ -1,10 +1,33 @@
 import { QueryableColumns } from "../constants/index.ts";
+
 import type {
-	ComicSeries,
-	ComicSeriesWithMetadata,
-	ComicBookWithThumbnail,
+	ComicSeries
+} from "#types/database.types.ts";
+
+import type {
 	ComicSeriesSortField,
-} from "#types/index.ts";
+} from "#types/parameters.type.ts";
+
+import type {
+	ComicBookWithThumbnail
+} from "#types/comicBook.type.ts";
+
+export type ComicSeriesWithMetadata = ComicSeries & {
+  writers?: string;
+  pencillers?: string;
+  inkers?: string;
+  letterers?: string;
+  editors?: string;
+  cover_artists?: string;
+  publishers?: string;
+  imprints?: string;
+  genres?: string;
+  characters?: string;
+  teams?: string;
+  locations?: string;
+  story_arcs?: string;
+  series_groups?: string;
+};
 
 // Extended type including optional thumbnail URL
 export type ComicSeriesWithThumbnail = ComicSeries & { thumbnailUrl?: string };

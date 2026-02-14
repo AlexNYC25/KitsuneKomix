@@ -200,20 +200,3 @@ export type ComicBookSeriesGroup = InferSelectModel<
 export type NewComicBookSeriesGroup = InferInsertModel<
   typeof comicBookSeriesGroupsTable
 >;
-
-export type ComicSeriesWithMetadata = ComicSeries & {
-  writers?: string;
-  pencillers?: string;
-  inkers?: string;
-  letterers?: string;
-  editors?: string;
-  cover_artists?: string;
-  publishers?: string;
-  imprints?: string;
-  genres?: string;
-  characters?: string;
-  teams?: string;
-  locations?: string;
-  story_arcs?: string;
-  series_groups?: string;
-};
