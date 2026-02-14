@@ -157,6 +157,9 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
   }
 }
 
+
+////// TODO: REMOVE THIS COMMENT/ Placeholder for verified code
+
 /**
  * Inserts a new comic series into the database
  * @param seriesData The series data to insert including name, description, and folder path
