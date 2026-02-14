@@ -1,3 +1,5 @@
+import { getClient } from "#sqlite/client.ts";
+
 import { getUsersComicLibraries } from "#sqlite/models/comicLibraries.model.ts";
 import {
   getComicSeriesById,
@@ -9,28 +11,42 @@ import {
 import { getComicBooksBySeriesId } from "#sqlite/models/comicBooks.model.ts";
 import { getThumbnailsByComicBookId } from "#sqlite/models/comicBookThumbnails.model.ts";
 
-import { attachThumbnailToComicBook } from "./comicbooks.service.ts";
+import {
+  fetchComicBooksWithRelatedMetadata,
+  attachThumbnailToComicBook 
+} from "./comicbooks.service.ts";
 
 import type {
   ComicBook,
   ComicBookWithThumbnail,
   ComicSeries,
   ComicSeriesWithMetadata,
-  ComicSeriesWithThumbnail,
   ComicSeriesFilterItem,
-  ComicSeriesWithMetadataAndThumbnail,
-  ComicSeriesWithComicsMetadataAndThumbnail,
   RequestParametersValidated,
   ComicSeriesSortField,
   ComicSeriesFilterField,
+  ComicSortField,
+  ComicFilterField,
   RequestPaginationParametersValidated,
   RequestFilterParametersValidated,
   RequestSortParametersValidated,
+  QueryData,
+  ComicBookWithMetadata,
+  ComicBookMetadataOnly,
+  ComicSeriesMetadata,
 } from "#types/index.ts";
 
+import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
+
+/**
+ * Fetch all comic series with related metadata.
+ * This includes the total number of comic books in each series, the total file size of all comic books in the series,
+ * @param queryData - The validated query parameters for pagination, sorting, and filtering.
+ * @returns A promise that resolves to an array of ComicSeries objects with related metadata
+ */
 export const fetchComicSeries = async (
   queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>,
-): Promise<ComicSeriesWithThumbnail[]> => {
+): Promise<ComicSeriesWithMetadata[]> => {
   try {
     const serviceDataPagination: RequestPaginationParametersValidated = queryData.pagination;
     const serviceDataFilter: RequestFilterParametersValidated<ComicSeriesFilterField> | undefined = queryData.filter;
@@ -46,26 +62,163 @@ export const fetchComicSeries = async (
       limit: serviceDataPagination.pageSize + 1
     });
 
-    // Request the overview comic series data i.e. how many books, date range, writers, artists, etc
-    // and attatch the thumbnail url for the first comic book in the series if it exists
+    const comicSeriesWithMetadata: ComicSeriesWithMetadata[] = [];
 
-    return []
+    for (const series of comicSeriesFromDb) {
+      const currentComicSeriesMetadata: ComicSeriesMetadata = await fetchAComicSeriesAssociatedMetadataById(series.id);
+
+      (series as ComicSeriesWithMetadata).totalComicBooks = currentComicSeriesMetadata.totalComicBooks;
+      (series as ComicSeriesWithMetadata).totalSize = currentComicSeriesMetadata.totalSize;
+      (series as ComicSeriesWithMetadata).thumbnailUrl = currentComicSeriesMetadata.thumbnailUrl;
+      (series as ComicSeriesWithMetadata).credits = currentComicSeriesMetadata.credits;
+
+      comicSeriesWithMetadata.push(series as ComicSeriesWithMetadata);
+    }
+
+    return comicSeriesWithMetadata;
   } catch (error) {
     throw new Error("Error fetching comic series: " + (error instanceof Error ? error.message : String(error)));
   }
 };
 
+/**
+ * Fetch associated metadata for a comic series by its ID, of the type ComicSeriesMetadata
+ * including total number of comic books in the series, total file size of all comic books in the series, thumbnail url for the series (which is the thumbnail for the first comic book in the series)
+ * and complete credits for the series (which would involve fetching the credits for each comic book in the series and then deduplicating them to get a complete list of unique credits for the series as a whole).
+ * 
+ * @param seriesId 
+ * @returns A promise that resolves to a ComicSeriesMetadata object.
+ */
+export const fetchAComicSeriesAssociatedMetadataById = async (
+  seriesId: number
+): Promise<ComicSeriesMetadata> => {
+  const queryData: QueryData = {
+    page: 0,
+    pageSize: 100, // Arbitrary large number to fetch all comic books in the series, we can implement proper pagination later if needed, but most comics should have less than 100 comic books in a series so this should be fine for now NOTE: Spawn, savage dragon, and other long-running series might have more than 100 comic books in a series, so we should implement proper pagination for this at some point to ensure we can fetch all comic books in a series if needed
+    filter: "seriesId",
+    filterProperty: seriesId.toString(),
+  }
+  const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
+  const comicBooksBelongingToSeries: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData);
+
+  const totalComicBooks: number = comicBooksBelongingToSeries.length;
+  const totalSize: number = comicBooksBelongingToSeries.reduce((total, book) => total + (book.fileSize || 0), 0);
+  const thumbnailUrl: string | undefined = comicBooksBelongingToSeries.length > 0
+    ? `/api/image/thumbnails/${comicBooksBelongingToSeries[0].id}` // TODO: Check that this is the correct way to get the thumbnail url for the first comic book in the series
+    : undefined;
+  const credits: ComicBookMetadataOnly = complileTheCompleteComicSeriesCreditsMetadata(comicBooksBelongingToSeries);
+
+  // This function would involve fetching the credits for each comic book in the series and then deduplicating them to get a complete list of unique credits for the series as a whole. This is a non-trivial amount of additional work so I'm leaving it as a placeholder for now and we can implement it later if we have time or if it's needed by the frontend.
+  return {
+    totalComicBooks,
+    totalSize,
+    thumbnailUrl,
+    credits
+  };
+}
+
+/**
+ * We want to compile the complete credits metadata for a comic series by iterating through all the comic books in the series 
+ * and collecting their credits (writers, pencillers, inkers, letterers, editors, colorists, cover artists, publishers, imprints, genres, characters, teams, locations, story arcs, and series groups).
+ * We will then deduplicate these credits to get a unique list of credits for the entire series.
+ * 
+ * @param comicBooks An array of data objects that are of the type ComicBookWithMetadata
+ * @returns A ComicBookMetadataOnly object containing the deduplicated credits for the entire series.
+ */
+export const complileTheCompleteComicSeriesCreditsMetadata = (comicBooks: ComicBookWithMetadata[]): ComicBookMetadataOnly => {
+  const completeCredits: ComicBookMetadataOnly = {};
+
+  for (const book of comicBooks) {
+    if (book.writers) {
+      completeCredits.writers = completeCredits.writers || [];
+      completeCredits.writers.push(...book.writers);
+    }
+    if (book.pencillers) {
+      completeCredits.pencillers = completeCredits.pencillers || [];
+      completeCredits.pencillers.push(...book.pencillers);
+    }
+    if (book.inkers) {
+      completeCredits.inkers = completeCredits.inkers || [];
+      completeCredits.inkers.push(...book.inkers);
+    }
+    if (book.letterers) {
+      completeCredits.letterers = completeCredits.letterers || [];
+      completeCredits.letterers.push(...book.letterers);
+    }
+    if (book.editors) {
+      completeCredits.editors = completeCredits.editors || [];
+      completeCredits.editors.push(...book.editors);
+    }
+    if (book.colorists) {
+      completeCredits.colorists = completeCredits.colorists || [];
+      completeCredits.colorists.push(...book.colorists);
+    }
+    if (book.coverArtists) {
+      completeCredits.coverArtists = completeCredits.coverArtists || [];
+      completeCredits.coverArtists.push(...book.coverArtists);
+    }
+    if (book.publishers) {
+      completeCredits.publishers = completeCredits.publishers || [];
+      completeCredits.publishers.push(...book.publishers);
+    }
+    if (book.imprints) {
+      completeCredits.imprints = completeCredits.imprints || [];
+      completeCredits.imprints.push(...book.imprints);
+    }
+    if (book.genres) {
+      completeCredits.genres = completeCredits.genres || [];
+      completeCredits.genres.push(...book.genres);
+    }
+    if (book.characters) {
+      completeCredits.characters = completeCredits.characters || [];
+      completeCredits.characters.push(...book.characters);
+    }
+    if (book.teams) {
+      completeCredits.teams = completeCredits.teams || [];
+      completeCredits.teams.push(...book.teams);
+    }
+    if (book.locations) {
+      completeCredits.locations = completeCredits.locations || [];
+      completeCredits.locations.push(...book.locations);
+    }
+    if (book.storyArcs) {
+      completeCredits.storyArcs = completeCredits.storyArcs || [];
+      completeCredits.storyArcs.push(...book.storyArcs);
+    }
+    if (book.seriesGroups) {
+      completeCredits.seriesGroups = completeCredits.seriesGroups || [];
+      completeCredits.seriesGroups.push(...book.seriesGroups);
+    }
+  }
+
+  for (const creditType in completeCredits) {
+    if (completeCredits[creditType as keyof ComicBookMetadataOnly]) {
+      const uniqueCredits = new Map();
+      for (const credit of completeCredits[creditType as keyof ComicBookMetadataOnly] as any[]) {
+        uniqueCredits.set(credit.id, credit);
+      }
+      completeCredits[creditType as keyof ComicBookMetadataOnly] = Array.from(uniqueCredits.values());
+    }
+  }
+
+  return completeCredits;
+}
+
+
+
+
+
 export const getLatestComicSeriesUserCanAccess = async (
   userId: number,
   limit: number = 20,
   offset: number = 0,
-): Promise<Array<ComicSeriesWithThumbnail>> => {
+): Promise<Array<ComicSeriesWithMetadata>> => {
   const userLibraries = await getUsersComicLibraries(userId);
 
   const libraryIds = userLibraries.map((lib) => lib.id);
   const latestSeries = await getLatestComicSeries(limit, offset, libraryIds);
 
-  const latestSeriesWithThumbnails: Array<ComicSeriesWithThumbnail> = [];
+  const latestSeriesWithThumbnails: Array<ComicSeriesWithMetadata> = [];
 
   for (const series of latestSeries) {
     const comicBooksForCurrentSeries = await getComicBooksBySeriesId(series.id);
@@ -78,11 +231,11 @@ export const getLatestComicSeriesUserCanAccess = async (
 
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
-      const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
+      const seriesWithThumbnailUrl = series as ComicSeriesWithMetadata;
       seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].filePath.split("/").pop()}`;
       latestSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
-      latestSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
+      latestSeriesWithThumbnails.push(series as ComicSeriesWithMetadata);
     }
   }
 
@@ -93,13 +246,13 @@ export const getUpdatedComicSeriesUserCanAccess = async (
   userId: number,
   limit: number = 20,
   offset: number = 0,
-): Promise<Array<ComicSeriesWithThumbnail>> => {
+): Promise<Array<ComicSeriesWithMetadata>> => {
   const userLibraries = await getUsersComicLibraries(userId);
 
   const libraryIds = userLibraries.map((lib) => lib.id);
   const updatedSeries = await getUpdatedComicSeries(limit, offset, libraryIds);
 
-  const updatedSeriesWithThumbnails: Array<ComicSeriesWithThumbnail> = [];
+  const updatedSeriesWithThumbnails: Array<ComicSeriesWithMetadata> = [];
 
   for (const series of updatedSeries) {
     const comicBooksForCurrentSeries = await getComicBooksBySeriesId(series.id);
@@ -112,11 +265,11 @@ export const getUpdatedComicSeriesUserCanAccess = async (
 
     const thumbnails = await getThumbnailsByComicBookId(firstComicBook.id);
     if (thumbnails && thumbnails.length > 0) {
-      const seriesWithThumbnailUrl = series as ComicSeriesWithThumbnail;
+      const seriesWithThumbnailUrl = series as ComicSeriesWithMetadata;
       seriesWithThumbnailUrl.thumbnailUrl = `/api/image/thumbnails/${thumbnails[0].filePath.split("/").pop()}`;
       updatedSeriesWithThumbnails.push(seriesWithThumbnailUrl);
     } else {
-      updatedSeriesWithThumbnails.push(series as ComicSeriesWithThumbnail);
+      updatedSeriesWithThumbnails.push(series as ComicSeriesWithMetadata);
     }
   }
 
@@ -125,7 +278,7 @@ export const getUpdatedComicSeriesUserCanAccess = async (
 
 export const getSelectedComicSeriesDetails = async (
   seriesId: number,
-): Promise<ComicSeriesWithComicsMetadataAndThumbnail | null> => {
+): Promise<ComicSeriesWithMetadata | null> => {
   const comicSeriesInfo: ComicSeries | null = await getComicSeriesById(
     seriesId,
   );
@@ -153,7 +306,7 @@ export const getSelectedComicSeriesDetails = async (
     }
   }
 
-  const seriesWithThumbnailUrl = comicSeriesInfo as ComicSeriesWithThumbnail;
+  const seriesWithThumbnailUrl = comicSeriesInfo as ComicSeriesWithMetadata;
   if (
     comicBooksForCurrentSeriesWithThumbnails &&
     comicBooksForCurrentSeriesWithThumbnails.length > 0
