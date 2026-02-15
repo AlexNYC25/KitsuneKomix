@@ -16,7 +16,18 @@ import {
  */
 export const ComicSeriesSchema = ComicSeriesSelectSchema.extend(
   {
-    thumbnail: ComicBookThumbnailSelectSchema.shape.filePath.optional(),
+    totalComicBooks: z.number().openapi({
+      description: "Total number of comic books in the series",
+      example: 42,
+    }),
+    totalSize: z.number().openapi({
+      description: "Total file size of all comic books in the series (in bytes)",
+      example: 123456789,
+    }),
+    thumbnailUrl: z.url().openapi({
+      description: "URL to the thumbnail image for the comic series",
+      example: "https://example.com/thumbnails/series123.jpg",
+    }).optional(),
     metadata: MetadataSchema.optional(),
     comicBooks: z.array(ComicBookSchema).optional(),
   },
