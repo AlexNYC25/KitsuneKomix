@@ -286,8 +286,8 @@ export const getSelectedComicSeriesDetails = async (
     return null;
   }
 
-  const comicSeriesMetadata: ComicSeriesWithMetadata | null =
-    await getComicSeriesMetadataById(seriesId);
+  // NOTE: Removed typing needs review
+  const comicSeriesMetadata = await getComicSeriesMetadataById(seriesId);
 
   const comicBooksForCurrentSeries: Array<ComicBook> =
     await getComicBooksBySeriesId(comicSeriesInfo.id);
