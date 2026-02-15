@@ -48,6 +48,7 @@ import type {
   ComicSeriesFilteringAndSortingParams,
   ComicSeriesFilterItem,
   ComicSeriesSortField,
+
 } from "#types/index.ts";
 import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 
@@ -283,7 +284,7 @@ export const getComicSeriesById = async (
  */
 export const getComicSeriesMetadataById = async (
   id: number,
-): Promise<ComicSeriesWithMetadata | null> => {
+) => {
   const { db, client } = getClient();
 
   if (!db || !client) {
