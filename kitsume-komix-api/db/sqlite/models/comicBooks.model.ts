@@ -287,6 +287,8 @@ export const getComicBooksWithMetadataFilteringSorting = async (
           communityRating: comicBooksTable.communityRating
         }
       ).from(comicBooksTable)
+      .leftJoin(comicSeriesBooksTable, eq(comicBooksTable.id, comicSeriesBooksTable.comicBookId))
+      .leftJoin(comicSeriesTable, eq(comicSeriesBooksTable.comicSeriesId, comicSeriesTable.id))
       .leftJoin(comicBookWritersTable, eq(comicBooksTable.id, comicBookWritersTable.comicBookId))
       .leftJoin(comicBookPencillersTable, eq(comicBooksTable.id, comicBookPencillersTable.comicBookId))
       .leftJoin(comicBookInkersTable, eq(comicBooksTable.id, comicBookInkersTable.comicBookId))
