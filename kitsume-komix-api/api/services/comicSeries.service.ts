@@ -43,6 +43,13 @@ import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
  * This includes the total number of comic books in each series, the total file size of all comic books in the series,
  * @param queryData - The validated query parameters for pagination, sorting, and filtering.
  * @returns A promise that resolves to an array of ComicSeries objects with related metadata
+ * 
+ * used by
+ * - GET /api/comic-series/ (with pagination, sorting, and filtering)
+ * - GET /api/comic-series/list (with pagination and letter filtering)
+ * - GET /api/comic-series/latest
+ * - GET /api/comic-series/updated
+ * - GET /api/comic-series/{id}
  */
 export const fetchComicSeries = async (
   queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>,
@@ -89,7 +96,7 @@ export const fetchComicSeries = async (
  * @param seriesId 
  * @returns A promise that resolves to a ComicSeriesMetadata object.
  */
-export const fetchAComicSeriesAssociatedMetadataById = async (
+const fetchAComicSeriesAssociatedMetadataById = async (
   seriesId: number
 ): Promise<ComicSeriesMetadata> => {
   const queryData: QueryData = {
