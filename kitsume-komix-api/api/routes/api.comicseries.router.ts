@@ -20,10 +20,12 @@ import {
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamLetterSchema,
+  PaginationLetterQuerySchema,
 } from "#schemas/request.schema.ts";
 import {
   ComicSeriesMultipleResponseSchema,
   MessageResponseSchema,
+  ErrorResponseSchema,
 } from "#schemas/response.schema.ts";
 
 import type { 
@@ -40,8 +42,9 @@ import type {
   ComicSeriesMultipleResponseData,
   ComicSeriesMultipleResponseMeta,
   ComicSeriesMultipleResponse,
+  QueryDataWithLetter
 } from "#types/index.ts";
-import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
+import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -437,6 +440,103 @@ app.openapi(
   },
 );
 
+/**
+ * GET /api/comic-series/list
+ * Get comic series by starting letter. This is used for the alphabetical listing on the frontend.
+ */
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/list",
+    summary: "Get series by letter",
+    tags: ["Comic Series"],
+    request: {
+      query: PaginationLetterQuerySchema,
+    },
+    responses: {
+      200: {
+        content: { 
+          "application/json": { 
+            schema: ComicSeriesMultipleResponseSchema 
+          } 
+        },
+        description: "Alphabetical series retrieved successfully",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Internal Server Error",
+      },
+    },
+  }),
+  async (c) => {
+    const queryData: QueryDataWithLetter = c.req.valid("query");
+
+    queryData.sort = "title";
+    queryData.sortDirection = "asc";
+    queryData.filter = queryData.letter;
+    queryData.filterProperty = "listLetter";
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+    
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, "comicSeries");
+    const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
+
+    try {
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+
+      const hasNextPage: boolean = comicSeries.length > paginationData.pageSize;
+      const resultComics: ComicSeriesWithMetadata[] = hasNextPage ? comicSeries.slice(0, paginationData.pageSize) : comicSeries;
+
+      const requestMetadata: ComicSeriesMultipleResponseMeta = {
+        count: resultComics.length,
+        hasNextPage: hasNextPage,
+        currentPage: paginationData.pageNumber,
+        pageSize: paginationData.pageSize,
+      }
+
+      const returnObj: ComicSeriesMultipleResponse = {
+        data: resultComics,
+        meta: requestMetadata,
+      };
+
+      return c.json(returnObj, 200);
+    } catch (error) {
+      console.error("Error fetching comic series:", error);
+      return c.json({ message: "Internal Server Error" }, 500);
+    }
+  }
+);
+
+
 // -- Up to this point, we have updated the routes
 
 // Get series thumbnails
@@ -458,29 +558,6 @@ app.openapi(
     const { id } = c.req.valid("param");
     return c.json({
       message: `Comic Series API is running for ID ${id} - Thumbnails`,
-    }, 200);
-  }
-);
-
-// Create series thumbnail
-app.openapi(
-  createRoute({
-    method: "post",
-    path: "/{id}/thumbnail",
-    summary: "Create series thumbnail",
-    tags: ["Comic Series"],
-    request: { params: ParamIdSchema },
-    responses: {
-      200: {
-        content: { "application/json": { schema: MessageResponseSchema } },
-        description: "Thumbnail created successfully",
-      },
-    },
-  }),
-  (c) => {
-    const { id } = c.req.valid("param");
-    return c.json({
-      message: `Comic Series API is running for ID ${id} - Thumbnail Creation`,
     }, 200);
   }
 );
@@ -555,46 +632,6 @@ app.openapi(
   }
 );
 
-// Get alphabetical series
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/alphabetical",
-    summary: "Get series alphabetically",
-    tags: ["Comic Series"],
-    responses: {
-      200: {
-        content: { "application/json": { schema: MessageResponseSchema } },
-        description: "Alphabetical series retrieved successfully",
-      },
-    },
-  }),
-  (_c) => {
-    return _c.json({ message: "Alphabetical Comic Series API is running" }, 200);
-  }
-);
 
-// Get series by letter
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/alphabetical/{letter}",
-    summary: "Get series by starting letter",
-    tags: ["Comic Series"],
-    request: { params: ParamLetterSchema },
-    responses: {
-      200: {
-        content: { "application/json": { schema: MessageResponseSchema } },
-        description: "Series retrieved successfully",
-      },
-    },
-  }),
-  (c) => {
-    const { letter } = c.req.valid("param");
-    return c.json({
-      message: `Alphabetical Comic Series API is running for letter ${letter}`,
-    }, 200);
-  }
-);
 
 export default app;
