@@ -34,6 +34,12 @@ import type {
   ComicSeriesSortField,
   ComicSeriesFilterField,
   ComicSeriesWithMetadata,
+  RequestSortParametersValidated,
+  RequestFilterParametersValidated,
+  RequestPaginationParametersValidated,
+  ComicSeriesMultipleResponseData,
+  ComicSeriesMultipleResponseMeta,
+  ComicSeriesMultipleResponse,
 } from "#types/index.ts";
 import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
 
@@ -64,7 +70,7 @@ app.openapi(
       200: {
         content: { 
           "application/json": { 
-            schema: z.any() // TODO: Define a proper response schema for this endpoint
+            schema: ComicSeriesMultipleResponseSchema,
           }
         },
         description: "Series retrieved successfully",
@@ -114,7 +120,31 @@ app.openapi(
 
     try {
       const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
-      return c.json(comicSeries, 200);
+
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilter: RequestFilterParametersValidated<ComicSeriesFilterField> | undefined = serviceData.filter;
+      const serviceDataSort: RequestSortParametersValidated<ComicSeriesSortField> = serviceData.sort;
+
+      const hasNextPage: boolean = comicSeries.length > serviceDataPagination.pageSize;
+      const resultComicSeries: ComicSeriesMultipleResponseData = hasNextPage ? comicSeries.slice(0, serviceDataPagination.pageSize) : comicSeries;
+
+      const requestMetadata: ComicSeriesMultipleResponseMeta = {
+        count: resultComicSeries.length,
+        hasNextPage: hasNextPage,
+        currentPage: serviceDataPagination.pageNumber,
+        pageSize: serviceDataPagination.pageSize,
+        filterProperty: serviceDataFilter?.filterProperty,
+        filterValue: serviceDataFilter?.filterValue,
+        sortProperty: serviceDataSort.sortProperty,
+        sortOrder: serviceDataSort.sortOrder,
+      }
+
+      const returnObj: ComicSeriesMultipleResponse = {
+        data: resultComicSeries,
+        meta: requestMetadata,
+      };
+
+      return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching comic series:", error);
       return c.json({ message: "Internal Server Error" }, 500);
@@ -144,7 +174,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: z.any() // TODO: Define a proper response schema for this endpoint,
+            schema: ComicSeriesMultipleResponseSchema,
           },
         },
         description: "Latest series retrieved successfully",
@@ -184,7 +214,31 @@ app.openapi(
 
     try {
       const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
-      return c.json(comicSeries, 200);
+
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilter: RequestFilterParametersValidated<ComicSeriesFilterField> | undefined = serviceData.filter;
+      const serviceDataSort: RequestSortParametersValidated<ComicSeriesSortField> = serviceData.sort;
+
+      const hasNextPage: boolean = comicSeries.length > serviceDataPagination.pageSize;
+      const resultComicSeries: ComicSeriesMultipleResponseData = hasNextPage ? comicSeries.slice(0, serviceDataPagination.pageSize) : comicSeries;
+
+      const requestMetadata: ComicSeriesMultipleResponseMeta = {
+        count: resultComicSeries.length,
+        hasNextPage: hasNextPage,
+        currentPage: serviceDataPagination.pageNumber,
+        pageSize: serviceDataPagination.pageSize,
+        filterProperty: serviceDataFilter?.filterProperty,
+        filterValue: serviceDataFilter?.filterValue,
+        sortProperty: serviceDataSort.sortProperty,
+        sortOrder: serviceDataSort.sortOrder,
+      }
+
+      const returnObj: ComicSeriesMultipleResponse = {
+        data: resultComicSeries,
+        meta: requestMetadata,
+      };
+
+      return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching latest comic series:", error);
       return c.json({ message: "Internal Server Error" }, 500);
@@ -207,10 +261,10 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: z.any() // TODO: Define a proper response schema for this endpoint,
+            schema: ComicSeriesMultipleResponseSchema,
           },
         },
-        description: "Latest series retrieved successfully",
+        description: "Updated series retrieved successfully",
       },
       400: {
         content: { "application/json": { schema: MessageResponseSchema } },
@@ -247,7 +301,31 @@ app.openapi(
 
     try {
       const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
-      return c.json(comicSeries, 200);
+
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilter: RequestFilterParametersValidated<ComicSeriesFilterField> | undefined = serviceData.filter;
+      const serviceDataSort: RequestSortParametersValidated<ComicSeriesSortField> = serviceData.sort;
+
+      const hasNextPage: boolean = comicSeries.length > serviceDataPagination.pageSize;
+      const resultComicSeries: ComicSeriesMultipleResponseData = hasNextPage ? comicSeries.slice(0, serviceDataPagination.pageSize) : comicSeries;
+
+      const requestMetadata: ComicSeriesMultipleResponseMeta = {
+        count: resultComicSeries.length,
+        hasNextPage: hasNextPage,
+        currentPage: serviceDataPagination.pageNumber,
+        pageSize: serviceDataPagination.pageSize,
+        filterProperty: serviceDataFilter?.filterProperty,
+        filterValue: serviceDataFilter?.filterValue,
+        sortProperty: serviceDataSort.sortProperty,
+        sortOrder: serviceDataSort.sortOrder,
+      }
+
+      const returnObj: ComicSeriesMultipleResponse = {
+        data: resultComicSeries,
+        meta: requestMetadata,
+      };
+
+      return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching updated comic series:", error);
       return c.json({ message: "Internal Server Error" }, 500);
@@ -275,7 +353,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: z.any() // TODO: Define a proper response schema for this endpoint,
+            schema: ComicSeriesMultipleResponseSchema,
           },
         },
         description: "Series retrieved successfully",
@@ -331,13 +409,35 @@ app.openapi(
         return c.json({ message: "Comic series not found" }, 404);
       }
 
-      return c.json(comicSeries[0], 200);
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilter: RequestFilterParametersValidated<ComicSeriesFilterField> | undefined = serviceData.filter;
+      const serviceDataSort: RequestSortParametersValidated<ComicSeriesSortField> = serviceData.sort;
+
+      const requestMetadata: ComicSeriesMultipleResponseMeta = {
+        count: 1,
+        hasNextPage: false,
+        currentPage: serviceDataPagination.pageNumber,
+        pageSize: serviceDataPagination.pageSize,
+        filterProperty: serviceDataFilter?.filterProperty,
+        filterValue: serviceDataFilter?.filterValue,
+        sortProperty: serviceDataSort.sortProperty,
+        sortOrder: serviceDataSort.sortOrder,
+      }
+
+      const returnObj: ComicSeriesMultipleResponse = {
+        data: [comicSeries[0]],
+        meta: requestMetadata,
+      };
+
+      return c.json(returnObj, 200);
     } catch (error) {
       console.error("Error fetching comic series:", error);
       return c.json({ message: "Internal Server Error" }, 500);
     }
   },
 );
+
+// -- Up to this point, we have updated the routes
 
 // Get series thumbnails
 app.openapi(
