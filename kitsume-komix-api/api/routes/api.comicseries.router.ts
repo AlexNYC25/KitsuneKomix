@@ -5,9 +5,6 @@ import { requireAuth } from "../middleware/authChecks.ts";
 
 import {
   fetchComicSeries,
-  getLatestComicSeriesUserCanAccess,
-  getSelectedComicSeriesDetails,
-  getUpdatedComicSeriesUserCanAccess,
 } from "../services/comicSeries.service.ts";
 
 
