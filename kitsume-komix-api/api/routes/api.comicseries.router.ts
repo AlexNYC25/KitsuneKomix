@@ -4,41 +4,44 @@ import camelcasekeys from "camelcase-keys";
 import { requireAuth } from "../middleware/authChecks.ts";
 
 import {
+  fetchComicSeries,
   getLatestComicSeriesUserCanAccess,
   getSelectedComicSeriesDetails,
   getUpdatedComicSeriesUserCanAccess,
 } from "../services/comicSeries.service.ts";
 
-import type { AppEnv } from "../../types/index.ts";
-import { AuthHeaderSchema } from "../../zod/schemas/header.schema.ts";
+
+import { AuthHeaderSchema } from "#schemas/header.schema.ts";
 import {
+  ComicSeriesSchema,
+} from "#schemas/data/comicSeries.schema.ts";
+import {
+  ParamIdThumbnailIdSchema,
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamLetterSchema,
-} from "../../zod/schemas/request.schema.ts";
+} from "#schemas/request.schema.ts";
 import {
-  ComicSeriesResponseSchema,
-  ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema,
+  ComicSeriesMultipleResponseSchema,
   MessageResponseSchema,
-} from "../../zod/schemas/response.schema.ts";
+} from "#schemas/response.schema.ts";
+
+import type { 
+  AppEnv,
+  AccessRefreshTokenCombinedPayload,
+  QueryData,
+  RequestParametersValidated,
+  ComicSeriesSortField,
+  ComicSeriesFilterField,
+  ComicSeriesWithMetadata,
+} from "#types/index.ts";
+import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",
   scheme: "bearer",
-});
-
-// TODO: Depreate this and use the one from response.schema.ts: ParamIdThumbnailIdSchema
-const ParamIdThumbIdSchema = z.object({
-  id: z.string().openapi({
-    param: { name: "id", in: "path" },
-    example: "1",
-  }),
-  thumbId: z.string().openapi({
-    param: { name: "thumbId", in: "path" },
-    example: "1",
-  }),
 });
 
 /**
@@ -53,16 +56,69 @@ app.openapi(
     summary: "Get all comic series",
     description: "Retrieve all comic series from the database",
     tags: ["Comic Series"],
+    middleware: [requireAuth],
+    request: {
+      query: PaginationSortFilterQuerySchema,
+    },
     responses: {
       200: {
-        content: { "application/json": { schema: MessageResponseSchema } },
+        content: { 
+          "application/json": { 
+            schema: z.any() // TODO: Define a proper response schema for this endpoint
+          }
+        },
         description: "Series retrieved successfully",
+      },
+      400: {
+        content: { 
+          "application/json": { 
+            schema: MessageResponseSchema 
+          }
+        },
+        description: "Bad Request",
+      },
+      401: {
+        content: { 
+          "application/json": { 
+            schema: MessageResponseSchema 
+          }
+        },
+        description: "Unauthorized",
+      },
+      500: {
+        content: { 
+          "application/json": 
+            { 
+              schema: MessageResponseSchema 
+            } 
+        },
+        description: "Internal Server Error",
       },
     },
   }),
-  (_c) => {
-    // TODO: use the model/service to get the series from the database
-    return _c.json({ message: "Comic Series API is running" }, 200);
+  async (c) => {
+    const queryData: QueryData = c.req.valid("query");
+
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, "comicSeries");
+
+    try {
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+      return c.json(comicSeries, 200);
+    } catch (error) {
+      console.error("Error fetching comic series:", error);
+      return c.json({ message: "Internal Server Error" }, 500);
+    }
   },
 );
 
@@ -71,6 +127,7 @@ app.openapi(
  *
  * Get the latest comic series that the current user has access to.
  * Admins can see all series, regular users only those they have been granted access to.
+ * Results are always sorted by creation date in descending order.
  */
 app.openapi(
   createRoute({
@@ -79,12 +136,15 @@ app.openapi(
     summary: "Get latest comic series",
     tags: ["Comic Series"],
     middleware: [requireAuth],
-    request: { headers: AuthHeaderSchema, query: PaginationSortFilterQuerySchema },
+    request: { 
+      headers: AuthHeaderSchema, 
+      query: PaginationSortFilterQuerySchema 
+    },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: ComicSeriesResponseSchema,
+            schema: z.any() // TODO: Define a proper response schema for this endpoint,
           },
         },
         description: "Latest series retrieved successfully",
@@ -104,50 +164,31 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user = c.get("user");
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const userId = parseInt(user.sub, 10);
+    const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const { page = 1, pageSize = 20 } = c.req.valid("query");
+    const queryData: QueryData = c.req.valid("query");
 
-    const offset = (page - 1) * pageSize;
-    const limit = pageSize;
+    // Override sort to always be by createdAt in descending order
+    queryData.sort = "createdAt";
+    queryData.sortDirection = "desc";
 
-    const latestSeries = await getLatestComicSeriesUserCanAccess(
-      userId,
-      limit,
-      offset,
-    );
+    const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, "comicSeries");
 
-    // Convert keys to snake_case
-    const formattedLatestSeries = latestSeries.map((series) => {
-      return camelcasekeys({
-        id: series.id,
-        name: series.name,
-        description: series.description,
-        folder_path: series.folderPath, // Fixed property name
-        created_at: series.createdAt,   // Fixed property name
-        updated_at: series.updatedAt,   // Fixed property name
-        thumbnailUrl: series.thumbnailUrl ?? null,
-      }, { deep: true });
-    });
-
-    return c.json({
-      data: formattedLatestSeries,
-      meta: {
-        total: formattedLatestSeries.length,
-        page: 1,
-        pageSize: 10,
-        hasNextPage: false,
-      },
-      message: "Latest Comic Series API is running",
-    }, 200);
+    try {
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+      return c.json(comicSeries, 200);
+    } catch (error) {
+      console.error("Error fetching latest comic series:", error);
+      return c.json({ message: "Internal Server Error" }, 500);
+    }
   },
 );
 
@@ -166,7 +207,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicSeriesResponseSchema,
+            schema: z.any() // TODO: Define a proper response schema for this endpoint,
           },
         },
         description: "Latest series retrieved successfully",
@@ -186,46 +227,31 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user = c.get("user");
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    const userId = parseInt(user.sub, 10);
+    const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const { page = 1, pageSize = 20 } = c.req.valid("query");
+    const queryData: QueryData = c.req.valid("query");
 
-    const offset = (page - 1) * pageSize;
-    const limit = pageSize;
+    // Override sort to always be by updatedAt in descending order
+    queryData.sort = "updatedAt";
+    queryData.sortDirection = "desc";
 
-    const latestSeries = await getUpdatedComicSeriesUserCanAccess(
-      userId,
-      limit,
-      offset,
-    );
+    const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, "comicSeries");
 
-    // Convert keys to camelCase and ensure correct types for folderPath and thumbnailUrl
-    const formatedLatestSeries = latestSeries.map((series) => {
-      const camel = camelcasekeys(series, { deep: true });
-      return {
-        ...camel,
-        thumbnailUrl: camel.thumbnailUrl ?? null,
-      };
-    });
-
-    return c.json({
-      data: formatedLatestSeries,
-      meta: {
-        total: formatedLatestSeries.length,
-        page: 1,
-        pageSize: 10,
-        hasNextPage: false,
-      },
-      message: "Latest Comic Series API is running",
-    }, 200);
+    try {
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+      return c.json(comicSeries, 200);
+    } catch (error) {
+      console.error("Error fetching updated comic series:", error);
+      return c.json({ message: "Internal Server Error" }, 500);
+    }
   },
 );
 
@@ -241,12 +267,15 @@ app.openapi(
     summary: "Get a comic series by ID",
     tags: ["Comic Series"],
     middleware: [requireAuth],
-    request: { params: ParamIdSchema },
+    request: { 
+      params: ParamIdSchema,
+      query: PaginationSortFilterQuerySchema,
+    },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: ComicSeriesWithComicsMetadataAndThumbnailsCamelCaseResponseSchema,
+            schema: z.any() // TODO: Define a proper response schema for this endpoint,
           },
         },
         description: "Series retrieved successfully",
@@ -270,9 +299,14 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user = c.get("user");
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
     }
 
     const { id } = c.req.valid("param");
@@ -280,186 +314,187 @@ app.openapi(
       return c.json({ message: "Invalid series ID" }, 400);
     }
 
+    const queryData: QueryData = c.req.valid("query");
+
+    // Override to filter by ID, sort by ID, and limit to 1 result
+    queryData.filter = id;
+    queryData.filterProperty = "id";
+    queryData.sort = "id";
+    queryData.sortDirection = "asc";
+    queryData.pageSize = 1;
+
+    const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, "comicSeries");
+
     try {
-      const series = await getSelectedComicSeriesDetails(parseInt(id, 10));
-      if (!series) {
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+      if (!comicSeries || comicSeries.length === 0) {
         return c.json({ message: "Comic series not found" }, 404);
       }
-      const seriesDataCamel = camelcasekeys(series, { deep: true });
 
-      const comicSeriesData = {
-        ...seriesDataCamel,
-        thumbnailUrl: seriesDataCamel.thumbnailUrl ?? null,
-      };
-
-      return c.json({
-        data: comicSeriesData,
-        message: "Selected Comic Series API is running",
-      }, 200);
+      return c.json(comicSeries[0], 200);
     } catch (error) {
-      return c.json({ message: "Internal Server Error" + error }, 500);
+      console.error("Error fetching comic series:", error);
+      return c.json({ message: "Internal Server Error" }, 500);
     }
   },
 );
 
 // Get series thumbnails
-const getThumbnailsRoute = createRoute({
-  method: "get",
-  path: "/{id}/thumbnails",
-  summary: "Get series thumbnails",
-  tags: ["Comic Series"],
-  request: { params: ParamIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Thumbnails retrieved successfully",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}/thumbnails",
+    summary: "Get series thumbnails",
+    tags: ["Comic Series"],
+    request: { params: ParamIdSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Thumbnails retrieved successfully",
+      },
     },
-  },
-});
-
-app.openapi(getThumbnailsRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnails`,
-  }, 200);
-});
+  }),
+  (c) => {
+    const { id } = c.req.valid("param");
+    return c.json({
+      message: `Comic Series API is running for ID ${id} - Thumbnails`,
+    }, 200);
+  }
+);
 
 // Create series thumbnail
-const createThumbnailRoute = createRoute({
-  method: "post",
-  path: "/{id}/thumbnail",
-  summary: "Create series thumbnail",
-  tags: ["Comic Series"],
-  request: { params: ParamIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Thumbnail created successfully",
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/{id}/thumbnail",
+    summary: "Create series thumbnail",
+    tags: ["Comic Series"],
+    request: { params: ParamIdSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Thumbnail created successfully",
+      },
     },
-  },
-});
-
-app.openapi(createThumbnailRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnail Creation`,
-  }, 200);
-});
+  }),
+  (c) => {
+    const { id } = c.req.valid("param");
+    return c.json({
+      message: `Comic Series API is running for ID ${id} - Thumbnail Creation`,
+    }, 200);
+  }
+);
 
 // Delete series thumbnail
-const deleteThumbnailRoute = createRoute({
-  method: "delete",
-  path: "/{id}/thumbnail/{thumbId}",
-  summary: "Delete series thumbnail",
-  tags: ["Comic Series"],
-  request: { params: ParamIdThumbIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Thumbnail deleted successfully",
+app.openapi(
+  createRoute({
+    method: "delete",
+    path: "/{id}/thumbnail/{thumbId}",
+    summary: "Delete series thumbnail",
+    tags: ["Comic Series"],
+    request: { params: ParamIdThumbnailIdSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Thumbnail deleted successfully",
+      },
     },
-  },
-});
-
-app.openapi(deleteThumbnailRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnail Deletion`,
-  }, 200);
-});
+  }),
+  (c) => {
+    const { id } = c.req.valid("param");
+    return c.json({
+      message: `Comic Series API is running for ID ${id} - Thumbnail Deletion`,
+    }, 200);
+  }
+);
 
 // Get specific thumbnail
-const getThumbnailByIdRoute = createRoute({
-  method: "get",
-  path: "/{id}/thumbnails/{thumbId}",
-  summary: "Get specific thumbnail",
-  tags: ["Comic Series"],
-  request: { params: ParamIdThumbIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Thumbnail retrieved successfully",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/{id}/thumbnails/{thumbId}",
+    summary: "Get specific thumbnail",
+    tags: ["Comic Series"],
+    request: { params: ParamIdThumbnailIdSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Thumbnail retrieved successfully",
+      },
     },
-  },
-});
-
-app.openapi(getThumbnailByIdRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message: `Comic Series API is running for ID ${id} - Thumbnail Retrieval`,
-  }, 200);
-});
+  }),
+  (c) => {
+    const { id } = c.req.valid("param");
+    return c.json({
+      message: `Comic Series API is running for ID ${id} - Thumbnail Retrieval`,
+    }, 200);
+  }
+);
 
 // Update thumbnail cover
-const updateThumbnailCoverRoute = createRoute({
-  method: "put",
-  path: "/{id}/thumbnail/{thumbId}/cover",
-  summary: "Update thumbnail cover",
-  tags: ["Comic Series"],
-  request: { params: ParamIdThumbIdSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Thumbnail cover updated successfully",
+app.openapi(
+  createRoute({
+    method: "put",
+    path: "/{id}/thumbnail/{thumbId}/cover",
+    summary: "Update thumbnail cover",
+    tags: ["Comic Series"],
+    request: { params: ParamIdThumbnailIdSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Thumbnail cover updated successfully",
+      },
     },
-  },
-});
-
-app.openapi(updateThumbnailCoverRoute, (c) => {
-  const { id } = c.req.valid("param");
-  return c.json({
-    message:
-      `Comic Series API is running for ID ${id} - Thumbnail Cover Update`,
-  }, 200);
-});
+  }),
+  (c) => {
+    const { id } = c.req.valid("param");
+    return c.json({
+      message:
+        `Comic Series API is running for ID ${id} - Thumbnail Cover Update`,
+    }, 200);
+  }
+);
 
 // Get alphabetical series
-const getAlphabeticalRoute = createRoute({
-  method: "get",
-  path: "/alphabetical",
-  summary: "Get series alphabetically",
-  tags: ["Comic Series"],
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Alphabetical series retrieved successfully",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/alphabetical",
+    summary: "Get series alphabetically",
+    tags: ["Comic Series"],
+    responses: {
+      200: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Alphabetical series retrieved successfully",
+      },
     },
-  },
-});
-
-app.openapi(getAlphabeticalRoute, (_c) => {
-  return _c.json({ message: "Alphabetical Comic Series API is running" }, 200);
-});
+  }),
+  (_c) => {
+    return _c.json({ message: "Alphabetical Comic Series API is running" }, 200);
+  }
+);
 
 // Get series by letter
-const getByLetterRoute = createRoute({
-  method: "get",
-  path: "/alphabetical/{letter}",
-  summary: "Get series by starting letter",
-  tags: ["Comic Series"],
-  request: { params: ParamLetterSchema },
-  responses: {
-    200: {
-      content: { "application/json": { schema: MessageResponseSchema } },
-      description: "Series retrieved successfully",
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/alphabetical/{letter}",
+    summary: "Get series by starting letter",
+    tags: ["Comic Series"],
+    request: { params: ParamLetterSchema },
+    responses: {
+      200: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Series retrieved successfully",
+      },
     },
-  },
-});
-
-app.openapi(getByLetterRoute, (c) => {
-  const { letter } = c.req.valid("param");
-  return c.json({
-    message: `Alphabetical Comic Series API is running for letter ${letter}`,
-  }, 200);
-});
-
-// Define a minimal custom `Context` type
-interface Context<T = unknown> {
-  req: {
-    valid: (key: string) => T;
-  };
-  get: (key: string) => Record<string, unknown> | undefined;
-  json: (data: Record<string, unknown>, status: number) => void;
-}
+  }),
+  (c) => {
+    const { letter } = c.req.valid("param");
+    return c.json({
+      message: `Alphabetical Comic Series API is running for letter ${letter}`,
+    }, 200);
+  }
+);
 
 export default app;
