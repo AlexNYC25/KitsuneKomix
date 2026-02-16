@@ -1,39 +1,28 @@
-import { getClient } from "#sqlite/client.ts";
 
-import { getUsersComicLibraries } from "#sqlite/models/comicLibraries.model.ts";
 import {
-  getComicSeriesById,
-  getComicSeriesMetadataById,
-  getLatestComicSeries,
-  getUpdatedComicSeries,
   getComicSeriesWithMetadataFilteringSorting,
 } from "#sqlite/models/comicSeries.model.ts";
-import { getComicBooksBySeriesId } from "#sqlite/models/comicBooks.model.ts";
-import { getThumbnailsByComicBookId } from "#sqlite/models/comicBookThumbnails.model.ts";
 
 import {
   fetchComicBooksWithRelatedMetadata,
-  attachThumbnailToComicBook 
 } from "./comicbooks.service.ts";
 
 import type {
-  ComicBook,
-  ComicBookWithThumbnail,
+  QueryData,
   ComicSeries,
   ComicSeriesWithMetadata,
-  ComicSeriesFilterItem,
-  RequestParametersValidated,
-  ComicSeriesSortField,
-  ComicSeriesFilterField,
-  ComicSortField,
-  ComicFilterField,
+  ComicSeriesMetadata,
+  ComicBookWithMetadata,
+  ComicBookMetadataOnly,
   RequestPaginationParametersValidated,
   RequestFilterParametersValidated,
   RequestSortParametersValidated,
-  QueryData,
-  ComicBookWithMetadata,
-  ComicBookMetadataOnly,
-  ComicSeriesMetadata,
+  RequestParametersValidated,
+  ComicSortField,
+  ComicFilterField,
+  ComicSeriesSortField,
+  ComicSeriesFilterField,
+  ComicSeriesFilterItem,
 } from "#types/index.ts";
 
 import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
