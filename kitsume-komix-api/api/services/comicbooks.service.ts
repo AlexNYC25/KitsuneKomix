@@ -888,6 +888,7 @@ export const getNextComicBookId = async (
       return null; // Current comic is not part of a series
     }
 
+    // DEPRECATED: Update this to use the optimized function fetchComics
     const comicsInSeries = await getComicBooksInSeries(seriesId);
     if (comicsInSeries.length === 0) {
       return null; // No comics found in the series
@@ -948,6 +949,7 @@ export const getPreviousComicBookId = async (
       return null; // Current comic is not part of a series
     }
 
+    // DEPRECATED: Update this to use the optimized function fetchComics
     const comicsInSeries = await getComicBooksInSeries(seriesId);
     if (comicsInSeries.length === 0) {
       return null; // No comics found in the series
