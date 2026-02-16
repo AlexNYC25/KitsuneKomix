@@ -1,55 +1,22 @@
-import { desc, eq, inArray, sql, asc, ilike } from "drizzle-orm";
-import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
+import { desc, eq, asc, ilike } from "drizzle-orm";
+import { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 
 import {
-  comicBookCharactersTable,
-  comicBookColoristsTable,
-  comicBookCoverArtistsTable,
-  comicBookEditorsTable,
-  comicBookGenresTable,
-  comicBookImprintsTable,
-  comicBookInkersTable,
-  comicBookLetterersTable,
-  comicBookLocationsTable,
-  comicBookPencillersTable,
-  comicBookPublishersTable,
-  comicBookSeriesGroupsTable,
-  comicBooksTable,
-  comicBookStoryArcsTable,
-  comicBookTeamsTable,
-  comicBookWritersTable,
-  comicCharactersTable,
-  comicColoristsTable,
-  comicCoverArtistsTable,
-  comicEditorsTable,
-  comicGenresTable,
-  comicImprintsTable,
-  comicInkersTable,
-  comicLetterersTable,
-  comicLibrariesSeriesTable,
-  comicLibrariesTable,
-  comicLocationsTable,
-  comicPencillersTable,
-  comicPublishersTable,
-  comicSeriesBooksTable,
-  comicSeriesGroupsTable,
   comicSeriesTable,
-  comicStoryArcsTable,
-  comicTeamsTable,
-  comicWritersTable,
+  comicSeriesBooksTable,
+  comicLibrariesSeriesTable,
 } from "../schema.ts";
 
 import type {
   ComicSeries,
-  ComicSeriesWithMetadata,
   NewComicSeries,
   ComicSeriesFilteringAndSortingParams,
   ComicSeriesFilterItem,
   ComicSeriesSortField,
-
 } from "#types/index.ts";
+
 import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 
 /**
@@ -59,7 +26,9 @@ import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
  * @param query 
  * @returns the query with the filter applied
  */
-const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicSeriesFilterItem, query: T): T => {
+const addFilteringToQuery = <T extends SQLiteSelect>(
+  filter: ComicSeriesFilterItem, query: T
+): T => {
   const { filterProperty, filterValue } = filter;
 
   switch (filterProperty) {
@@ -85,7 +54,9 @@ const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicSeriesFilterIt
  * @param query 
  * @returns the query with the sorting applied
  */
-const addSortingToQuery = <T extends SQLiteSelect>(sortProperty: ComicSeriesSortField, sortDirection: string, query: T): T => {
+const addSortingToQuery = <T extends SQLiteSelect>(
+  sortProperty: ComicSeriesSortField, sortDirection: string, query: T
+): T => {
   const direction = sortDirection === "asc" ? asc : desc;
 
   switch (sortProperty) {
