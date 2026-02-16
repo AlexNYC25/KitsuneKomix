@@ -1,5 +1,4 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import camelcasekeys from "camelcase-keys";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
@@ -8,15 +7,13 @@ import {
 } from "../services/comicSeries.service.ts";
 
 
-import { AuthHeaderSchema } from "#schemas/header.schema.ts";
-import {
-  ComicSeriesSchema,
-} from "#schemas/data/comicSeries.schema.ts";
+import { 
+  AuthHeaderSchema 
+} from "#schemas/header.schema.ts";
 import {
   ParamIdThumbnailIdSchema,
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
-  ParamLetterSchema,
   PaginationLetterQuerySchema,
 } from "#schemas/request.schema.ts";
 import {
@@ -41,6 +38,7 @@ import type {
   ComicSeriesMultipleResponse,
   QueryDataWithLetter
 } from "#types/index.ts";
+
 import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
