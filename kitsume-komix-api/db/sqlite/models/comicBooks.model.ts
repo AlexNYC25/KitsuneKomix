@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
-import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
+import { asc, desc, eq, ilike, sql } from "drizzle-orm";
+import { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 
@@ -12,7 +12,6 @@ import {
   comicBookImprintsTable,
   comicBookInkersTable,
   comicBookLetterersTable,
-  comicBookLocationsTable,
   comicBookPencillersTable,
   comicBookPublishersTable,
   comicBookSeriesGroupsTable,
@@ -20,24 +19,9 @@ import {
   comicBookStoryArcsTable,
   comicBookTeamsTable,
   comicBookWritersTable,
-  comicCharactersTable,
-  comicColoristsTable,
-  comicCoverArtistsTable,
-  comicEditorsTable,
-  comicGenresTable,
-  comicImprintsTable,
-  comicInkersTable,
-  comicLetterersTable,
-  comicLocationsTable,
-  comicPencillersTable,
-  comicPublishersTable,
   comicSeriesBooksTable,
-  comicSeriesGroupsTable,
   comicSeriesTable,
-  comicStoryArcsTable,
-  comicTeamsTable,
   comicWebLinksTable,
-  comicWritersTable,
 } from "../schema.ts";
 
 import type {
@@ -47,7 +31,7 @@ import type {
   ComicBookFilterItem,
   ComicSortField,
 } from "#types/index.ts";
-import type { ComicBookQueryParams } from "#interfaces/index.ts";
+
 import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 
 /**
