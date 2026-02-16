@@ -1,9 +1,7 @@
 import { getClient } from "#sqlite/client.ts";
 
 import {
-  getAllComicBooksSortByDate,
   getComicBookById,
-  getComicBooksWithMetadata,
   getComicBooksWithMetadataFilteringSorting,
   getComicDuplicates,
   getRandomBook,
