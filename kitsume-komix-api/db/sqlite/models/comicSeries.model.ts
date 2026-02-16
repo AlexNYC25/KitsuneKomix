@@ -158,11 +158,13 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
   }
 }
 
-
-////// TODO: REMOVE THIS COMMENT/ Placeholder for verified code
-
 /**
  * Inserts a new comic series into the database
+ * 
+ * used by the internal worker
+ * 
+ * TODO: Check if this should be broken into a service/worker function
+ * 
  * @param seriesData The series data to insert including name, description, and folder path
  * @returns The ID of the newly inserted or existing series
  */
@@ -217,6 +219,9 @@ export const insertComicSeries = async (
 
 /**
  * Adds a comic series to a library by creating a relationship
+ * 
+ * Used by the internal worker
+ * 
  * @param seriesId The ID of the series
  * @param libraryId The ID of the library
  * @returns True if the series was added, false if relationship already exists
@@ -249,278 +254,10 @@ export const insertComicSeriesIntoLibrary = async (
 };
 
 /**
- * Retrieves a comic series by ID
- * @param id The ID of the series
- * @returns The ComicSeries object, or null if not found
- */
-export const getComicSeriesById = async (
-  id: number,
-): Promise<ComicSeries | null> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result: ComicSeries[] = await db
-      .select()
-      .from(comicSeriesTable)
-      .where(
-        eq(comicSeriesTable.id, id),
-      );
-
-    return result.length > 0 ? result[0] : null;
-  } catch (error) {
-    console.error("Error fetching comic series by ID:", error);
-    throw error;
-  }
-};
-
-/**
- * Get the metadata for a comic series by its ID by compiling it from the comic books under it
- * @param id The ID of the comic series to retrieve metadata for.
- * @returns The metadata of the comic series or null if not found.
- */
-export const getComicSeriesMetadataById = async (
-  id: number,
-) => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result = await db
-      .select({
-        id: comicSeriesTable.id,
-        name: comicSeriesTable.name,
-        description: comicSeriesTable.description,
-        folderPath: comicSeriesTable.folderPath,
-        createdAt: comicSeriesTable.createdAt,
-        updatedAt: comicSeriesTable.updatedAt,
-        writers: sql<string>`GROUP_CONCAT(DISTINCT ${comicWritersTable}.name)`,
-        pencillers: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicPencillersTable}.name)`,
-        inkers: sql<string>`GROUP_CONCAT(DISTINCT ${comicInkersTable}.name)`,
-        colorists: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicColoristsTable}.name)`,
-        letterers: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicLetterersTable}.name)`,
-        editors: sql<string>`GROUP_CONCAT(DISTINCT ${comicEditorsTable}.name)`,
-        coverArtists: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicCoverArtistsTable}.name)`,
-        publishers: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicPublishersTable}.name)`,
-        imprints: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicImprintsTable}.name)`,
-        genres: sql<string>`GROUP_CONCAT(DISTINCT ${comicGenresTable}.name)`,
-        characters: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicCharactersTable}.name)`,
-        teams: sql<string>`GROUP_CONCAT(DISTINCT ${comicTeamsTable}.name)`,
-        locations: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicLocationsTable}.name)`,
-        storyArcs: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicStoryArcsTable}.name)`,
-        seriesGroups: sql<
-          string
-        >`GROUP_CONCAT(DISTINCT ${comicSeriesGroupsTable}.name)`,
-      })
-      .from(comicSeriesTable)
-      .leftJoin(
-        comicSeriesBooksTable,
-        eq(comicSeriesTable.id, comicSeriesBooksTable.comicSeriesId),
-      )
-      .leftJoin(
-        comicBooksTable,
-        eq(comicSeriesBooksTable.comicBookId, comicBooksTable.id),
-      )
-      .leftJoin(
-        comicBookWritersTable,
-        eq(comicBooksTable.id, comicBookWritersTable.comicBookId),
-      )
-      .leftJoin(
-        comicWritersTable,
-        eq(comicBookWritersTable.comicWriterId, comicWritersTable.id),
-      )
-      .leftJoin(
-        comicBookPencillersTable,
-        eq(comicBooksTable.id, comicBookPencillersTable.comicBookId),
-      )
-      .leftJoin(
-        comicPencillersTable,
-        eq(
-          comicBookPencillersTable.comicPencillerId,
-          comicPencillersTable.id,
-        ),
-      )
-      .leftJoin(
-        comicBookInkersTable,
-        eq(comicBooksTable.id, comicBookInkersTable.comicBookId),
-      )
-      .leftJoin(
-        comicInkersTable,
-        eq(comicBookInkersTable.comicInkerId, comicInkersTable.id),
-      )
-      .leftJoin(
-        comicBookColoristsTable,
-        eq(comicBooksTable.id, comicBookColoristsTable.comicBookId),
-      )
-      .leftJoin(
-        comicColoristsTable,
-        eq(comicBookColoristsTable.comicColoristId, comicColoristsTable.id),
-      )
-      .leftJoin(
-        comicBookLetterersTable,
-        eq(comicBooksTable.id, comicBookLetterersTable.comicBookId),
-      )
-      .leftJoin(
-        comicLetterersTable,
-        eq(comicBookLetterersTable.comicLetterId, comicLetterersTable.id),
-      )
-      .leftJoin(
-        comicBookEditorsTable,
-        eq(comicBooksTable.id, comicBookEditorsTable.comicBookId),
-      )
-      .leftJoin(
-        comicEditorsTable,
-        eq(comicBookEditorsTable.comicEditorId, comicEditorsTable.id),
-      )
-      .leftJoin(
-        comicBookCoverArtistsTable,
-        eq(comicBooksTable.id, comicBookCoverArtistsTable.comicBookId),
-      )
-      .leftJoin(
-        comicCoverArtistsTable,
-        eq(
-          comicBookCoverArtistsTable.comicCoverArtistId,
-          comicCoverArtistsTable.id,
-        ),
-      )
-      .leftJoin(
-        comicBookPublishersTable,
-        eq(comicBooksTable.id, comicBookPublishersTable.comicBookId),
-      )
-      .leftJoin(
-        comicPublishersTable,
-        eq(
-          comicBookPublishersTable.comicPublisherId,
-          comicPublishersTable.id,
-        ),
-      )
-      .leftJoin(
-        comicBookImprintsTable,
-        eq(comicBooksTable.id, comicBookImprintsTable.comicBookId),
-      )
-      .leftJoin(
-        comicImprintsTable,
-        eq(comicBookImprintsTable.comicImprintId, comicImprintsTable.id),
-      )
-      .leftJoin(
-        comicBookGenresTable,
-        eq(comicBooksTable.id, comicBookGenresTable.comicBookId),
-      )
-      .leftJoin(
-        comicGenresTable,
-        eq(comicBookGenresTable.comicGenreId, comicGenresTable.id),
-      )
-      .leftJoin(
-        comicBookCharactersTable,
-        eq(comicBooksTable.id, comicBookCharactersTable.comicBookId),
-      )
-      .leftJoin(
-        comicCharactersTable,
-        eq(
-          comicBookCharactersTable.comicCharacterId,
-          comicCharactersTable.id,
-        ),
-      )
-      .leftJoin(
-        comicBookTeamsTable,
-        eq(comicBooksTable.id, comicBookTeamsTable.comicBookId),
-      )
-      .leftJoin(
-        comicTeamsTable,
-        eq(comicBookTeamsTable.comicTeamId, comicTeamsTable.id),
-      )
-      .leftJoin(
-        comicBookLocationsTable,
-        eq(comicBooksTable.id, comicBookLocationsTable.comicBookId),
-      )
-      .leftJoin(
-        comicLocationsTable,
-        eq(comicBookLocationsTable.comicLocationId, comicLocationsTable.id),
-      )
-      .leftJoin(
-        comicBookStoryArcsTable,
-        eq(comicBooksTable.id, comicBookStoryArcsTable.comicBookId),
-      )
-      .leftJoin(
-        comicStoryArcsTable,
-        eq(comicBookStoryArcsTable.comicStoryArcId, comicStoryArcsTable.id),
-      )
-      .leftJoin(
-        comicBookSeriesGroupsTable,
-        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comicBookId),
-      )
-      .leftJoin(
-        comicSeriesGroupsTable,
-        eq(
-          comicBookSeriesGroupsTable.comicSeriesGroupId,
-          comicSeriesGroupsTable.id,
-        ),
-      )
-      .where(eq(comicSeriesTable.id, id))
-      .groupBy(comicSeriesTable.id);
-
-    return result.length > 0 ? result[0] : null;
-  } catch (error) {
-    console.error("Error fetching comic series metadata by ID:", error);
-    throw error;
-  }
-};
-
-/**
- * Retrieves a comic series by name
- * @param name The name of the series
- * @returns The ComicSeries object, or null if not found
- */
-export const getComicSeriesByName = async (
-  name: string,
-): Promise<ComicSeries | null> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result: ComicSeries[] = await db
-      .select()
-      .from(comicSeriesTable)
-      .where(
-        eq(comicSeriesTable.name, name),
-      );
-
-    return result.length > 0 ? result[0] : null;
-  } catch (error) {
-    console.error("Error fetching comic series by name:", error);
-    throw error;
-  }
-};
-
-/**
  * Retrieves a comic series by folder path
+ * 
+ * used by the internal worker
+ * 
  * @param path The folder path of the series
  * @returns The ComicSeries object, or null if not found
  */
@@ -549,202 +286,10 @@ export const getComicSeriesByPath = async (
 };
 
 /**
- * Retrieves all comic series from the database
- * @returns An array of all ComicSeries objects
- */
-export const getAllComicSeries = async (): Promise<ComicSeries[]> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result: ComicSeries[] = await db.select().from(comicSeriesTable);
-    return result;
-  } catch (error) {
-    console.error("Error fetching all comic series:", error);
-    throw error;
-  }
-};
-
-/**
- * Retrieves the most recently created comic series
- * @param limit The maximum number of series to retrieve
- * @returns An array of the latest ComicSeries objects
- */
-export const getLatestComicSeries = async (
-  limit: number,
-  offset: number = 0,
-  libraryIds?: number[],
-): Promise<ComicSeries[]> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result: { comicSeries: ComicSeries }[] = await db
-      .select({
-        comicSeries: comicSeriesTable,
-      })
-      .from(comicSeriesTable)
-      .leftJoin(
-        comicLibrariesSeriesTable,
-        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comicSeriesId),
-      )
-      .leftJoin(
-        comicLibrariesTable,
-        eq(comicLibrariesSeriesTable.libraryId, comicLibrariesTable.id),
-      )
-      .where(
-        libraryIds && libraryIds.length > 0
-          ? inArray(comicLibrariesTable.id, libraryIds)
-          : undefined,
-      )
-      .groupBy(comicSeriesTable.id)
-      .orderBy(desc(comicSeriesTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    const comicSeriesResults: ComicSeries[] = result.map((row) => row.comicSeries);
-
-    return comicSeriesResults;
-  } catch (error) {
-    console.error("Error fetching latest comic series:", error);
-    throw error;
-  }
-};
-
-/**
- * Retrieves comic series that have been updated since a specific date
- * @param since The date to filter series by (ISO string)
- * @param limit The maximum number of series to retrieve
- * @returns An array of ComicSeries objects updated after the specified date
- */
-export const getUpdatedComicSeries = async (
-  limit: number,
-  offset: number = 0,
-  libraryIds?: number[],
-): Promise<ComicSeries[]> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result = await db
-      .select({
-        comicSeries: comicSeriesTable,
-      })
-      .from(comicSeriesTable)
-      .leftJoin(
-        comicLibrariesSeriesTable,
-        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comicSeriesId),
-      )
-      .leftJoin(
-        comicLibrariesTable,
-        eq(comicLibrariesSeriesTable.libraryId, comicLibrariesTable.id),
-      )
-      .leftJoin(
-        comicSeriesBooksTable,
-        eq(comicSeriesTable.id, comicSeriesBooksTable.comicSeriesId),
-      )
-      .leftJoin(
-        comicBooksTable,
-        eq(comicSeriesBooksTable.comicBookId, comicBooksTable.id),
-      )
-      .where(
-        libraryIds && libraryIds.length > 0
-          ? inArray(comicLibrariesTable.id, libraryIds)
-          : undefined,
-      )
-      .groupBy(comicSeriesTable.id)
-      .orderBy(desc(comicBooksTable.updatedAt))
-      .limit(limit)
-      .offset(offset);
-
-    const comicSeriesResults: ComicSeries[] = result.map((row) => row.comicSeries);
-
-    return comicSeriesResults;
-  } catch (error) {
-    console.error("Error fetching updated comic series:", error);
-    throw error;
-  }
-};
-
-/**
- * Updates an existing comic series with new data
- * @param id The ID of the series to update
- * @param updates Partial data to update in the series
- * @returns A boolean indicating if the update was successful
- */
-export const updateComicSeries = async (
-  id: number,
-  updates: Partial<NewComicSeries>,
-): Promise<boolean> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const updateData: Record<string, unknown> = {};
-    if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.description !== undefined) {
-      updateData.description = updates.description;
-    }
-    if (updates.folderPath !== undefined) {
-      updateData.folderPath = updates.folderPath;
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      return false;
-    }
-
-    const result: { id: number }[] = await db
-      .update(comicSeriesTable)
-      .set(updateData)
-      .where(eq(comicSeriesTable.id, id))
-      .returning({ id: comicSeriesTable.id });
-
-    return result.length > 0;
-  } catch (error) {
-    console.error("Error updating comic series:", error);
-    throw error;
-  }
-};
-
-/**
- * Deletes a comic series by ID
- * @param id The ID of the series to delete
- * @returns A boolean indicating if the deletion was successful
- */
-export const deleteComicSeries = async (id: number): Promise<boolean> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result: { id: number }[] = await db
-      .delete(comicSeriesTable)
-      .where(eq(comicSeriesTable.id, id))
-      .returning({ id: comicSeriesTable.id });
-
-    return result.length > 0;
-  } catch (error) {
-    console.error("Error deleting comic series:", error);
-    throw error;
-  }
-};
-
-/**
  * Adds a comic book to a series by creating a relationship
+ * 
+ * used by the internal worker
+ * 
  * @param seriesId The ID of the series
  * @param comicBookId The ID of the comic book
  * @returns void
@@ -777,6 +322,44 @@ export const addComicBookToSeries = async (
 };
 
 /**
+ * Retrieves the series ID for a specific comic book
+ * 
+ * Used by functions in the comic books services
+ * 
+ * @param comicBookId The ID of the comic book
+ * @returns The series ID, or null if the comic book is not in a series
+ */
+export const getSeriesIdFromComicBook = async (
+  comicBookId: number,
+): Promise<number | null> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: {
+      id: number;
+      comicSeriesId: number;
+      comicBookId: number;
+      createdAt: string;
+      updatedAt: string;
+    }[] = await db
+      .select()
+      .from(comicSeriesBooksTable)
+      .where(eq(comicSeriesBooksTable.comicBookId, comicBookId));
+
+    return result.length > 0 ? result[0].comicSeriesId : null;
+  } catch (error) {
+    console.error("Error fetching series ID from comic book ID:", error);
+    throw error;
+  }
+};
+
+/**
+ * DEPRECATED: Currently just used by some functions in the comic books service, check if they functions have been updated to not
+ * use this function and if so remove this function
  * Retrieves all comic book IDs in a specific series
  * @param seriesId The ID of the series
  * @returns An array of comic book IDs in the series
@@ -806,39 +389,6 @@ export const getComicBooksInSeries = async (
     return result.map((row) => row.comicBookId);
   } catch (error) {
     console.error("Error fetching comic books in series:", error);
-    throw error;
-  }
-};
-
-/**
- * Retrieves the series ID for a specific comic book
- * @param comicBookId The ID of the comic book
- * @returns The series ID, or null if the comic book is not in a series
- */
-export const getSeriesIdFromComicBook = async (
-  comicBookId: number,
-): Promise<number | null> => {
-  const { db, client } = getClient();
-
-  if (!db || !client) {
-    throw new Error("Database is not initialized.");
-  }
-
-  try {
-    const result: {
-      id: number;
-      comicSeriesId: number;
-      comicBookId: number;
-      createdAt: string;
-      updatedAt: string;
-    }[] = await db
-      .select()
-      .from(comicSeriesBooksTable)
-      .where(eq(comicSeriesBooksTable.comicBookId, comicBookId));
-
-    return result.length > 0 ? result[0].comicSeriesId : null;
-  } catch (error) {
-    console.error("Error fetching series ID from comic book ID:", error);
     throw error;
   }
 };
