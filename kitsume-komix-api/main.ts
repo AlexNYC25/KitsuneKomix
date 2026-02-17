@@ -1,5 +1,5 @@
 import app from "./api/app.ts";
-import { getWatcherManager } from "./fileWatchers/watcherManager.ts";
+import { getWatcherManager } from "./queue/watcherManager.ts";
 import "./queue/workers/comicWorker.ts";
 
 import { runMigrations } from "./db/migrate.ts";
