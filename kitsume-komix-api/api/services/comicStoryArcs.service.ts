@@ -1,6 +1,4 @@
-import { getAllComicStoryArcs, getComicStoryArcById, insertComicStoryArc, deleteComicStoryArcById } from "#sqlite/models/comicStoryArcs.model.ts";
-
-import { validatePaginationParameters, buildStoryArcQueryParams } from "#utilities/parameters.ts";
+import { getComicStoryArcById, insertComicStoryArc, deleteComicStoryArcById, getComicStoryArcsFilteringSorting } from "#sqlite/models/comicStoryArcs.model.ts";
 
 import { ComicStoryArcQueryParams } from "#interfaces/index.ts";
 
@@ -8,47 +6,36 @@ import {
 	// Filter and sort types   
   RequestFilterParameters,
   // Request parameter types
-  RequestPaginationParameters,
   RequestPaginationParametersValidated,
   RequestSortParameters,
   ComicStoryArc,
+  //
+  RequestParametersValidated,
+  ComicReadlistsFilterField,
+  ComicReadlistsSortField,
+  RequestFilterParametersValidated,
+  RequestSortParametersValidated,
+  ComicStoryArcFilterItem
  } from "#types/index.ts";
 
-export const fetchAllComicStoryArcs = async (
-	requestPaginationParameters: RequestPaginationParameters,
-  requestFilterParameters: RequestFilterParameters,
-  requestSortParameters: RequestSortParameters,
+export const fetchComicStoryArcs = async (
+  queryData: RequestParametersValidated<ComicReadlistsSortField, ComicReadlistsFilterField>
 ) => {
-  // Set default pagination values
-  const validatedPaginationParameters: RequestPaginationParametersValidated = validatePaginationParameters(requestPaginationParameters);
+  const serviceDataPagination: RequestPaginationParametersValidated = queryData.pagination;
+  const serviceDataFilter: RequestFilterParametersValidated<ComicReadlistsFilterField> | undefined = queryData.filter;
+  const serviceDataSort: RequestSortParametersValidated<ComicReadlistsSortField> = queryData.sort;
 
-  const queryParams: ComicStoryArcQueryParams = buildStoryArcQueryParams(
-    validatedPaginationParameters,
-    requestFilterParameters,
-    requestSortParameters
-  );
+  const comicStoryArcs = await getComicStoryArcsFilteringSorting({
+    filters: [serviceDataFilter] as ComicStoryArcFilterItem[],
+    sort: {
+      property: serviceDataSort.sortProperty,
+      order: serviceDataSort.sortOrder,
+    },
+    offset: serviceDataPagination.pageNumber * serviceDataPagination.pageSize - serviceDataPagination.pageSize,
+    limit: serviceDataPagination.pageSize + 1,
+  });
 
-  try {
-    const storyArcs = await getAllComicStoryArcs(queryParams);
-
-    const hasNextPage =
-      storyArcs.length > validatedPaginationParameters.pageSize;
-    if (hasNextPage) {
-      storyArcs.pop();
-    }
-    return {
-      storyArcs,
-      hasNextPage,
-      currentPage: validatedPaginationParameters.page,
-      pageSize: validatedPaginationParameters.pageSize,
-      totalResults: storyArcs.length,
-      isFiltered: Boolean(requestFilterParameters.filter),
-      isSorted: Boolean(requestSortParameters.sortProperty),
-    };
-  } catch (error) {
-    console.error("Error fetching all comic story arcs:", error);
-    return null;
-  }
+  return comicStoryArcs;
 }
 
 export const fetchComicStoryArcById = async (
@@ -74,13 +61,6 @@ export const addComicStoryArc = async (
     console.error("Error adding new comic story arc:", error);
     return null;
   }
-};
-
-export const downloadComicsInStoryArc = async (
-  storyArcId: number,
-): Promise<boolean> => {
-  // Implementation for downloading comics in a story arc would go here
-  return false;
 };
 
 export const deleteComicStoryArc = async (
