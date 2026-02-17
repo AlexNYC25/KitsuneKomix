@@ -3,8 +3,8 @@ import chokidar from "chokidar";
 import {
   getAllComicLibraries,
   getComicLibraryLastChangedTime,
-} from "../db/sqlite/models/comicLibraries.model.ts";
-import { addNewComicFile } from "../queue/actions/newComicFile.ts";
+} from "#sqlite/models/comicLibraries.model.ts";
+import { addNewComicFile } from "./actions/newComicFile.ts";
 import { apiLogger } from "../logger/loggers.ts";
 
 let instance: WatchManager | null = null;
