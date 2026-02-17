@@ -4,7 +4,7 @@ import camelcasekeys from "camelcase-keys";
 import { requireAuth } from "../middleware/authChecks.ts";
 
 
-import { fetchAllComicStoryArcs } from "../services/comicStoryArcs.service.ts";
+import { fetchComicStoryArcs } from "../services/comicStoryArcs.service.ts";
 import { 
   ComicStoryArcMultipleResponseSchema,
   MessageResponseSchema,
