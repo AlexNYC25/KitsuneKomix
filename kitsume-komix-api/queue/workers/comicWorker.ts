@@ -8,16 +8,16 @@ import { Worker } from "bullmq";
 import { dirname } from "@std/path";
 
 // Utility imports
-import { deleteFolderRecursive, getFileSize } from "../../utilities/file.ts";
-import { getImageDimensions } from "../../utilities/imageUtils.ts";
-import { getMetadata, standardizeMetadata } from "../../utilities/metadata.ts";
-import { calculateFileHash } from "../../utilities/hash.ts";
-import { extractComicBook } from "../../utilities/extract.ts";
+import { deleteFolderRecursive, getFileSize } from "#utilities/file.ts";
+import { getImageDimensions } from "#utilities/imageUtils.ts";
+import { getMetadata, standardizeMetadata } from "#utilities/metadata.ts";
+import { calculateFileHash } from "#utilities/hash.ts";
+import { extractComicBook } from "#utilities/extract.ts";
 import {
   getComicFileRawDetails,
   getComicSeriesRawDetails,
-} from "../../utilities/comic-parser.ts";
-import { createImageThumbnail } from "../../utilities/image.ts";
+} from "#utilities/comic-parser.ts";
+import { createImageThumbnail } from "#utilities/image.ts";
 
 // Queue and configuration imports
 import { appQueue } from "../queueManager.ts";
@@ -32,82 +32,84 @@ import {
   getComicBookByFilePath,
   insertComicBook,
   updateComicBook,
-} from "../../db/sqlite/models/comicBooks.model.ts";
+} from "#sqlite/models/comicBooks.model.ts";
 import {
   addComicBookToSeries,
   getComicSeriesByPath,
   insertComicSeries,
   insertComicSeriesIntoLibrary,
-} from "../../db/sqlite/models/comicSeries.model.ts";
-import { getLibraryContainingPath } from "../../db/sqlite/models/comicLibraries.model.ts";
-import { insertComicPage } from "../../db/sqlite/models/comicPages.model.ts";
-import { insertComicBookCover } from "../../db/sqlite/models/comicBookCovers.model.ts";
-import { insertComicBookThumbnail } from "../../db/sqlite/models/comicBookThumbnails.model.ts";
+} from "#sqlite/models/comicSeries.model.ts";
+import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts";
+import { insertComicPage } from "#sqlite/models/comicPages.model.ts";
+import { insertComicBookCover } from "#sqlite/models/comicBookCovers.model.ts";
+import { insertComicBookThumbnail } from "#sqlite/models/comicBookThumbnails.model.ts";
 
 // Database model imports - People/Creators
 import {
   insertComicWriter,
   linkWriterToComicBook,
-} from "../../db/sqlite/models/comicWriters.model.ts";
+} from "#sqlite/models/comicWriters.model.ts";
 import {
   insertComicPenciller,
   linkPencillerToComicBook,
-} from "../../db/sqlite/models/comicPencillers.model.ts";
+} from "#sqlite/models/comicPencillers.model.ts";
 import {
   insertComicInker,
   linkInkerToComicBook,
-} from "../../db/sqlite/models/comicInkers.model.ts";
+} from "#sqlite/models/comicInkers.model.ts";
 import {
   insertComicColorist,
   linkColoristToComicBook,
-} from "../../db/sqlite/models/comicColorists.model.ts";
+} from "#sqlite/models/comicColorists.model.ts";
 import {
   insertComicLetterer,
   linkLettererToComicBook,
-} from "../../db/sqlite/models/comicLetterers.model.ts";
+} from "#sqlite/models/comicLetterers.model.ts";
 import {
   insertComicEditor,
   linkEditorToComicBook,
-} from "../../db/sqlite/models/comicEditors.model.ts";
+} from "#sqlite/models/comicEditors.model.ts";
 import {
   insertComicCoverArtist,
   linkCoverArtistToComicBook,
-} from "../../db/sqlite/models/comicCoverArtists.model.ts";
+} from "#sqlite/models/comicCoverArtists.model.ts";
 
 // Database model imports - Publishers/Content
 import {
   insertComicPublisher,
   linkPublisherToComicBook,
-} from "../../db/sqlite/models/comicPublishers.model.ts";
+} from "#sqlite/models/comicPublishers.model.ts";
 import {
   insertComicImprint,
   linkImprintToComicBook,
-} from "../../db/sqlite/models/comicImprints.model.ts";
+} from "#sqlite/models/comicImprints.model.ts";
 import {
   insertComicGenre,
   linkGenreToComicBook,
-} from "../../db/sqlite/models/comicGenres.model.ts";
+} from "#sqlite/models/comicGenres.model.ts";
 import {
   insertComicCharacter,
   linkCharacterToComicBook,
-} from "../../db/sqlite/models/comicCharacters.model.ts";
+} from "#sqlite/models/comicCharacters.model.ts";
 import {
   insertComicTeam,
   linkTeamToComicBook,
-} from "../../db/sqlite/models/comicTeams.model.ts";
+} from "#sqlite/models/comicTeams.model.ts";
 import {
   insertComicLocation,
   linkLocationToComicBook,
-} from "../../db/sqlite/models/comicLocations.model.ts";
+} from "#sqlite/models/comicLocations.model.ts";
 import {
   insertComicStoryArc,
   linkStoryArcToComicBook,
-} from "../../db/sqlite/models/comicStoryArcs.model.ts";
+} from "#sqlite/models/comicStoryArcs.model.ts";
 import {
   insertComicSeriesGroup,
   linkSeriesGroupToComicBook,
-} from "../../db/sqlite/models/comicSeriesGroups.model.ts";
+} from "#sqlite/models/comicSeriesGroups.model.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
+
+import { NewComicBook, NewComicSeries } from "#types/index.ts";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS
@@ -207,7 +209,39 @@ async function processNewComicFile(
       );
     } else {
       // Insert new record
-      comicId = await insertComicBook(comicData);
+      const newRecord: NewComicBook = {
+        libraryId: comicData.library_id,
+        filePath: comicData.file_path,
+        hash: comicData.hash,
+        title: comicData.title,
+        series: comicData.series,
+        issueNumber: comicData.issue_number,
+        count: comicData.count,
+        volume: comicData.volume,
+        alternateSeries: comicData.alternate_series,
+        alternateIssueNumber: comicData.alternate_issue_number,
+        alternateCount: comicData.alternate_count,
+        pageCount: comicData.page_count,
+        fileSize: comicData.file_size,
+        summary: comicData.summary,
+        notes: comicData.notes,
+        year: comicData.year,
+        month: comicData.month,
+        day: comicData.day,
+        publisher: comicData.publisher,
+        publicationDate: comicData.publication_date,
+        scanInfo: comicData.scan_info,
+        language: comicData.language,
+        format: comicData.format,
+        blackAndWhite: comicData.black_and_white,
+        manga: comicData.manga,
+        readingDirection: comicData.reading_direction,
+        review: comicData.review,
+        ageRating: comicData.age_rating,
+        communityRating: comicData.community_rating,
+      };
+
+      comicId = await insertComicBook(newRecord);
       apiLogger.info(`Inserted new comic book with ID: ${comicId}`);
     }
 
@@ -491,10 +525,10 @@ async function processComicSeries(
       );
     }
 
-    const seriesData = {
+    const seriesData: NewComicSeries = {
       name: job.data.metadata?.comicInfoXml?.series || seriesName,
       description: null,
-      folder_path: job.data.seriesPath,
+      folderPath: job.data.seriesPath,
     };
 
     const seriesId = await insertComicSeries(seriesData);
