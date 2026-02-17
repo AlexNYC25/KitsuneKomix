@@ -1,86 +1,122 @@
-import { eq, and, asc, desc } from "drizzle-orm";
-import { SQLiteColumn } from "drizzle-orm/sqlite-core";
+import { eq, and, asc, desc, ilike } from "drizzle-orm";
+import { SQLiteSelect, SQLiteColumn } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
-import { comicBookStoryArcsTable, comicStoryArcsTable } from "../schema.ts";
+import { comicBookStoryArcsTable, comicStoryArcsTable, comicBooksTable} from "../schema.ts";
 
-import type { ComicStoryArc} from "#types/index.ts";
+import type { ComicStoryArc, ComicBookFilteringAndSortingParams, ComicStoryArcsFilteringAndSortingParams, ComicStoryArcFilterItem } from "#types/index.ts";
 import type { ComicStoryArcQueryParams } from "#interfaces/index.ts";
+import type { ComicReadlistsSortField, ComicReadlistsFilterField } from "#types/parameters.type.ts";
 
 import { PAGE_SIZE_DEFAULT } from "#utilities/constants.ts";
 
 /**
- * Retrieves all comic story arcs with optional filtering and sorting
- * @param params Query parameters including offset, limit, filters, sort column and order
- * @returns An array of ComicStoryArc objects matching the query parameters
+ * Exclusive dynamic filtering function for comic story arcs.
+ * Filters story arcs by name, description, or timestamp fields.
+ * @param filter - Filter configuration with property and value
+ * @param query - The query builder to apply filters to
+ * @returns The query with filters applied
  */
-export const getAllComicStoryArcs = async (
-  params: ComicStoryArcQueryParams = {}
+const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicStoryArcFilterItem, query: T): T => {
+  const { filterProperty, filterValue } = filter;
+
+  switch (filterProperty) {
+    case "id":
+      query.where(eq(comicStoryArcsTable.id, Number(filterValue)));
+      break;
+    case "name":
+      query.where(ilike(comicStoryArcsTable.name, `%${filterValue}%`));
+      break;
+    case "description":
+      query.where(ilike(comicStoryArcsTable.description, `%${filterValue}%`));
+      break;
+  }
+
+  return query;
+};
+
+/**
+ * Exclusive dynamic sorting function for comic story arcs.
+ * Sorts story arcs by name, creation date, or update date.
+ * @param sortProperty - The field to sort by
+ * @param sortDirection - Sort direction ("asc" or "desc")
+ * @param query - The query builder to apply sorting to
+ * @returns The query with sorting applied
+ */
+const addSortingToQuery = <T extends SQLiteSelect>(sortProperty: ComicReadlistsSortField, sortDirection: string, query: T): T => {
+  const direction = sortDirection === "asc" ? asc : desc;
+
+  switch (sortProperty) {
+    case "id":
+      query.orderBy(direction(comicStoryArcsTable.id));
+      break;
+    case "name":
+      query.orderBy(direction(comicStoryArcsTable.name));
+      break;
+    case "createdAt":
+      query.orderBy(direction(comicStoryArcsTable.createdAt));
+      break;
+    case "updatedAt":
+      query.orderBy(direction(comicStoryArcsTable.updatedAt));
+      break;
+  }
+
+  return query;
+};
+
+
+export const getComicStoryArcsFilteringSorting = async (
+  serviceDetails: ComicStoryArcsFilteringAndSortingParams
 ): Promise<ComicStoryArc[]> => {
   const { db, client } = getClient();
-
-  const {
-    offset = 0,
-    limit = PAGE_SIZE_DEFAULT,
-    nameFilter,
-    descriptionFilter,
-    sortBy,
-    sortOrder
-  } = params;
-
+  
   if (!db || !client) {
-    throw new Error("Database is not initialized.");
+    throw new Error("Database client is not initialized");
   }
+
+  const offset = serviceDetails.offset || 0;
+  const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
 
   try {
+    let query = 
+      db.select(
+        {
+          id: comicStoryArcsTable.id,
+          name: comicStoryArcsTable.name,
+          description: comicStoryArcsTable.description,
+          createdAt: comicStoryArcsTable.createdAt,
+          updatedAt: comicStoryArcsTable.updatedAt,
+        }
+      ).from(comicStoryArcsTable)
+      .leftJoin(
+        comicBookStoryArcsTable,
+        eq(comicStoryArcsTable.id, comicBookStoryArcsTable.comicStoryArcId)
+      )
+      .leftJoin(
+        comicBooksTable,
+        eq(comicBookStoryArcsTable.comicBookId, comicBooksTable.id)
+      )
+      .groupBy(comicStoryArcsTable.id)
+      .offset(offset)
+      .limit(limit)
+      .$dynamic();
 
-const whereConditions: Array<ReturnType<typeof eq>> = [];
+      if (serviceDetails.sort?.property && serviceDetails.sort.order) {
+        query = addSortingToQuery(serviceDetails.sort.property, serviceDetails.sort.order, query);
+      }
 
-
-    if (nameFilter) {
-      whereConditions.push(eq(comicStoryArcsTable.name, nameFilter));
-    }
-
-    if (descriptionFilter) {
-      whereConditions.push(eq(comicStoryArcsTable.description, descriptionFilter));
-    }
-
-    let orderByColumn: SQLiteColumn;
-
-    switch (sortBy) {
-      case "name":
-        orderByColumn = comicStoryArcsTable.name;
-        break;
-      case "created_at":
-        orderByColumn = comicStoryArcsTable.createdAt;
-        break;
-      case "updated_at":
-        orderByColumn = comicStoryArcsTable.updatedAt;
-        break;
-      default:
-        orderByColumn = comicStoryArcsTable.id;
-        break;
-    }
-
-    const baseQuery = db.select().from(comicStoryArcsTable).$dynamic();
-
-    // Apply where conditions
-    const finalQuery: typeof baseQuery = whereConditions.length > 0
-          ? baseQuery.where(and(...whereConditions))
-          : baseQuery;
+      if (serviceDetails.filters && serviceDetails.filters.length > 0) {
+        query = addFilteringToQuery(serviceDetails.filters[0], query); 
+      }
 
 
-    const result: ComicStoryArc[] = await finalQuery
-          .orderBy(sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn))
-          .limit(limit)
-          .offset(offset);
+    return query;
 
-    return result;
   } catch (error) {
-    console.error("Error fetching all comic story arcs:", error);
-    throw new Error("Failed to fetch all comic story arcs.");
+    console.error("Error fetching comic books with metadata filtering and sorting:", error);
+    throw new Error("Failed to fetch comic books with metadata filtering and sorting.");
   }
-};
+}
 
 /**
  * Retrieves a specific comic story arc by ID
