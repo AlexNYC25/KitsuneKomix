@@ -109,7 +109,11 @@ import {
 } from "#sqlite/models/comicSeriesGroups.model.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
-import { NewComicBook, NewComicSeries } from "#types/index.ts";
+import { 
+  NewComicBook, 
+  NewComicSeries, 
+  WorkerJob 
+} from "#types/index.ts";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS
@@ -119,9 +123,11 @@ import { NewComicBook, NewComicSeries } from "#types/index.ts";
  * Main comic file processing function
  * Handles metadata extraction, hash calculation, and initiates all follow-up jobs
  * Only processes new files or files with changed hash values
+ * 
+ * NOTE: This should be the orchestrating function that calls all other processing steps and queues follow-up jobs as needed
  */
 async function processNewComicFile(
-  job: { data: { filePath: string; metadata: object } },
+  job: WorkerJob
 ): Promise<void> {
   queueLogger.info(`Processing comic file: ${job.data.filePath}`);
 
