@@ -5,7 +5,7 @@ import { createNewClient } from "../client.ts";
  * Purge all data from all tables in the database.
  * This function deletes all records from every table
  * and resets any auto-incrementing primary keys.
- * 
+ *
  * Purly for testing purposes.
  * NOTE: REALLY DESTRUCTIVE OPERATION. USE WITH CAUTION.
  */

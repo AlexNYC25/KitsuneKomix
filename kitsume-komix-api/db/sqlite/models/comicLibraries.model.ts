@@ -1,4 +1,4 @@
-import { sql, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 import { comicLibrariesTable, userComicLibrariesTable } from "../schema.ts";
@@ -8,7 +8,6 @@ import type {
   LibraryRegistrationInput,
   LibraryUpdateInput,
 } from "#types/index.ts";
-
 
 /**
  * Creates a new comic library in the database
@@ -311,8 +310,8 @@ export const getUsersComicLibraries = async (
       )
       .where(eq(userComicLibrariesTable.userId, userId))
       .groupBy(comicLibrariesTable.id);
-      
-    const libraries: ComicLibrary[] = result.map(row => row.comicLibrary);
+
+    const libraries: ComicLibrary[] = result.map((row) => row.comicLibrary);
 
     return libraries;
   } catch (error) {

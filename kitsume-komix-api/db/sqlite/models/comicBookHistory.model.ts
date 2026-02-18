@@ -3,10 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { comicBookHistoryTable } from "../schema.ts";
 
-import type {
-  ComicBookHistory,
-  NewComicBookHistory,
-} from "#types/index.ts";
+import type { ComicBookHistory, NewComicBookHistory } from "#types/index.ts";
 
 /**
  * Record a new comic book history entry.

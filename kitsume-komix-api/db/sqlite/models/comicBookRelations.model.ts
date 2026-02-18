@@ -27,7 +27,6 @@ import type {
   NewComicBookWriter,
 } from "#types/index.ts";
 
-
 // Writers
 
 /**
@@ -79,7 +78,7 @@ export const removeComicBookWriter = async (
       .delete(comicBookWritersTable)
       .where(
         eq(comicBookWritersTable.comicBookId, comicBookId) &&
-        eq(comicBookWritersTable.comicWriterId, writerId),
+          eq(comicBookWritersTable.comicWriterId, writerId),
       )
       .returning({ id: comicBookWritersTable.id });
 
@@ -212,7 +211,7 @@ export const addComicBookGenre = async (
 
 /**
  * Utility function to remove all relations for a comic book
- * @param comicBookId 
+ * @param comicBookId
  */
 export const removeAllComicBookRelations = async (
   comicBookId: number,

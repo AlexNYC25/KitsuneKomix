@@ -17,7 +17,7 @@ import type { ComicPage } from "#types/index.ts";
  * @param width Optional width of the page in pixels
  * @param length Optional height of the page in pixels
  * @returns The ID of the newly inserted comic page
- * 
+ *
  * TODO: Update the parameters to be an object for better declaration
  */
 export const insertComicPage = async (

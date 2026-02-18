@@ -1,12 +1,24 @@
-import { eq, and, asc, desc, ilike } from "drizzle-orm";
-import { SQLiteSelect, SQLiteColumn } from "drizzle-orm/sqlite-core";
+import { and, asc, desc, eq, ilike } from "drizzle-orm";
+import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
-import { comicBookStoryArcsTable, comicStoryArcsTable, comicBooksTable} from "../schema.ts";
+import {
+  comicBooksTable,
+  comicBookStoryArcsTable,
+  comicStoryArcsTable,
+} from "../schema.ts";
 
-import type { ComicStoryArc, ComicBookFilteringAndSortingParams, ComicStoryArcsFilteringAndSortingParams, ComicStoryArcFilterItem } from "#types/index.ts";
+import type {
+  ComicBookFilteringAndSortingParams,
+  ComicStoryArc,
+  ComicStoryArcFilterItem,
+  ComicStoryArcsFilteringAndSortingParams,
+} from "#types/index.ts";
 import type { ComicStoryArcQueryParams } from "#interfaces/index.ts";
-import type { ComicReadlistsSortField, ComicReadlistsFilterField } from "#types/parameters.type.ts";
+import type {
+  ComicReadlistsFilterField,
+  ComicReadlistsSortField,
+} from "#types/parameters.type.ts";
 
 import { PAGE_SIZE_DEFAULT } from "#utilities/constants.ts";
 
@@ -17,7 +29,10 @@ import { PAGE_SIZE_DEFAULT } from "#utilities/constants.ts";
  * @param query - The query builder to apply filters to
  * @returns The query with filters applied
  */
-const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicStoryArcFilterItem, query: T): T => {
+const addFilteringToQuery = <T extends SQLiteSelect>(
+  filter: ComicStoryArcFilterItem,
+  query: T,
+): T => {
   const { filterProperty, filterValue } = filter;
 
   switch (filterProperty) {
@@ -43,7 +58,11 @@ const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicStoryArcFilter
  * @param query - The query builder to apply sorting to
  * @returns The query with sorting applied
  */
-const addSortingToQuery = <T extends SQLiteSelect>(sortProperty: ComicReadlistsSortField, sortDirection: string, query: T): T => {
+const addSortingToQuery = <T extends SQLiteSelect>(
+  sortProperty: ComicReadlistsSortField,
+  sortDirection: string,
+  query: T,
+): T => {
   const direction = sortDirection === "asc" ? asc : desc;
 
   switch (sortProperty) {
@@ -64,12 +83,11 @@ const addSortingToQuery = <T extends SQLiteSelect>(sortProperty: ComicReadlistsS
   return query;
 };
 
-
 export const getComicStoryArcsFilteringSorting = async (
-  serviceDetails: ComicStoryArcsFilteringAndSortingParams
+  serviceDetails: ComicStoryArcsFilteringAndSortingParams,
 ): Promise<ComicStoryArc[]> => {
   const { db, client } = getClient();
-  
+
   if (!db || !client) {
     throw new Error("Database client is not initialized");
   }
@@ -78,45 +96,51 @@ export const getComicStoryArcsFilteringSorting = async (
   const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
 
   try {
-    let query = 
-      db.select(
-        {
-          id: comicStoryArcsTable.id,
-          name: comicStoryArcsTable.name,
-          description: comicStoryArcsTable.description,
-          createdAt: comicStoryArcsTable.createdAt,
-          updatedAt: comicStoryArcsTable.updatedAt,
-        }
-      ).from(comicStoryArcsTable)
+    let query = db.select(
+      {
+        id: comicStoryArcsTable.id,
+        name: comicStoryArcsTable.name,
+        description: comicStoryArcsTable.description,
+        createdAt: comicStoryArcsTable.createdAt,
+        updatedAt: comicStoryArcsTable.updatedAt,
+      },
+    ).from(comicStoryArcsTable)
       .leftJoin(
         comicBookStoryArcsTable,
-        eq(comicStoryArcsTable.id, comicBookStoryArcsTable.comicStoryArcId)
+        eq(comicStoryArcsTable.id, comicBookStoryArcsTable.comicStoryArcId),
       )
       .leftJoin(
         comicBooksTable,
-        eq(comicBookStoryArcsTable.comicBookId, comicBooksTable.id)
+        eq(comicBookStoryArcsTable.comicBookId, comicBooksTable.id),
       )
       .groupBy(comicStoryArcsTable.id)
       .offset(offset)
       .limit(limit)
       .$dynamic();
 
-      if (serviceDetails.sort?.property && serviceDetails.sort.order) {
-        query = addSortingToQuery(serviceDetails.sort.property, serviceDetails.sort.order, query);
-      }
+    if (serviceDetails.sort?.property && serviceDetails.sort.order) {
+      query = addSortingToQuery(
+        serviceDetails.sort.property,
+        serviceDetails.sort.order,
+        query,
+      );
+    }
 
-      if (serviceDetails.filters && serviceDetails.filters.length > 0) {
-        query = addFilteringToQuery(serviceDetails.filters[0], query); 
-      }
-
+    if (serviceDetails.filters && serviceDetails.filters.length > 0) {
+      query = addFilteringToQuery(serviceDetails.filters[0], query);
+    }
 
     return query;
-
   } catch (error) {
-    console.error("Error fetching comic books with metadata filtering and sorting:", error);
-    throw new Error("Failed to fetch comic books with metadata filtering and sorting.");
+    console.error(
+      "Error fetching comic books with metadata filtering and sorting:",
+      error,
+    );
+    throw new Error(
+      "Failed to fetch comic books with metadata filtering and sorting.",
+    );
   }
-}
+};
 
 /**
  * Retrieves a specific comic story arc by ID
@@ -238,7 +262,10 @@ export const getComicStoryArcByName = async (
  * @param description Optional description of the story arc
  * @returns The ID of the newly inserted or existing story arc
  */
-export const insertComicStoryArc = async (name: string, description?: string ): Promise<number> => {
+export const insertComicStoryArc = async (
+  name: string,
+  description?: string,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -367,4 +394,3 @@ export const getStoryArcsByComicBookId = async (
     throw new Error("Failed to fetch story arcs for comic book.");
   }
 };
-

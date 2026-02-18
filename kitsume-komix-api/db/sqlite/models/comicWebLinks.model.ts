@@ -24,7 +24,11 @@ export const insertComicWebLink = async (
   try {
     const result: { id: number }[] = await db
       .insert(comicWebLinksTable)
-      .values({ comicBookId: comicBookId, url, description: description ?? null })
+      .values({
+        comicBookId: comicBookId,
+        url,
+        description: description ?? null,
+      })
       .onConflictDoNothing()
       .returning({ id: comicWebLinksTable.id });
 

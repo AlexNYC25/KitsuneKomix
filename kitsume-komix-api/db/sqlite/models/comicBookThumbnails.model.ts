@@ -26,10 +26,12 @@ export const insertComicBookThumbnail = async (
 
   try {
     // Check if comic_book_id column exists (for migration compatibility)
-    const tableInfo: { rows?: Row[] } = await db.run("PRAGMA table_info(comic_book_thumbnails)");
-    const hasComicBookIdColumn: boolean | undefined = tableInfo.rows?.some((row: Row) =>
-      row[1] === "comic_book_id"
+    const tableInfo: { rows?: Row[] } = await db.run(
+      "PRAGMA table_info(comic_book_thumbnails)",
     );
+    const hasComicBookIdColumn: boolean | undefined = tableInfo.rows?.some((
+      row: Row,
+    ) => row[1] === "comic_book_id");
 
     if (hasComicBookIdColumn) {
       // Use new schema

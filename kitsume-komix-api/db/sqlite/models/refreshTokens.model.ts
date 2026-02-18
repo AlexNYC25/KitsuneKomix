@@ -3,7 +3,7 @@ import { and, eq, gte, lt } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { refreshTokensTable } from "../schema.ts";
 
-import {RefreshToken, CreateRefreshTokenInput} from "#interfaces/index.ts";
+import { CreateRefreshTokenInput, RefreshToken } from "#interfaces/index.ts";
 
 /**
  * Stores a new refresh token in the database

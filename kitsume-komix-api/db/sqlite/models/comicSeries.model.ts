@@ -1,20 +1,20 @@
-import { desc, eq, asc, ilike } from "drizzle-orm";
+import { asc, desc, eq, ilike } from "drizzle-orm";
 import { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 
 import {
-  comicSeriesTable,
-  comicSeriesBooksTable,
   comicLibrariesSeriesTable,
+  comicSeriesBooksTable,
+  comicSeriesTable,
 } from "../schema.ts";
 
 import type {
   ComicSeries,
-  NewComicSeries,
   ComicSeriesFilteringAndSortingParams,
   ComicSeriesFilterItem,
   ComicSeriesSortField,
+  NewComicSeries,
 } from "#types/index.ts";
 
 import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
@@ -22,12 +22,13 @@ import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 /**
  * Exclusive dynamic filtering function specifcally for getComicSeriesWithMetadataFilteringSorting
  * This is necessary as the filtering can be applied to any of the fields in the comic series table and we need to dynamically apply it to the query builder.
- * @param filter 
- * @param query 
+ * @param filter
+ * @param query
  * @returns the query with the filter applied
  */
 const addFilteringToQuery = <T extends SQLiteSelect>(
-  filter: ComicSeriesFilterItem, query: T
+  filter: ComicSeriesFilterItem,
+  query: T,
 ): T => {
   const { filterProperty, filterValue } = filter;
 
@@ -49,13 +50,15 @@ const addFilteringToQuery = <T extends SQLiteSelect>(
 /**
  * Exclusive dynamic sorting function specifcally for getComicSeriesWithMetadataFilteringSorting
  * This is necessary as the sorting can be applied to any of the fields in the comic series table and we need to dynamically apply it to the query builder.
- * @param sortProperty 
- * @param sortDirection 
- * @param query 
+ * @param sortProperty
+ * @param sortDirection
+ * @param query
  * @returns the query with the sorting applied
  */
 const addSortingToQuery = <T extends SQLiteSelect>(
-  sortProperty: ComicSeriesSortField, sortDirection: string, query: T
+  sortProperty: ComicSeriesSortField,
+  sortDirection: string,
+  query: T,
 ): T => {
   const direction = sortDirection === "asc" ? asc : desc;
 
@@ -80,8 +83,8 @@ const addSortingToQuery = <T extends SQLiteSelect>(
 /**
  * Gets comic series with metadata filtering and sorting
  * @param serviceDetails - Filtering and sorting parameters
- * @returns Promise resolving to an array of ComicSeries objects 
- * 
+ * @returns Promise resolving to an array of ComicSeries objects
+ *
  * Note: This function can be used to filter and sort on the metadata fields as well but not return them. i.e. we can filter by writer but not return the writer data with the comic book.
  * This metadata must be fetched separately after getting the comic books and attached to the comic book objects upstream.
  */
@@ -89,7 +92,7 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
   serviceDetails: ComicSeriesFilteringAndSortingParams,
 ): Promise<ComicSeries[]> => {
   const { db, client } = getClient();
-  
+
   if (!db || !client) {
     throw new Error("Database client is not initialized");
   }
@@ -98,24 +101,27 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
   const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
 
   try {
-    let query = 
-      db.select(
-        {
-          id: comicSeriesTable.id,
-          name: comicSeriesTable.name,
-          description: comicSeriesTable.description,
-          folderPath: comicSeriesTable.folderPath,
-          createdAt: comicSeriesTable.createdAt,
-          updatedAt: comicSeriesTable.updatedAt,
-        }
-      ).from(comicSeriesTable)
+    let query = db.select(
+      {
+        id: comicSeriesTable.id,
+        name: comicSeriesTable.name,
+        description: comicSeriesTable.description,
+        folderPath: comicSeriesTable.folderPath,
+        createdAt: comicSeriesTable.createdAt,
+        updatedAt: comicSeriesTable.updatedAt,
+      },
+    ).from(comicSeriesTable)
       .groupBy(comicSeriesTable.id)
       .offset(offset)
       .limit(limit)
       .$dynamic();
 
     if (serviceDetails.sort?.property && serviceDetails.sort.order) {
-      query = addSortingToQuery(serviceDetails.sort.property, serviceDetails.sort.order, query);
+      query = addSortingToQuery(
+        serviceDetails.sort.property,
+        serviceDetails.sort.order,
+        query,
+      );
     }
 
     if (serviceDetails.filters && serviceDetails.filters.length > 0) {
@@ -124,18 +130,21 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
 
     return query;
   } catch (error) {
-    console.error("Error fetching comic series with metadata filtering and sorting:", error);
+    console.error(
+      "Error fetching comic series with metadata filtering and sorting:",
+      error,
+    );
     throw error;
   }
-}
+};
 
 /**
  * Inserts a new comic series into the database
- * 
+ *
  * used by the internal worker
- * 
+ *
  * TODO: Check if this should be broken into a service/worker function
- * 
+ *
  * @param seriesData The series data to insert including name, description, and folder path
  * @returns The ID of the newly inserted or existing series
  */
@@ -190,9 +199,9 @@ export const insertComicSeries = async (
 
 /**
  * Adds a comic series to a library by creating a relationship
- * 
+ *
  * Used by the internal worker
- * 
+ *
  * @param seriesId The ID of the series
  * @param libraryId The ID of the library
  * @returns True if the series was added, false if relationship already exists
@@ -226,9 +235,9 @@ export const insertComicSeriesIntoLibrary = async (
 
 /**
  * Retrieves a comic series by folder path
- * 
+ *
  * used by the internal worker
- * 
+ *
  * @param path The folder path of the series
  * @returns The ComicSeries object, or null if not found
  */
@@ -258,9 +267,9 @@ export const getComicSeriesByPath = async (
 
 /**
  * Adds a comic book to a series by creating a relationship
- * 
+ *
  * used by the internal worker
- * 
+ *
  * @param seriesId The ID of the series
  * @param comicBookId The ID of the comic book
  * @returns void
@@ -294,9 +303,9 @@ export const addComicBookToSeries = async (
 
 /**
  * Retrieves the series ID for a specific comic book
- * 
+ *
  * Used by functions in the comic books services
- * 
+ *
  * @param comicBookId The ID of the comic book
  * @returns The series ID, or null if the comic book is not in a series
  */
@@ -346,11 +355,11 @@ export const getComicBooksInSeries = async (
 
   try {
     const result: {
-        id: number;
-        comicSeriesId: number;
-        comicBookId: number;
-        createdAt: string;
-        updatedAt: string;
+      id: number;
+      comicSeriesId: number;
+      comicBookId: number;
+      createdAt: string;
+      updatedAt: string;
     }[] = await db
       .select()
       .from(comicSeriesBooksTable)

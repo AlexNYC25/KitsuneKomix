@@ -27,9 +27,9 @@ import {
 import type {
   ComicBook,
   ComicBookFilteringAndSortingParams,
-  NewComicBook,
   ComicBookFilterItem,
   ComicSortField,
+  NewComicBook,
 } from "#types/index.ts";
 
 import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
@@ -37,11 +37,14 @@ import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
 /**
  * Exclusive dynamic filtering function specifcally for getComicBooksWithMetadataFilteringSorting
  * This is necessary as the filtering can be applied to any of the fields in the comic book table and we need to dynamically apply it to the query builder.
- * @param filter 
+ * @param filter
  * @param query
  * @returns the query with the filter applied
  */
-const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicBookFilterItem, query: T): T => {
+const addFilteringToQuery = <T extends SQLiteSelect>(
+  filter: ComicBookFilterItem,
+  query: T,
+): T => {
   const { filterProperty, filterValue } = filter;
 
   switch (filterProperty) {
@@ -103,7 +106,9 @@ const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicBookFilterItem
       query.where(ilike(comicBooksTable.format, `%${filterValue}%`));
       break;
     case "blackAndWhite":
-      query.where(eq(comicBooksTable.blackAndWhite, filterValue === "true" ? 1 : 0));
+      query.where(
+        eq(comicBooksTable.blackAndWhite, filterValue === "true" ? 1 : 0),
+      );
       break;
     case "manga":
       query.where(eq(comicBooksTable.manga, filterValue === "true" ? 1 : 0));
@@ -137,12 +142,16 @@ const addFilteringToQuery = <T extends SQLiteSelect>(filter: ComicBookFilterItem
 /**
  * Exclusive dynamic sorting function specifcally for getComicBooksWithMetadataFilteringSorting
  * This is necessary as the sorting can be applied to any of the fields in the comic book table and we need to dynamically apply it to the query builder.
- * @param sortProperty 
- * @param sortDirection 
- * @param query 
+ * @param sortProperty
+ * @param sortDirection
+ * @param query
  * @returns the query with the sorting applied
  */
-const addSortingToQuery = <T extends SQLiteSelect>(sortProperty: ComicSortField, sortDirection: string, query: T): T => {
+const addSortingToQuery = <T extends SQLiteSelect>(
+  sortProperty: ComicSortField,
+  sortDirection: string,
+  query: T,
+): T => {
   const direction = sortDirection === "asc" ? asc : desc;
 
   switch (sortProperty) {
@@ -212,12 +221,11 @@ const addSortingToQuery = <T extends SQLiteSelect>(sortProperty: ComicSortField,
   return query;
 };
 
-
 /**
  * Gets comic books with metadata filtering and sorting
  * @param serviceDetails - Filtering and sorting parameters
- * @returns Promise resolving to an array of ComicBook objects 
- * 
+ * @returns Promise resolving to an array of ComicBook objects
+ *
  * Note: This function can be used to filter and sort on the metadata fields as well but not return them. i.e. we can filter by writer but not return the writer data with the comic book.
  * This metadata must be fetched separately after getting the comic books and attached to the comic book objects upstream.
  */
@@ -234,73 +242,126 @@ export const getComicBooksWithMetadataFilteringSorting = async (
   const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
 
   try {
-    let query = 
-      db.select(
-        {
-          id: comicBooksTable.id,
-          libraryId: comicBooksTable.libraryId,
-          filePath: comicBooksTable.filePath,
-          hash: comicBooksTable.hash,
-          title: comicBooksTable.title,
-          series: comicBooksTable.series,
-          issueNumber: comicBooksTable.issueNumber,
-          count: comicBooksTable.count,
-          volume: comicBooksTable.volume,
-          alternateSeries: comicBooksTable.alternateSeries,
-          alternateIssueNumber: comicBooksTable.alternateIssueNumber,
-          alternateCount: comicBooksTable.alternateCount,
-          pageCount: comicBooksTable.pageCount,
-          fileSize: comicBooksTable.fileSize,
-          summary: comicBooksTable.summary,
-          notes: comicBooksTable.notes,
-          year: comicBooksTable.year,
-          month: comicBooksTable.month,
-          day: comicBooksTable.day,
-          publisher: comicBooksTable.publisher,
-          publicationDate: comicBooksTable.publicationDate,
-          scanInfo: comicBooksTable.scanInfo,
-          createdAt: comicBooksTable.createdAt,
-          updatedAt: comicBooksTable.updatedAt,
-          language: comicBooksTable.language,
-          format: comicBooksTable.format,
-          blackAndWhite: comicBooksTable.blackAndWhite,
-          manga: comicBooksTable.manga,
-          readingDirection: comicBooksTable.readingDirection,
-          review: comicBooksTable.review,
-          ageRating: comicBooksTable.ageRating,
-          communityRating: comicBooksTable.communityRating
-        }
-      ).from(comicBooksTable)
-      .leftJoin(comicSeriesBooksTable, eq(comicBooksTable.id, comicSeriesBooksTable.comicBookId))
-      .leftJoin(comicSeriesTable, eq(comicSeriesBooksTable.comicSeriesId, comicSeriesTable.id))
-      .leftJoin(comicBookWritersTable, eq(comicBooksTable.id, comicBookWritersTable.comicBookId))
-      .leftJoin(comicBookPencillersTable, eq(comicBooksTable.id, comicBookPencillersTable.comicBookId))
-      .leftJoin(comicBookInkersTable, eq(comicBooksTable.id, comicBookInkersTable.comicBookId))
-      .leftJoin(comicBookLetterersTable, eq(comicBooksTable.id, comicBookLetterersTable.comicBookId))
-      .leftJoin(comicBookEditorsTable, eq(comicBooksTable.id, comicBookEditorsTable.comicBookId))
-      .leftJoin(comicBookColoristsTable, eq(comicBooksTable.id, comicBookColoristsTable.comicBookId))
-      .leftJoin(comicBookCoverArtistsTable, eq(comicBooksTable.id, comicBookCoverArtistsTable.comicBookId))
-      .leftJoin(comicBookPublishersTable, eq(comicBooksTable.id, comicBookPublishersTable.comicBookId))
-      .leftJoin(comicBookImprintsTable, eq(comicBooksTable.id, comicBookImprintsTable.comicBookId))
-      .leftJoin(comicBookGenresTable, eq(comicBooksTable.id, comicBookGenresTable.comicBookId))
-      .leftJoin(comicBookStoryArcsTable, eq(comicBooksTable.id, comicBookStoryArcsTable.comicBookId))
-      .leftJoin(comicBookSeriesGroupsTable, eq(comicBooksTable.id, comicBookSeriesGroupsTable.comicBookId))
-      .leftJoin(comicBookTeamsTable, eq(comicBooksTable.id, comicBookTeamsTable.comicBookId))
-      .leftJoin(comicBookCharactersTable, eq(comicBooksTable.id, comicBookCharactersTable.comicBookId))
-      .leftJoin(comicWebLinksTable, eq(comicBooksTable.id, comicWebLinksTable.comicBookId))
+    let query = db.select(
+      {
+        id: comicBooksTable.id,
+        libraryId: comicBooksTable.libraryId,
+        filePath: comicBooksTable.filePath,
+        hash: comicBooksTable.hash,
+        title: comicBooksTable.title,
+        series: comicBooksTable.series,
+        issueNumber: comicBooksTable.issueNumber,
+        count: comicBooksTable.count,
+        volume: comicBooksTable.volume,
+        alternateSeries: comicBooksTable.alternateSeries,
+        alternateIssueNumber: comicBooksTable.alternateIssueNumber,
+        alternateCount: comicBooksTable.alternateCount,
+        pageCount: comicBooksTable.pageCount,
+        fileSize: comicBooksTable.fileSize,
+        summary: comicBooksTable.summary,
+        notes: comicBooksTable.notes,
+        year: comicBooksTable.year,
+        month: comicBooksTable.month,
+        day: comicBooksTable.day,
+        publisher: comicBooksTable.publisher,
+        publicationDate: comicBooksTable.publicationDate,
+        scanInfo: comicBooksTable.scanInfo,
+        createdAt: comicBooksTable.createdAt,
+        updatedAt: comicBooksTable.updatedAt,
+        language: comicBooksTable.language,
+        format: comicBooksTable.format,
+        blackAndWhite: comicBooksTable.blackAndWhite,
+        manga: comicBooksTable.manga,
+        readingDirection: comicBooksTable.readingDirection,
+        review: comicBooksTable.review,
+        ageRating: comicBooksTable.ageRating,
+        communityRating: comicBooksTable.communityRating,
+      },
+    ).from(comicBooksTable)
+      .leftJoin(
+        comicSeriesBooksTable,
+        eq(comicBooksTable.id, comicSeriesBooksTable.comicBookId),
+      )
+      .leftJoin(
+        comicSeriesTable,
+        eq(comicSeriesBooksTable.comicSeriesId, comicSeriesTable.id),
+      )
+      .leftJoin(
+        comicBookWritersTable,
+        eq(comicBooksTable.id, comicBookWritersTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookPencillersTable,
+        eq(comicBooksTable.id, comicBookPencillersTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookInkersTable,
+        eq(comicBooksTable.id, comicBookInkersTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookLetterersTable,
+        eq(comicBooksTable.id, comicBookLetterersTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookEditorsTable,
+        eq(comicBooksTable.id, comicBookEditorsTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookColoristsTable,
+        eq(comicBooksTable.id, comicBookColoristsTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookCoverArtistsTable,
+        eq(comicBooksTable.id, comicBookCoverArtistsTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookPublishersTable,
+        eq(comicBooksTable.id, comicBookPublishersTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookImprintsTable,
+        eq(comicBooksTable.id, comicBookImprintsTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookGenresTable,
+        eq(comicBooksTable.id, comicBookGenresTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookStoryArcsTable,
+        eq(comicBooksTable.id, comicBookStoryArcsTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookSeriesGroupsTable,
+        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookTeamsTable,
+        eq(comicBooksTable.id, comicBookTeamsTable.comicBookId),
+      )
+      .leftJoin(
+        comicBookCharactersTable,
+        eq(comicBooksTable.id, comicBookCharactersTable.comicBookId),
+      )
+      .leftJoin(
+        comicWebLinksTable,
+        eq(comicBooksTable.id, comicWebLinksTable.comicBookId),
+      )
       .groupBy(comicBooksTable.id)
       .offset(offset)
       .limit(limit)
       .$dynamic();
 
-      if (serviceDetails.sort?.property && serviceDetails.sort.order) {
-        query = addSortingToQuery(serviceDetails.sort.property, serviceDetails.sort.order, query);
-      }
+    if (serviceDetails.sort?.property && serviceDetails.sort.order) {
+      query = addSortingToQuery(
+        serviceDetails.sort.property,
+        serviceDetails.sort.order,
+        query,
+      );
+    }
 
-      if (serviceDetails.filters && serviceDetails.filters.length > 0) {
-        query = addFilteringToQuery(serviceDetails.filters[0], query);
-      }
-
+    if (serviceDetails.filters && serviceDetails.filters.length > 0) {
+      query = addFilteringToQuery(serviceDetails.filters[0], query);
+    }
 
     return query;
   } catch (error) {
@@ -312,11 +373,10 @@ export const getComicBooksWithMetadataFilteringSorting = async (
   }
 };
 
-
 /**
- * Gets a random comic book from the database  
+ * Gets a random comic book from the database
  * @returns Promise resolving to a ComicBook object or null if none found
- * 
+ *
  * TODO: Update this function to return a object of type ComicBookWithMetadata
  */
 export const getRandomBook = async (): Promise<ComicBook | null> => {
@@ -345,7 +405,9 @@ export const getRandomBook = async (): Promise<ComicBook | null> => {
  * @param comicBook The comic book data to insert
  * @returns The ID of the newly inserted comic book
  */
-export const insertComicBook = async (comicBook: NewComicBook): Promise<number> => {
+export const insertComicBook = async (
+  comicBook: NewComicBook,
+): Promise<number> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -369,7 +431,7 @@ export const insertComicBook = async (comicBook: NewComicBook): Promise<number> 
  * Gets the comic book by its ID
  * @param id Id of the comic book
  * @returns The comic book object or null if not found
- * 
+ *
  * NOTE: This is primarily used in the comicBooks.service.ts file as part of larger functions that need to fetch a comic book by id,
  * possibly could be deprecated in favor of the more flexible function
  */
@@ -418,7 +480,7 @@ export const getComicBookByFilePath = async (
       .where(
         eq(comicBooksTable.filePath, filePath),
       );
-    
+
     return result.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error fetching comic book by file path:", error);
