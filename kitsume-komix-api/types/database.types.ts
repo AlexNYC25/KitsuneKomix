@@ -58,7 +58,9 @@ export type NewComicBookHistory = InferInsertModel<
   typeof comicBookHistoryTable
 >;
 
-export type ComicBookThumbnail = InferSelectModel<typeof comicBookThumbnailsTable>;
+export type ComicBookThumbnail = InferSelectModel<
+  typeof comicBookThumbnailsTable
+>;
 export type NewComicBookThumbnail = InferInsertModel<
   typeof comicBookThumbnailsTable
 >;

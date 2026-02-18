@@ -17,7 +17,7 @@ export const ParamIdSchema = z.object({
 
 /**
  * Schema specifically for use when request a specific page of a comic stream
- * 
+ *
  * Combines the 'id' and 'page' path parameters into a single schema.
  */
 export const ParamIdStreamPageSchema = ParamIdSchema.extend({
@@ -41,20 +41,21 @@ export const ParamLetterSchema = z.object({
 
 /**
  * Schema for image file path parameter
- * 
+ *
  * Used in routes that retrieve image files by path, supporting subdirectories
  */
 export const ParamImagePathSchema = z.object({
   imagePath: z.string().openapi({
     param: { name: "imagePath", in: "path" },
     description: "The path to the image file (can include subdirectories)",
-    example: "daa25f429c0da574fddec515c0aefb581d7079afa2c55dae7a07955800152ef7_thumb.jpg",
+    example:
+      "daa25f429c0da574fddec515c0aefb581d7079afa2c55dae7a07955800152ef7_thumb.jpg",
   }),
 });
 
 /**
  * Schema for comic book page image path parameters
- * 
+ *
  * Extends ParamImagePathSchema with comicId for retrieving specific comic pages
  */
 export const ParamComicPageImageSchema = ParamImagePathSchema.extend({
@@ -64,7 +65,6 @@ export const ParamComicPageImageSchema = ParamImagePathSchema.extend({
     example: "42",
   }),
 });
-
 
 /**
  * Common schema for pagination query parameters
@@ -79,12 +79,12 @@ export const PaginationQuerySchema = z.object({
   pageSize: z.coerce.number().min(1).max(100).default(20).openapi({
     description: "Number of items per page (default is 20, max is 100)",
     example: 20,
-  })
+  }),
 });
 
 /**
  * Common schema for sort query parameters
- * 
+ *
  * Used as part of pagination schemas for routes that support sorting.
  */
 const SortQuerySchema = z.object({
@@ -100,7 +100,7 @@ const SortQuerySchema = z.object({
 
 /**
  * Common schema for filter query parameters
- * 
+ *
  * Used as part of pagination schemas for routes that support filtering.
  */
 const FilterQuerySchema = z.object({
@@ -116,25 +116,30 @@ const FilterQuerySchema = z.object({
 
 /**
  * Common schema for pagination query parameters with sorting
- * 
+ *
  * Used in routes that support pagination and sorting.
  */
-export const PaginationSortQuerySchema = PaginationQuerySchema.extend(SortQuerySchema.shape);
-
+export const PaginationSortQuerySchema = PaginationQuerySchema.extend(
+  SortQuerySchema.shape,
+);
 
 /**
  * Common schema for pagination query parameters with filtering
- * 
+ *
  * Used in routes that support pagination and filtering.
  */
-export const PaginationFilterQuerySchema = PaginationQuerySchema.extend(FilterQuerySchema.shape);
+export const PaginationFilterQuerySchema = PaginationQuerySchema.extend(
+  FilterQuerySchema.shape,
+);
 
 /**
  * Common schema for pagination query parameters with letter filtering
- * 
+ *
  * Used in routes that support pagination and filtering by first letter.
  */
-export const PaginationLetterQuerySchema = PaginationQuerySchema.extend(ParamLetterSchema.shape);
+export const PaginationLetterQuerySchema = PaginationQuerySchema.extend(
+  ParamLetterSchema.shape,
+);
 
 /**
  * Common schema for pagination query parameters with sorting and filtering
@@ -143,12 +148,12 @@ export const PaginationLetterQuerySchema = PaginationQuerySchema.extend(ParamLet
  * Combines pagination, sort, and filter parameters into a single schema.
  */
 export const PaginationSortFilterQuerySchema = PaginationQuerySchema
-	.extend(SortQuerySchema.shape)
-	.extend(FilterQuerySchema.shape);
+  .extend(SortQuerySchema.shape)
+  .extend(FilterQuerySchema.shape);
 
 /**
  * Schema for comic metadata updates in request body
- * 
+ *
  * Used in routes that update comic metadata for single or multiple comic books.
  */
 const ComicMetadataUpdateSchema = metadataUpdateSchema.array().openapi({
@@ -158,12 +163,12 @@ const ComicMetadataUpdateSchema = metadataUpdateSchema.array().openapi({
 
 /**
  * Schema for updating comic metadata for a single comic book
- * 
+ *
  * Used in routes that update metadata for a single comic book.
  */
 export const ComicMetadataSingleUpdateSchema = z.object({
   metadataUpdates: ComicMetadataUpdateSchema,
-  comicBookId: ParamIdSchema
+  comicBookId: ParamIdSchema,
 }).openapi({
   title: "ComicMetadataSingleUpdate",
   description: "Schema for updating metadata for a single comic book",
@@ -171,7 +176,7 @@ export const ComicMetadataSingleUpdateSchema = z.object({
 
 /**
  * Schema for updating comic metadata for multiple comic books
- * 
+ *
  * Used in routes that update metadata for multiple comic books.
  */
 export const ComicMetadataBulkUpdateSchema = z.object({
@@ -202,7 +207,6 @@ export const AddCollectionSchema = z.object({
     example: "My Collection",
   }),
 });
-
 
 // Schema for updating comic book partial fields in request body
 export const ComicBookUpdateSchema = z.object({
@@ -247,7 +251,7 @@ export const UserSchema = z.object({
 
 /**
  * Schema for creating a custom thumbnail for a comic book
- * 
+ *
  * Expects a multipart form data request with:
  * - image: The image file (JPEG, PNG, WebP)
  * - name: Optional name for the thumbnail

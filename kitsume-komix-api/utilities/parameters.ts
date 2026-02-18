@@ -1,25 +1,23 @@
 import {
-	RequestPaginationParametersValidated,
-	QueryData,
+  ComicFilterField,
+  ComicReadlistsFilterField,
+  ComicReadlistsSortField,
+  ComicSeriesFilterField,
+  ComicSeriesSortField,
+  ComicSortField,
+  QueryData,
+  RequestPaginationParametersValidated,
   RequestParametersValidated,
   SortOrder,
-	ComicSortField,
-	ComicFilterField,
-	ComicSeriesSortField,
-	ComicSeriesFilterField,
-	ComicReadlistsSortField,
-	ComicReadlistsFilterField,
 } from "#types/index.ts";
 
 import {
-	PAGE_SIZE_DEFAULT, 
-	PAGE_NUMBER_DEFAULT,
-	FILTER_SORT_DEFAULT
+  FILTER_SORT_DEFAULT,
+  PAGE_NUMBER_DEFAULT,
+  PAGE_SIZE_DEFAULT,
 } from "../utilities/constants.ts";
 
 import { QueryableColumns } from "../constants/index.ts";
-
-
 
 // ============================================================================
 // PARAMETER VALIDATION FUNCTIONS
@@ -32,13 +30,13 @@ import { QueryableColumns } from "../constants/index.ts";
  * @returns Validated pagination parameters with defaults applied
  */
 export const validatePagination = (
-	page?: number,
-	pageSize?: number,
+  page?: number,
+  pageSize?: number,
 ): RequestPaginationParametersValidated => {
-	const validPageNumber = page && page > 0 ? page : PAGE_NUMBER_DEFAULT;
-	const validPageSize = pageSize && pageSize > 0 ? pageSize : PAGE_SIZE_DEFAULT;
+  const validPageNumber = page && page > 0 ? page : PAGE_NUMBER_DEFAULT;
+  const validPageSize = pageSize && pageSize > 0 ? pageSize : PAGE_SIZE_DEFAULT;
 
-	return { pageNumber: validPageNumber, pageSize: validPageSize };
+  return { pageNumber: validPageNumber, pageSize: validPageSize };
 };
 
 /**
@@ -50,25 +48,27 @@ export const validatePagination = (
  * @returns Validated sort property and order
  */
 const validateSort = (
-	sortProperty: string | undefined,
-	sortDirection: "asc" | "desc" | undefined,
-	allowedSortFields: string[],
-	defaultSort: string,
+  sortProperty: string | undefined,
+  sortDirection: "asc" | "desc" | undefined,
+  allowedSortFields: string[],
+  defaultSort: string,
 ): { sortProperty: string; sortOrder: SortOrder } => {
-	// Validate sort property is in allowed list
-	const validSortProperty = sortProperty && allowedSortFields.includes(sortProperty)
-		? sortProperty
-		: defaultSort;
+  // Validate sort property is in allowed list
+  const validSortProperty =
+    sortProperty && allowedSortFields.includes(sortProperty)
+      ? sortProperty
+      : defaultSort;
 
-	// Validate sort order is asc or desc
-	const validSortOrder: SortOrder = (sortDirection === "asc" || sortDirection === "desc")
-		? sortDirection
-		: FILTER_SORT_DEFAULT as SortOrder;
+  // Validate sort order is asc or desc
+  const validSortOrder: SortOrder =
+    (sortDirection === "asc" || sortDirection === "desc")
+      ? sortDirection
+      : FILTER_SORT_DEFAULT as SortOrder;
 
-	return {
-		sortProperty: validSortProperty,
-		sortOrder: validSortOrder,
-	};
+  return {
+    sortProperty: validSortProperty,
+    sortOrder: validSortOrder,
+  };
 };
 
 /**
@@ -79,26 +79,25 @@ const validateSort = (
  * @returns Validated filter property and value, or undefined if invalid
  */
 const validateFilter = (
-	filterProperty: string | undefined,
-	filterValue: string | undefined,
-	allowedFilterFields: string[],
+  filterProperty: string | undefined,
+  filterValue: string | undefined,
+  allowedFilterFields: string[],
 ): { filterProperty: string; filterValue: string } | undefined => {
-	// Both property and value must be present
-	if (!filterProperty || !filterValue) {
-		return undefined;
-	}
+  // Both property and value must be present
+  if (!filterProperty || !filterValue) {
+    return undefined;
+  }
 
-	// Property must be in allowed list
-	if (!allowedFilterFields.includes(filterProperty)) {
-		return undefined;
-	}
+  // Property must be in allowed list
+  if (!allowedFilterFields.includes(filterProperty)) {
+    return undefined;
+  }
 
-	return {
-		filterProperty,
-		filterValue: filterValue.trim(),
-	};
+  return {
+    filterProperty,
+    filterValue: filterValue.trim(),
+  };
 };
-
 
 // ============================================================================
 // MAIN PARAMETER BUILDER - FUNCTION OVERLOADS
@@ -110,81 +109,84 @@ const validateFilter = (
  */
 
 export function validateAndBuildQueryParams(
-	queryData: QueryData,
-	dataType: "comics"
+  queryData: QueryData,
+  dataType: "comics",
 ): RequestParametersValidated<ComicSortField, ComicFilterField>;
 
 export function validateAndBuildQueryParams(
-	queryData: QueryData,
-	dataType: "comicSeries"
+  queryData: QueryData,
+  dataType: "comicSeries",
 ): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
 
 export function validateAndBuildQueryParams(
-	queryData: QueryData,
-	dataType: "comicReadlists"
-): RequestParametersValidated<ComicReadlistsSortField, ComicReadlistsFilterField>;
+  queryData: QueryData,
+  dataType: "comicReadlists",
+): RequestParametersValidated<
+  ComicReadlistsSortField,
+  ComicReadlistsFilterField
+>;
 
 export function validateAndBuildQueryParams(
-	queryData: QueryData,
-	dataType: keyof typeof QueryableColumns
+  queryData: QueryData,
+  dataType: keyof typeof QueryableColumns,
 ): RequestParametersValidated<string, string>;
 
 /**
  * Validates and builds query parameters from raw request query data.
- * 
+ *
  * This function handles:
  * - Pagination validation (page, pageSize)
  * - Sort validation (ensures sortProperty is in allowed columns)
  * - Filter validation (ensures filterProperty is in allowed columns)
- * 
+ *
  * Returns a RequestParametersValidated object ready to pass to service functions.
  * The return type is specific to the data type requested, providing full type safety.
- * 
+ *
  * @param queryData The raw query data from the request (verified with Zod)
  * @param dataType The type of data being queried ("comics", "series", etc.)
  * @returns RequestParametersValidated with type-specific sort and filter fields
  * @throws Error if dataType is not recognized in QueryableColumns
- * 
+ *
  * @example
  * const params = validateAndBuildQueryParams(queryData, "comics");
  * // params is now: RequestParametersValidated<ComicSortField, ComicFilterField>
  * // Can safely pass to service functions
  */
 export function validateAndBuildQueryParams(
-	queryData: QueryData,
-	dataType: keyof typeof QueryableColumns,
+  queryData: QueryData,
+  dataType: keyof typeof QueryableColumns,
 ): RequestParametersValidated<string, string> {
-	// Get the queryable columns for this data type
-	const columnConfig = QueryableColumns[dataType];
+  // Get the queryable columns for this data type
+  const columnConfig = QueryableColumns[dataType];
 
-	if (!columnConfig) {
-		throw new Error(`Unknown data type: ${dataType}`);
-	}
+  if (!columnConfig) {
+    throw new Error(`Unknown data type: ${dataType}`);
+  }
 
-	// Extract allowed columns
-	const allowedSortFields = Object.values(columnConfig.sort);
-	const allowedFilterFields = Object.values(columnConfig.filter);
+  // Extract allowed columns
+  const allowedSortFields = Object.values(columnConfig.sort);
+  const allowedFilterFields = Object.values(columnConfig.filter);
 
-	// Validate and build each parameter set
-	const pagination = validatePagination(queryData.page, queryData.pageSize);
+  // Validate and build each parameter set
+  const pagination = validatePagination(queryData.page, queryData.pageSize);
 
-	const sort = validateSort(
-		queryData.sort,
-		queryData.sortDirection,
-		allowedSortFields,
-		allowedSortFields[0] || "createdAt", // Use first allowed field as default
-	);
+  const sort = validateSort(
+    queryData.sort,
+    queryData.sortDirection,
+    allowedSortFields,
+    allowedSortFields[0] || "createdAt", // Use first allowed field as default
+  );
 
-	const filter = validateFilter(
-		queryData.filterProperty,
-		queryData.filter,
-		allowedFilterFields,
-	);
+  const filter = validateFilter(
+    queryData.filterProperty,
+    queryData.filter,
+    allowedFilterFields,
+  );
 
-	// Return the validated parameters object
-	return {
-		pagination,
-		sort,
-		filter,
-	};
+  // Return the validated parameters object
+  return {
+    pagination,
+    sort,
+    filter,
+  };
 }

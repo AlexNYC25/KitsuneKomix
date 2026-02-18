@@ -1,13 +1,10 @@
 import { z } from "@hono/zod-openapi";
 
-import { 
-  AuthRefreshToken,
-  AuthAccessToken
-} from "./data/auth.schema.ts";
-import { 
-  ComicStoryArcSelectSchema, 
-  ComicBookThumbnailSelectSchema, 
-  ComicPageSelectSchema 
+import { AuthAccessToken, AuthRefreshToken } from "./data/auth.schema.ts";
+import {
+  ComicBookThumbnailSelectSchema,
+  ComicPageSelectSchema,
+  ComicStoryArcSelectSchema,
 } from "./data/database.schema.ts";
 import { ComicBookSchema } from "./data/comicBooks.schema.ts";
 import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
@@ -44,15 +41,14 @@ export const SuccessResponseSchema = z.object({
   description: "A response indicating success or failure",
 });
 
-/**
- * 
- */
+/** */
 export const SuccessCreationResponseSchema = z.object({
   success: z.boolean(),
   id: z.number().optional(),
 }).openapi({
   title: "SuccessCreationResponse",
-  description: "A response indicating success of a creation operation, optionally including the ID of the created resource",
+  description:
+    "A response indicating success of a creation operation, optionally including the ID of the created resource",
 });
 
 // **** Modular schemas **** //
@@ -120,7 +116,8 @@ const BasicUserInfoSchema = z.object({
  */
 export const ComicSeriesMultipleResponseSchema = z.object({
   data: z.array(ComicSeriesSchema),
-  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
+  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape)
+    .extend(SortMetaSchema.shape),
 }).openapi({
   title: "ComicSeriesMultipleResponse",
   description: "Response containing paginated comic series data",
@@ -131,7 +128,8 @@ export const ComicSeriesMultipleResponseSchema = z.object({
  */
 export const ComicBookMultipleResponseSchema = z.object({
   data: z.array(ComicBookSchema),
-  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
+  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape)
+    .extend(SortMetaSchema.shape),
 }).openapi({
   title: "ComicBookMultipleResponse",
   description: "Response containing multiple comic books",
@@ -142,7 +140,8 @@ export const ComicBookMultipleResponseSchema = z.object({
  */
 export const ComicStoryArcMultipleResponseSchema = z.object({
   data: z.array(ComicStoryArcSelectSchema),
-  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape).extend(SortMetaSchema.shape),
+  meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape)
+    .extend(SortMetaSchema.shape),
 }).openapi({
   title: "ComicStoryArcMultipleResponse",
   description: "Response containing multiple comic story arcs",
@@ -156,7 +155,8 @@ export const ComicBookReadListsResponseSchema = z.object({
   readLists: z.array(ComicStoryArcSelectSchema),
 }).openapi({
   title: "ComicBookReadListsResponse",
-  description: "Response containing readlists that include a specific comic book",
+  description:
+    "Response containing readlists that include a specific comic book",
 });
 
 /**
@@ -184,7 +184,9 @@ export const ComicBookReadByUserResponseSchema = z.object({
 /**
  * Schema for bulk update response with results summary including total updated, total requested, and success status
  */
-export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResultsSchema.shape).openapi({
+export const BulkUpdateResponseSchema = MessageResponseSchema.extend(
+  UpdatedResultsSchema.shape,
+).openapi({
   title: "BulkUpdateResponse",
   description: "Response for bulk update operations with results summary",
 });
@@ -196,19 +198,20 @@ export const BulkUpdateResponseSchema = MessageResponseSchema.extend(UpdatedResu
 export const FileDownloadResponseSchema = z.object({
   fileName: z.string().openapi({
     description: "The name of the file being downloaded",
-    example: "comic_book.cbz"
+    example: "comic_book.cbz",
   }),
   contentType: z.string().openapi({
     description: "The MIME type of the file",
-    example: "application/octet-stream"
+    example: "application/octet-stream",
   }),
   contentLength: z.number().openapi({
     description: "The size of the file in bytes",
-    example: 5242880
+    example: 5242880,
   }),
 }).openapi({
   title: "FileDownloadResponse",
-  description: "Response metadata for file downloads containing file information and headers",
+  description:
+    "Response metadata for file downloads containing file information and headers",
 });
 
 /**
@@ -218,23 +221,23 @@ export const FileDownloadResponseSchema = z.object({
 export const ComicBookStreamingResponseSchema = z.object({
   comicId: z.number().openapi({
     description: "The ID of the comic book being streamed",
-    example: 1
+    example: 1,
   }),
   pagePath: z.string().openapi({
     description: "The file path to the current page image",
-    example: "/path/to/page/image.png"
+    example: "/path/to/page/image.png",
   }),
   pageNumber: z.number().openapi({
     description: "The current page number being streamed",
-    example: 1
+    example: 1,
   }),
   format: z.string().openapi({
     description: "The image format of the page",
-    example: "image/png"
+    example: "image/png",
   }),
   cached: z.boolean().openapi({
     description: "Whether the page is cached locally",
-    example: true
+    example: true,
   }),
 }).openapi({
   title: "ComicBookStreamingResponse",
@@ -247,15 +250,15 @@ export const ComicBookStreamingResponseSchema = z.object({
 export const ComicBookPagesInfoResponseSchema = z.object({
   comicId: z.number().openapi({
     description: "The ID of the comic book",
-    example: 1
+    example: 1,
   }),
   totalPages: z.number().openapi({
     description: "The total number of pages in the comic book",
-    example: 100
+    example: 100,
   }),
   pagesInDb: z.number().openapi({
     description: "The number of pages currently stored in the database",
-    example: 80
+    example: 80,
   }),
   pages: z.array(ComicPageSelectSchema).openapi({
     description: "An array of comic pages",
@@ -300,7 +303,8 @@ export const LogoutAllResponseSchema = z.object({
   revokedTokens: z.number().openapi({ example: 3 }),
 }).openapi({
   title: "LogoutAllResponse",
-  description: "Response for logging out from all devices, including the number of revoked tokens",
+  description:
+    "Response for logging out from all devices, including the number of revoked tokens",
 });
 
 /**
@@ -338,5 +342,6 @@ export const UserCreationResponseSchema = z.object({
   userId: z.number(),
 }).openapi({
   title: "UserCreationResponse",
-  description: "Response for successful user creation containing a message and the new user's ID",
+  description:
+    "Response for successful user creation containing a message and the new user's ID",
 });

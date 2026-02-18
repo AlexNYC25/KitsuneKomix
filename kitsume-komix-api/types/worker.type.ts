@@ -1,7 +1,6 @@
-
 export type WorkerJob = {
-	data: {
-		filePath: string;
-		metadata: object;
-	}
-}
+  data: {
+    filePath: string;
+    metadata: object;
+  };
+};

@@ -1,23 +1,22 @@
 import { z } from "@hono/zod-openapi";
 
 import {
-  ComicWriterSelectSchema,
-  ComicPencillerSelectSchema,
-  ComicInkerSelectSchema,
-  ComicColoristSelectSchema,
-  ComicLettererSelectSchema,
-  ComicEditorSelectSchema,
-  ComicCoverArtistSelectSchema,
-  ComicPublisherSelectSchema,
-  ComicImprintSelectSchema,
-  ComicGenreSelectSchema,
   ComicCharacterSelectSchema,
-  ComicTeamSelectSchema,
+  ComicColoristSelectSchema,
+  ComicCoverArtistSelectSchema,
+  ComicEditorSelectSchema,
+  ComicGenreSelectSchema,
+  ComicImprintSelectSchema,
+  ComicInkerSelectSchema,
+  ComicLettererSelectSchema,
   ComicLocationSelectSchema,
-  ComicStoryArcSelectSchema,
+  ComicPencillerSelectSchema,
+  ComicPublisherSelectSchema,
   ComicSeriesGroupSelectSchema,
+  ComicStoryArcSelectSchema,
+  ComicTeamSelectSchema,
+  ComicWriterSelectSchema,
 } from "./database.schema.ts";
-
 
 export const metadataUpdateSchema = z.object({
   metadataType: z.string(),
@@ -30,10 +29,10 @@ export const metadataUpdateSchema = z.object({
 
 /**
  * Schema for comic series metadata
- * 
+ *
  * Includes various optional fields for comic series information from the various
  * metadata categories from their respective databases tables.
- * 
+ *
  * Note: At this point the metadata rows are read and parsed for the name/publisher/arc name and stored as comma-separated strings in the metadata fields of the comic series. This is to avoid the complexity of joining with multiple metadata tables for each category and instead just have a single metadata field that can be easily queried and updated. In the future, if we want to support more complex querying and updating of metadata, we can consider normalizing the metadata into separate tables and joining them with the comic series table.
  */
 export const MetadataSchema = z.object({

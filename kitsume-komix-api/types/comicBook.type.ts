@@ -37,15 +37,17 @@ export type ComicBookMetadataOnly = {
   locations?: ComicLocation[];
   storyArcs?: ComicStoryArc[];
   seriesGroups?: ComicSeriesGroup[];
-}
+};
 
 export type ComicBookWithMetadata = ComicBook & ComicBookMetadataOnly;
 
 import { QueryableColumns } from "../constants/index.ts";
 
-export type AllowedFilterProperties = keyof typeof QueryableColumns["comics"]["filter"];
+export type AllowedFilterProperties =
+  keyof typeof QueryableColumns["comics"]["filter"];
 
-export type AllowedSortProperties = keyof typeof QueryableColumns["comics"]["sort"];
+export type AllowedSortProperties =
+  keyof typeof QueryableColumns["comics"]["sort"];
 
 // Filter types for advanced comic book querying
 export type ComicBookFilterItem = {
@@ -69,7 +71,7 @@ export type ComicBookStreamingServiceData = {
   pageNumber: number;
   acceptHeader: string | null;
   preloadPagesNumber: number;
-}
+};
 
 export type ComicBookStreamingServiceResult = {
   comicId: number;

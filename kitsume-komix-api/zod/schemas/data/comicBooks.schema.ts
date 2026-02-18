@@ -1,6 +1,9 @@
 import { z } from "@hono/zod-openapi";
 
-import { ComicBookSelectSchema, ComicBookThumbnailSelectSchema } from "./database.schema.ts";
+import {
+  ComicBookSelectSchema,
+  ComicBookThumbnailSelectSchema,
+} from "./database.schema.ts";
 import { MetadataSchema } from "./comicMetadata.schema.ts";
 
 /**
@@ -12,5 +15,6 @@ export const ComicBookSchema: z.ZodObject = ComicBookSelectSchema.extend({
   thumbnails: z.array(ComicBookThumbnailSelectSchema).optional(),
 }).openapi({
   title: "ComicBook",
-  description: "Schema representing a comic book, including optional metadata and thumbnails",
+  description:
+    "Schema representing a comic book, including optional metadata and thumbnails",
 });
