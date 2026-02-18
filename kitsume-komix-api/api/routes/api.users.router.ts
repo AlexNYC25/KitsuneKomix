@@ -8,14 +8,22 @@ import {
   deleteUserService,
 } from "../services/users.service.ts";
 
-import { UserSchema, ParamUserLibraryIdSchema, ParamIdSchema } from "#schemas/request.schema.ts";
+import {
+  ParamIdSchema,
+  ParamUserLibraryIdSchema,
+  UserSchema,
+} from "#schemas/request.schema.ts";
 import { AuthHeaderSchema } from "#schemas/header.schema.ts";
-import { ErrorResponseSchema, MessageResponseSchema, UserCreationResponseSchema } from "#schemas/response.schema.ts";
+import {
+  ErrorResponseSchema,
+  MessageResponseSchema,
+  UserCreationResponseSchema,
+} from "#schemas/response.schema.ts";
 
-import { 
-  AccessRefreshTokenCombinedPayload, 
-  AppEnv, 
-  UserRegistrationInput 
+import {
+  AccessRefreshTokenCombinedPayload,
+  AppEnv,
+  UserRegistrationInput,
 } from "#types/index.ts";
 
 const apiUsersRouter = new OpenAPIHono<AppEnv>();
@@ -48,7 +56,7 @@ apiUsersRouter.openapi(
         description: "User created successfully",
         content: {
           "application/json": {
-            schema: UserCreationResponseSchema
+            schema: UserCreationResponseSchema,
           },
         },
       },
@@ -56,7 +64,7 @@ apiUsersRouter.openapi(
         description: "Invalid user data",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -92,7 +100,7 @@ apiUsersRouter.openapi(
       if (isNaN(userId)) {
         return c.json({ message: "Invalid user ID" }, 400);
       }
-      
+
       const parsed: ZodSafeParseResult<UserRegistrationInput> = UserSchema
         .safeParse(userData);
 
@@ -137,7 +145,7 @@ apiUsersRouter.openapi(
       body: {
         content: {
           "application/json": {
-            schema: ParamUserLibraryIdSchema
+            schema: ParamUserLibraryIdSchema,
           },
         },
       },
@@ -147,7 +155,7 @@ apiUsersRouter.openapi(
         description: "Library assigned successfully",
         content: {
           "application/json": {
-            schema: MessageResponseSchema
+            schema: MessageResponseSchema,
           },
         },
       },
@@ -155,7 +163,7 @@ apiUsersRouter.openapi(
         description: "Invalid request data",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -163,7 +171,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -171,7 +179,7 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -232,7 +240,7 @@ apiUsersRouter.openapi(
         description: "Library assigned successfully",
         content: {
           "application/json": {
-            schema: MessageResponseSchema
+            schema: MessageResponseSchema,
           },
         },
       },
@@ -240,7 +248,7 @@ apiUsersRouter.openapi(
         description: "Invalid request data",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -248,7 +256,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -256,7 +264,7 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -312,7 +320,7 @@ apiUsersRouter.openapi(
         description: "User deleted successfully",
         content: {
           "application/json": {
-            schema: MessageResponseSchema
+            schema: MessageResponseSchema,
           },
         },
       },
@@ -320,7 +328,7 @@ apiUsersRouter.openapi(
         description: "Invalid user ID",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -328,7 +336,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -336,7 +344,7 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -388,7 +396,7 @@ apiUsersRouter.openapi(
         description: "User deleted successfully",
         content: {
           "application/json": {
-            schema: MessageResponseSchema
+            schema: MessageResponseSchema,
           },
         },
       },
@@ -396,7 +404,7 @@ apiUsersRouter.openapi(
         description: "Invalid user ID",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -404,7 +412,7 @@ apiUsersRouter.openapi(
         description: "Unauthorized",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -412,7 +420,7 @@ apiUsersRouter.openapi(
         description: "Internal server error",
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
       },
@@ -430,7 +438,7 @@ apiUsersRouter.openapi(
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
-    
+
     const deleteUserId = parseInt(paramId, 10);
 
     if (isNaN(deleteUserId) || deleteUserId <= 0) {

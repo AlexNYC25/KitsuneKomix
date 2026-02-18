@@ -3,27 +3,25 @@ import camelcasekeys from "camelcase-keys";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
-
 import { fetchComicStoryArcs } from "../services/comicStoryArcs.service.ts";
-import { 
+import {
   ComicStoryArcMultipleResponseSchema,
-  MessageResponseSchema,
   ErrorResponseSchema,
+  MessageResponseSchema,
   ReadlistsResponseSchema,
 } from "#schemas/response.schema.ts";
-import { 
-  ParamIdSchema,
+import {
   AddReadlistSchema,
   PaginationSortFilterQuerySchema,
   ParamComicBookIdSchema,
+  ParamIdSchema,
 } from "#schemas/request.schema.ts";
 
-import type { 
-  AppEnv, 
-  QueryData,
+import type {
   AccessRefreshTokenCombinedPayload,
+  AppEnv,
+  QueryData,
 } from "#types/index.ts";
-
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -72,7 +70,7 @@ app.openapi(
           },
         },
         description: "Unauthorized",
-      },  
+      },
       500: {
         content: {
           "application/json": {
@@ -82,9 +80,10 @@ app.openapi(
         description: "Internal Server Error",
       },
     },
-  }), async (c) => {
+  }),
+  async (c) => {
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    
+
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
@@ -114,7 +113,6 @@ app.openapi(
       sortOrder: query.sortDirection,
     };
     */
-  
 
     //const readlists = await fetchAllComicStoryArcs(paginationParams, filterParams, sortParams);
 
@@ -128,7 +126,7 @@ app.openapi(
     }
 
     return c.json(camelcasekeys(readlists, { deep: true }), 200);
-  }
+  },
 );
 
 /**
@@ -168,7 +166,7 @@ app.openapi(
           },
         },
         description: "Unauthorized",
-      },  
+      },
       500: {
         content: {
           "application/json": {
@@ -178,11 +176,12 @@ app.openapi(
         description: "Internal Server Error",
       },
     },
-  }), (c) => {
+  }),
+  (c) => {
     const { id } = c.req.valid("param");
 
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    
+
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
@@ -192,11 +191,10 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-
     //TODO: implement readlist retrieval logic
     const readlist = { id, name: "Default Readlist" };
     return c.json(readlist, 200);
-  }
+  },
 );
 
 /**
@@ -218,10 +216,11 @@ app.openapi(
         description: "Not implemented",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     //TODO: implement readlist deletion logic
     return _c.json({ message: "Readlist deletion not implemented yet" }, 501);
-  }
+  },
 );
 
 /**
@@ -239,33 +238,34 @@ app.openapi(
     request: { params: ParamIdSchema },
     responses: {
       400: {
-        content: { 
-          "application/json": { 
-            schema: ErrorResponseSchema
-          }
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
         },
         description: "Invalid readlist ID",
       },
       401: {
-        content: { 
-          "application/json": { 
-            schema: ErrorResponseSchema 
-          } 
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
         },
         description: "Unauthorized",
       },
       501: {
-        content: { 
-          "application/json": { 
-            schema: MessageResponseSchema 
-          } 
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
         },
         description: "Not implemented",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     const user: AccessRefreshTokenCombinedPayload | undefined = _c.get("user");
-    
+
     if (!user || !user.sub) {
       return _c.json({ message: "Unauthorized" }, 401);
     }
@@ -275,15 +275,14 @@ app.openapi(
       return _c.json({ message: "Invalid user ID" }, 400);
     }
 
-
     //TODO: implement readlist download logic
     return _c.json({ message: "Readlist download not implemented yet" }, 501);
-  }
+  },
 );
 
 /**
  * POST /api/readlists/add-readlist
- * 
+ *
  * Add a new readlist.
  */
 app.openapi(
@@ -304,35 +303,36 @@ app.openapi(
     },
     responses: {
       400: {
-        content: { 
-          "application/json": { 
-            schema: ErrorResponseSchema 
-          } 
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
         },
         description: "Invalid request body",
       },
       401: {
-        content: { 
-          "application/json": { 
-            schema: ErrorResponseSchema 
-          } 
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
         },
         description: "Unauthorized",
       },
       501: {
-        content: { 
-          "application/json": { 
-            schema: MessageResponseSchema 
-          } 
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
         },
         description: "Not implemented",
       },
     },
-  }), (c) => {
+  }),
+  (c) => {
     const body = c.req.valid("json");
 
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    
+
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
@@ -351,7 +351,7 @@ app.openapi(
     }
     //TODO: implement readlist addition logic
     return c.json({ message: "Readlist addition not implemented yet" }, 501);
-  }
+  },
 );
 
 /**
@@ -391,17 +391,18 @@ app.openapi(
           },
         },
         description: "Unauthorized",
-      },  
+      },
       501: {
         content: { "application/json": { schema: MessageResponseSchema } },
         description: "Not implemented",
       },
     },
-  }), (c) => {
+  }),
+  (c) => {
     const { comicBookId } = c.req.valid("param");
 
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    
+
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
     }
@@ -412,11 +413,13 @@ app.openapi(
     }
 
     return c.json(
-      { message: `Readlists for comic book ID ${comicBookId} not implemented yet` },
+      {
+        message:
+          `Readlists for comic book ID ${comicBookId} not implemented yet`,
+      },
       501,
     );
-  }
+  },
 );
-
 
 export default app;

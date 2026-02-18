@@ -4,9 +4,18 @@ import { existsSync } from "@std/fs";
 import { join } from "@std/path";
 import { requireAuth } from "../middleware/authChecks.ts";
 
-import type { AppEnv, AccessRefreshTokenCombinedPayload } from "#types/index.ts";
-import { ErrorResponseSchema, ImageResponseSchema } from "#schemas/response.schema.ts";
-import { ParamImagePathSchema, ParamComicPageImageSchema } from "#schemas/request.schema.ts";
+import type {
+  AccessRefreshTokenCombinedPayload,
+  AppEnv,
+} from "#types/index.ts";
+import {
+  ErrorResponseSchema,
+  ImageResponseSchema,
+} from "#schemas/response.schema.ts";
+import {
+  ParamComicPageImageSchema,
+  ParamImagePathSchema,
+} from "#schemas/request.schema.ts";
 
 const imageRouter = new OpenAPIHono<AppEnv>();
 
@@ -93,7 +102,11 @@ imageRouter.openapi(
       const { imagePath }: { imagePath: string } = c.req.valid("param");
 
       // Construct the full thumbnail path
-      const thumbnailPath: string = join(CACHE_DIRECTORY, "thumbnails", imagePath);
+      const thumbnailPath: string = join(
+        CACHE_DIRECTORY,
+        "thumbnails",
+        imagePath,
+      );
 
       apiLogger.info(`Attempting to serve thumbnail: ${thumbnailPath}`);
 
@@ -207,10 +220,16 @@ imageRouter.openapi(
     }
 
     try {
-      const { comicId, imagePath }: { comicId: string; imagePath: string } = c.req.valid("param");
+      const { comicId, imagePath }: { comicId: string; imagePath: string } = c
+        .req.valid("param");
 
       // Construct the full page image path: cache/pages/{comicId}/{imagePath}
-      const pagePath: string = join(CACHE_DIRECTORY, "pages", comicId, imagePath);
+      const pagePath: string = join(
+        CACHE_DIRECTORY,
+        "pages",
+        comicId,
+        imagePath,
+      );
 
       apiLogger.info(`Attempting to serve comic page: ${pagePath}`);
 

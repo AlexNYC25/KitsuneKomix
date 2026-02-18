@@ -1,91 +1,90 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { basename } from "@std/path";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
 import {
-  fetchComicBooksWithRelatedMetadata,
-  fetchAComicsAssociatedMetadataById,
-  fetchRandomComicBook,
-  fetchComicDuplicatesInTheDb,
-  getComicPagesInfo,
-  getTheReadlistsContainingComicBook,
   checkComicReadByUser,
-  setComicReadByUser,
-  getNextComicBookId,
-  getPreviousComicBookId,
-  getComicThumbnailByComicIdThumbnailId,
-  getComicThumbnails,
   createCustomThumbnail,
   deleteComicsThumbnailById,
+  fetchAComicsAssociatedMetadataById,
+  fetchComicBooksWithRelatedMetadata,
+  fetchComicDuplicatesInTheDb,
+  fetchRandomComicBook,
+  getComicPagesInfo,
+  getComicThumbnailByComicIdThumbnailId,
+  getComicThumbnails,
+  getNextComicBookId,
+  getPreviousComicBookId,
+  getTheReadlistsContainingComicBook,
+  processComicBookDeletion,
+  setComicReadByUser,
   startStreamingComicBookFile,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
-  processComicBookDeletion,
 } from "../services/comicbooks.service.ts";
 
-import {
-  ComicBookSchema,
-} from "#schemas/data/comicBooks.schema.ts";
+import { ComicBookSchema } from "#schemas/data/comicBooks.schema.ts";
+
+import { MetadataExpandedSchema } from "#schemas/data/comicMetadata.schema.ts";
 
 import {
-  MetadataExpandedSchema
-} from "#schemas/data/comicMetadata.schema.ts";
-
-import {
-  SuccessResponseSchema,
-  ErrorResponseSchema,
-  ComicBookReadByUserResponseSchema,
-  ComicBookThumbnailsResponseSchema,
-  ComicBookMultipleResponseSchema,
-  ComicBookStreamingResponseSchema,
-  ComicBookPagesInfoResponseSchema,
-  ComicBookReadListsResponseSchema,
   BulkUpdateResponseSchema,
+  ComicBookMultipleResponseSchema,
+  ComicBookPagesInfoResponseSchema,
+  ComicBookReadByUserResponseSchema,
+  ComicBookReadListsResponseSchema,
+  ComicBookStreamingResponseSchema,
+  ComicBookThumbnailsResponseSchema,
+  ErrorResponseSchema,
   FileDownloadResponseSchema,
+  SuccessResponseSchema,
 } from "#schemas/response.schema.ts";
 
 import {
+  ComicMetadataBulkUpdateSchema,
+  ComicMetadataSingleUpdateSchema,
+  CreateCustomThumbnailSchema,
+  PaginationFilterQuerySchema,
+  PaginationLetterQuerySchema,
+  PaginationQuerySchema,
+  PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamIdStreamPageSchema,
   ParamIdThumbnailIdSchema,
-  PaginationQuerySchema,
-  PaginationSortFilterQuerySchema,
-  PaginationFilterQuerySchema,
-  PaginationLetterQuerySchema,
-  ComicMetadataSingleUpdateSchema,
-  ComicMetadataBulkUpdateSchema,
-  CreateCustomThumbnailSchema,
 } from "#schemas/request.schema.ts";
 
 import type {
-  AppEnv,
   AccessRefreshTokenCombinedPayload,
+  AppEnv,
   ComicBook,
-  ComicBookWithMetadata,
   ComicBookMetadataOnly,
-  ComicBookThumbnail,
-  ComicBookPagesInfo,
-  ComicBookStreamingServiceData,
-  ComicBookStreamingServiceResult,
   ComicBookMultipleResponse,
   ComicBookMultipleResponseData,
   ComicBookMultipleResponseMeta,
-  ComicStoryArc,
-  ComicSortField,
+  ComicBookPagesInfo,
+  ComicBookStreamingServiceData,
+  ComicBookStreamingServiceResult,
+  ComicBookThumbnail,
+  ComicBookWithMetadata,
   ComicFilterField,
-  ComicMetadataUpdateData,
   ComicMetadataBulkUpdateData,
   ComicMetadataSingleUpdateData,
-  RequestPaginationParametersValidated,
-  RequestFilterParametersValidated,
-  RequestSortParametersValidated,
-  RequestParametersValidated,
+  ComicMetadataUpdateData,
+  ComicSortField,
+  ComicStoryArc,
   QueryData,
   QueryDataWithLetter,
+  RequestFilterParametersValidated,
+  RequestPaginationParametersValidated,
+  RequestParametersValidated,
+  RequestSortParametersValidated,
 } from "#types/index.ts";
 
-import { validateAndBuildQueryParams, validatePagination } from "#utilities/parameters.ts";
+import {
+  validateAndBuildQueryParams,
+  validatePagination,
+} from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -105,7 +104,8 @@ app.openapi(
     method: "get",
     path: "/all",
     summary: "Get all comic books",
-    description: "Retrieve all comic books in the database with pagination, sorting, and filtering",
+    description:
+      "Retrieve all comic books in the database with pagination, sorting, and filtering",
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
@@ -115,7 +115,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicBookMultipleResponseSchema
+            schema: ComicBookMultipleResponseSchema,
           },
         },
         description: "Comic books retrieved successfully",
@@ -160,20 +160,31 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
+    const serviceData: RequestParametersValidated<
+      ComicSortField,
+      ComicFilterField
+    > = validateAndBuildQueryParams(queryData, "comics");
 
     try {
-      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
-        serviceData
-      );
+      const comics: ComicBookWithMetadata[] =
+        await fetchComicBooksWithRelatedMetadata(
+          serviceData,
+        );
 
-      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
-      const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = serviceData.filter;
-      const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
+      const serviceDataPagination: RequestPaginationParametersValidated =
+        serviceData.pagination;
+      const serviceDataFilter:
+        | RequestFilterParametersValidated<ComicFilterField>
+        | undefined = serviceData.filter;
+      const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
+        serviceData.sort;
 
       // Check if there's a next page
-      const hasNextPage: boolean = comics.length > serviceDataPagination.pageSize;
-      const resultComics: ComicBookMultipleResponseData = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
+      const hasNextPage: boolean =
+        comics.length > serviceDataPagination.pageSize;
+      const resultComics: ComicBookMultipleResponseData = hasNextPage
+        ? comics.slice(0, serviceDataPagination.pageSize)
+        : comics;
 
       const requestMetadata: ComicBookMultipleResponseMeta = {
         count: resultComics.length,
@@ -185,10 +196,10 @@ app.openapi(
         sortProperty: serviceDataSort.sortProperty,
         sortOrder: serviceDataSort.sortOrder,
       };
- 
+
       const returnObj: ComicBookMultipleResponse = {
         data: resultComics,
-        meta: requestMetadata
+        meta: requestMetadata,
       };
 
       return c.json(returnObj, 200);
@@ -196,7 +207,7 @@ app.openapi(
       console.error("API Route Error:", error);
       return c.json({ message: "Failed to fetch comic books" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -211,7 +222,8 @@ app.openapi(
     method: "get",
     path: "/latest",
     summary: "Get latest comic books",
-    description: "Retrieve the latest comic books added to the database, sorted by creation date in descending order",
+    description:
+      "Retrieve the latest comic books added to the database, sorted by creation date in descending order",
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
@@ -221,7 +233,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicBookMultipleResponseSchema
+            schema: ComicBookMultipleResponseSchema,
           },
         },
         description: "Latest comic books retrieved successfully",
@@ -267,19 +279,30 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
+    const serviceData: RequestParametersValidated<
+      ComicSortField,
+      ComicFilterField
+    > = validateAndBuildQueryParams(queryData, "comics");
 
     try {
-      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
-        serviceData
-      );
+      const comics: ComicBookWithMetadata[] =
+        await fetchComicBooksWithRelatedMetadata(
+          serviceData,
+        );
 
-      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
-      const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = serviceData.filter;
-      const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
+      const serviceDataPagination: RequestPaginationParametersValidated =
+        serviceData.pagination;
+      const serviceDataFilter:
+        | RequestFilterParametersValidated<ComicFilterField>
+        | undefined = serviceData.filter;
+      const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
+        serviceData.sort;
 
-      const hasNextPage: boolean = comics.length > serviceDataPagination.pageSize;
-      const resultComics: ComicBookWithMetadata[] = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
+      const hasNextPage: boolean =
+        comics.length > serviceDataPagination.pageSize;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage
+        ? comics.slice(0, serviceDataPagination.pageSize)
+        : comics;
 
       const requestMetadata: ComicBookMultipleResponseMeta = {
         count: resultComics.length,
@@ -291,10 +314,10 @@ app.openapi(
         sortProperty: serviceDataSort.sortProperty,
         sortOrder: serviceDataSort.sortOrder,
       };
- 
+
       const returnObj: ComicBookMultipleResponse = {
         data: resultComics,
-        meta: requestMetadata
+        meta: requestMetadata,
       };
 
       return c.json(returnObj, 200);
@@ -302,7 +325,7 @@ app.openapi(
       console.error("Error fetching latest comic books:", error);
       return c.json({ message: "Failed to fetch latest comic books" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -317,7 +340,8 @@ app.openapi(
     method: "get",
     path: "/newest",
     summary: "Get newest comic books",
-    description: "Retrieve the newest comic books sorted by publication date in descending order",
+    description:
+      "Retrieve the newest comic books sorted by publication date in descending order",
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
@@ -327,7 +351,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicBookMultipleResponseSchema
+            schema: ComicBookMultipleResponseSchema,
           },
         },
         description: "Latest comic books retrieved successfully",
@@ -373,19 +397,30 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
+    const serviceData: RequestParametersValidated<
+      ComicSortField,
+      ComicFilterField
+    > = validateAndBuildQueryParams(queryData, "comics");
 
     try {
-      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
-        serviceData
-      );
+      const comics: ComicBookWithMetadata[] =
+        await fetchComicBooksWithRelatedMetadata(
+          serviceData,
+        );
 
-      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
-      const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = serviceData.filter;
-      const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
+      const serviceDataPagination: RequestPaginationParametersValidated =
+        serviceData.pagination;
+      const serviceDataFilter:
+        | RequestFilterParametersValidated<ComicFilterField>
+        | undefined = serviceData.filter;
+      const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
+        serviceData.sort;
 
-      const hasNextPage: boolean = comics.length > serviceDataPagination.pageSize;
-      const resultComics: ComicBookWithMetadata[] = hasNextPage ? comics.slice(0, serviceDataPagination.pageSize) : comics;
+      const hasNextPage: boolean =
+        comics.length > serviceDataPagination.pageSize;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage
+        ? comics.slice(0, serviceDataPagination.pageSize)
+        : comics;
 
       const requestMetadata: ComicBookMultipleResponseMeta = {
         count: resultComics.length,
@@ -397,10 +432,10 @@ app.openapi(
         sortProperty: serviceDataSort.sortProperty,
         sortOrder: serviceDataSort.sortOrder,
       };
- 
+
       const returnObj: ComicBookMultipleResponse = {
         data: resultComics,
-        meta: requestMetadata
+        meta: requestMetadata,
       };
 
       return c.json(returnObj, 200);
@@ -408,7 +443,7 @@ app.openapi(
       console.error("Error fetching latest comic books:", error);
       return c.json({ message: "Failed to fetch latest comic books" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -425,7 +460,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      query: PaginationQuerySchema
+      query: PaginationQuerySchema,
     },
     responses: {
       200: {
@@ -476,7 +511,8 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
+    const paginationData: RequestPaginationParametersValidated =
+      validatePagination(queryData.page, queryData.pageSize);
 
     try {
       const duplicates: ComicBook[] = await fetchComicDuplicatesInTheDb({
@@ -485,19 +521,22 @@ app.openapi(
       });
 
       if (duplicates.length > 0) {
-        const hasNextPage: boolean = duplicates.length > paginationData.pageSize;
-        const resultComics: ComicBookWithMetadata[] = hasNextPage ? duplicates.slice(0, paginationData.pageSize) : duplicates;
+        const hasNextPage: boolean =
+          duplicates.length > paginationData.pageSize;
+        const resultComics: ComicBookWithMetadata[] = hasNextPage
+          ? duplicates.slice(0, paginationData.pageSize)
+          : duplicates;
 
         const requestMetadata: ComicBookMultipleResponseMeta = {
           count: duplicates.length,
           hasNextPage: hasNextPage,
           currentPage: paginationData.pageNumber,
-          pageSize: paginationData.pageSize
+          pageSize: paginationData.pageSize,
         };
-  
+
         const returnObj: ComicBookMultipleResponse = {
           data: resultComics,
-          meta: requestMetadata
+          meta: requestMetadata,
         };
 
         return c.json(returnObj, 200);
@@ -506,12 +545,12 @@ app.openapi(
           count: 0,
           hasNextPage: false,
           currentPage: 0,
-          pageSize: 0
+          pageSize: 0,
         };
-  
+
         const returnObj: ComicBookMultipleResponse = {
           data: [],
-          meta: requestMetadata
+          meta: requestMetadata,
         };
 
         return c.json(returnObj, 200);
@@ -520,7 +559,7 @@ app.openapi(
       console.error("Error fetching comic book duplicates:", error);
       return c.json({ message: "Failed to fetch comic book duplicates" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -539,13 +578,13 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      query: PaginationQuerySchema
+      query: PaginationQuerySchema,
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: ComicBookMultipleResponseSchema
+            schema: ComicBookMultipleResponseSchema,
           },
         },
         description: "Random comic book retrieved successfully",
@@ -598,28 +637,33 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
+    const paginationData: RequestPaginationParametersValidated =
+      validatePagination(queryData.page, queryData.pageSize);
 
     try {
-      const randomComics: ComicBookWithMetadata[] | null = await fetchRandomComicBook(paginationData);
+      const randomComics: ComicBookWithMetadata[] | null =
+        await fetchRandomComicBook(paginationData);
 
       if (!randomComics || randomComics.length === 0) {
         return c.json({ message: "No comic books found" }, 404);
       }
 
-      const hasNextPage: boolean = randomComics.length > paginationData.pageSize;
-      const resultComics: ComicBookWithMetadata[] = hasNextPage ? randomComics.slice(0, paginationData.pageSize) : randomComics;
+      const hasNextPage: boolean =
+        randomComics.length > paginationData.pageSize;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage
+        ? randomComics.slice(0, paginationData.pageSize)
+        : randomComics;
 
       const requestMetadata: ComicBookMultipleResponseMeta = {
         count: randomComics.length,
         hasNextPage: hasNextPage,
         currentPage: paginationData.pageNumber,
-        pageSize: paginationData.pageSize
+        pageSize: paginationData.pageSize,
       };
 
       const returnObj: ComicBookMultipleResponse = {
         data: resultComics,
-        meta: requestMetadata
+        meta: requestMetadata,
       };
 
       return c.json(returnObj, 200);
@@ -627,14 +671,14 @@ app.openapi(
       console.error("Error fetching random comic book:", error);
       return c.json({ message: "Failed to fetch random comic book" }, 500);
     }
-  }
+  },
 );
 
 /**
  * Get comic books filtered by first letter
- * 
+ *
  * GET /api/comic-books/list
- * 
+ *
  * This route returns comic books whose titles start with a specific letter, with pagination support
  * @param letter - The first letter to filter comic book titles by
  * @return JSON object containing the list of comic books starting with the specified letter
@@ -644,16 +688,17 @@ app.openapi(
     method: "get",
     path: "/list",
     summary: "Get comic books by letter",
-    description: "Retrieve comic books filtered by their first letter with pagination",
+    description:
+      "Retrieve comic books filtered by their first letter with pagination",
     tags: ["Comic Books"],
     request: {
-      query: PaginationLetterQuerySchema
+      query: PaginationLetterQuerySchema,
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: ComicBookMultipleResponseSchema
+            schema: ComicBookMultipleResponseSchema,
           },
         },
         description: "Comic books retrieved successfully",
@@ -703,27 +748,34 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comics");
-    const paginationData: RequestPaginationParametersValidated = validatePagination(queryData.page, queryData.pageSize);
+    const serviceData: RequestParametersValidated<
+      ComicSortField,
+      ComicFilterField
+    > = validateAndBuildQueryParams(queryData, "comics");
+    const paginationData: RequestPaginationParametersValidated =
+      validatePagination(queryData.page, queryData.pageSize);
 
     try {
-      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(
-        serviceData
-      );
+      const comics: ComicBookWithMetadata[] =
+        await fetchComicBooksWithRelatedMetadata(
+          serviceData,
+        );
 
       const hasNextPage: boolean = comics.length > paginationData.pageSize;
-      const resultComics: ComicBookWithMetadata[] = hasNextPage ? comics.slice(0, paginationData.pageSize) : comics;
+      const resultComics: ComicBookWithMetadata[] = hasNextPage
+        ? comics.slice(0, paginationData.pageSize)
+        : comics;
 
       const requestMetadata: ComicBookMultipleResponseMeta = {
         count: comics.length,
         hasNextPage: hasNextPage,
         currentPage: paginationData.pageNumber,
-        pageSize: paginationData.pageSize
+        pageSize: paginationData.pageSize,
       };
 
       const returnObj: ComicBookMultipleResponse = {
         data: resultComics,
-        meta: requestMetadata
+        meta: requestMetadata,
       };
 
       return c.json(returnObj, 200);
@@ -731,14 +783,14 @@ app.openapi(
       console.error("Error fetching comic book list:", error);
       return c.json({ message: "Failed to fetch comic book list" }, 500);
     }
-  }
+  },
 );
 
 /**
  * Batch update metadata for multiple comic books with multiple metadata updates possible
- * 
+ *
  * POST /api/comic-books/update-batch
- * 
+ *
  * @param comicBookIds - Array of comic book IDs to update
  * @param metadataUpdates - Array of metadata updates to apply
  * @return JSON object indicating success or failure of the batch update
@@ -809,40 +861,51 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const comicBookIds: number[] = data.comicBookIds.map(idStr => Number(idStr));
+    const comicBookIds: number[] = data.comicBookIds.map((idStr) =>
+      Number(idStr)
+    );
     const metadataUpdates: ComicMetadataUpdateData[] = data.metadataUpdates;
 
     try {
-      const updateResult: number = await updateComicBookMetadataBulk(comicBookIds, metadataUpdates);
+      const updateResult: number = await updateComicBookMetadataBulk(
+        comicBookIds,
+        metadataUpdates,
+      );
       if (updateResult) {
         return c.json(
-          { 
-            message: "Metadata updated successfully", 
-            totalUpdated: updateResult, 
+          {
+            message: "Metadata updated successfully",
+            totalUpdated: updateResult,
             totalRequested: comicBookIds.length,
-            successful: updateResult === comicBookIds.length
-          }, 200);
+            successful: updateResult === comicBookIds.length,
+          },
+          200,
+        );
       } else {
         return c.json(
-          { 
+          {
             message: "Failed to update some or all metadata",
-            totalUpdated: updateResult, 
+            totalUpdated: updateResult,
             totalRequested: comicBookIds.length,
-            successful: false
-          }, 500);
+            successful: false,
+          },
+          500,
+        );
       }
     } catch (error) {
       console.error("Error updating comic book metadata in batch:", error);
-      return c.json({ message: "Failed to update comic book metadata in batch" }, 500);
+      return c.json({
+        message: "Failed to update comic book metadata in batch",
+      }, 500);
     }
-  }
+  },
 );
 
 /**
  * Get a comic book by ID
- * 
+ *
  * GET /api/comic-books/:id
- * 
+ *
  * @param id - The ID of the comic book to retrieve
  * @return JSON object of the comic book
  */
@@ -915,13 +978,17 @@ app.openapi(
     }
 
     try {
-      const comicWithMetadataSearchResults: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata({
-        pagination: { pageNumber: 1, pageSize: 1 },
-        filter: { filterProperty: "id", filterValue: id.toString() },
-        sort: { sortProperty: "createdAt", sortOrder: "asc" }
-      })
+      const comicWithMetadataSearchResults: ComicBookWithMetadata[] =
+        await fetchComicBooksWithRelatedMetadata({
+          pagination: { pageNumber: 1, pageSize: 1 },
+          filter: { filterProperty: "id", filterValue: id.toString() },
+          sort: { sortProperty: "createdAt", sortOrder: "asc" },
+        });
 
-      const comicWithMetadata: ComicBookWithMetadata | null = comicWithMetadataSearchResults.length > 0 ? comicWithMetadataSearchResults[0] : null;
+      const comicWithMetadata: ComicBookWithMetadata | null =
+        comicWithMetadataSearchResults.length > 0
+          ? comicWithMetadataSearchResults[0]
+          : null;
 
       if (comicWithMetadata) {
         return c.json(comicWithMetadata, 200);
@@ -932,7 +999,7 @@ app.openapi(
       console.error("Error fetching comic book by ID:", error);
       return c.json({ message: "Failed to fetch comic book" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -981,7 +1048,7 @@ app.openapi(
       404: {
         content: {
           "application/json": {
-            schema: ErrorResponseSchema
+            schema: ErrorResponseSchema,
           },
         },
         description: "Comic book not found",
@@ -1011,7 +1078,8 @@ app.openapi(
     }
 
     try {
-      const comicBookMetadataOnly: ComicBookMetadataOnly = await fetchAComicsAssociatedMetadataById(id);
+      const comicBookMetadataOnly: ComicBookMetadataOnly =
+        await fetchAComicsAssociatedMetadataById(id);
 
       if (comicBookMetadataOnly) {
         return c.json(comicBookMetadataOnly, 200);
@@ -1022,7 +1090,7 @@ app.openapi(
       console.error("Error fetching comic book metadata by ID:", error);
       return c.json({ message: "Failed to fetch comic book metadata" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -1044,7 +1112,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1096,13 +1164,16 @@ app.openapi(
     }
 
     try {
-      const comicWithMetadataSearchResults = await fetchComicBooksWithRelatedMetadata({
-        pagination: { pageNumber: 1, pageSize: 1 },
-        filter: { filterProperty: "id", filterValue: id.toString() },
-        sort: { sortProperty: "createdAt", sortOrder: "asc" }
-      })
+      const comicWithMetadataSearchResults =
+        await fetchComicBooksWithRelatedMetadata({
+          pagination: { pageNumber: 1, pageSize: 1 },
+          filter: { filterProperty: "id", filterValue: id.toString() },
+          sort: { sortProperty: "createdAt", sortOrder: "asc" },
+        });
 
-      const comicWithMetadata = comicWithMetadataSearchResults.length > 0 ? comicWithMetadataSearchResults[0] : null;
+      const comicWithMetadata = comicWithMetadataSearchResults.length > 0
+        ? comicWithMetadataSearchResults[0]
+        : null;
 
       if (!comicWithMetadata) {
         return c.json({ message: "Comic book not found" }, 404);
@@ -1138,7 +1209,7 @@ app.openapi(
       console.error("Error downloading comic book:", error);
       return c.json({ message: "Failed to download comic book file" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -1160,7 +1231,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1220,16 +1291,17 @@ app.openapi(
     };
 
     try {
-      const streamingResult: ComicBookStreamingServiceResult = await startStreamingComicBookFile(
-        streamingDataOptions
-      );
+      const streamingResult: ComicBookStreamingServiceResult =
+        await startStreamingComicBookFile(
+          streamingDataOptions,
+        );
 
       return c.json(streamingResult, 200);
     } catch (error) {
       console.error("Error starting comic book streaming:", error);
       return c.json({ message: "Failed to start comic book streaming" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -1246,7 +1318,7 @@ app.openapi(
     method: "get",
     path: "/{id}/stream/{page}",
     request: {
-      params: ParamIdStreamPageSchema
+      params: ParamIdStreamPageSchema,
     },
     summary: "Stream comic book page",
     description: "Stream a specific page of a comic book by its ID",
@@ -1311,9 +1383,10 @@ app.openapi(
     };
 
     try {
-      const streamingResult: ComicBookStreamingServiceResult = await startStreamingComicBookFile(
-        streamingDataOptions
-      );
+      const streamingResult: ComicBookStreamingServiceResult =
+        await startStreamingComicBookFile(
+          streamingDataOptions,
+        );
 
       return c.json(streamingResult, 200);
     } catch (error) {
@@ -1322,8 +1395,6 @@ app.openapi(
     }
   },
 );
-
-
 
 /**
  * Get information about the pages of a comic book by ID
@@ -1344,7 +1415,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1402,7 +1473,8 @@ app.openapi(
       console.error("Error fetching comic book pages info:", error);
       return c.json({ message: "Failed to fetch comic book pages info" }, 500);
     }
-  });
+  },
+);
 
 /**
  * Check if a comic book has been read by a user
@@ -1416,11 +1488,12 @@ app.openapi(
     method: "get",
     path: "/{id}/read",
     summary: "Check if comic book has been read",
-    description: "Check if a comic book has been marked as read by the current user",
+    description:
+      "Check if a comic book has been marked as read by the current user",
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1475,13 +1548,13 @@ app.openapi(
       const hasRead: boolean = await checkComicReadByUser(userId, id);
       return c.json({
         id,
-        read: hasRead
+        read: hasRead,
       }, 200);
     } catch (error) {
       console.error("Error checking read status:", error);
       return c.json({ message: "Failed to check read status" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -1500,7 +1573,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1560,7 +1633,11 @@ app.openapi(
     }
 
     try {
-      const setComicToReadSuccess: boolean = await setComicReadByUser(id, userId, true);
+      const setComicToReadSuccess: boolean = await setComicReadByUser(
+        id,
+        userId,
+        true,
+      );
 
       if (setComicToReadSuccess) {
         return c.json({ success: true }, 200);
@@ -1568,7 +1645,9 @@ app.openapi(
         return c.json({ message: "Failed to mark comic book as read" }, 500);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : String(error);
 
       if (errorMessage.includes("FOREIGN KEY")) {
         return c.json({ message: "User or comic book not found" }, 404);
@@ -1576,14 +1655,14 @@ app.openapi(
 
       return c.json({ message: "Failed to mark comic book as read" }, 500);
     }
-  }
+  },
 );
 
 /**
  * Mark a comic book as unread by a user
- * 
+ *
  * POST /api/comic-books/:id/unread
- * 
+ *
  * This should mark the comic book as unread by the user
  */
 app.openapi(
@@ -1595,7 +1674,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1655,7 +1734,11 @@ app.openapi(
     }
 
     try {
-      const setComicToReadSuccess: boolean = await setComicReadByUser(id, userId, false);
+      const setComicToReadSuccess: boolean = await setComicReadByUser(
+        id,
+        userId,
+        false,
+      );
 
       if (setComicToReadSuccess) {
         return c.json({ success: true }, 200);
@@ -1663,7 +1746,9 @@ app.openapi(
         return c.json({ message: "Failed to mark comic book as unread" }, 500);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : String(error);
 
       if (errorMessage.includes("FOREIGN KEY")) {
         return c.json({ message: "User or comic book not found" }, 404);
@@ -1671,7 +1756,7 @@ app.openapi(
 
       return c.json({ message: "Failed to mark comic book as unread" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -1760,7 +1845,10 @@ app.openapi(
     try {
       const metadataUpdates = updateRequestBody.metadataUpdates;
 
-      const success: boolean = await updateComicBookMetadata(id, metadataUpdates);
+      const success: boolean = await updateComicBookMetadata(
+        id,
+        metadataUpdates,
+      );
       if (success) {
         return c.json({
           success: true,
@@ -1772,9 +1860,8 @@ app.openapi(
       console.error("Error updating comic book:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  }
+  },
 );
-
 
 /**
  * Delete a comic book by ID
@@ -1792,7 +1879,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1865,7 +1952,7 @@ app.openapi(
       console.error("Error deleting comic book:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -1880,11 +1967,12 @@ app.openapi(
     method: "get",
     path: "/{id}/next",
     summary: "Get next comic book in series",
-    description: "Retrieve the next comic book in the same series based on issue number",
+    description:
+      "Retrieve the next comic book in the same series based on issue number",
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -1945,7 +2033,7 @@ app.openapi(
 
     try {
       const nextComic: ComicBook | null = await getNextComicBookId(id);
-      
+
       if (nextComic) {
         return c.json(nextComic, 200);
       } else {
@@ -1957,7 +2045,7 @@ app.openapi(
       console.error("Error fetching next comic book:", error);
       return c.json({ message: "Failed to fetch next comic book" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -1972,11 +2060,12 @@ app.openapi(
     method: "get",
     path: "/{id}/previous",
     summary: "Get previous comic book in series",
-    description: "Retrieve the previous comic book in the same series based on issue number",
+    description:
+      "Retrieve the previous comic book in the same series based on issue number",
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -2049,7 +2138,7 @@ app.openapi(
       console.error("Error fetching previous comic book:", error);
       return c.json({ message: "Failed to fetch previous comic book" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -2068,7 +2157,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -2128,7 +2217,9 @@ app.openapi(
     }
 
     try {
-      const thumbnails: ComicBookThumbnail[] | null = await getComicThumbnails(id);
+      const thumbnails: ComicBookThumbnail[] | null = await getComicThumbnails(
+        id,
+      );
 
       if (thumbnails) {
         return c.json({
@@ -2144,7 +2235,7 @@ app.openapi(
       console.error("Error fetching comic book thumbnails:", error);
       return c.json({ message: "Failed to fetch comic book thumbnails" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -2163,7 +2254,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdThumbnailIdSchema
+      params: ParamIdThumbnailIdSchema,
     },
     responses: {
       200: {
@@ -2224,7 +2315,8 @@ app.openapi(
     }
 
     try {
-      const thumbnail: ComicBookThumbnail | null = await getComicThumbnailByComicIdThumbnailId(id, thumbId);
+      const thumbnail: ComicBookThumbnail | null =
+        await getComicThumbnailByComicIdThumbnailId(id, thumbId);
 
       if (thumbnail) {
         return c.json({
@@ -2241,7 +2333,7 @@ app.openapi(
       console.error("Error fetching comic book thumbnail:", error);
       return c.json({ message: "Failed to fetch comic book thumbnail" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -2261,7 +2353,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdThumbnailIdSchema
+      params: ParamIdThumbnailIdSchema,
     },
     responses: {
       200: {
@@ -2323,7 +2415,7 @@ app.openapi(
 
     try {
       const deletionResult = await deleteComicsThumbnailById(id, thumbId);
-      
+
       if (!deletionResult) {
         return c.json({
           message: "Thumbnail not found or could not be deleted",
@@ -2335,7 +2427,7 @@ app.openapi(
       console.error("Error deleting comic book thumbnail:", error);
       return c.json({ message: "Failed to delete comic book thumbnail" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -2344,7 +2436,7 @@ app.openapi(
  * POST /api/comic-books/:id/thumbnails
  *
  * This should create a custom thumbnail for a comic book by its ID
- * 
+ *
  * TODO: Migrate the logic to service layer
  */
 app.openapi(
@@ -2352,7 +2444,8 @@ app.openapi(
     method: "post",
     path: "/{id}/thumbnails",
     summary: "Create custom thumbnail",
-    description: "Create a custom thumbnail for a comic book via multipart form data",
+    description:
+      "Create a custom thumbnail for a comic book via multipart form data",
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
@@ -2465,7 +2558,11 @@ app.openapi(
         description,
       );
 
-      const thumbnail: ComicBookThumbnail | null = await getComicThumbnailByComicIdThumbnailId(comicId, result.thumbnailId);
+      const thumbnail: ComicBookThumbnail | null =
+        await getComicThumbnailByComicIdThumbnailId(
+          comicId,
+          result.thumbnailId,
+        );
 
       return c.json({
         message: "Custom thumbnail created successfully",
@@ -2482,7 +2579,7 @@ app.openapi(
 
       return c.json({ message: "Failed to create custom thumbnail" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -2501,7 +2598,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      params: ParamIdSchema
+      params: ParamIdSchema,
     },
     responses: {
       200: {
@@ -2551,20 +2648,20 @@ app.openapi(
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
-    
+
     try {
-      const comicStoryArcs: ComicStoryArc[] = await getTheReadlistsContainingComicBook(comicId);
+      const comicStoryArcs: ComicStoryArc[] =
+        await getTheReadlistsContainingComicBook(comicId);
 
       return c.json({
         comicId: comicId,
         readLists: comicStoryArcs,
       }, 200);
-
     } catch (error) {
       console.error("Error fetching comic book readlists:", error);
       return c.json({ message: "Failed to fetch comic book readlists" }, 501);
     }
-  }
+  },
 );
 
 export default app;

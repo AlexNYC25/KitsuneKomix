@@ -1,8 +1,14 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
-
-import { MessageResponseSchema, ErrorResponseSchema } from "#schemas/response.schema.ts";
-import { ParamIdSchema, AddCollectionSchema, ParamIdThumbnailIdSchema } from "#schemas/request.schema.ts";
+import {
+  ErrorResponseSchema,
+  MessageResponseSchema,
+} from "#schemas/response.schema.ts";
+import {
+  AddCollectionSchema,
+  ParamIdSchema,
+  ParamIdThumbnailIdSchema,
+} from "#schemas/request.schema.ts";
 import type { AppEnv } from "#types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
@@ -15,11 +21,11 @@ app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
 
 /**
  * GET /api/collections/
- * 
+ *
  * Get all collections
  */
 app.openapi(
-    createRoute({
+  createRoute({
     method: "get",
     path: "/",
     summary: "Get all collections",
@@ -34,16 +40,17 @@ app.openapi(
         description: "Collections retrieved successfully",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     //TODO: implement collections retrieval logic
     const collections = [{ id: 1, name: "Default Collection" }];
     return _c.json(collections);
-  }
+  },
 );
 
 /**
  * GET /api/collections/{id}
- * 
+ *
  * Get a collection by its ID
  */
 app.openapi(
@@ -63,17 +70,18 @@ app.openapi(
         description: "Collection retrieved successfully",
       },
     },
-  }), (c) => {
+  }),
+  (c) => {
     const { id } = c.req.valid("param");
     //TODO: implement collection retrieval logic
     const collection = { id, name: "Default Collection" };
     return c.json(collection);
-  }
+  },
 );
 
 /**
  * DELETE /api/collections/{id}
- * 
+ *
  * Delete a collection by its ID
  */
 app.openapi(
@@ -89,15 +97,16 @@ app.openapi(
         description: "Not implemented",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     //TODO: implement collection deletion logic
     return _c.json({ message: "Collection deletion not implemented yet" }, 501);
-  }
+  },
 );
 
 /**
  * GET /api/collections/{id}/series
- * 
+ *
  * Get series in a collection
  */
 app.openapi(
@@ -117,16 +126,17 @@ app.openapi(
         description: "Series retrieved successfully",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     //TODO: implement collection series retrieval logic
     const series = [{ id: 1, title: "Default Series" }];
     return _c.json(series);
-  }
+  },
 );
 
 /**
  * GET /api/collections/{id}/thumbnails
- * 
+ *
  * Get thumbnails for a collection
  */
 app.openapi(
@@ -146,11 +156,12 @@ app.openapi(
         description: "Thumbnails retrieved successfully",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     //TODO: implement collection thumbnails retrieval logic
     const thumbnails = [{ id: 1, url: "http://example.com/thumb1.jpg" }];
     return _c.json(thumbnails);
-  }
+  },
 );
 
 /**
@@ -169,18 +180,19 @@ app.openapi(
         description: "Not implemented",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     //TODO: implement collection thumbnail update logic
     return _c.json(
       { message: "Collection thumbnail update not implemented yet" },
       501,
     );
-  }
+  },
 );
 
 /**
  * POST /api/collections/add-collection
- * 
+ *
  * Add a new collection
  */
 app.openapi(
@@ -208,7 +220,8 @@ app.openapi(
         description: "Invalid request body",
       },
     },
-  }), (c) => {
+  }),
+  (c) => {
     const body = c.req.valid("json");
     const result = AddCollectionSchema.safeParse(body);
     if (!result.success) {
@@ -219,12 +232,12 @@ app.openapi(
     }
     //TODO: implement collection addition logic
     return c.json({ message: "Collection addition not implemented yet" }, 501);
-  }
+  },
 );
 
 /**
  * PUT /api/collections/{id}/update
- * 
+ *
  * Update a collection by its ID
  */
 app.openapi(
@@ -240,15 +253,16 @@ app.openapi(
         description: "Not implemented",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     //TODO: implement collection update logic
     return _c.json({ message: "Collection update not implemented yet" }, 501);
-  }
+  },
 );
 
 /**
  * POST /api/collections/{id}/add-comics
- * 
+ *
  * Add comics to a collection
  */
 app.openapi(
@@ -264,18 +278,19 @@ app.openapi(
         description: "Not implemented",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     // TODO: implement add comics to collection logic
     return _c.json(
       { message: "Add comics to collection not implemented yet" },
       501,
     );
-  }
+  },
 );
 
 /**
  * POST /api/collections/{id}/remove-comics
- * 
+ *
  * Remove comic series from a collection
  */
 app.openapi(
@@ -291,12 +306,13 @@ app.openapi(
         description: "Not implemented",
       },
     },
-  }), (_c) => {
+  }),
+  (_c) => {
     // TODO: implement remove comics from collection logic
     return _c.json({
       message: "Remove comics from collection not implemented yet",
     }, 501);
-  }
+  },
 );
 
 export default app;

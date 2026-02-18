@@ -26,9 +26,12 @@ apiRouter.doc("/doc", {
 });
 
 // Swagger UI for API documentation
-apiRouter.get("/ui", swaggerUI({
-	url: "/api/doc",
-}));
+apiRouter.get(
+  "/ui",
+  swaggerUI({
+    url: "/api/doc",
+  }),
+);
 
 // Sub-routers for separate API functionalities
 apiRouter.route("/users", apiUsersRouter);

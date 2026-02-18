@@ -6,10 +6,7 @@ import { purgeAllData } from "#sqlite/models/admin.model.ts";
 
 import { MessageResponseSchema } from "#schemas/response.schema.ts";
 
-import { 
-  AppEnv, 
-  AccessRefreshTokenCombinedPayload 
-} from "#types/index.ts";
+import { AccessRefreshTokenCombinedPayload, AppEnv } from "#types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -61,10 +58,10 @@ app.openapi(
         description: "Internal server error",
       },
     },
-  }), 
+  }),
   async (c) => {
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    
+
     // TODO: Add additional check to verify that the user has admin privileges before allowing data purge
 
     if (!user || !user.sub) {
@@ -83,7 +80,7 @@ app.openapi(
       console.error("Error purging data:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  }
+  },
 );
 
 export default app;

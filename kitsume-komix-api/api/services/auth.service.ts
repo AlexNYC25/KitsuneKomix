@@ -11,8 +11,8 @@ import { User } from "#types/index.ts";
  * @throws Error if authentication fails
  */
 export const authenticateUser = async (
-  email: string, 
-  password: string
+  email: string,
+  password: string,
 ): Promise<{ id: number; email: string; admin: boolean }> => {
   const user: User | null = await getUserByEmail(email);
   if (!user) {

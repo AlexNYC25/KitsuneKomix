@@ -8,7 +8,7 @@ import {
   storeRefreshToken,
 } from "#sqlite/models/refreshTokens.model.ts";
 
-import { TokenPair, RefreshTokenResponse } from "#interfaces/index.ts";
+import { RefreshTokenResponse, TokenPair } from "#interfaces/index.ts";
 
 /**
  * Creates and stores a new refresh token pair for a user

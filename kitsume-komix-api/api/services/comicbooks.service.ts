@@ -1,11 +1,11 @@
 import { getClient } from "#sqlite/client.ts";
 
 import {
+  deleteComicBook,
   getComicBookById,
   getComicBooksWithMetadataFilteringSorting,
   getComicDuplicates,
   getRandomBook,
-  deleteComicBook
 } from "#sqlite/models/comicBooks.model.ts";
 import {
   getWritersByComicBookId,
@@ -85,11 +85,11 @@ import {
   linkLocationToComicBook,
   unlinkLocationsToComicBook,
 } from "#sqlite/models/comicLocations.model.ts";
-import { 
+import {
   getStoryArcsByComicBookId,
   unlinkStoryArcsToComicBook,
 } from "#sqlite/models/comicStoryArcs.model.ts";
-import { 
+import {
   getSeriesGroupsByComicBookId,
   unlinkSeriesGroupsToComicBook,
 } from "#sqlite/models/comicSeriesGroups.model.ts";
@@ -119,23 +119,23 @@ import {
   ComicBook,
   ComicBookFilterItem,
   ComicBookHistory,
-  ComicBookThumbnail,
   ComicBookMetadataOnly,
+  ComicBookPagesInfo,
+  ComicBookStreamingServiceData,
+  ComicBookStreamingServiceResult,
+  ComicBookThumbnail,
   ComicBookWithMetadata,
   ComicBookWithThumbnail,
+  ComicFilterField,
+  ComicMetadataUpdateData,
+  ComicPage,
+  ComicSortField,
+  ComicStoryArc,
+  RequestFilterParametersValidated,
   // Request parameter types
   RequestPaginationParametersValidated,
   RequestParametersValidated,
-  ComicSortField, 
-  ComicFilterField,
-  RequestFilterParametersValidated,
   RequestSortParametersValidated,
-  ComicMetadataUpdateData,
-  ComicBookStreamingServiceData,
-  ComicBookStreamingServiceResult,
-  ComicStoryArc,
-  ComicPage,
-  ComicBookPagesInfo,
 } from "#types/index.ts";
 
 /**
@@ -149,23 +149,30 @@ import {
  * -  /api/comic-books/newest (sorting by the publication_date)
  */
 export const fetchComicBooksWithRelatedMetadata = async (
-  queryData: RequestParametersValidated<ComicSortField, ComicFilterField>
+  queryData: RequestParametersValidated<ComicSortField, ComicFilterField>,
 ): Promise<ComicBookWithMetadata[]> => {
   try {
-    const serviceDataPagination: RequestPaginationParametersValidated = queryData.pagination;
-    const serviceDataFilter: RequestFilterParametersValidated<ComicFilterField> | undefined = queryData.filter;
-    const serviceDataSort: RequestSortParametersValidated<ComicSortField> = queryData.sort;
+    const serviceDataPagination: RequestPaginationParametersValidated =
+      queryData.pagination;
+    const serviceDataFilter:
+      | RequestFilterParametersValidated<ComicFilterField>
+      | undefined = queryData.filter;
+    const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
+      queryData.sort;
 
     // now we pass these filters + the sorting details to the new optimized database function
-    const comicsFromDb: ComicBook[] = await getComicBooksWithMetadataFilteringSorting({
-      filters: [serviceDataFilter] as ComicBookFilterItem[],
-      sort: {
-        property: serviceDataSort.sortProperty,
-        order: serviceDataSort.sortOrder,
-      },
-      offset: serviceDataPagination.pageNumber * serviceDataPagination.pageSize - serviceDataPagination.pageSize,
-      limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
-    });
+    const comicsFromDb: ComicBook[] =
+      await getComicBooksWithMetadataFilteringSorting({
+        filters: [serviceDataFilter] as ComicBookFilterItem[],
+        sort: {
+          property: serviceDataSort.sortProperty,
+          order: serviceDataSort.sortOrder,
+        },
+        offset:
+          serviceDataPagination.pageNumber * serviceDataPagination.pageSize -
+          serviceDataPagination.pageSize,
+        limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
+      });
 
     const comicsWithMetadata: ComicBookWithMetadata[] = [];
     for (let i = 0; i < comicsFromDb.length; i++) {
@@ -174,7 +181,7 @@ export const fetchComicBooksWithRelatedMetadata = async (
       const comicWithMetadata: ComicBookWithMetadata = {
         ...comic,
         ...metadata,
-      }
+      };
       comicsWithMetadata.push(comicWithMetadata);
     }
 
@@ -189,7 +196,7 @@ export const fetchComicBooksWithRelatedMetadata = async (
  * Fetch associated metadata for a comic book by its ID.
  * @param id - The ID of the comic book.
  * @returns A promise that resolves to the associated metadata of the comic book of type ComicBookMetadataOnly.
- * 
+ *
  * used by
  * - /api/comic-books/:id/metadata
  */
@@ -203,7 +210,6 @@ export const fetchAComicsAssociatedMetadataById = async (
   }
 
   try {
-
     const metadata = {
       writers: await getWritersByComicBookId(id),
       pencillers: await getPencillersByComicBookId(id),
@@ -227,7 +233,7 @@ export const fetchAComicsAssociatedMetadataById = async (
     console.error("Error fetching comic book metadata:", error);
     throw error;
   }
-}
+};
 
 /**
  * Get comic book duplicates in the database.
@@ -235,13 +241,12 @@ export const fetchAComicsAssociatedMetadataById = async (
  * @param RequestPaginationParametersValidated - The query parameters for pagination.
  * @returns A promise that resolves to an array of duplicate comic books.
  *
- * used by 
+ * used by
  * - /api/comic-books/duplicates
  */
 export const fetchComicDuplicatesInTheDb = async (
   requestPaginationParameters: RequestPaginationParametersValidated,
 ): Promise<ComicBook[]> => {
-
   // Calculate offset for pagination
   const offset = (requestPaginationParameters.pageNumber - 1) *
     requestPaginationParameters.pageSize;
@@ -273,7 +278,7 @@ export const fetchRandomComicBook = async (
 ): Promise<ComicBookWithMetadata[] | null> => {
   try {
     const randomComics: ComicBookWithMetadata[] = [];
-    
+
     for (let i = 0; i < requestPaginationParameters.pageSize; i++) {
       const comicBook = await getRandomBook();
       if (comicBook) {
@@ -290,16 +295,16 @@ export const fetchRandomComicBook = async (
 
 /**
  * Service to update comic book metadata for a single comic book.
- * @param comicId 
- * @param metadataUpdates 
+ * @param comicId
+ * @param metadataUpdates
  * @returns boolean indicating success or failure
- * 
+ *
  * used by
  * - /api/comic-books/{id}/update
  */
 export const updateComicBookMetadata = async (
   comicId: number,
-  metadataUpdates: Array<ComicMetadataUpdateData>
+  metadataUpdates: Array<ComicMetadataUpdateData>,
 ): Promise<boolean> => {
   try {
     for (const update of metadataUpdates) {
@@ -308,7 +313,9 @@ export const updateComicBookMetadata = async (
       const values = update.values as string[];
 
       if (!values || values.length === 0) {
-        console.warn(`No values provided for ${updateType} on comic ID ${comicId}`);
+        console.warn(
+          `No values provided for ${updateType} on comic ID ${comicId}`,
+        );
         continue;
       }
 
@@ -363,7 +370,10 @@ export const updateComicBookMetadata = async (
               break;
           }
         } catch (error) {
-          console.error(`Error unlinking ${updateType} from comic book:`, error);
+          console.error(
+            `Error unlinking ${updateType} from comic book:`,
+            error,
+          );
           throw error;
         }
       }
@@ -466,11 +476,11 @@ export const updateComicBookMetadata = async (
 
 /**
  * Service to bulk update comic book metadata for multiple comic books using the same set of updates.
- * 
- * @param comicIds 
- * @param metadataUpdates 
+ *
+ * @param comicIds
+ * @param metadataUpdates
  * @returns number of successful updates
- * 
+ *
  * used by
  * - /api/comic-books/update-batch
  */
@@ -504,13 +514,13 @@ export const updateComicBookMetadataBulk = async (
  * @param page Page number to stream (1-based)
  * @param acceptHeader Browser's Accept header for format negotiation
  * @param preloadPages Number of additional pages to preload for caching
- * 
+ *
  * used by
  * - /api/comic-books/{id}/stream
  * - /api/comic-books/{id}/stream/{page}
  */
 export const startStreamingComicBookFile = async (
-  data: ComicBookStreamingServiceData
+  data: ComicBookStreamingServiceData,
 ) => {
   // Get the comic book record from the database
   const comic = await getComicBookById(data.comicId);
@@ -542,13 +552,16 @@ export const startStreamingComicBookFile = async (
   }
 
   // Determine best output format for browser compatibility
-  const targetFormat = determineBestOutputFormat(data.acceptHeader || undefined);
+  const targetFormat = determineBestOutputFormat(
+    data.acceptHeader || undefined,
+  );
   const formatExtension = targetFormat.split("/")[1];
 
   // Check if page exists in cache (with correct format)
   const cacheDir = "./cache/pages";
   const comicCacheDir = `${cacheDir}/${data.comicId}`;
-  const cachedPagePath = `${comicCacheDir}/${data.pageNumber}.${formatExtension}`;
+  const cachedPagePath =
+    `${comicCacheDir}/${data.pageNumber}.${formatExtension}`;
 
   // Create cache directory if it doesn't exist
   await Deno.mkdir(comicCacheDir, { recursive: true });
@@ -556,7 +569,11 @@ export const startStreamingComicBookFile = async (
   let pagePath = cachedPagePath;
 
   // Check if page is already in cache
-  const pageInCache = await checkIfPageInCache(data.comicId, data.pageNumber, formatExtension);
+  const pageInCache = await checkIfPageInCache(
+    data.comicId,
+    data.pageNumber,
+    formatExtension,
+  );
 
   if (!pageInCache) {
     console.log(`Page ${data.pageNumber} not in cache, extracting...`);
@@ -632,7 +649,10 @@ export const startStreamingComicBookFile = async (
       // Use single page extraction for smaller files
       console.log(`Small file, extracting single page ${data.pageNumber}`);
 
-      const extractedPagePath = await extractComicPage(filePath, data.pageNumber - 1); // Convert to 0-based
+      const extractedPagePath = await extractComicPage(
+        filePath,
+        data.pageNumber - 1,
+      ); // Convert to 0-based
 
       if (!extractedPagePath) {
         throw new Error("Failed to extract page from comic archive");
@@ -680,11 +700,13 @@ export const startStreamingComicBookFile = async (
  * Gets information about the pages of a comic book.
  * @param comicId ID of the comic book
  * @returns an object containing total pages, pages in DB, and page details
- * 
+ *
  * used by
  * - /api/comic-books/{id}/pages-info
  */
-export const getComicPagesInfo = async (comicId: number): Promise<ComicBookPagesInfo> => {
+export const getComicPagesInfo = async (
+  comicId: number,
+): Promise<ComicBookPagesInfo> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
@@ -712,7 +734,7 @@ export const getComicPagesInfo = async (comicId: number): Promise<ComicBookPages
  * @param comicId ID of the comic book
  * @param userId ID of the user
  * @returns boolean indicating if the comic book has been marked as read by the user
- * 
+ *
  * used by
  * - /api/comic-books/:id/read
  */
@@ -731,10 +753,10 @@ export const checkComicReadByUser = async (
 /**
  * Marks a comic book as read or unread by a user.
  * @param comicId ID of the comic book
- * @param userId ID of the user we want to set read/unread status for 
+ * @param userId ID of the user we want to set read/unread status for
  * @param read The boolean value indicating if we want to set the book to be read or unread
  * @returns boolean indicating if this update was successful
- * 
+ *
  * used by
  * - /api/comic-books/:id/read
  * - /api/comic-books/:id/unread
@@ -800,10 +822,10 @@ export const setComicReadByUser = async (
 
 /**
  * Service to process the deletion of a comic book and its associated data.
- * 
+ *
  * @param comicId ID of the Comic Book to be deleted
  * @returns Boolean representing if the deletion succeeded
- * 
+ *
  * used by
  * - /api/comic-books/{id}/delete
  */
@@ -852,7 +874,6 @@ export const processComicBookDeletion = async (
     console.error(`Error deleting comic book ID ${comicId}:`, error);
     throw error;
   }
-  
 
   return true;
 };
@@ -861,7 +882,7 @@ export const processComicBookDeletion = async (
  * Get the next comic book ID in the same series based on issue number.
  * @param currentComicId Current comic book ID
  * @returns Next comic book object or null if not found
- * 
+ *
  * used by
  * - /api/comic-books/:id/next
  */
@@ -917,12 +938,11 @@ export const getNextComicBookId = async (
   }
 };
 
-
 /**
  * Get the previous comic book ID in the same series based on issue number.
- * @param currentComicId 
+ * @param currentComicId
  * @returns Previous comic book object or null if not found
- * 
+ *
  * used by
  * - /api/comic-books/:id/previous
  */
@@ -984,7 +1004,7 @@ export const getPreviousComicBookId = async (
  * Get the thumbnails for a specific comic book.
  * @param comicId The comic id we want to get the thumbnails for
  * @returns an array of ComicBookThumbnail objects or null if none found
- * 
+ *
  * used by
  * - /api/comic-books/:id/thumbnails
  */
@@ -1002,13 +1022,12 @@ export const getComicThumbnails = async (
   return comicThumbnails;
 };
 
-
 /**
  * Get the specific thumbnail for a comic book by thumbnail ID.
  * @param comicId The comic id we want to get the thumbnail for
  * @param thumbnailId The specific thumbnail id we want to get
  * @returns the ComicBookThumbnail object or null if not found
- * 
+ *
  * used by
  * - /api/comic-books/:id/thumbnails/:thumbId
  */
@@ -1028,14 +1047,14 @@ export const getComicThumbnailByComicIdThumbnailId = async (
 
 /**
  * Delete a specific thumbnail for a comic book by thumbnail ID.
- * 
+ *
  * @param comicId The specific comic id we want to remove the thumbnail for
  * @param thumbnailId The specific thumbnail we want to remove
  * @returns A boolean indicating if the deletion was successful
- * 
+ *
  * used by
  * - /api/comic-books/:id/thumbnails/:thumbId
- * 
+ *
  * FIXME: Updated function to also delete the thumbnail from the filesystem
  */
 export const deleteComicsThumbnailById = async (
@@ -1071,14 +1090,14 @@ export const deleteComicsThumbnailById = async (
 
 /**
  * The service to create a custom thumbnail for a specific comic book.
- * 
+ *
  * @param comicId The specific comic id we want to create a custom thumbnail for
  * @param imageData The image data for the custom thumbnail
  * @param userId The user id who is creating the custom thumbnail
  * @param name Optional name for the custom thumbnail
  * @param description Optional description for the custom thumbnail
  * @returns The newly created thumbnail's ID and file path
- * 
+ *
  * used by
  * - /api/comic-books/:id/thumbnails
  */
@@ -1124,13 +1143,12 @@ export const createCustomThumbnail = async (
   }
 };
 
-
 /**
  * Compiles the comic book data along with its thumbnail URL.
- * 
+ *
  * @param comicId The Comic book id who's data we want to attatch it's thumbnail data
  * @returns an object containing the comic book data along with the thumbnail URL or null if comic not found
- * 
+ *
  * Note: currently only used by the comic series service, may not be needed anymore or be moved elsewhere
  */
 export const attachThumbnailToComicBook = async (
@@ -1155,7 +1173,7 @@ export const attachThumbnailToComicBook = async (
 
 /**
  * Get the readlists/comic story arcs that a specific comic book belongs to.
- * 
+ *
  * @param comicId The comic in question we want to see what readlists/comic story arcs it belongs to
  * @returns An array of comic story arc objects the comic belongs to
  */
@@ -1258,7 +1276,7 @@ const preloadAdjacentPages = async (
       }
     }
   }
-}
+};
 
 /**
  * Determine the best output format based on browser capabilities
@@ -1276,7 +1294,7 @@ const determineBestOutputFormat = (acceptHeader?: string): string => {
     return "image/png"; // Good quality, universal support
   }
   return "image/jpeg"; // Universal fallback
-}
+};
 
 /**
  * Convert image to browser-compatible format if needed
@@ -1305,7 +1323,7 @@ const convertImageForBrowser = async (
     console.error(`Error converting image format: ${error}`);
     return false;
   }
-}
+};
 
 /**
  * Attaches metadata to a comic book object.

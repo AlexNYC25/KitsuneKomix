@@ -14,13 +14,17 @@ import type { AccessRefreshTokenCombinedPayload } from "#types/index.ts";
 export const requireAuth = async (c: Context, next: Next) => {
   const authHeader: string | undefined = c.req.header("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return c.json({ message: "Unauthorized - Missing or invalid Authorization header" }, 401);
+    return c.json({
+      message: "Unauthorized - Missing or invalid Authorization header",
+    }, 401);
   }
 
   const token: string = authHeader.split(" ")[1];
 
   try {
-    const payload: AccessRefreshTokenCombinedPayload = await verifyAccessToken(token);
+    const payload: AccessRefreshTokenCombinedPayload = await verifyAccessToken(
+      token,
+    );
     c.set("user", payload);
     return next();
   } catch (error) {

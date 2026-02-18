@@ -7,22 +7,22 @@ import { getComicLibrariesAvailableToUser } from "../services/comicLibraries.ser
 import { createComicLibrary } from "#sqlite/models/comicLibraries.model.ts";
 
 import {
-  MessageResponseSchema,
   ErrorResponseSchema,
+  MessageResponseSchema,
   SuccessCreationResponseSchema,
 } from "#schemas/response.schema.ts";
 import {
-  ParamIdSchema, 
+  ComicLibrarySchema,
   PaginationSortFilterQuerySchema,
-  ComicLibrarySchema, 
+  ParamIdSchema,
 } from "#schemas/request.schema.ts";
 import { ComicLibrariesSchema } from "#schemas/data/comicLibraries.schema.ts";
 
-import type { 
-  AppEnv,
+import type {
   AccessRefreshTokenCombinedPayload,
+  AppEnv,
+  ComicLibrary,
   LibraryRegistrationInput,
-  ComicLibrary
 } from "#types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
@@ -102,7 +102,9 @@ app.openapi(
       // TODO: Updated the validation function to handle comic libraries
       //const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comicLibraries");
 
-      const libraries: ComicLibrary[] = await getComicLibrariesAvailableToUser(userId);
+      const libraries: ComicLibrary[] = await getComicLibrariesAvailableToUser(
+        userId,
+      );
       return c.json(
         { libraries },
         200,
@@ -165,7 +167,7 @@ app.openapi(
         description: "Internal server error",
       },
     },
-  }), 
+  }),
   async (c) => {
     const id = parseInt(c.req.valid("param").id, 10);
 
@@ -189,7 +191,7 @@ app.openapi(
       console.error("Error retrieving comic library for user:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -242,10 +244,10 @@ app.openapi(
         description: "Internal server error",
       },
     },
-  }), 
+  }),
   async (c) => {
     const id = parseInt(c.req.valid("param").id, 10);
-    
+
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
 
     if (!user || !user.sub) {
@@ -267,7 +269,7 @@ app.openapi(
       console.error("Error starting analysis for comic library:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -320,7 +322,7 @@ app.openapi(
         description: "Internal server error",
       },
     },
-  }), 
+  }),
   async (c) => {
     const id = parseInt(c.req.valid("param").id, 10);
 
@@ -345,7 +347,7 @@ app.openapi(
       console.error("Error emptying trash for comic library:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -404,7 +406,7 @@ app.openapi(
         description: "Internal server error",
       },
     },
-  }), 
+  }),
   async (c) => {
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
 
@@ -439,7 +441,7 @@ app.openapi(
 
       return c.json({
         success: true,
-        'id': newLibraryId,
+        "id": newLibraryId,
       }, 201);
     } catch (error) {
       console.error("Error parsing JSON or registering library:", error);
@@ -451,7 +453,7 @@ app.openapi(
       }
       return c.json({ message: "Internal server error" }, 500);
     }
-  }
+  },
 );
 
 /**
@@ -506,7 +508,7 @@ app.openapi(
         description: "Internal server error",
       },
     },
-  }), 
+  }),
   async (c) => {
     const id = parseInt(c.req.valid("param").id, 10);
 
@@ -523,13 +525,15 @@ app.openapi(
 
     try {
       // TODO: use user.id and id to delete the library from the database
-      return c.json({ message: `Library[${id}] deleted for user ${user.id}` }, 200);
+      return c.json(
+        { message: `Library[${id}] deleted for user ${user.id}` },
+        200,
+      );
     } catch (error) {
       console.error("Error deleting comic library:", error);
       return c.json({ message: "Internal server error" }, 500);
     }
-    
-  }
+  },
 );
 
 export default app;

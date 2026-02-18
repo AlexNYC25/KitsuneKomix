@@ -23,7 +23,7 @@ app.openapi(
   }),
   (_c) => {
     return _c.json({ message: "Welcome to the API" }, 200);
-  }
+  },
 );
 
 // Serve static assets (CSS, JS, images) with proper cache headers
@@ -58,7 +58,7 @@ app.openapi(
   (c) => {
     // The middleware handles the response
     return c.body(null);
-  }
+  },
 );
 
 // Serve the main index.html for the root route with OpenAPI documentation
@@ -84,7 +84,7 @@ app.openapi(
   (c) => {
     // The middleware handles the response
     return c.body(null);
-  }
+  },
 );
 
 // SPA fallback: Only catch routes that don't start with /api, /health, etc.

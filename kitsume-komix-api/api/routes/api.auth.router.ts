@@ -10,12 +10,19 @@ import {
 import { verifyAccessToken } from "../../auth/auth.ts";
 
 import { AuthHeaderSchema } from "#schemas/header.schema.ts";
-import { LoginRequestSchema, RefreshTokenRequestSchema } from "#schemas/request.schema.ts";
-import { LoginResponseSchema, RefreshTokenResponseSchema, LogoutAllResponseSchema, ErrorResponseSchema, MessageResponseSchema } from "#schemas/response.schema.ts";
-
 import {
-  AppEnv,
-} from "#types/index.ts";
+  LoginRequestSchema,
+  RefreshTokenRequestSchema,
+} from "#schemas/request.schema.ts";
+import {
+  ErrorResponseSchema,
+  LoginResponseSchema,
+  LogoutAllResponseSchema,
+  MessageResponseSchema,
+  RefreshTokenResponseSchema,
+} from "#schemas/response.schema.ts";
+
+import { AppEnv } from "#types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -64,7 +71,8 @@ app.openapi(
         description: "Authentication failed",
       },
     },
-  }), async (c) => {
+  }),
+  async (c) => {
     const { email, password } = c.req.valid("json");
 
     try {
@@ -87,7 +95,7 @@ app.openapi(
     } catch (error: Error | unknown) {
       return c.json({ message: (error as Error).message }, 401);
     }
-  }
+  },
 );
 
 /**
@@ -137,7 +145,8 @@ app.openapi(
         description: "Token refresh failed",
       },
     },
-  }), async (c) => {
+  }),
+  async (c) => {
     try {
       const { refreshToken } = c.req.valid("json");
 
@@ -159,7 +168,7 @@ app.openapi(
         }`,
       }, 401);
     }
-  }
+  },
 );
 
 /**
@@ -209,7 +218,8 @@ app.openapi(
         description: "Logout failed",
       },
     },
-  }), async (c) => {
+  }),
+  async (c) => {
     try {
       const { refreshToken } = c.req.valid("json");
 
@@ -227,12 +237,12 @@ app.openapi(
         }`,
       }, 401);
     }
-  }
+  },
 );
 
 /**
  * POST /api/auth/logout-all
- * 
+ *
  * Logout from all devices by revoking all refresh tokens for the authenticated user
  */
 app.openapi(
@@ -271,7 +281,8 @@ app.openapi(
         description: "Logout from all devices failed",
       },
     },
-  }), async (c) => {
+  }),
+  async (c) => {
     try {
       // Manual auth check since middleware doesn't work well with OpenAPIHono typed routes
       const authHeader = c.req.header("Authorization");
@@ -302,7 +313,7 @@ app.openapi(
         }`,
       }, 500);
     }
-  }
+  },
 );
 
 export default app;

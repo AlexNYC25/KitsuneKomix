@@ -4,7 +4,10 @@ import { ErrorResponseSchema } from "#schemas/response.schema.ts";
 import { ParamIdSchema } from "#schemas/request.schema.ts";
 import { requireAuth } from "../middleware/authChecks.ts";
 
-import type { AppEnv, AccessRefreshTokenCombinedPayload } from "#types/index.ts";
+import type {
+  AccessRefreshTokenCombinedPayload,
+  AppEnv,
+} from "#types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -46,7 +49,7 @@ app.openapi(
 
     //TODO: implement duplicate detection logic
     return _c.json({ message: "Duplicate detection not implemented yet" }, 501);
-  }
+  },
 );
 
 // Get duplicates by ID
@@ -89,7 +92,7 @@ app.openapi(
     return _c.json({
       message: "Duplicate detection for comic page not implemented yet",
     }, 501);
-  }
+  },
 );
 
 // Delete duplicate
@@ -130,7 +133,7 @@ app.openapi(
 
     //TODO: implement duplicate deletion logic
     return _c.json({ message: "Duplicate deletion not implemented yet" }, 501);
-  }
+  },
 );
 
 export default app;
