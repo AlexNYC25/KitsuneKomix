@@ -44,6 +44,10 @@ import { insertComicPage } from "#sqlite/models/comicPages.model.ts";
 import { insertComicBookCover } from "#sqlite/models/comicBookCovers.model.ts";
 import { insertComicBookThumbnail } from "#sqlite/models/comicBookThumbnails.model.ts";
 
+import {
+  checkIfTheFileShouldBeProcessed
+} from "../actions/processComicFile.ts";
+
 // Database model imports - People/Creators
 import {
   insertComicWriter,
@@ -109,7 +113,8 @@ import {
 } from "#sqlite/models/comicSeriesGroups.model.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
-import { NewComicBook, NewComicSeries, WorkerJob } from "#types/index.ts";
+import { NewComicBook, NewComicSeries, WorkerJob, WorkerFileCheckResult } from "#types/index.ts";
+import { queue } from "sharp";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS
@@ -129,13 +134,12 @@ async function processNewComicFile(
 
   try {
     // ============== CHECK IF FILE EXISTS AND COMPARE HASH ==============
-    const existingComic = await getComicBookByFilePath(job.data.filePath);
-    const fileHash = await calculateFileHash(job.data.filePath);
+    const shouldProcessFile: WorkerFileCheckResult = await checkIfTheFileShouldBeProcessed(job.data.filePath);
 
     // If comic exists and hash hasn't changed, skip processing
-    if (existingComic && existingComic.hash === fileHash) {
+    if (!shouldProcessFile.shouldBeProcessed) {
       queueLogger.info(
-        `Skipping processing for ${job.data.filePath} - file unchanged (hash: ${fileHash})`,
+        `Skipping processing for ${job.data.filePath} - file unchanged)`,
       );
       return;
     }
@@ -163,7 +167,7 @@ async function processNewComicFile(
     const comicData = {
       library_id: libraryId,
       file_path: job.data.filePath,
-      hash: fileHash,
+      hash: shouldProcessFile.hash,
       title: standardizedMetadata?.title || null,
       series: standardizedMetadata?.series || rawFileDetails.series || null,
       issue_number: standardizedMetadata?.issueNumber || rawFileDetails.issue ||
@@ -202,10 +206,10 @@ async function processNewComicFile(
     let comicId: number;
 
     // ============== INSERT OR UPDATE COMIC BOOK RECORD ==============
-    if (existingComic) {
+    if (shouldProcessFile.dbRecord) {
       // Update existing record
-      await updateComicBook(existingComic.id, comicData);
-      comicId = existingComic.id;
+      await updateComicBook(shouldProcessFile.dbRecord.id, comicData);
+      comicId = shouldProcessFile.dbRecord.id;
       apiLogger.info(
         `Updated existing comic book with ID: ${comicId} (hash changed)`,
       );
@@ -214,7 +218,7 @@ async function processNewComicFile(
       const newRecord: NewComicBook = {
         libraryId: comicData.library_id,
         filePath: comicData.file_path,
-        hash: comicData.hash,
+        hash: shouldProcessFile.hash,
         title: comicData.title,
         series: comicData.series,
         issueNumber: comicData.issue_number,
