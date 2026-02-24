@@ -45,7 +45,8 @@ import { insertComicBookCover } from "#sqlite/models/comicBookCovers.model.ts";
 import { insertComicBookThumbnail } from "#sqlite/models/comicBookThumbnails.model.ts";
 
 import {
-  checkIfTheFileShouldBeProcessed
+  checkIfTheFileShouldBeProcessed,
+  findLibraryIdFromPath
 } from "../actions/processComicFile.ts";
 
 // Database model imports - People/Creators
@@ -114,7 +115,6 @@ import {
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
 import { NewComicBook, NewComicSeries, WorkerJob, WorkerFileCheckResult } from "#types/index.ts";
-import { queue } from "sharp";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS
@@ -144,21 +144,23 @@ async function processNewComicFile(
       return;
     }
 
-    // ============== METADATA AND LIBRARY PROCESSING ==============
-    const metadata: MetadataCompiled | null = await getMetadata(
-      job.data.filePath,
-    );
-    const libraryId: number | null = await findLibraryIdFromPath(
-      job.data.filePath,
-    );
-
-    const rawFileDetails = getComicFileRawDetails(job.data.filePath);
+    // ============= Determine library ID from file path ==============
+    const libraryId: number | null = await findLibraryIdFromPath(job.data.filePath);
 
     if (!libraryId) {
       throw new Error(
         `Could not determine library ID for file path: ${job.data.filePath}`,
       );
     }
+
+    // ============== METADATA PROCESSING ==============
+    const metadata: MetadataCompiled | null = await getMetadata(
+      job.data.filePath,
+    );
+
+    const rawFileDetails = getComicFileRawDetails(job.data.filePath);
+
+    
 
     const standardizedMetadata: StandardizedComicMetadata | null =
       await standardizeMetadata(job.data.filePath);
@@ -1308,25 +1310,6 @@ async function processComicSeriesGroup(
 // ==================================================================================
 // WORKER CONFIGURATION AND UTILITY FUNCTIONS
 // ==================================================================================
-
-/**
- * Helper function to find library ID from file path
- */
-const findLibraryIdFromPath = async (
-  filePath: string,
-): Promise<number | null> => {
-  const library = await getLibraryContainingPath(filePath);
-
-  if (library) {
-    queueLogger.info(
-      `Found library ID ${library.id} ("${library.name}") containing file: ${filePath}`,
-    );
-    return library.id;
-  } else {
-    queueLogger.info(`No library found containing file: ${filePath}`);
-    return null;
-  }
-};
 
 /**
  * Main BullMQ worker instance for processing comic book files and metadata
