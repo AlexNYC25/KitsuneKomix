@@ -2,23 +2,11 @@
 import {
 	getComicBookByFilePath
 } from "#sqlite/models/comicBooks.model.ts";
+import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts";
 
 import { calculateFileHash } from "#utilities/hash.ts";
 
 import type { ComicBook, WorkerFileCheckResult } from "#types/index.ts";
-
-/**
- * Fetches the comic book record for a given file path.
- * @param filePath File path to look up.
- * @returns Comic book record if found; otherwise null.
- */
-export const checkIfFileExistsInRecords = async (
-  filePath: string,
-): Promise<ComicBook | null> => {
-	const dbRecord: ComicBook | null = await getComicBookByFilePath(filePath);
-
-  return dbRecord;
-};
 
 /**
  * Determines whether a file should be processed by comparing its current hash to the stored hash.
@@ -42,4 +30,16 @@ export const checkIfTheFileShouldBeProcessed = async (
 
 	// If the file exists in records but the hash has changed, we need to process it
 	return { shouldBeProcessed, hash: fileHash, dbRecord };
+};
+
+export const findLibraryIdFromPath = async (
+	filePath: string,
+): Promise<number | null> => {
+	const library = await getLibraryContainingPath(filePath);
+
+	if (!library) {
+		return null;
+	}
+
+	return library.id;
 };
