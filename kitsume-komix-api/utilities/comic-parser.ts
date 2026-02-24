@@ -1,17 +1,4 @@
-export type ComicFileDetails = {
-  series: string;
-  issue: string;
-  volume?: string;
-  count?: string;
-  year?: string;
-};
-
-export type ComicSeriesDetails = {
-  series: string;
-  volume?: string;
-  count?: string;
-  year?: string;
-};
+import { ComicSeriesDetails, ComicFileDetails } from "#types/index.ts";
 
 export const getComicFileRawDetails = (filePath: string): ComicFileDetails => {
   const path = filePath.replace(/\\/g, "/");

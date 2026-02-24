@@ -4,6 +4,8 @@ export * from "./database.types.ts";
 // Re-export types related to workers
 export * from "./worker.type.ts";
 
+export * from "./comicParser.type.ts";
+
 // Re-export request and response types
 export * from "./request.type.ts";
 export * from "./responses.type.ts";
