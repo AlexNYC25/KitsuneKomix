@@ -32,6 +32,11 @@ export const checkIfTheFileShouldBeProcessed = async (
 	return { shouldBeProcessed, hash: fileHash, dbRecord };
 };
 
+/**
+ * Finds the library ID for a given file path.
+ * @param filePath The file path to check.
+ * @returns The library ID if found, otherwise null.
+ */
 export const findLibraryIdFromPath = async (
 	filePath: string,
 ): Promise<number | null> => {
