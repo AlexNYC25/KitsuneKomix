@@ -46,7 +46,8 @@ import { insertComicBookThumbnail } from "#sqlite/models/comicBookThumbnails.mod
 
 import {
   checkIfTheFileShouldBeProcessed,
-  findLibraryIdFromPath
+  findLibraryIdFromPath,
+  prepareComicFilesMetadataForProcessing
 } from "../actions/processComicFile.ts";
 
 // Database model imports - People/Creators
@@ -154,100 +155,25 @@ async function processNewComicFile(
     }
 
     // ============== METADATA PROCESSING ==============
-    const metadata: MetadataCompiled | null = await getMetadata(
-      job.data.filePath,
-    );
-
-    const rawFileDetails = getComicFileRawDetails(job.data.filePath);
-
-    
-
-    const standardizedMetadata: StandardizedComicMetadata | null =
-      await standardizeMetadata(job.data.filePath);
-
-    // ============== COMIC BOOK DATA PREPARATION ==============
-    const comicData = {
-      library_id: libraryId,
-      file_path: job.data.filePath,
-      hash: shouldProcessFile.hash,
-      title: standardizedMetadata?.title || null,
-      series: standardizedMetadata?.series || rawFileDetails.series || null,
-      issue_number: standardizedMetadata?.issueNumber || rawFileDetails.issue ||
-        null,
-      count: standardizedMetadata?.count || null,
-      volume: standardizedMetadata?.volume || rawFileDetails.volume || null,
-      alternate_series: standardizedMetadata?.alternateSeries || null,
-      alternate_issue_number: standardizedMetadata?.alternateNumber || null,
-      alternate_count: standardizedMetadata?.alternateCount || null,
-      page_count: standardizedMetadata?.pageCount || null,
-      file_size: await getFileSize(job.data.filePath),
-      summary: standardizedMetadata?.summary || null,
-      notes: standardizedMetadata?.notes || null,
-      year: standardizedMetadata?.year || Number(rawFileDetails.year) || null,
-      month: standardizedMetadata?.month || null,
-      day: standardizedMetadata?.day || null,
-      publisher: standardizedMetadata?.publisher?.[0] || null,
-      publication_date: standardizedMetadata?.year
-        ? `${standardizedMetadata.year}-${
-          String(standardizedMetadata.month || 1).padStart(2, "0")
-        }-${String(standardizedMetadata.day || 1).padStart(2, "0")}`
-        : null,
-      scan_info: standardizedMetadata?.scanInfo || null,
-      language: standardizedMetadata?.language || null,
-      format: standardizedMetadata?.format || null,
-      black_and_white: standardizedMetadata?.blackAndWhite ? 1 : 0,
-      manga: standardizedMetadata?.manga ? 1 : 0,
-      reading_direction: standardizedMetadata?.readingDirection || null,
-      review: standardizedMetadata?.review || null,
-      age_rating: standardizedMetadata?.ageRating || null,
-      community_rating: standardizedMetadata?.communityRating || null,
-      story_arcs: standardizedMetadata?.storyArcs || null,
-      series_groups: standardizedMetadata?.seriesGroups || null,
-    };
+    const comicsMetadataGeneratedNewRecord = await prepareComicFilesMetadataForProcessing({
+      libraryId,
+      filePath: job.data.filePath,
+      fileHash: shouldProcessFile.hash,
+    });
 
     let comicId: number;
 
     // ============== INSERT OR UPDATE COMIC BOOK RECORD ==============
     if (shouldProcessFile.dbRecord) {
       // Update existing record
-      await updateComicBook(shouldProcessFile.dbRecord.id, comicData);
+      await updateComicBook(shouldProcessFile.dbRecord.id, comicsMetadataGeneratedNewRecord.comicData);
       comicId = shouldProcessFile.dbRecord.id;
       apiLogger.info(
         `Updated existing comic book with ID: ${comicId} (hash changed)`,
       );
     } else {
       // Insert new record
-      const newRecord: NewComicBook = {
-        libraryId: comicData.library_id,
-        filePath: comicData.file_path,
-        hash: shouldProcessFile.hash,
-        title: comicData.title,
-        series: comicData.series,
-        issueNumber: comicData.issue_number,
-        count: comicData.count,
-        volume: comicData.volume,
-        alternateSeries: comicData.alternate_series,
-        alternateIssueNumber: comicData.alternate_issue_number,
-        alternateCount: comicData.alternate_count,
-        pageCount: comicData.page_count,
-        fileSize: comicData.file_size,
-        summary: comicData.summary,
-        notes: comicData.notes,
-        year: comicData.year,
-        month: comicData.month,
-        day: comicData.day,
-        publisher: comicData.publisher,
-        publicationDate: comicData.publication_date,
-        scanInfo: comicData.scan_info,
-        language: comicData.language,
-        format: comicData.format,
-        blackAndWhite: comicData.black_and_white,
-        manga: comicData.manga,
-        readingDirection: comicData.reading_direction,
-        review: comicData.review,
-        ageRating: comicData.age_rating,
-        communityRating: comicData.community_rating,
-      };
+      const newRecord: NewComicBook = comicsMetadataGeneratedNewRecord.comicData;
 
       comicId = await insertComicBook(newRecord);
       apiLogger.info(`Inserted new comic book with ID: ${comicId}`);
@@ -260,12 +186,18 @@ async function processNewComicFile(
     await queueImageProcessing(comicId, job.data.filePath);
 
     // Queue web link processing if available
-    await queueWebLinkProcessing(comicId, standardizedMetadata?.web);
+    await queueWebLinkProcessing(comicId, comicsMetadataGeneratedNewRecord.standardizedMetadata?.web);
 
     const rawSeriesDetails = getComicSeriesRawDetails(
       job.data.filePath.split("/").slice(0, -1).join("/"),
     );
 
+
+    // TODO: Find out what is this for?
+    // We eventually pass it to the series processing job, but may not be very efficient
+    const metadata: MetadataCompiled | null = await getMetadata(
+      job.data.filePath,
+    );
     // Queue series processing if needed
     // Prepare comic metadata - prioritize folder-based series info over file metadata
     const comicMetadata: ComicMetadata | null = metadata
@@ -290,11 +222,13 @@ async function processNewComicFile(
 
     await queueSeriesProcessing(comicId, job.data.filePath, comicMetadata);
 
-    // Queue creator processing
-    await queueCreatorProcessing(comicId, standardizedMetadata);
+    // Queue creator processing FIXME: the second parameter needs to be set
+    await queueCreatorProcessing(comicId, {});
 
-    // Queue publisher/content processing
-    await queuePublisherContentProcessing(comicId, standardizedMetadata);
+    // Queue story arc/series group processing
+
+    // Queue publisher/content processing FIXME: the second parameter needs to be set
+    await queuePublisherContentProcessing(comicId, {});
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     queueLogger.error(
