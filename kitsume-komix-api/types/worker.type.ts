@@ -1,4 +1,5 @@
-import { ComicBook } from "./database.types.ts";
+import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { ComicBook, NewComicBook } from "./database.types.ts";
 
 export type WorkerJob = {
   data: {
@@ -17,4 +18,24 @@ export type WorkerFileCheckResult = {
   shouldBeProcessed: boolean;
   dbRecord?: ComicBook;
   hash: string;
+};
+
+/**
+ * Data used for building a new comic book insertion as part
+ * of the worker's processing workflow.
+ */
+export type WorkerDataForBuildingComicInsertion = {
+  libraryId: number;
+  filePath: string;
+  fileHash: string;
+}
+
+/**
+ * Result type for preparing comic file metadata for processing.
+ * - `comicData`: The combined comic data ready for insertion.
+ * - `standardizedMetadata`: Optional standardized metadata extracted from the file.
+ */
+export type WorkerComicFileMetadataResult = {
+  comicData: NewComicBook;
+  standardizedMetadata?: StandardizedComicMetadata;
 };
