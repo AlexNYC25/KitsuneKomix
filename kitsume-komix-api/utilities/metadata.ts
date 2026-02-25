@@ -4,7 +4,9 @@ import {
   MetadataCompiled,
   readComicFileMetadata,
 } from "comic-metadata-tool";
+import { getFileSize } from "#utilities/file.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
 
 /**
  * Uses the comic-metadata-tool to read metadata from a comic file.
@@ -29,11 +31,11 @@ export const getMetadata = async (filePath: string) => {
  */
 export const standardizeMetadata = async (
   filePath: string,
-): Promise<StandardizedComicMetadata | null> => {
+): Promise<StandardizedComicMetadata | undefined> => {
   const rawMetadata: MetadataCompiled | null = await getMetadata(filePath);
 
   if (!rawMetadata) {
-    return null;
+    return undefined;
   }
 
   const comicInfoXml = rawMetadata?.comicInfoXml;
@@ -45,7 +47,7 @@ export const standardizeMetadata = async (
     return standardizeFromCoMet(cometXml);
   }
 
-  return null;
+  return undefined;
 };
 
 /**
@@ -202,3 +204,56 @@ const standardizeFromCoMet = (comet: CoMet): StandardizedComicMetadata => {
     pages: undefined,
   };
 };
+
+/**
+ * Combines metadata from various sources with parsed file details to create a new comic book entry.
+ * @param workerData Data from the worker for building the comic insertion.
+ * @param fileDetails Parsed details from the comic file.
+ * @param fileMetadata Optional standardized metadata.
+ * @returns A new comic book object ready for insertion.
+ */
+export const combineMetadataWithParsedFileDetails = async (
+  workerData: WorkerDataForBuildingComicInsertion,
+  fileDetails: ComicFileDetails,
+  fileMetadata?: StandardizedComicMetadata,
+): Promise<NewComicBook> => {
+
+  const comicData: NewComicBook = {
+    libraryId: workerData.libraryId,
+    filePath: workerData.filePath,
+    hash: workerData.fileHash,
+    title: fileMetadata?.title || null,
+    series: fileMetadata?.series || fileDetails.series || null,
+    issueNumber: fileMetadata?.issueNumber || fileDetails.issue ||
+      null,
+    count: fileMetadata?.count || null,
+    volume: fileMetadata?.volume || fileDetails.volume || null,
+    alternateSeries: fileMetadata?.alternateSeries || null,
+    alternateIssueNumber: fileMetadata?.alternateNumber || null,
+    alternateCount: fileMetadata?.alternateCount || null,
+    pageCount: fileMetadata?.pageCount || null,
+    fileSize: await getFileSize(workerData.filePath),
+    summary: fileMetadata?.summary || null,
+    notes: fileMetadata?.notes || null,
+    year: fileMetadata?.year || Number(fileDetails.year) || null,
+    month: fileMetadata?.month || null,
+    day: fileMetadata?.day || null,
+    publisher: fileMetadata?.publisher?.[0] || null,
+    publicationDate: fileMetadata?.year
+      ? `${fileMetadata.year}-${
+        String(fileMetadata.month || 1).padStart(2, "0")
+      }-${String(fileMetadata.day || 1).padStart(2, "0")}`
+      : null,
+    scanInfo: fileMetadata?.scanInfo || null,
+    language: fileMetadata?.language || null,
+    format: fileMetadata?.format || null,
+    blackAndWhite: fileMetadata?.blackAndWhite ? 1 : 0,
+    manga: fileMetadata?.manga ? 1 : 0,
+    readingDirection: fileMetadata?.readingDirection || null,
+    review: fileMetadata?.review || null,
+    ageRating: fileMetadata?.ageRating || null,
+    communityRating: fileMetadata?.communityRating || null,
+  };
+
+  return comicData;
+}
