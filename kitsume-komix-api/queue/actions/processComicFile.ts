@@ -1,4 +1,7 @@
 
+import { standardizeMetadata, combineMetadataWithParsedFileDetails } from "#utilities/metadata.ts";
+import { getComicFileRawDetails } from "#utilities/comic-parser.ts";
+
 import {
 	getComicBookByFilePath
 } from "#sqlite/models/comicBooks.model.ts";
@@ -6,7 +9,15 @@ import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts
 
 import { calculateFileHash } from "#utilities/hash.ts";
 
-import type { ComicBook, WorkerFileCheckResult } from "#types/index.ts";
+import type { 
+	ComicBook, 
+	WorkerFileCheckResult,
+	ComicFileDetails,
+  NewComicBook,
+  WorkerDataForBuildingComicInsertion,
+	WorkerComicFileMetadataResult
+} from "#types/index.ts";
+import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
 /**
  * Determines whether a file should be processed by comparing its current hash to the stored hash.
@@ -48,3 +59,30 @@ export const findLibraryIdFromPath = async (
 
 	return library.id;
 };
+
+/**
+ * Begins the process of preparing comic file metadata for insertion by combining standardized metadata with parsed file details.
+ * @param workerData Data from the worker for building the comic insertion.
+ * @returns An object containing the combined comic insertion data and standardized metadata.
+ */
+export const prepareComicFilesMetadataForProcessing = async (
+	workerData: WorkerDataForBuildingComicInsertion
+): Promise<WorkerComicFileMetadataResult> => {
+	const rawFileDetails: ComicFileDetails = getComicFileRawDetails(workerData.filePath);
+
+	const standardizedMetadata: StandardizedComicMetadata | undefined =
+      await standardizeMetadata(workerData.filePath);
+
+	const combinedData: NewComicBook = await combineMetadataWithParsedFileDetails(
+		workerData,
+		rawFileDetails,
+		standardizedMetadata,
+	);
+
+	const resultData: WorkerComicFileMetadataResult = {
+		comicData: combinedData,
+		standardizedMetadata: standardizedMetadata,
+	};
+
+	return resultData;
+}
