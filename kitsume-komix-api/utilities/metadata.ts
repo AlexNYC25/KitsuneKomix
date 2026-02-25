@@ -12,7 +12,7 @@ import { StandardizedComicMetadata } from "#interfaces/index.ts";
  * @returns A promise that resolves to the metadata object or null if an error occurs.
  * @throws Will log an error if metadata reading fails.
  */
-export async function getMetadata(filePath: string) {
+export const getMetadata = async (filePath: string) => {
   try {
     const metadata = await readComicFileMetadata(filePath);
     return metadata;
@@ -20,11 +20,16 @@ export async function getMetadata(filePath: string) {
     console.error("Error fetching metadata for file", filePath, ":", error);
     return null;
   }
-}
+};
 
-export async function standardizeMetadata(
+/**
+ * Standardizes comic metadata from various formats into a unified structure.
+ * @param filePath Path to the comic file.
+ * @returns Standardized metadata object or null if extraction fails.
+ */
+export const standardizeMetadata = async (
   filePath: string,
-): Promise<StandardizedComicMetadata | null> {
+): Promise<StandardizedComicMetadata | null> => {
   const rawMetadata: MetadataCompiled | null = await getMetadata(filePath);
 
   if (!rawMetadata) {
@@ -41,11 +46,16 @@ export async function standardizeMetadata(
   }
 
   return null;
-}
+};
 
-function standardizeFromComicInfo(
+/**
+ * Converts ComicInfo XML metadata to standardized format.
+ * @param comicInfo ComicInfo metadata object.
+ * @returns Standardized metadata object.
+ */
+const standardizeFromComicInfo = (
   comicInfo: ComicInfo,
-): StandardizedComicMetadata {
+): StandardizedComicMetadata => {
   // Helper function to safely split comma-separated strings
   const splitAndClean = (
     value: string | string[] | undefined,
@@ -122,9 +132,14 @@ function standardizeFromComicInfo(
       height: page.ImageHeight,
     })),
   };
-}
+};
 
-function standardizeFromCoMet(comet: CoMet): StandardizedComicMetadata {
+/**
+ * Converts CoMet XML metadata to standardized format.
+ * @param comet CoMet metadata object.
+ * @returns Standardized metadata object.
+ */
+const standardizeFromCoMet = (comet: CoMet): StandardizedComicMetadata => {
   // Helper function to safely split comma-separated strings
   const splitAndClean = (
     value: string | string[] | undefined,
@@ -186,4 +201,4 @@ function standardizeFromCoMet(comet: CoMet): StandardizedComicMetadata {
     // Pages
     pages: undefined,
   };
-}
+};
