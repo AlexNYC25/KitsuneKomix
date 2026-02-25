@@ -46,7 +46,8 @@ import { insertComicBookThumbnail } from "#sqlite/models/comicBookThumbnails.mod
 
 import {
   checkIfTheFileShouldBeProcessed,
-  prepareComicFilesMetadataForProcessing
+  prepareComicFilesMetadataForProcessing,
+  processTheUpdateOrInsertionOfComicBook
 } from "../actions/processComicFile.ts";
 
 // Database model imports - People/Creators
@@ -114,7 +115,7 @@ import {
 } from "#sqlite/models/comicSeriesGroups.model.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
-import { NewComicBook, NewComicSeries, WorkerJob, WorkerFileCheckResult } from "#types/index.ts";
+import { NewComicBook, NewComicSeries, WorkerJob, WorkerFileCheckResult, WorkerComicFileMetadataResult } from "#types/index.ts";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS
@@ -154,28 +155,26 @@ async function processNewComicFile(
     }
 
     // ============== METADATA PROCESSING ==============
-    const comicsMetadataGeneratedNewRecord = await prepareComicFilesMetadataForProcessing({
+    const comicsMetadataGeneratedNewRecord: WorkerComicFileMetadataResult = await prepareComicFilesMetadataForProcessing({
       libraryId,
       filePath: job.data.filePath,
       fileHash: shouldProcessFile.hash,
     });
 
     // ============== INSERT OR UPDATE COMIC BOOK RECORD ==============
-    let comicId: number;
+    const comicId: number = await processTheUpdateOrInsertionOfComicBook(
+      shouldProcessFile,
+      comicsMetadataGeneratedNewRecord.comicData,
+    );
 
-    if (shouldProcessFile.dbRecord) {
-      // Update existing record
-      await updateComicBook(shouldProcessFile.dbRecord.id, comicsMetadataGeneratedNewRecord.comicData);
-      comicId = shouldProcessFile.dbRecord.id;
+    if (comicId && shouldProcessFile.dbRecord) {
       apiLogger.info(
         `Updated existing comic book with ID: ${comicId} (hash changed)`,
       );
-    } else {
-      // Insert new record
-      const newRecord: NewComicBook = comicsMetadataGeneratedNewRecord.comicData;
-
-      comicId = await insertComicBook(newRecord);
+    } else if (comicId) {
       apiLogger.info(`Inserted new comic book with ID: ${comicId}`);
+    } else {
+      throw new Error(`Failed to insert or update comic book for file: ${job.data.filePath}`);
     }
 
     // ============== QUEUE FOLLOW-UP JOBS ==============

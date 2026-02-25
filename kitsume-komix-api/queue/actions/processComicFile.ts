@@ -3,7 +3,9 @@ import { standardizeMetadata, combineMetadataWithParsedFileDetails } from "#util
 import { getComicFileRawDetails } from "#utilities/comic-parser.ts";
 
 import {
-	getComicBookByFilePath
+	getComicBookByFilePath,
+	insertComicBook,
+  updateComicBook,
 } from "#sqlite/models/comicBooks.model.ts";
 import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts";
 
@@ -68,4 +70,29 @@ export const prepareComicFilesMetadataForProcessing = async (
 	};
 
 	return resultData;
+}
+
+/**
+ * Handles the logic for either updating an existing comic book record or inserting a new one based on the provided metadata and file check results.
+ * @param shouldProcessFile The result of the initial checks over the comic file against the db
+ * @param comicData The generated data insertion object for adding a new/updated comic book data
+ * @returns The ID of the comic book that was updated or inserted
+ */
+export const processTheUpdateOrInsertionOfComicBook = async (
+	shouldProcessFile: WorkerFileCheckResult,
+	comicData: NewComicBook
+) => {
+	let comicId: number;
+
+	if (shouldProcessFile.dbRecord) {
+		// Update existing record
+		await updateComicBook(shouldProcessFile.dbRecord.id, comicData);
+		comicId = shouldProcessFile.dbRecord.id;
+	} else {
+		// Insert new record
+		const newRecord: NewComicBook = comicData;
+		comicId = await insertComicBook(newRecord);
+	}
+
+	return comicId;
 }
