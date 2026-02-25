@@ -44,23 +44,6 @@ export const checkIfTheFileShouldBeProcessed = async (
 };
 
 /**
- * Finds the library ID for a given file path.
- * @param filePath The file path to check.
- * @returns The library ID if found, otherwise null.
- */
-export const findLibraryIdFromPath = async (
-	filePath: string,
-): Promise<number | null> => {
-	const library = await getLibraryContainingPath(filePath);
-
-	if (!library) {
-		return null;
-	}
-
-	return library.id;
-};
-
-/**
  * Begins the process of preparing comic file metadata for insertion by combining standardized metadata with parsed file details.
  * @param workerData Data from the worker for building the comic insertion.
  * @returns An object containing the combined comic insertion data and standardized metadata.

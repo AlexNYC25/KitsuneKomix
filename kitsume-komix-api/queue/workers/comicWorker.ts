@@ -46,7 +46,6 @@ import { insertComicBookThumbnail } from "#sqlite/models/comicBookThumbnails.mod
 
 import {
   checkIfTheFileShouldBeProcessed,
-  findLibraryIdFromPath,
   prepareComicFilesMetadataForProcessing
 } from "../actions/processComicFile.ts";
 
@@ -146,7 +145,7 @@ async function processNewComicFile(
     }
 
     // ============= Determine library ID from file path ==============
-    const libraryId: number | null = await findLibraryIdFromPath(job.data.filePath);
+    const libraryId: number | null = (await getLibraryContainingPath(job.data.filePath))?.id || null;
 
     if (!libraryId) {
       throw new Error(
@@ -161,9 +160,9 @@ async function processNewComicFile(
       fileHash: shouldProcessFile.hash,
     });
 
+    // ============== INSERT OR UPDATE COMIC BOOK RECORD ==============
     let comicId: number;
 
-    // ============== INSERT OR UPDATE COMIC BOOK RECORD ==============
     if (shouldProcessFile.dbRecord) {
       // Update existing record
       await updateComicBook(shouldProcessFile.dbRecord.id, comicsMetadataGeneratedNewRecord.comicData);
