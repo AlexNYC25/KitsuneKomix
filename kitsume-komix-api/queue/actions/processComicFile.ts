@@ -1,12 +1,17 @@
+import { dirname } from "@std/path";
 
 import { standardizeMetadata, combineMetadataWithParsedFileDetails } from "#utilities/metadata.ts";
 import { getComicFileRawDetails } from "#utilities/comic-parser.ts";
+import { queueLogger } from "../../logger/loggers.ts";
 
 import {
 	getComicBookByFilePath,
 	insertComicBook,
   updateComicBook,
 } from "#sqlite/models/comicBooks.model.ts";
+import {
+	addComicBookToSeries
+} from "#sqlite/models/comicSeries.model.ts";
 import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts";
 
 import { calculateFileHash } from "#utilities/hash.ts";
@@ -17,9 +22,11 @@ import type {
 	ComicFileDetails,
   NewComicBook,
   WorkerDataForBuildingComicInsertion,
-	WorkerComicFileMetadataResult
+	WorkerComicFileMetadataResult,
+  ComicSeries
 } from "#types/index.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { queue } from "sharp";
 
 /**
  * Determines whether a file should be processed by comparing its current hash to the stored hash.
@@ -96,3 +103,21 @@ export const processTheUpdateOrInsertionOfComicBook = async (
 
 	return comicId;
 }
+
+export const processTheLinkingOfComicBookToSeries = async (
+	comicId: number,
+	seriesId: number
+) => {
+	try {
+		const linked: boolean = await addComicBookToSeries(seriesId, comicId);
+
+		if (linked) {
+			queueLogger.info(`Successfully linked comic book ID ${comicId} to series ID ${seriesId}`);
+			return;
+		}
+
+		queueLogger.error(`Comic book ID ${comicId} is already linked to series ID ${seriesId} or there was an issue linking them.`);
+	} catch (error) {
+		throw new Error(error instanceof Error ? error.message : String(error));
+	}
+};
