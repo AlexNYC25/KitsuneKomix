@@ -1,4 +1,4 @@
-import { appQueue } from "../queueManager.ts";
+import { appQueue } from "../../queue/queueManager.ts";
 import { apiLogger } from "../../logger/loggers.ts";
 
 export async function addNewComicFile(
