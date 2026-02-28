@@ -7,6 +7,7 @@ import {
 import { getFileSize } from "#utilities/file.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
+import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts";
 
 /**
  * Uses the comic-metadata-tool to read metadata from a comic file.
@@ -217,9 +218,14 @@ export const combineMetadataWithParsedFileDetails = async (
   fileDetails: ComicFileDetails,
   fileMetadata?: StandardizedComicMetadata,
 ): Promise<NewComicBook> => {
+  const libraryId: number | null = (await getLibraryContainingPath(workerData.filePath))?.id || null;
+
+  if (!libraryId) {
+    throw new Error(`No library found containing the path: ${workerData.filePath}`);
+  }
 
   const comicData: NewComicBook = {
-    libraryId: workerData.libraryId,
+    libraryId: libraryId,
     filePath: workerData.filePath,
     hash: workerData.fileHash,
     title: fileMetadata?.title || null,

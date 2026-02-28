@@ -25,7 +25,6 @@ export type WorkerFileCheckResult = {
  * of the worker's processing workflow.
  */
 export type WorkerDataForBuildingComicInsertion = {
-  libraryId: number;
   filePath: string;
   fileHash: string;
 }
