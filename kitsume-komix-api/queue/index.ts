@@ -40,16 +40,8 @@ appQueueEvents.on("error", (error) => {
   queueLogger.error(`Queue error: ${error}`);
 });
 
-/**
- * File Queue for processing new or updated comic files.
- * 
- * This queue is specifically designed to be the initial point of entry
- * - loads data into redis for quick access by the workers
- * - checks if the file has been processed before by comparing hashes
- * - checks if the parent folder of the comic file is registered as a series and if not, queues a follow-up job to process the series information
- * - builds the workflow for processing the comic file and inserting/updating the database record with the extracted metadata and generated thumbnails
- */
-export const fileQueue = new Queue("fileProcessingQueue", {
+
+export const fileOrchestrationQueue = new Queue("fileOrchestrationQueue", {
   connection: redisConnection,
   defaultJobOptions: {
     removeOnComplete: true,
@@ -62,7 +54,45 @@ export const fileQueue = new Queue("fileProcessingQueue", {
   },
 } as QueueOptions);
 
-export const fileQueueEvents = new QueueEvents("fileProcessingQueue", {
+export const fileOrchestrationQueueEvents = new QueueEvents("fileOrchestrationQueue", {
+  connection: redisConnection,
+});
+
+fileOrchestrationQueue.on("error", (error) => {
+  //console.error("File orchestration queue connection error:", error);
+  queueLogger.error(`File orchestration queue connection error: ${error}`);
+});
+
+fileOrchestrationQueueEvents.on("completed", ({ jobId }) => {
+  //console.log(`File orchestration queue event: Job ${jobId} completed`);
+  queueLogger.info(`File orchestration job ${jobId} has completed`);
+});
+
+fileOrchestrationQueueEvents.on("failed", ({ jobId, failedReason }) => {
+  //console.log(`File orchestration queue event: Job ${jobId} failed - ${failedReason}`);
+  queueLogger.error(`File orchestration job ${jobId} has failed with reason: ${failedReason}`);
+});
+
+fileOrchestrationQueueEvents.on("error", (error) => {
+  console.error("File orchestration queue events error:", error);
+  queueLogger.error(`File orchestration queue error: ${error}`);
+});
+
+
+export const fileQueue = new Queue("files", {
+  connection: redisConnection,
+  defaultJobOptions: {
+    removeOnComplete: true,
+    removeOnFail: false,
+    attempts: 3,
+    backoff: {
+      type: "exponential",
+      delay: 5000, // Initial delay of 5 seconds
+    },
+  },
+} as QueueOptions);
+
+export const fileQueueEvents = new QueueEvents("files", {
   connection: redisConnection,
 });
 
@@ -90,7 +120,7 @@ fileQueueEvents.on("error", (error) => {
  * The Series Queue is responsible for processing series information and linking comic books to their respective series based on the parent folder structure 
  * It handles the creation of new series records in the database if they don't already exist, and ensures that comic books are properly associated with their series.
  */
-export const seriesQueue = new Queue("seriesProcessingQueue", {
+export const seriesQueue = new Queue("comicSeries", {
   connection: redisConnection,
   defaultJobOptions: {
     removeOnComplete: true,
@@ -103,7 +133,7 @@ export const seriesQueue = new Queue("seriesProcessingQueue", {
   },
 } as QueueOptions);
 
-export const seriesQueueEvents = new QueueEvents("seriesProcessingQueue", {
+export const seriesQueueEvents = new QueueEvents("comicSeries", {
   connection: redisConnection,
 });
 
@@ -131,7 +161,7 @@ seriesQueueEvents.on("error", (error) => {
  * The Comic Book Queue is responsible for the detailed processing of comic book files, including metadata extraction, thumbnail generation, and database insertion/updating.
  * It works closely with the file queue to receive jobs for new or updated comic files, and ensures that all necessary processing steps are completed before finalizing the comic book record in the database.
  */
-export const comicBookQueue = new Queue("comicBookProcessingQueue", {
+export const comicBookQueue = new Queue("comicBooks", {
   connection: redisConnection,
   defaultJobOptions: {
     removeOnComplete: true,
@@ -144,7 +174,7 @@ export const comicBookQueue = new Queue("comicBookProcessingQueue", {
   },
 } as QueueOptions);
 
-export const comicBookQueueEvents = new QueueEvents("comicBookProcessingQueue", {
+export const comicBookQueueEvents = new QueueEvents("comicBooks", {
   connection: redisConnection,
 });
 
