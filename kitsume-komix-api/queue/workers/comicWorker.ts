@@ -20,7 +20,7 @@ import {
 import { createImageThumbnail } from "#utilities/image.ts";
 
 // Queue and configuration imports
-import { appQueue } from "../queueManager.ts";
+import { appQueue } from "../index.ts";
 import { redisConnection } from "../../db/redis/redisConnection.ts";
 import { apiLogger, queueLogger } from "../../logger/loggers.ts";
 
@@ -47,6 +47,7 @@ import { insertComicBookThumbnail } from "#sqlite/models/comicBookThumbnails.mod
 import {
   checkIfTheFileShouldBeProcessed,
   prepareComicFilesMetadataForProcessing,
+  processTheLinkingOfComicBookToSeries,
   processTheUpdateOrInsertionOfComicBook
 } from "../actions/processComicFile.ts";
 
@@ -115,7 +116,7 @@ import {
 } from "#sqlite/models/comicSeriesGroups.model.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
-import { NewComicBook, NewComicSeries, WorkerJob, WorkerFileCheckResult, WorkerComicFileMetadataResult } from "#types/index.ts";
+import { NewComicBook, NewComicSeries, WorkerJob, WorkerFileCheckResult, WorkerComicFileMetadataResult, ComicSeries } from "#types/index.ts";
 
 // ==================================================================================
 // MAIN PROCESSING FUNCTIONS
@@ -156,7 +157,6 @@ async function processNewComicFile(
 
     // ============== METADATA PROCESSING ==============
     const comicsMetadataGeneratedNewRecord: WorkerComicFileMetadataResult = await prepareComicFilesMetadataForProcessing({
-      libraryId,
       filePath: job.data.filePath,
       fileHash: shouldProcessFile.hash,
     });
@@ -177,6 +177,9 @@ async function processNewComicFile(
       throw new Error(`Failed to insert or update comic book for file: ${job.data.filePath}`);
     }
 
+    // ============== SERIES PROCESSING ==============  
+    await queueSeriesProcessing(comicId, job.data.filePath, comicsMetadataGeneratedNewRecord.standardizedMetadata);
+
     // ============== QUEUE FOLLOW-UP JOBS ==============
     // Only queue follow-up jobs for new files or files with changed hash
 
@@ -185,40 +188,6 @@ async function processNewComicFile(
 
     // Queue web link processing if available
     await queueWebLinkProcessing(comicId, comicsMetadataGeneratedNewRecord.standardizedMetadata?.web);
-
-    const rawSeriesDetails = getComicSeriesRawDetails(
-      job.data.filePath.split("/").slice(0, -1).join("/"),
-    );
-
-
-    // TODO: Find out what is this for?
-    // We eventually pass it to the series processing job, but may not be very efficient
-    const metadata: MetadataCompiled | null = await getMetadata(
-      job.data.filePath,
-    );
-    // Queue series processing if needed
-    // Prepare comic metadata - prioritize folder-based series info over file metadata
-    const comicMetadata: ComicMetadata | null = metadata
-      ? {
-        comicInfoXml: metadata.comicInfoXml,
-        filePath: job.data.filePath,
-        ...metadata,
-      }
-      : {
-        // When no file metadata available, use folder-based series information
-        comicInfoXml: {
-          series: rawSeriesDetails.series,
-          volume: rawSeriesDetails.volume
-            ? Number(rawSeriesDetails.volume)
-            : undefined,
-          year: rawSeriesDetails.year
-            ? Number(rawSeriesDetails.year)
-            : undefined,
-        },
-        filePath: job.data.filePath,
-      };
-
-    await queueSeriesProcessing(comicId, job.data.filePath, comicMetadata);
 
     // Queue creator processing FIXME: the second parameter needs to be set
     await queueCreatorProcessing(comicId, {});
@@ -450,7 +419,7 @@ async function processComicFileImages(
  */
 async function processComicSeries(
   job: {
-    data: { seriesPath: string; comicId: number; metadata: ComicMetadata };
+    data: { seriesPath: string; comicId: number; metadata: StandardizedComicMetadata | undefined };
   },
 ): Promise<void> {
   try {
@@ -466,7 +435,7 @@ async function processComicSeries(
     }
 
     const seriesData: NewComicSeries = {
-      name: job.data.metadata?.comicInfoXml?.series || seriesName,
+      name: job.data.metadata?.series || seriesName,
       description: null,
       folderPath: job.data.seriesPath,
     };
@@ -596,13 +565,25 @@ async function queueWebLinkProcessing(
 async function queueSeriesProcessing(
   comicId: number,
   filePath: string,
-  metadata: ComicMetadata | null,
+  metadata: StandardizedComicMetadata | undefined,
 ): Promise<void> {
+  // First we take the file path and determines the parent folder's path for checking if its 
+  // registered as a series in the database
   const parentPath = dirname(filePath);
-  queueLogger.info(`Checking for comic series at path: ${parentPath}`);
+  let existingSeries: ComicSeries | null = null;
 
-  const existingSeries = await getComicSeriesByPath(parentPath);
+  try {
+    existingSeries = await getComicSeriesByPath(parentPath);
+    queueLogger.info(`Checking for comic series at path: ${parentPath}`);
+  } catch (error) { 
+    queueLogger.error(
+      `Error checking for existing comic series at path: ${parentPath}: ${error}`,
+    );
+    
+    return; // Exit the function if there's an error checking for existing series
+  }
 
+  // If no existing series found, queue a job to process the series information and link it to the comic book
   if (!existingSeries) {
     queueLogger.info(
       `No existing series found for path: ${parentPath}, adding series processing job to queue`,
@@ -615,29 +596,23 @@ async function queueSeriesProcessing(
     });
 
     apiLogger.info(`Added series processing job for path: ${parentPath}`);
-  } else {
-    queueLogger.info(
-      `Series already exists for path: ${parentPath}, series ID: ${existingSeries.id}`,
-    );
 
-    // Add the comic book to the existing series
-    try {
-      const linked = await addComicBookToSeries(existingSeries.id, comicId);
-      if (linked) {
-        apiLogger.info(
-          `Successfully linked comic book ${comicId} to existing series ${existingSeries.id}`,
-        );
-      } else {
-        apiLogger.warn(
-          `Comic book ${comicId} may already be linked to series ${existingSeries.id}`,
-        );
-      }
-    } catch (error) {
-      queueLogger.error(
-        `Error linking comic book ${comicId} to series ${existingSeries.id}: ${error}`,
-      );
-    }
+    return; // Exit the function after queuing series processing
   }
+
+  queueLogger.info(
+    `Series already exists for path: ${parentPath}, series ID: ${existingSeries.id}`,
+  );
+
+  // Add the comic book to the existing series
+  try {
+    await processTheLinkingOfComicBookToSeries(comicId, existingSeries.id);
+  } catch (error) {
+    queueLogger.error(
+      `Error linking comic book ${comicId} to series ${existingSeries.id}: ${error}`,
+    );
+  }
+  
 }
 
 /**
