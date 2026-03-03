@@ -1,5 +1,5 @@
-import { appQueue } from "../../queue/index.ts";
 import { apiLogger } from "../../logger/loggers.ts";
+import { orchestrateFile } from "../../queue/orchestrators/comic.orchestrator.ts";
 
 export async function addNewComicFile(
   params: { filePath: string; metadata: object },
@@ -7,10 +7,7 @@ export async function addNewComicFile(
   try {
     apiLogger.info(`Adding new comic file job to queue: ${params.filePath}`);
 
-    const job = await appQueue.add("newComicFile", params);
-
-    apiLogger.info(`Job successfully added to queue with ID: ${job.id}`);
-    return job;
+    await orchestrateFile(params.filePath);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     apiLogger.error(
