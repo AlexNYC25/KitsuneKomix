@@ -4,15 +4,19 @@ import {
   MetadataCompiled,
   readComicFileMetadata,
 } from "comic-metadata-tool";
-import { createClient } from "redis";
 
 import { getFileSize } from "#utilities/file.ts";
-import { redisConnection } from "#db/redis/redisConnection.ts";
 
 import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts";
 
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
+
+const METADATA_CACHE_TTL_MS = 60 * 60 * 1000;
+const metadataCache = new Map<
+  string,
+  { value: StandardizedComicMetadata; expiresAt: number }
+>();
 
 /**
  * Uses the comic-metadata-tool to read metadata from a comic file.
@@ -270,98 +274,42 @@ export const combineMetadataWithParsedFileDetails = async (
 }
 
 /**
- * Stores standardized comic metadata in Redis cache with a 1-hour TTL.
- * @param filePath Path to the comic file.
- * @param metadata Standardized metadata object to cache.
- * @throws Error if caching fails.
+ * Stores standardized comic metadata in an in-process cache with a 1-hour TTL.
  */
 export const loadMetadataIntoCache = async (
   filePath: string,
-  metadata: StandardizedComicMetadata
+  metadata: StandardizedComicMetadata,
 ): Promise<void> => {
-  try {
-    const client = createClient({
-      socket: {
-        host: redisConnection.host,
-        port: redisConnection.port,
-      }
-    });
-    await client.connect();
-
-    const cacheKey = `metadata:${filePath}`;
-    const serializedMetadata = JSON.stringify(metadata);
-    
-    // Store metadata with a 1-hour TTL (3600 seconds)
-    await client.setEx(cacheKey, 3600, serializedMetadata);
-
-    await client.disconnect();
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(`Error loading metadata into cache for ${filePath}:`, errorMessage);
-    throw error;
-  }
+  metadataCache.set(filePath, {
+    value: metadata,
+    expiresAt: Date.now() + METADATA_CACHE_TTL_MS,
+  });
 };
 
 /**
- * Retrieves cached comic metadata from Redis.
- * @param filePath Path to the comic file.
- * @returns Cached metadata object or null if not found or on error.
+ * Retrieves cached comic metadata.
  */
 export const retrieveMetadataFromCache = async (
-  filePath: string
+  filePath: string,
 ): Promise<StandardizedComicMetadata | null> => {
-  try {
-    const client = createClient({
-      socket: {
-        host: redisConnection.host,
-        port: redisConnection.port,
-      }
-    });
-    await client.connect();
-
-    const cacheKey = `metadata:${filePath}`;
-    const cachedMetadata = await client.get(cacheKey);
-
-    await client.disconnect();
-
-    if (!cachedMetadata) {
-      return null;
-    }
-
-    return JSON.parse(cachedMetadata) as StandardizedComicMetadata;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(`Error retrieving metadata from cache for ${filePath}:`, errorMessage);
+  const entry = metadataCache.get(filePath);
+  if (!entry) {
     return null;
   }
+
+  if (entry.expiresAt <= Date.now()) {
+    metadataCache.delete(filePath);
+    return null;
+  }
+
+  return entry.value;
 };
 
 /**
- * Removes metadata from the Redis cache for a given file path.
- * @param filePath Path to the comic file whose metadata should be removed.
- * @returns True if the key was deleted, false if it didn't exist.
+ * Removes metadata from cache for a given file path.
  */
 export const removeMetadataFromCache = async (
-  filePath: string
+  filePath: string,
 ): Promise<boolean> => {
-  try {
-    const client = createClient({
-      socket: {
-        host: redisConnection.host,
-        port: redisConnection.port,
-      }
-    });
-    await client.connect();
-
-    const cacheKey = `metadata:${filePath}`;
-    const result = await client.del(cacheKey);
-
-    client.destroy();
-
-    return result > 0;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(`Error removing metadata from cache for ${filePath}:`, errorMessage);
-    return false;
-  }
-};;
+  return metadataCache.delete(filePath);
+};
