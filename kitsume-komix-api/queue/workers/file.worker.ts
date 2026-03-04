@@ -1,4 +1,5 @@
 import { Worker } from "bullmq";
+import { redisConnection } from "../../db/redis/redisConnection.ts";
 
 import { comicBookQueue, seriesQueue } from "../index.ts";
 
@@ -44,10 +45,11 @@ export const fileWorker = new Worker(
 	async (job) => {
 		switch (job.name) {
 			case "extract-metadata":
-				await prepareMetadataForWorkers(job as unknown as { filePath: string });
+				await prepareMetadataForWorkers(job.data as unknown as { filePath: string });
 				break;
 			default:
 				queueLogger.warn(`No processor defined for job name: ${job.name}`);
 		}
-	}
+	},
+	{ connection: redisConnection }
 )

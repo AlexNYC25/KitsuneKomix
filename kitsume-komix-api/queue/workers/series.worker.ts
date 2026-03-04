@@ -1,5 +1,6 @@
 import { Worker } from "bullmq";
-import { dirname } from "path";
+import { dirname } from "node:path";
+import { redisConnection } from "../../db/redis/redisConnection.ts";
 
 import { queueLogger } from "../../logger/loggers.ts";
 
@@ -11,7 +12,6 @@ import {
 } from "#sqlite/models/comicSeries.model.ts";
 
 import {
-	WorkerJob,
 	ComicSeries,
   NewComicSeries
 } from "#types/index.ts";
@@ -167,16 +167,17 @@ export const seriesWorker = new Worker(
 	async (job) => {
 		switch (job.name) {
 			case "process-comic-series":
-				await processComicSeries(job as unknown as { filePath: string });
+				await processComicSeries(job.data as unknown as { filePath: string });
 				break;
 			case "add-new-comic-series":
-				await processAddingANewComicSeries(job as unknown as { filePath: string });
+				await processAddingANewComicSeries(job.data as unknown as { filePath: string });
 				break;
 			case "add-series-to-library":
-				await processComicLibraryLinkingToSeries(job as unknown as { seriesId: number; folderPath: string });
+				await processComicLibraryLinkingToSeries(job.data as unknown as { seriesId: number; folderPath: string });
 				break;
 			default:
 				queueLogger.warn(`No processor defined for job name: ${job.name}`);
 		}
-	}
-)
+	},
+	{ connection: redisConnection }
+);

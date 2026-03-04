@@ -1,4 +1,5 @@
 import { Worker } from "bullmq";
+import { redisConnection } from "../../db/redis/redisConnection.ts";
 import { queueLogger } from "../../logger/loggers.ts";
 
 import { 
@@ -14,8 +15,7 @@ import { getImageDimensions } from "#utilities/imageUtils.ts";
 import { createImageThumbnail } from "#utilities/image.ts";
 
 import { 
-	WorkerFileCheckResult, 
-	WorkerJob,
+	WorkerFileCheckResult,
   NewComicBook,
   ComicFileDetails,
   WorkerDataForBuildingComicInsertion,
@@ -362,7 +362,7 @@ export const saveComicBookMetadata = async (job: { comicId: number; filePath: st
  * Processes comic images by extracting pages, storing page metadata,
  * creating cover records, and generating thumbnails.
  */
-export const processComicBookImages = async (job: any): Promise<void> => {
+export const processComicBookImages = async (job: { comicId: number; filePath: string }): Promise<void> => {
 	const comicId: number = job.comicId;
 	const filePath: string = job.filePath;
 
@@ -460,15 +460,16 @@ export const comicBookWorker = new Worker(
 	async (job) => {
 		switch (job.name) {
 			case "save-comic-book":
-				return await saveComicBook(job as unknown as { filePath: string; seriesId: number });
+				return await saveComicBook(job.data as unknown as { filePath: string; seriesId: number });
 			case "save-metadata":
-				await saveComicBookMetadata(job as unknown as { comicId: number; filePath: string });
+				await saveComicBookMetadata(job.data as unknown as { comicId: number; filePath: string });
 				break;
 			case "process-comic-book-images":
-				await processComicBookImages(job as unknown as { comicId: number; filePath: string });
+				await processComicBookImages(job.data as unknown as { comicId: number; filePath: string });
 				break;
 			default:
 				queueLogger.warn(`No processor defined for job name: ${job.name}`);
 		}
-	}
+	},
+	{ connection: redisConnection }
 )
