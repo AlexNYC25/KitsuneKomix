@@ -28,13 +28,13 @@ export const ParamIdStreamPageSchema = ParamIdSchema.extend({
 });
 
 /**
- * Common schema for path parameter 'letter'
+ * Common schema for query parameter 'letter'
  *
- * Used in routes that require a 'letter' parameter in the path.
+ * Used in routes that filter by first letter via query string.
  */
 export const ParamLetterSchema = z.object({
   letter: z.string().openapi({
-    param: { name: "letter", in: "path" },
+    param: { name: "letter", in: "query" },
     example: "A",
   }),
 });
@@ -258,7 +258,9 @@ export const UserSchema = z.object({
  * - description: Optional description for the thumbnail
  */
 export const CreateCustomThumbnailSchema = z.object({
-  image: z.instanceof(File).openapi({
+  image: z.any().openapi({
+    type: "string",
+    format: "binary",
     description: "Image file for the custom thumbnail (JPEG, PNG, WebP)",
   }),
   name: z.string().optional().openapi({
