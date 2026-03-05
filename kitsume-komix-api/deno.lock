@@ -1,9 +1,11 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/fs@^1.0.19": "1.0.19",
-    "jsr:@std/internal@^1.0.10": "1.0.10",
-    "jsr:@std/internal@^1.0.9": "1.0.10",
+    "jsr:@std/internal@^1.0.10": "1.0.12",
+    "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@std/internal@^1.0.9": "1.0.12",
     "jsr:@std/path@^1.1.1": "1.1.2",
     "jsr:@std/path@^1.1.2": "1.1.2",
     "npm:@hono/swagger-ui@~0.5.2": "0.5.2_hono@4.9.10",
@@ -20,6 +22,7 @@
     "npm:drizzle-orm@~0.44.6": "0.44.6_@libsql+client@0.15.15",
     "npm:drizzle-zod@~0.8.3": "0.8.3_drizzle-orm@0.44.6__@libsql+client@0.15.15_zod@4.1.11_@libsql+client@0.15.15",
     "npm:hono@^4.9.10": "4.9.10",
+    "npm:ioredis@^5.10.0": "5.10.0",
     "npm:jose@^6.1.0": "6.1.0",
     "npm:pino-pretty@^13.1.1": "13.1.1",
     "npm:pino@^9.11.0": "9.11.0",
@@ -28,6 +31,12 @@
     "npm:zod@^4.1.11": "4.1.11"
   },
   "jsr": {
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.12"
+      ]
+    },
     "@std/fs@1.0.19": {
       "integrity": "051968c2b1eae4d2ea9f79a08a3845740ef6af10356aff43d3e2ef11ed09fb06",
       "dependencies": [
@@ -37,6 +46,9 @@
     },
     "@std/internal@1.0.10": {
       "integrity": "e3be62ce42cab0e177c27698e5d9800122f67b766a0bea6ca4867886cbde8cf7"
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
     },
     "@std/path@1.1.2": {
       "integrity": "c0b13b97dfe06546d5e16bf3966b1cadf92e1cc83e56ba5476ad8b498d9e3038",
@@ -489,6 +501,9 @@
     "@ioredis/commands@1.4.0": {
       "integrity": "sha512-aFT2yemJJo+TZCmieA7qnYGQooOS7QfNmYrzGtsYd3g9j5iDP8AimYYAesf79ohjbLG12XxC4nG5DyEnC88AsQ=="
     },
+    "@ioredis/commands@1.5.1": {
+      "integrity": "sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw=="
+    },
     "@libsql/client@0.15.15": {
       "integrity": "sha512-twC0hQxPNHPKfeOv3sNT6u2pturQjLcI+CnpTM0SjRpocEGgfiZ7DWKXLNnsothjyJmDqEsBQJ5ztq9Wlu470w==",
       "dependencies": [
@@ -671,7 +686,7 @@
       "integrity": "sha512-hQPfUOLE7/aidCiQSMc5K1EYF6eAuOYSGNdKoLbTpYuRsjYsY0uGUBNX7VrESvAerUpklrsgPLqbunySUxWh5Q==",
       "dependencies": [
         "cron-parser",
-        "ioredis",
+        "ioredis@5.8.0",
         "msgpackr",
         "node-abort-controller",
         "semver",
@@ -883,10 +898,24 @@
     "hono@4.9.10": {
       "integrity": "sha512-AlI15ijFyKTXR7eHo7QK7OR4RoKIedZvBuRjO8iy4zrxvlY5oFCdiRG/V/lFJHCNXJ0k72ATgnyzx8Yqa5arug=="
     },
+    "ioredis@5.10.0": {
+      "integrity": "sha512-HVBe9OFuqs+Z6n64q09PQvP1/R4Bm+30PAyyD4wIEqssh3v9L21QjCVk4kRLucMBcDokJTcLjsGeVRlq/nH6DA==",
+      "dependencies": [
+        "@ioredis/commands@1.5.1",
+        "cluster-key-slot",
+        "debug",
+        "denque",
+        "lodash.defaults",
+        "lodash.isarguments",
+        "redis-errors",
+        "redis-parser",
+        "standard-as-callback"
+      ]
+    },
     "ioredis@5.8.0": {
       "integrity": "sha512-AUXbKn9gvo9hHKvk6LbZJQSKn/qIfkWXrnsyL9Yrf+oeXmla9Nmf6XEumOddyhM8neynpK5oAV6r9r99KBuwzA==",
       "dependencies": [
-        "@ioredis/commands",
+        "@ioredis/commands@1.4.0",
         "cluster-key-slot",
         "debug",
         "denque",
@@ -1244,6 +1273,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@std/assert@^1.0.19",
       "jsr:@std/fs@^1.0.19",
       "jsr:@std/path@^1.1.2",
       "npm:@hono/swagger-ui@~0.5.2",
@@ -1259,6 +1289,7 @@
       "npm:drizzle-orm@~0.44.6",
       "npm:drizzle-zod@~0.8.3",
       "npm:hono@^4.9.10",
+      "npm:ioredis@^5.10.0",
       "npm:jose@^6.1.0",
       "npm:pino-pretty@^13.1.1",
       "npm:pino@^9.11.0",
