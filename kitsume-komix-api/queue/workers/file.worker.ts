@@ -1,15 +1,12 @@
 import { Worker } from "bullmq";
-import { redisConnection } from "../../db/redis/redisConnection.ts";
+import { redisConnection } from "#db/redis/redisConnection.ts";
 
-import { comicBookQueue, seriesQueue } from "../index.ts";
+import { seriesQueue } from "../index.ts";
 
 import { queueLogger } from "../../logger/loggers.ts";
 
 import { standardizeMetadata, loadMetadataIntoCache } from "#utilities/metadata.ts";
 
-import { 
-	WorkerJob,
-} from "#types/index.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 
 /**
