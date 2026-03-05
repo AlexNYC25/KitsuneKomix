@@ -77,6 +77,11 @@ Deno.test({
       lazyConnect: true,
     });
 
+    // Suppress error event logging
+    redis.on("error", () => {
+      // Silently handle the error
+    });
+
     let errorThrown = false;
 
     try {
