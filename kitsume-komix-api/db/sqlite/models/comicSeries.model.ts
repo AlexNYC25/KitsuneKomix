@@ -372,3 +372,34 @@ export const getComicBooksInSeries = async (
     throw error;
   }
 };
+
+/**
+ * Deletes a comic series from the database by ID
+ * @param seriesId The ID of the comic series to delete
+ * @returns The ID of the deleted series
+ */
+export const deleteComicSeries = async (
+  seriesId: number,
+): Promise<number> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .delete(comicSeriesTable)
+      .where(eq(comicSeriesTable.id, seriesId))
+      .returning({ id: comicSeriesTable.id });
+
+    if (result.length === 0) {
+      throw new Error(`Comic series with ID ${seriesId} not found`);
+    }
+
+    return result[0].id;
+  } catch (error) {
+    console.error("Error deleting comic series:", error);
+    throw error;
+  }
+};
