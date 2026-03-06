@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { dirname } from "node:path";
-import { redisConnection } from "../../db/redis/redisConnection.ts";
+import { redisConnection } from "#db/redis/redisConnection.ts";
 
 import { queueLogger } from "../../logger/loggers.ts";
 
@@ -101,7 +101,7 @@ export const processAddingANewComicSeries = async (job: { filePath: string }) =>
 		
 		// we also want to link the comic series to the library it belongs to, 
 		// we can do this by finding the library that contains the comic series folder path and then updating the comic series record with the library ID
-		seriesQueue.add("add-series-to-library", {
+		await seriesQueue.add("add-series-to-library", {
 			seriesId,
 			folderPath: parentPath,
 		});
@@ -156,7 +156,7 @@ const processComicSeries = async (job: { filePath: string }) => {
 	} else {
 		queueLogger.info(`No existing comic series found for path: ${parentPath}, creating new series`);
 		// add job to comicSeriesQueue to create a new series with the filePath
-		seriesQueue.add("add-new-comic-series", {
+		await seriesQueue.add("add-new-comic-series", {
 			filePath,
 		});
 	}
