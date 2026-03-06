@@ -1,5 +1,5 @@
 import { Worker } from "bullmq";
-import { dirname } from "node:path";
+import { dirname } from "@std/path";
 import { redisConnection } from "#db/redis/redisConnection.ts";
 
 import { queueLogger } from "../../logger/loggers.ts";
