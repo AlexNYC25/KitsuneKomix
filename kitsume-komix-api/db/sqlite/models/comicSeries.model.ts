@@ -27,9 +27,13 @@ import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
  * @returns the query with the filter applied
  */
 const addFilteringToQuery = <T extends SQLiteSelect>(
-  filter: ComicSeriesFilterItem,
+  filter: ComicSeriesFilterItem | undefined,
   query: T,
 ): T => {
+  if (!filter) {
+    return query;
+  }
+
   const { filterProperty, filterValue } = filter;
 
   switch (filterProperty) {
@@ -125,7 +129,11 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
     }
 
     if (serviceDetails.filters && serviceDetails.filters.length > 0) {
-      query = addFilteringToQuery(serviceDetails.filters[0], query);
+      const firstValidFilter = serviceDetails.filters.find(
+        (filter): filter is ComicSeriesFilterItem => filter !== undefined,
+      );
+
+      query = addFilteringToQuery(firstValidFilter, query);
     }
 
     return query;
