@@ -16,6 +16,7 @@ export const useAuthStore = defineStore('auth', {
 			user: persisted?.user ?? null,
 			loading: false,
 			error: null as string | null,
+			isAppSetup: null as boolean | null,
 		};
 
 		if (state.token) {
@@ -38,7 +39,8 @@ export const useAuthStore = defineStore('auth', {
 		return state;
 	},
 	getters: {
-		isAuthenticated: (state) => !!state.token
+		isAuthenticated: (state) => !!state.token,
+		needsSetup: (state) => state.isAppSetup === false
 	},
 	actions: {
 		persist() {
@@ -51,6 +53,56 @@ export const useAuthStore = defineStore('auth', {
 			// Update the openapi-fetch client with the latest tokens
 			setAuthToken(this.token);
 			setRefreshToken(this.refreshToken);
+		},
+		async checkAppSetup(): Promise<boolean> {
+			try {
+				const { data, error } = await apiClient.GET('/auth/check-setup');
+				
+				if (error) {
+					console.error('Error checking app setup:', error);
+					this.isAppSetup = true;
+					return true;
+				}
+
+				this.isAppSetup = data?.isSetup ?? true;
+				return this.isAppSetup ?? true;
+			} catch (error) {
+				console.error('Error checking app setup:', error);
+				this.isAppSetup = true;
+				return true;
+			}
+		},
+		async initialSetup({ email, password }: { email: string, password: string }): Promise<boolean> {
+			this.loading = true;
+			this.error = null;
+
+			try {
+				const { data, error } = await apiClient.POST('/users/create-user-setup', {
+					body: {
+						username: email,
+						email,
+						password
+					}
+				});
+
+				if (error || !data) {
+					throw new Error(error?.message || 'Initial setup failed');
+				}
+
+				// Mark app as setup
+				this.isAppSetup = true;
+				
+				return true;
+			} catch (error) {
+				if (error instanceof Error) {
+					this.error = error.message;
+				} else {
+					this.error = String(error);
+				}
+				return false;
+			} finally {
+				this.loading = false;
+			}
 		},
 		async login({ username, password, rememberMe }: { username: string, password: string, rememberMe: boolean }): Promise<boolean> {
 			this.loading = true;
