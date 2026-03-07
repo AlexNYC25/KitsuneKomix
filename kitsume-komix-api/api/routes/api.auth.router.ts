@@ -1,6 +1,8 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { z } from "zod";
 
 import { authenticateUser } from "../services/auth.service.ts";
+import { checkIfAppSetupComplete } from "../services/users.service.ts";
 import {
   createRefreshTokenPair,
   refreshAccessToken,
@@ -23,6 +25,7 @@ import {
 } from "#schemas/response.schema.ts";
 
 import { AppEnv } from "#types/index.ts";
+
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -309,6 +312,54 @@ app.openapi(
       }
       return c.json({
         message: `Logout from all devices failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      }, 500);
+    }
+  },
+);
+
+
+/**
+ * GET /api/auth/check-setup
+ *
+ * Check if the application has been initially set up (i.e. if an admin user exists)
+ */
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/check-setup",
+    summary: "Check if app setup is complete",
+    description: "Check if the application has been initially set up (i.e. if an admin user exists)",
+    tags: ["Authentication"],
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              isSetup: z.boolean(),
+            }),
+          },
+        },
+        description: "Setup status retrieved successfully",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Failed to check setup status",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const isSetup = {isSetup: await checkIfAppSetupComplete()};
+      return c.json(isSetup, 200);
+    } catch (error) {
+      return c.json({
+        message: `Failed to check setup status: ${
           error instanceof Error ? error.message : String(error)
         }`,
       }, 500);
