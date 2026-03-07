@@ -4,6 +4,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { requireAuth } from "../middleware/authChecks.ts";
 import {
   assignLibraryToUserService,
+  checkIfAppSetupComplete,
   createUserService,
   deleteUserService,
 } from "../services/users.service.ts";
@@ -34,6 +35,11 @@ apiUsersRouter.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   scheme: "bearer",
 });
 
+/**
+ * POST /api/users/create-user
+ *
+ * Create a new user in the system. Requires authentication.
+ */
 apiUsersRouter.openapi(
   createRoute({
     method: "post",
@@ -100,6 +106,93 @@ apiUsersRouter.openapi(
       if (isNaN(userId)) {
         return c.json({ message: "Invalid user ID" }, 400);
       }
+
+      const parsed: ZodSafeParseResult<UserRegistrationInput> = UserSchema
+        .safeParse(userData);
+
+      if (!parsed.success) {
+        return c.json({
+          message: "Invalid user data",
+          errors: z.treeifyError(parsed.error),
+        }, 400);
+      }
+
+      // Use the service layer to handle user creation logic
+      const newUserId = await createUserService(parsed.data);
+
+      return c.json({
+        message: `User[${parsed.data.email}] created successfully`,
+        userId: newUserId,
+      }, 201);
+    } catch (error) {
+      console.error("Error parsing JSON or creating user:", error);
+      if (error instanceof SyntaxError && error.message.includes("JSON")) {
+        return c.json({ message: "Invalid JSON format in request body" }, 400);
+      }
+      return c.json({ message: "Internal server error" }, 500);
+    }
+  },
+);
+
+/**
+ * POST /api/users/create-user-setup
+ * 
+ * Endpoint to create a new user during the initial setup of the system. 
+ * This endpoint can only be used if the application has not been set up yet (i.e. no admin user exists).
+ */
+apiUsersRouter.openapi(
+  createRoute({
+    method: "post",
+    path: "/create-user-setup",
+    summary: "Create a new user for initial setup",
+    description: "Endpoint to create a new user during the initial setup of the system.",
+    tags: ["Users"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: UserSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      201: {
+        description: "User created successfully",
+        content: {
+          "application/json": {
+            schema: UserCreationResponseSchema,
+          },
+        },
+      },
+      400: {
+        description: "Invalid user data",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      500: {
+        description: "Internal server error",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    try {
+
+      const isAppSetupComplete = await checkIfAppSetupComplete();
+
+      if (isAppSetupComplete) {
+        return c.json({ message: "Initial setup is already complete. Cannot create user through this endpoint." }, 400);
+      }
+
+      const userData: UserRegistrationInput = await c.req.json();
 
       const parsed: ZodSafeParseResult<UserRegistrationInput> = UserSchema
         .safeParse(userData);
