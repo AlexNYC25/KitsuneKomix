@@ -5,10 +5,13 @@ import "./queue/workers/series.worker.ts";
 import "./queue/workers/file.worker.ts";
 
 import { runMigrations } from "#db/migrate.ts";
+import { setUpAppSettings } from "#db/settingsSetup.ts";
 
 import { API_PORT } from "#utilities/environment.ts";
 
 await runMigrations();
+
+await setUpAppSettings();
 
 const _watchManager = getWatcherManager();
 
