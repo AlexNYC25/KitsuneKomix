@@ -13,6 +13,39 @@ import { hashPassword } from "#utilities/hash.ts";
 
 import { UserRegistrationInput } from "#types/index.ts";
 
+import { getSetting, setSetting } from "#sqlite/models/appSettings.model.ts";
+
+/**
+ * Checks whether initial application setup has been completed.
+ *
+ * This reads the `appSetupComplete` flag from application settings.
+ *
+ * @returns `true` when setup is complete, otherwise `false`.
+ * @throws {Error} Throws when the setup status cannot be read.
+ */
+export async function checkIfAppSetupComplete(): Promise<boolean> {
+  try {
+    const settingValue = await getSetting("appSetupComplete");
+    return settingValue === "true";
+  } catch (error) {
+    console.error("Error checking app setup status:", error);
+    throw new Error("Internal server error");
+  }
+}
+
+
+/**
+ * Creates a new user and applies first-user setup rules.
+ *
+ * - Prevents duplicate users by email.
+ * - Hashes the provided password before persistence.
+ * - If app setup is not complete, marks setup complete and creates the user as admin.
+ * - Otherwise, creates the user as a non-admin.
+ *
+ * @param user - Registration payload for the new user.
+ * @returns The newly created user ID.
+ * @throws {Error} Throws when validation fails or persistence operations fail.
+ */
 export async function createUserService(
   user: UserRegistrationInput,
 ): Promise<number> {
@@ -33,6 +66,30 @@ export async function createUserService(
   // Hash the user's password before storing it
   const hashedPassword = await hashPassword(user.password);
 
+  // if this is the first user being created, we will make them an admin and mark app setup as complete
+  if (!existingUser) {
+    const appSetupComplete = await checkIfAppSetupComplete();
+
+    if (!appSetupComplete) {
+      // Mark app setup as complete
+      await setSetting("appSetupComplete", "true");
+
+      // Create the user as an admin
+      const newUserId = await createUser({
+        username: user.username,
+        email: user.email,
+        passwordHash: hashedPassword,
+        firstName: user.firstName ?? null,
+        lastName: user.lastName ?? null,
+        admin: 1, // Make the first user an admin
+      });
+
+      return newUserId;
+    }
+  }
+
+  // For subsequent users, create them as non-admins
+
   // Insert new user into the database
   const newUserId = await createUser({
     username: user.username,
@@ -47,8 +104,11 @@ export async function createUserService(
 }
 
 /**
- * @param userId ID of the user to delete
- * @returns True if the user was deleted, false otherwise.
+ * Deletes an existing user by ID.
+ *
+ * @param userId - ID of the user to delete.
+ * @returns `true` when the user is deleted.
+ * @throws {Error} Throws when the user does not exist or deletion fails.
  */
 export const deleteUserService = async (userId: number): Promise<boolean> => {
   // First, check if the user exists
@@ -76,9 +136,14 @@ export const deleteUserService = async (userId: number): Promise<boolean> => {
 };
 
 /**
- * Assign a comic library to a user
- * @param userId
- * @param libraryId
+ * Assigns a comic library to a user.
+ *
+ * Validates that both the user and library exist before creating the assignment.
+ *
+ * @param userId - Target user ID.
+ * @param libraryId - Target comic library ID.
+ * @returns Resolves when the assignment completes.
+ * @throws {Error} Throws when validation fails or the assignment operation fails.
  */
 export async function assignLibraryToUserService(
   userId: number,
