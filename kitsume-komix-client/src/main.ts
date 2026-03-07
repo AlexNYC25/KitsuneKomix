@@ -17,6 +17,7 @@ import Home from './pages/Home.vue';
 import Login from './pages/Login.vue'
 import ComicSeries from './pages/ComicSeries.vue';
 import ComicBook from './pages/ComicBook.vue';
+import Settings from './pages/Settings.vue';
 
 const app = createApp(App)
 
@@ -45,7 +46,8 @@ const router = createRouter({
     { path: '/', component: Home, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/login', component: Login, meta: { requiresAuth: false, layout: 'auth' } },
     { path: '/comic-series/:id', component: ComicSeries, meta: { requiresAuth: true, layout: 'default' } },
-    { path: '/comic-book/:id', component: ComicBook, meta: { requiresAuth: true, layout: 'default' } }
+    { path: '/comic-book/:id', component: ComicBook, meta: { requiresAuth: true, layout: 'default' } },
+    { path: '/settings', component: Settings, meta: { requiresAuth: true, layout: 'default' } }
   ],
 })
 

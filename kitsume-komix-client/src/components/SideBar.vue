@@ -31,6 +31,10 @@ const handleLogout = async () => {
 	await router.push('/login');
 };
 
+const handleSettingsClick = async () => {
+	await router.push('/settings');
+};
+
 const userDisplayName = computed(() => {
 	const email = authStore.user?.email;
 	return email ? email.split('@')[0] : 'User';
@@ -39,8 +43,8 @@ const userDisplayName = computed(() => {
   <div id="sidebar" class="flex flex-col h-full">
     <div id="sidebar-header">
       <h2 class="text-2xl font-bold mx-2" style="color: var(--p-secondary-color)">
-				Kitsume Komix
-			</h2>
+			Kitsume Komix
+		</h2>
     </div>
 
 		<div id="sidebar-content" class="flex-1 overflow-y-auto">
@@ -92,7 +96,7 @@ const userDisplayName = computed(() => {
 					{{ authStore.user?.email || 'No email' }}
 				</div>
 				<div id="sidebar-user-actions" class="mt-2 flex space-x-2">
-					<Button severity="info" class="p-button-text p-button-sm grow" rounded>
+					<Button id="settings" severity="info" class="p-button-text p-button-sm grow" rounded @click="handleSettingsClick">
 						<v-icon name="md-manageaccounts" class="mr-1" />
 					</Button>
 
