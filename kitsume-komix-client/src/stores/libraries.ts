@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
-import { DEFAULT_HEADER_AUTHORIZATION } from '../utilities/constants'
 import type { ComicLibrary } from '../types/comic-libraries.types'
+
+type CreateLibraryPayload = {
+	name: string;
+	path: string;
+	description?: string | null;
+};
 
 // Convert ComicLibrary to objects compatible with MenuItem
 function transformToMenuItems(libraries: Array<ComicLibrary>) {
@@ -30,22 +35,39 @@ export const useLibrariesStore = defineStore('libraries', {
 		setLibraries(libraries: Array<ComicLibrary>) {
 			this.libraries = libraries;
 		},
-		async requestUsersLibraries() {
-			// The authorization header is automatically added by the apiClient middleware
-			const { data, error } = await apiClient.GET('/comic-libraries', {
-				params: {
-					header: DEFAULT_HEADER_AUTHORIZATION
+		async createLibrary(payload: CreateLibraryPayload): Promise<boolean> {
+			const { data, error } = await apiClient.POST('/comic-libraries/create-library', {
+				body: {
+					name: payload.name,
+					path: payload.path,
+					description: payload.description ?? null,
+					enabled: true,
 				}
 			});
+
+			if (error || !data?.success) {
+				throw new Error(error?.message || 'Failed to create library');
+			}
+
+			await this.requestUsersLibraries();
+
+			return true;
+		},
+		async requestUsersLibraries() {
+			// The authorization header is automatically added by the apiClient middleware
+			const { data, error } = await apiClient.GET('/comic-libraries');
 
 			if (error || !data) {
 				throw new Error(error?.message || 'Failed to fetch libraries');
 			}
 
-			// API always returns data as an array now
-			const libraries: Array<ComicLibrary> = Array.isArray(data.data)
-				? data.data
-				: [];
+			const librariesPayload = (data as { libraries?: Array<ComicLibrary>; data?: Array<ComicLibrary> });
+
+			const libraries: Array<ComicLibrary> = Array.isArray(librariesPayload.libraries)
+				? librariesPayload.libraries
+				: Array.isArray(librariesPayload.data)
+					? librariesPayload.data
+					: [];
 
 			this.setLibraries(libraries);
 		}
