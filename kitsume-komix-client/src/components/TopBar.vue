@@ -16,8 +16,8 @@ const breadcrumbItems = ref<any[]>([])
 
 const getComicSeriesName = async (seriesId: number): Promise<string> => {
 	try {
-		const series = await comicSeriesStore.lookupComicSeriesById(seriesId)
-		return series?.name || 'Comic Series'
+		const seriesArr = await comicSeriesStore.lookupComicSeriesById(seriesId)
+		return seriesArr && seriesArr.length > 0 ? seriesArr[0].name : 'Comic Series'
 	} catch (error) {
 		console.error('Failed to fetch series name:', error)
 	}

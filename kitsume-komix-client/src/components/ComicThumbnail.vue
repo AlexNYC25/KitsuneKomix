@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { composeStaticUrl } from '@/utilities/apiClient';
 
 const props = defineProps<{

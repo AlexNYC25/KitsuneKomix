@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { composeStaticUrl } from '@/utilities/apiClient';
 import { useComicSeriesStore } from '@/stores/comic-series';
 import type { ComicBooksSeriesResponse } from '@/types/comic-books.types';
+import type { ComicSeriesResponseItem, ComicSeriesComic } from '@/types/comic-series.types';
 import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
 import Paginator from 'primevue/paginator';
 import Button from 'primevue/button';
@@ -51,12 +52,20 @@ onMounted(async () => {
 });
 
 // Computed Properties
-const totalComics = computed(() => comicsData.value?.data?.length || 0);
+const seriesResponseItem = computed<ComicSeriesResponseItem | null>(() => {
+	return comicsData.value?.data?.[0] ?? null;
+});
+
+const allComicsInSeries = computed<ComicSeriesComic[]>(() => {
+	return seriesResponseItem.value?.comicBooks ?? [];
+});
+
+const totalComics = computed(() => allComicsInSeries.value.length);
 
 const paginatedComics = computed(() => {
-	if (!comicsData.value?.data) return [];
+	if (!allComicsInSeries.value.length) return [];
 
-	const sorted = [...comicsData.value.data].sort((a, b) => {
+	const sorted = [...allComicsInSeries.value].sort((a, b) => {
 		const aNum = parseFloat(a.issueNumber ?? '0') || 0;
 		const bNum = parseFloat(b.issueNumber ?? '0') || 0;
 		return aNum - bNum;
@@ -69,10 +78,10 @@ const paginatedComics = computed(() => {
 
 // Get the year of the first comic issue in the series
 const firstComicYear = computed(() => {
-	if (!comicsData.value?.data || comicsData.value.data.length === 0) return null;
+	if (!allComicsInSeries.value.length) return null;
 
 	// Sort all comics by issue number to get the first one
-	const sorted = [...comicsData.value.data].sort((a, b) => {
+	const sorted = [...allComicsInSeries.value].sort((a, b) => {
 		const aNum = parseFloat(a.issueNumber ?? '0') || 0;
 		const bNum = parseFloat(b.issueNumber ?? '0') || 0;
 		return aNum - bNum;
@@ -80,6 +89,20 @@ const firstComicYear = computed(() => {
 
 	return sorted[0]?.year || null;
 });
+
+const getComicThumbnailUrl = (comic: ComicSeriesComic): string | null => {
+	const thumbnailPath = comic.thumbnails?.[0]?.filePath;
+	if (!thumbnailPath) {
+		return null;
+	}
+
+	const filename = thumbnailPath.split('/').pop();
+	if (!filename) {
+		return null;
+	}
+
+	return composeStaticUrl(`/api/image/thumbnails/${filename}`);
+};
 
 const onPageChange = (event: any) => {
 	currentPage.value = event.page;
@@ -215,14 +238,14 @@ const navigateToComicBook = (comicBookId: number) => {
 						<div class="grid grid-cols-5 gap-4">
 							<div 
 								v-for="(comic, index) in paginatedComics" 
-								:key="index"
+								:key="comic.id"
 								class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
 								@click="navigateToComicBook(comic.id)"
 							>
 								<div class="w-full aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
 									<img
-										v-if="comic.thumbnailUrl"
-										:src="`http://localhost:8000${comic.thumbnailUrl}`"
+										v-if="getComicThumbnailUrl(comic)"
+										:src="getComicThumbnailUrl(comic) || undefined"
 										:alt="`Issue ${comic.issueNumber}`"
 										class="w-full h-full object-contain"
 									/>
@@ -239,15 +262,15 @@ const navigateToComicBook = (comicBookId: number) => {
 					<div v-else-if="viewMode === 'list' && paginatedComics.length > 0" class="space-y-3">
 						<div 
 							v-for="(comic, index) in paginatedComics" 
-							:key="index" 
+							:key="comic.id" 
 							class="w-full flex items-start gap-4 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer border-l-4 border-cyan-800"
 							@click="navigateToComicBook(comic.id)"
 						>
 							<!-- Thumbnail -->
 							<div class="flex-shrink-0 w-24 h-32 bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
 								<img
-									v-if="comic.thumbnailUrl"
-									:src="`http://localhost:8000${comic.thumbnailUrl}`"
+									v-if="getComicThumbnailUrl(comic)"
+									:src="getComicThumbnailUrl(comic) || undefined"
 									:alt="`Issue ${comic.issueNumber}`"
 									class="w-full h-full object-contain"
 								/>

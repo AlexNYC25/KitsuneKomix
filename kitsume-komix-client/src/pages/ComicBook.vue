@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/auth';
 import { apiClient } from '@/utilities/apiClient';
 import { convertArrayOfCreditsToString } from '@/utilities/metadata';
 
-import type { ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail } from '@/types/comic-books.types';
+import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail } from '@/types/comic-books.types';
 
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
@@ -24,7 +24,8 @@ const breadcrumbStore = useBreadcrumbStore();
 const authStore = useAuthStore();
 
 const comicBookId = ref<number | null>(null);
-const comicBookData = ref<ComicBookMetadata | null>(null);
+const comicBookData = ref<ComicBookById | null>(null);
+const comicBookMetadata = ref<ComicBookMetadata | null>(null);
 const thumbnailUrl = ref<string | null>(null);
 const comicBookListsData = ref<any[]>([]);
 
@@ -48,18 +49,18 @@ onMounted(async () => {
 
 	comicBookId.value = idNum;
 
-	// Fetch comic book metadata
+	// Fetch comic book details
 	try {
-		const { data: comicBookMetadata, error: comicBookMetadataError } = await apiClient.GET('/comic-books/{id}/metadata', {
+		const { data: comicBookDetails, error: comicBookDetailsError } = await apiClient.GET('/comic-books/{id}', {
 			params: {
 				path: { id: String(idNum) }
 			}
 		});
 
-		if (comicBookMetadataError) {
-			console.error('Failed to fetch comic book data:', comicBookMetadataError);
-		} else if (comicBookMetadata) {
-			comicBookData.value = comicBookMetadata as ComicBookMetadata;
+		if (comicBookDetailsError) {
+			console.error('Failed to fetch comic book data:', comicBookDetailsError);
+		} else if (comicBookDetails) {
+			comicBookData.value = comicBookDetails as ComicBookById;
 
 			// Get series ID from query params (passed from ComicSeries page)
 			const seriesId: number | undefined = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
@@ -70,6 +71,21 @@ onMounted(async () => {
 					seriesId,
 					comicBookData.value.title || `Comic Book #${comicBookId.value}`
 				);
+			}
+
+			// Fetch expanded metadata arrays (writers, inkers, etc.)
+			try {
+				const { data: metadataData, error: metadataError } = await apiClient.GET('/comic-books/{id}/metadata', {
+					params: {
+						path: { id: String(idNum) }
+					}
+				});
+
+				if (!metadataError && metadataData) {
+					comicBookMetadata.value = metadataData as ComicBookMetadata;
+				}
+			} catch (error) {
+				console.error('Error fetching expanded comic metadata:', error);
 			}
 
 			// Fetch thumbnail
@@ -84,7 +100,7 @@ onMounted(async () => {
 					const thumbnails: ComicBookThumbnailsData = (thumbnailData as GetComicBookThumbnailsResponse).thumbnails;
 					if (thumbnails && thumbnails.length > 0) {
 						const firstThumbnail: ComicBookThumbnail = thumbnails[0];
-						thumbnailUrl.value = `/api/image/thumbnails/${firstThumbnail.file_path.split('/').pop()}`;
+						thumbnailUrl.value = `/api/image/thumbnails/${firstThumbnail.filePath.split('/').pop()}`;
 					}
 				}
 			} catch (error) {
@@ -114,77 +130,77 @@ const comicBookHeading = computed(() => {
 
 // Computed properties for metadata arrays with proper typing
 const writersString = computed(() => {
-	const writers = comicBookData.value?.writers as Array<{ name: string }> | undefined;
+	const writers = comicBookMetadata.value?.writers as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(writers);
 });
 
 const pencillersString = computed(() => {
-	const pencillers = comicBookData.value?.pencillers as Array<{ name: string }> | undefined;
+	const pencillers = comicBookMetadata.value?.pencillers as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(pencillers);
 });
 
 const inkersString = computed(() => {
-	const inkers = comicBookData.value?.inkers as Array<{ name: string }> | undefined;
+	const inkers = comicBookMetadata.value?.inkers as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(inkers);
 });
 
 const letterersString = computed(() => {
-	const letterers = comicBookData.value?.letterers as Array<{ name: string }> | undefined;
+	const letterers = comicBookMetadata.value?.letterers as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(letterers);
 });
 
 const coloristsString = computed(() => {
-	const colorists = comicBookData.value?.colorists as Array<{ name: string }> | undefined;
+	const colorists = comicBookMetadata.value?.colorists as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(colorists);
 });
 
 const editorsString = computed(() => {
-	const editors = comicBookData.value?.editors as Array<{ name: string }> | undefined;
+	const editors = comicBookMetadata.value?.editors as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(editors);
 });
 
 const coverArtistsString = computed(() => {
-	const coverArtists = comicBookData.value?.coverArtists as Array<{ name: string }> | undefined;
+	const coverArtists = comicBookMetadata.value?.coverArtists as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(coverArtists);
 });
 
 const publishersString = computed(() => {
-	const publishers = comicBookData.value?.publishers as Array<{ name: string }> | undefined;
+	const publishers = comicBookMetadata.value?.publishers as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(publishers);
 });
 
 const imprintsString = computed(() => {
-	const imprints = comicBookData.value?.imprints as Array<{ name: string }> | undefined;
+	const imprints = comicBookMetadata.value?.imprints as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(imprints);
 });
 
 const genresString = computed(() => {
-	const genres = comicBookData.value?.genres as Array<{ name: string }> | undefined;
+	const genres = comicBookMetadata.value?.genres as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(genres);
 });
 
 const charactersString = computed(() => {
-	const characters = comicBookData.value?.characters as Array<{ name: string }> | undefined;
+	const characters = comicBookMetadata.value?.characters as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(characters);
 });
 
 const teamsString = computed(() => {
-	const teams = comicBookData.value?.teams as Array<{ name: string }> | undefined;
+	const teams = comicBookMetadata.value?.teams as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(teams);
 });
 
 const locationsString = computed(() => {
-	const locations = comicBookData.value?.locations as Array<{ name: string }> | undefined;
+	const locations = comicBookMetadata.value?.locations as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(locations);
 });
 
 const storyArcsString = computed(() => {
-	const storyArcs = comicBookData.value?.storyArcs as Array<{ name: string }> | undefined;
+	const storyArcs = comicBookMetadata.value?.storyArcs as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(storyArcs);
 });
 
 const seriesGroupsString = computed(() => {
-	const seriesGroups = comicBookData.value?.seriesGroups as Array<{ name: string }> | undefined;
+	const seriesGroups = comicBookMetadata.value?.seriesGroups as Array<{ name: string }> | undefined;
 	return convertArrayOfCreditsToString(seriesGroups);
 });
 
@@ -345,25 +361,25 @@ const downloadComic = async (comicBookId: number) => {
 						<!-- Credits Section -->
 						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Credits</h2>
-						<ComicSeriesPageDetails v-if="comicBookData.writers && comicBookData.writers.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.writers && comicBookMetadata.writers.length > 0"
 							comicMetadataDetailsLabel="Writers"
 							:comicMetadataDetails="writersString" />
-						<ComicSeriesPageDetails v-if="comicBookData.pencillers && comicBookData.pencillers.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.pencillers && comicBookMetadata.pencillers.length > 0"
 							comicMetadataDetailsLabel="Pencillers"
 							:comicMetadataDetails="pencillersString" />
-						<ComicSeriesPageDetails v-if="comicBookData.inkers && comicBookData.inkers.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.inkers && comicBookMetadata.inkers.length > 0"
 							comicMetadataDetailsLabel="Inkers"
 							:comicMetadataDetails="inkersString" />
-						<ComicSeriesPageDetails v-if="comicBookData.letterers && comicBookData.letterers.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.letterers && comicBookMetadata.letterers.length > 0"
 							comicMetadataDetailsLabel="Letterers"
 							:comicMetadataDetails="letterersString" />
-						<ComicSeriesPageDetails v-if="comicBookData.colorists && comicBookData.colorists.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.colorists && comicBookMetadata.colorists.length > 0"
 							comicMetadataDetailsLabel="Colorists"
 							:comicMetadataDetails="coloristsString" />
-						<ComicSeriesPageDetails v-if="comicBookData.editors && comicBookData.editors.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.editors && comicBookMetadata.editors.length > 0"
 							comicMetadataDetailsLabel="Editors"
 							:comicMetadataDetails="editorsString" />
-						<ComicSeriesPageDetails v-if="comicBookData.coverArtists && comicBookData.coverArtists.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.coverArtists && comicBookMetadata.coverArtists.length > 0"
 							comicMetadataDetailsLabel="Cover Artists"
 							:comicMetadataDetails="coverArtistsString" />
 						</div>
@@ -371,10 +387,10 @@ const downloadComic = async (comicBookId: number) => {
 						<!-- Publishing Section -->
 						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Publishing</h2>
-						<ComicSeriesPageDetails v-if="comicBookData.publishers && comicBookData.publishers.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.publishers && comicBookMetadata.publishers.length > 0"
 							comicMetadataDetailsLabel="Publishers"
 							:comicMetadataDetails="publishersString" />
-						<ComicSeriesPageDetails v-if="comicBookData.imprints && comicBookData.imprints.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.imprints && comicBookMetadata.imprints.length > 0"
 							comicMetadataDetailsLabel="Imprints"
 							:comicMetadataDetails="imprintsString" />
 						</div>
@@ -382,26 +398,26 @@ const downloadComic = async (comicBookId: number) => {
 						<!-- Content Section -->
 						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Content</h2>
-						<ComicSeriesPageDetails v-if="comicBookData.genres && comicBookData.genres.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.genres && comicBookMetadata.genres.length > 0"
 							comicMetadataDetailsLabel="Genres"
 							:comicMetadataDetails="genresString" />
-						<ComicSeriesPageDetails v-if="comicBookData.characters && comicBookData.characters.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.characters && comicBookMetadata.characters.length > 0"
 							comicMetadataDetailsLabel="Characters"
 							:comicMetadataDetails="charactersString"
 							:maxVisible="8" />
-						<ComicSeriesPageDetails v-if="comicBookData.teams && comicBookData.teams.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.teams && comicBookMetadata.teams.length > 0"
 							comicMetadataDetailsLabel="Teams"
 							:comicMetadataDetails="teamsString" />
-						<ComicSeriesPageDetails v-if="comicBookData.locations && comicBookData.locations.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.locations && comicBookMetadata.locations.length > 0"
 							comicMetadataDetailsLabel="Locations"
 							:comicMetadataDetails="locationsString" />
-						<ComicSeriesPageDetails v-if="comicBookData.storyArcs && comicBookData.storyArcs.length > 0"
+						<ComicSeriesPageDetails v-if="comicBookMetadata?.storyArcs && comicBookMetadata.storyArcs.length > 0"
 							comicMetadataDetailsLabel="Story Arcs"
 							:comicMetadataDetails="storyArcsString" />
 						</div>
 
 						<!-- Series Groups Section -->
-						<div v-if="comicBookData.seriesGroups && comicBookData.seriesGroups.length > 0"
+						<div v-if="comicBookMetadata?.seriesGroups && comicBookMetadata.seriesGroups.length > 0"
 							class="bg-gray-800 rounded-lg p-6 space-y-4">
 							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Series Groups</h2>
 						<ComicSeriesPageDetails comicMetadataDetailsLabel="Groups"

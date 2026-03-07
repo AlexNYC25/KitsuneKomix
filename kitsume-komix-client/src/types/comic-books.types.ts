@@ -1,7 +1,7 @@
 import type { paths } from '../openapi/openapi-schema';
 
-// /comic-books/series/{seriesId} endpoint types
-export type GetComicsBySeries = paths['/comic-books/series/{seriesId}']['get']['responses']['200']['content']['application/json'];
+// /comic-series/{id} endpoint types - Get comic books in a series
+export type GetComicsBySeries = paths['/comic-series/{id}']['get']['responses']['200']['content']['application/json'];
 
 export type ComicBookInSeriesData = GetComicsBySeries['data'];
 
@@ -19,6 +19,9 @@ export interface Creator {
 
 // /comic-books/{id}/metadata endpoint types - derived from OpenAPI schema
 export type ComicBookMetadata = paths['/comic-books/{id}/metadata']['get']['responses']['200']['content']['application/json'];
+
+// /comic-books/{id} endpoint types - base comic book details
+export type ComicBookById = paths['/comic-books/{id}']['get']['responses']['200']['content']['application/json'];
 
 // /comic-books/{id}/thumbnails endpoint types
 export type GetComicBookThumbnailsResponse = paths['/comic-books/{id}/thumbnails']['get']['responses']['200']['content']['application/json'];

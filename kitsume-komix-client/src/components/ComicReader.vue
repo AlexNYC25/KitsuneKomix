@@ -4,12 +4,12 @@ import { motion } from 'motion-v';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Skeleton from 'primevue/skeleton';
-import type { ComicBookMetadata } from '@/types/comic-books.types';
+import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
 
 interface ComicReaderProps {
 	comicBookId: number;
 	comicTitle: string;
-	comicBookData?: ComicBookMetadata;
+	comicBookData?: ComicBookById | ComicBookMetadata;
 }
 
 const props = defineProps<ComicReaderProps>();
@@ -343,7 +343,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
-			<span class="text-gray-300 font-semibold">{{ comicBookData?.title || 'Comic Reader' }}</span>
+			<span class="text-gray-300 font-semibold">{{ (comicBookData && 'title' in comicBookData) ? comicBookData.title : 'Comic Reader' }}</span>
 
 			<!-- Top Bar Buttons -->
 			<div class="flex gap-2">
