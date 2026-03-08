@@ -73,14 +73,12 @@ const userDisplayName = computed(() => {
 				<h3 class="text-lg font-semibold mb-2 mx-2" style="color: var(--p-secondary-color)">
 					Libraries
 				</h3>
-				<PanelMenu :model="libraries" class="mx-2">
-					<template #item="{ item }">
-						<div class="card flex items-center">
-							<v-icon v-if="item.icon" :name="item.icon" class="ml-2" />
-							<span>{{ item.label }}</span>
-						</div>
-					</template>
-				</PanelMenu>
+				<div v-for="library in libraries" :key="library.label" class="flex items-center">
+				  <Button :label="library.label" variant="text" class="w-full flex !justify-start items-center">
+					<v-icon name="md-locallibrary" class="ml-2" />
+					<p class="ml-2">{{ library.label }}</p>
+				  </Button>
+				</div>
 			</div>
 
 		</div>
