@@ -372,7 +372,7 @@ export const comicBookLetterersTable = sqliteTable("comic_book_letterers", {
   comicBookId: int().notNull().references(() => comicBooksTable.id, {
     onDelete: "cascade",
   }),
-  comicLetterId: int().notNull().references(() => comicLetterersTable.id, {
+  comicLettererId: int().notNull().references(() => comicLetterersTable.id, {
     onDelete: "cascade",
   }),
   createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),

@@ -72,7 +72,10 @@ export const linkLettererToComicBook = async (
   try {
     await db
       .insert(comicBookLetterersTable)
-      .values({ comicLetterId: lettererId, comicBookId: comicBookId })
+      .values({ 
+        comicLettererId: lettererId,
+        comicBookId: comicBookId 
+      })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     console.error("Error linking letterer to comic book:", error);
@@ -126,7 +129,7 @@ export const getLetterersByComicBookId = async (
       .from(comicLetterersTable)
       .innerJoin(
         comicBookLetterersTable,
-        eq(comicLetterersTable.id, comicBookLetterersTable.comicLetterId),
+        eq(comicLetterersTable.id, comicBookLetterersTable.comicLettererId),
       )
       .where(eq(comicBookLetterersTable.comicBookId, comicBookId));
 
