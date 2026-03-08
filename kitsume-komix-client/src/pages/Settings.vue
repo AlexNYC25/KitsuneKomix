@@ -135,18 +135,17 @@ onMounted(async () => {
 <template>
   <div id="settings-page" class="p-6">
     <div class="mb-6 flex items-center gap-4">
-      <Button 
-        icon="pi pi-arrow-left" 
-        severity="secondary"
-        text 
-        rounded
+      <button
+				class="p-2 rounded bg-cyan-700 hover:bg-blue-200 dark:hover:bg-blue-200"
         @click="goBack"
         v-tooltip.top="'Go back'"
-      />
+      >
+				<v-icon name="io-arrow-back"/>
+			</button>
       <h1 class="text-3xl font-bold">Settings</h1>
     </div>
 
-    <div class="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+    <div id="libraries-section" class="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-2xl font-semibold">Libraries</h2>
 
@@ -255,16 +254,16 @@ onMounted(async () => {
 
       <div
         v-else
-        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+        class="flex flex-col gap-4 w-full"
       >
         <div
           v-for="library in libraries"
           :key="library.id"
-          class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+          class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-full"
         >
           <h3 class="text-lg font-semibold mb-1">{{ library.name }}</h3>
           <p class="text-sm text-gray-600 dark:text-gray-400 break-all">
-            {{ library.path }}
+            Library Path: {{ library.path }}
           </p>
         </div>
       </div>
