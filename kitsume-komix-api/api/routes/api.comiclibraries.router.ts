@@ -1,4 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { z } from "zod";
 
 import { requireAuth } from "../middleware/authChecks.ts";
 
@@ -24,6 +25,7 @@ import type {
   ComicLibrary,
   LibraryRegistrationInput,
 } from "#types/index.ts";
+import { listFoldersInDirectoryService } from "../services/files.service.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -532,6 +534,98 @@ app.openapi(
     } catch (error) {
       console.error("Error deleting comic library:", error);
       return c.json({ message: "Internal server error" }, 500);
+    }
+  },
+);
+
+
+/**
+ * POST /api/comic-libraries/find-path
+ * 
+ * Used for the process of registering a new comic library in the system.
+ * The client sends a request to this path optionally with a file path, if not falls back to the
+ * default comics directory 
+ */
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/find-path",
+    summary: "Find a comic library path",
+    description: "Find a comic library path in the system",
+    tags: ["Comic Libraries"],
+    middleware: [requireAuth],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              path: z.string().optional(),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              directories: z.array(z.string()),
+            }),
+          },
+        },
+        description: "Library path found successfully",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Invalid library path data",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Internal server error",
+      },
+    },
+  }),
+  async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    try {
+      const listedDirectories = await listFoldersInDirectoryService(c.req.valid("json").path);
+      return c.json(
+        { directories: listedDirectories },
+        200,
+      );
+    } catch (error) {
+      console.error("Error finding comic library path:", error);
+      if (error instanceof Error && error.message.startsWith("Invalid path")) {
+        return c.json({ message: error.message }, 400);
+      }
+      return c.json({ message: "Internal server error" }, 500); 
     }
   },
 );
