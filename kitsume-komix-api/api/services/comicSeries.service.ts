@@ -60,7 +60,7 @@ export const fetchComicSeries = async (
           property: serviceDataSort.sortProperty,
           order: serviceDataSort.sortOrder,
         },
-        offset: serviceDataPagination.pageNumber *
+        offset: (serviceDataPagination.pageNumber - 1) *
           serviceDataPagination.pageSize,
         limit: serviceDataPagination.pageSize + 1,
       });

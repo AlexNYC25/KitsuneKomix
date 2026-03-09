@@ -136,7 +136,7 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
       query = addFilteringToQuery(firstValidFilter, query);
     }
 
-    return query;
+    return await query;
   } catch (error) {
     console.error(
       "Error fetching comic series with metadata filtering and sorting:",
