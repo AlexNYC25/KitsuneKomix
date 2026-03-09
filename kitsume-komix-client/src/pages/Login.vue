@@ -16,6 +16,8 @@ const authStore = useAuthStore();
 const showSetupForm = ref(false);
 const checkingSetup = ref(true);
 
+const loginFormMessage = ref<string | null>(null);
+
 // Check if app needs initial setup
 onMounted(async () => {
   const isSetup = await authStore.checkAppSetup();
@@ -52,11 +54,15 @@ const loginFormSubmit = handleLoginSubmit(async (values) => {
     });
 
     if (success) {
+      loginFormMessage.value = null;
       const redirect = (route.query.redirect as string) || '/';
       router.push(redirect);
+    } else {
+      loginFormMessage.value = authStore.error || 'Login failed. Please check your credentials and try again.';
     }
   } catch (error) {
     console.error('Login error:', error);
+    loginFormMessage.value = 'An unexpected error occurred during login.';
   }
 });
 
@@ -195,6 +201,11 @@ const signupFormSubmit = handleSignupSubmit(async (values) => {
         <h1 class="text-2xl font-bold text-white">
           Kistume Komix Login
         </h1>
+      </div>
+
+      <div id="login-message" class="text-gray-300 text-sm mb-6 text-center">
+        Please enter your credentials to log in.
+        <p v-if="loginFormMessage" class="mt-1 text-sm text-red-500">{{ loginFormMessage }}</p>
       </div>
       
       <form @submit="loginFormSubmit" class="space-y-4">
