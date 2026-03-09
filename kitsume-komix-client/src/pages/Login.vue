@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 
 import { useAuthStore } from '@/stores/auth';
+import { loadFromStorage, saveToStorage } from '@/utilities/storage';
 
 import { validateEmailPassword } from '@/zod/login.schema.ts';
 import { validateSignup } from '@/zod/signup.schema.ts';
@@ -17,9 +18,16 @@ const showSetupForm = ref(false);
 const checkingSetup = ref(true);
 
 const loginFormMessage = ref<string | null>(null);
+const REMEMBERED_USERNAME_STORAGE_KEY = 'kitsune_remembered_username';
 
 // Check if app needs initial setup
 onMounted(async () => {
+  const rememberedUsername = loadFromStorage<string>(REMEMBERED_USERNAME_STORAGE_KEY, '');
+  if (rememberedUsername) {
+    loginEmail.value = rememberedUsername;
+    rememberMe.value = true;
+  }
+
   const isSetup = await authStore.checkAppSetup();
   showSetupForm.value = !isSetup;
   checkingSetup.value = false;
@@ -47,6 +55,12 @@ const rememberMe = ref(false);
 // Handle login form submission
 const loginFormSubmit = handleLoginSubmit(async (values) => {
   try {
+    if (rememberMe.value) {
+      saveToStorage(REMEMBERED_USERNAME_STORAGE_KEY, values.email);
+    } else {
+      localStorage.removeItem(REMEMBERED_USERNAME_STORAGE_KEY);
+    }
+
     const success = await authStore.login({
       username: values.email,
       password: values.password,
