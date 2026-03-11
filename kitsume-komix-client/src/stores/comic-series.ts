@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
-import type { ComicSeriesWithComics } from '../types/comic-series.types'
+import type { ComicSeriesResponseItem } from '../types/comic-series.types'
 import type { ComicBooksSeriesResponse } from '../types/comic-books.types'
 
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({
-    comicSeriesData: [] as Array<ComicSeriesWithComics>,
+    comicSeriesData: [] as Array<ComicSeriesResponseItem>,
     comicsInSeriesData: new Map<number, ComicBooksSeriesResponse>(),
   }),
 	getters: {
-		getComicSeriesData(state): Array<ComicSeriesWithComics> {
+		getComicSeriesData(state): Array<ComicSeriesResponseItem> {
 			return state.comicSeriesData;
 		},
 		getComicsInSeries: (state) => (seriesId: number): ComicBooksSeriesResponse | undefined => {
@@ -30,14 +30,14 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 		throw new Error(error?.message || 'Failed to fetch comic series');
 	  }
 
-	  this.comicSeriesData.push(data.data);
+	  if (!data.data?.length) {
+		throw new Error('Comic series not found');
+	  }
+
+	  this.comicSeriesData.push(data.data[0]);
 	},
 	async lookupComicSeriesById(id: number) {
-		if (!this.comicSeriesData) {
-			return null;
-		}
-
-		const comicSeries = this.comicSeriesData.find(series => series.id === id);
+		const comicSeries = this.comicSeriesData.find((series) => series.id === id);
 
 		if (!comicSeries) {
 			await this.fetchComicSeries(id);
@@ -50,23 +50,20 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 	},
 	async fetchComicsInSeries(seriesId: number, page: number = 1, pageSize: number = 20): Promise<ComicBooksSeriesResponse> {
 		try {
-			// Construct the URL manually since the OpenAPI schema uses :seriesId format
-			const baseUrl = 'http://localhost:8000/api';
-			const url = new URL(`${baseUrl}/comic-books/series/${seriesId}`);
-			url.searchParams.append('page', String(page));
-			url.searchParams.append('pageSize', String(pageSize));
-
-			const response = await fetch(url.toString(), {
-				headers: {
-					'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+			const { data, error } = await apiClient.GET('/comic-books/all', {
+				params: {
+					query: {
+						page,
+						pageSize,
+						filterProperty: 'seriesId',
+						filter: String(seriesId)
+					}
 				}
 			});
 
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
+			if (error || !data) {
+				throw new Error(error?.message || 'Failed to fetch comics in series');
 			}
-
-			const data = await response.json() as ComicBooksSeriesResponse;
 			
 			// Save to store state
 			this.comicsInSeriesData.set(seriesId, data);
