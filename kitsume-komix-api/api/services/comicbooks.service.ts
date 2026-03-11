@@ -169,7 +169,7 @@ export const fetchComicBooksWithRelatedMetadata = async (
           order: serviceDataSort.sortOrder,
         },
         offset:
-          serviceDataPagination.pageNumber * serviceDataPagination.pageSize -
+          (serviceDataPagination.pageNumber - 1) *
           serviceDataPagination.pageSize,
         limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
       });
