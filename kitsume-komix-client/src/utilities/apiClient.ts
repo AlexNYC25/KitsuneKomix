@@ -24,6 +24,38 @@ export function setTokenRefreshCallback(callback: (() => Promise<boolean>) | nul
   onTokenRefresh = callback;
 }
 
+const withAuthHeader = (request: Request): Request => {
+  const headers = new Headers(request.headers);
+
+  if (authToken) {
+    headers.set("Authorization", `Bearer ${authToken}`);
+  }
+
+  return new Request(request, { headers });
+};
+
+/**
+ * Specialized fetch function for authenticated image requests, which may not be handled by the openapi-fetch client. 
+ * It includes logic to refresh tokens if a 401 response is received.
+ * @param input - The input to the fetch function, either a URL or a Request object.
+ * @param init - Optional fetch initialization parameters.
+ * @returns A promise that resolves to the fetch Response object.
+ */
+export async function authenticatedImageFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const baseRequest = new Request(input, init);
+  let response = await fetch(withAuthHeader(baseRequest.clone()));
+
+  if (response.status === 401 && refreshToken && onTokenRefresh) {
+    const refreshed = await onTokenRefresh();
+
+    if (refreshed) {
+      response = await fetch(withAuthHeader(baseRequest.clone()));
+    }
+  }
+
+  return response;
+}
+
 // Client middleware to handle authentication
 const authMiddleware: Middleware = {
   async onRequest({ request }) {
