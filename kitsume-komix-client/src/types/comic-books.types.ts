@@ -1,7 +1,7 @@
 import type { paths } from '../openapi/openapi-schema';
 
-// /comic-series/{id} endpoint types - Get comic books in a series
-export type GetComicsBySeries = paths['/comic-series/{id}']['get']['responses']['200']['content']['application/json'];
+// /comic-books/all endpoint types - Used for fetching comics by series via filterProperty=seriesId
+export type GetComicsBySeries = paths['/comic-books/all']['get']['responses']['200']['content']['application/json'];
 
 export type ComicBookInSeriesData = GetComicsBySeries['data'];
 
