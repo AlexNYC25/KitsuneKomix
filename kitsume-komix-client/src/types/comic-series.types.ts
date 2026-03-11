@@ -28,3 +28,7 @@ export type UpdatedComicSeriesData = GetUpdatedComicSeriesResponse['data'];
 export type UpdatedComicSeriesSingle = UpdatedComicSeriesData[number];
 
 export type UpdatedComicSeriesMeta = GetUpdatedComicSeriesResponse['meta'];
+
+// Minimal shape required to render a comic series in the carousel.
+// Derived from LatestComicSeriesSingle which shares the same structure as UpdatedComicSeriesSingle.
+export type ComicSeriesCarouselItem = Pick<LatestComicSeriesSingle, 'id' | 'name' | 'thumbnailUrl'>;
