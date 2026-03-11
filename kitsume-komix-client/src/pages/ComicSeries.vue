@@ -3,8 +3,8 @@ import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { composeStaticUrl } from '@/utilities/apiClient';
 import { useComicSeriesStore } from '@/stores/comic-series';
-import type { ComicBooksSeriesResponse } from '@/types/comic-books.types';
-import type { ComicSeriesResponseItem, ComicSeriesComic } from '@/types/comic-series.types';
+import type { ComicBook, ComicBooksSeriesResponse } from '@/types/comic-books.types';
+import type { ComicSeriesResponseItem } from '@/types/comic-series.types';
 import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
 import Paginator from 'primevue/paginator';
 import Button from 'primevue/button';
@@ -17,7 +17,7 @@ const route = useRoute();
 
 const comicSeriesStore = useComicSeriesStore();
 
-const comicSeriesData = ref<any | null>(null);
+const comicSeriesData = ref<ComicSeriesResponseItem | null>(null);
 const comicsData = ref<ComicBooksSeriesResponse | null>(null);
 
 const currentPage = ref(0);
@@ -52,12 +52,8 @@ onMounted(async () => {
 });
 
 // Computed Properties
-const seriesResponseItem = computed<ComicSeriesResponseItem | null>(() => {
-	return comicsData.value?.data?.[0] ?? null;
-});
-
-const allComicsInSeries = computed<ComicSeriesComic[]>(() => {
-	return seriesResponseItem.value?.comicBooks ?? [];
+const allComicsInSeries = computed<ComicBook[]>(() => {
+	return comicsData.value?.data ?? [];
 });
 
 const totalComics = computed(() => allComicsInSeries.value.length);
@@ -90,7 +86,7 @@ const firstComicYear = computed(() => {
 	return sorted[0]?.year || null;
 });
 
-const getComicThumbnailUrl = (comic: ComicSeriesComic): string | null => {
+const getComicThumbnailUrl = (comic: ComicBook): string | null => {
 	const thumbnailPath = comic.thumbnails?.[0]?.filePath;
 	if (!thumbnailPath) {
 		return null;
