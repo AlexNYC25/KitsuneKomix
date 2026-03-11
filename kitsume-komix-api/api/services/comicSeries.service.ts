@@ -2,7 +2,10 @@ import {
   getComicSeriesWithMetadataFilteringSorting,
 } from "#sqlite/models/comicSeries.model.ts";
 
-import { fetchComicBooksWithRelatedMetadata } from "./comicbooks.service.ts";
+import {
+  attachThumbnailToComicBook,
+  fetchComicBooksWithRelatedMetadata,
+} from "./comicbooks.service.ts";
 
 import type {
   ComicBookMetadataOnly,
@@ -121,10 +124,26 @@ const fetchAComicSeriesAssociatedMetadataById = async (
     (total, book) => total + (book.fileSize || 0),
     0,
   );
-  const thumbnailUrl: string | undefined =
-    comicBooksBelongingToSeries.length > 0
-      ? `/api/image/thumbnails/${comicBooksBelongingToSeries[0].id}` // TODO: Check that this is the correct way to get the thumbnail url for the first comic book in the series
-      : undefined;
+  let thumbnailUrl: string | undefined;
+  if (comicBooksBelongingToSeries.length > 0) {
+    // sort the comic books by their issue number (if they have one) to ensure we get the thumbnail for the first comic book in the series, otherwise we might end up with the thumbnail for a random comic book in the series which would be bad UX. If issue number is not available, we can sort by release date or just take the first comic book in the list.
+    const comicBooksBelongingToSeriesSorted: ComicBookWithMetadata[] = [...comicBooksBelongingToSeries];
+    comicBooksBelongingToSeriesSorted.sort((a, b) => {
+      if (a.issueNumber && b.issueNumber) {
+        return Number.parseFloat(a.issueNumber) - Number.parseFloat(b.issueNumber);
+      } else if (a.publicationDate && b.publicationDate) {
+        return new Date(a.publicationDate).getTime() - new Date(b.publicationDate).getTime();
+      } else {
+        return 0; // If neither issue number nor release date is available, maintain original order
+      }
+    });
+
+
+    const firstComicWithThumbnail = await attachThumbnailToComicBook(
+      comicBooksBelongingToSeriesSorted[0].id,
+    );
+    thumbnailUrl = firstComicWithThumbnail?.thumbnailUrl;
+  }
   const credits: ComicBookMetadataOnly =
     complileTheCompleteComicSeriesCreditsMetadata(comicBooksBelongingToSeries);
 
@@ -215,16 +234,17 @@ export const complileTheCompleteComicSeriesCreditsMetadata = (
 
   for (const creditType in completeCredits) {
     if (completeCredits[creditType as keyof ComicBookMetadataOnly]) {
-      const uniqueCredits = new Map();
-      for (
-        const credit
-          of completeCredits[creditType as keyof ComicBookMetadataOnly] as any[]
-      ) {
+      const creditItems =
+        completeCredits[creditType as keyof ComicBookMetadataOnly] as Array<
+          { id: number | string }
+        >;
+      const uniqueCredits = new Map<number | string, (typeof creditItems)[number]>();
+      for (const credit of creditItems) {
         uniqueCredits.set(credit.id, credit);
       }
       completeCredits[creditType as keyof ComicBookMetadataOnly] = Array.from(
         uniqueCredits.values(),
-      );
+      ) as ComicBookMetadataOnly[keyof ComicBookMetadataOnly];
     }
   }
 
