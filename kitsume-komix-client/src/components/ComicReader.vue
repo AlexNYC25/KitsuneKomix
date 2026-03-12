@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import { motion } from 'motion-v';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Skeleton from 'primevue/skeleton';
+import { apiClient, composeStaticUrl } from '@/utilities/apiClient';
+import { resolveImageSrc, revokeBlobUrl, revokeBlobUrls } from '@/utilities/image';
 import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
 
 interface ComicReaderProps {
@@ -63,6 +65,8 @@ const openReader = async () => {
 const closeReader = () => {
 	isVisible.value = false;
 	currentPage.value = 1;
+	revokeBlobUrl(currentImageUrl.value || '');
+	revokeBlobUrls(webtoonPages.value.map((page) => page.imageUrl));
 	currentImageUrl.value = null;
 	error.value = null;
 	webtoonPages.value = [];
@@ -70,18 +74,20 @@ const closeReader = () => {
 
 const loadPageInfo = async () => {
 	try {
-		const response = await fetch(`http://localhost:8000/api/comic-books/${props.comicBookId}/pages`, {
-			headers: {
-				'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+		const { data, error: pageInfoError } = await apiClient.GET('/comic-books/{id}/pages', {
+			params: {
+				path: {
+					id: String(props.comicBookId)
+				}
 			}
 		});
 
-		if (response.ok) {
-			const data = await response.json();
-			totalPages.value = data.totalPages || data.pagesInDb || 0;
-		} else {
+		if (pageInfoError || !data) {
 			error.value = 'Failed to load page information';
+			return;
 		}
+
+		totalPages.value = data.totalPages || data.pagesInDb || 0;
 	} catch (err) {
 		console.error('Error loading page info:', err);
 		error.value = 'Error loading page information';
@@ -104,28 +110,36 @@ const loadPage = async (pageNumber: number) => {
 	error.value = null;
 
 	try {
-		const response = await fetch(
-			`http://localhost:8000/api/comic-books/${props.comicBookId}/stream/${pageNumber}`,
-			{
-				headers: {
-					'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-					'Accept': 'image/webp,image/jpeg,image/*'
+		const { data, error: streamError } = await apiClient.GET('/comic-books/{id}/stream/{page}', {
+			params: {
+				path: {
+					id: String(props.comicBookId),
+					page: String(pageNumber)
 				}
 			}
-		);
+		});
 
-		if (response.ok) {
-			const data = await response.json();
-			if (data.pagePath) {
-				const newImageUrl = `http://localhost:8000/api/image/comic-book/${data.comicId}/page/${data.pagePath.split('/').pop()}`;
-				
-				currentImageUrl.value = newImageUrl;
-				currentPage.value = pageNumber;
-			} else {
-				error.value = 'Failed to load page';
-			}
-		} else {
+		if (streamError || !data) {
 			error.value = 'Failed to fetch page';
+			return;
+		}
+
+		if (data.pagePath) {
+			const pageFilename = data.pagePath.split('/').pop();
+			const pageUrl = composeStaticUrl(`/api/image/comic-book/${data.comicId}/page/${pageFilename}`);
+			const resolvedImageUrl = await resolveImageSrc(pageUrl);
+
+			if (!resolvedImageUrl) {
+				error.value = 'Failed to load page image';
+				return;
+			}
+
+			revokeBlobUrl(currentImageUrl.value || '');
+			
+			currentImageUrl.value = resolvedImageUrl;
+			currentPage.value = pageNumber;
+		} else {
+			error.value = 'Failed to load page';
 		}
 	} catch (err) {
 		console.error('Error loading page:', err);
@@ -186,26 +200,27 @@ const getInitialAnimationState = () => {
 
 const loadWebtoonPages = async () => {
 	isLoadingWebtoon.value = true;
+	revokeBlobUrls(webtoonPages.value.map((page) => page.imageUrl));
 	webtoonPages.value = [];
 	error.value = null;
 
 	try {
 		for (let pageNum = 1; pageNum <= totalPages.value; pageNum++) {
 			try {
-				const response = await fetch(
-					`http://localhost:8000/api/comic-books/${props.comicBookId}/stream/${pageNum}`,
-					{
-						headers: {
-							'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-							'Accept': 'image/webp,image/jpeg,image/*'
+				const { data, error: streamError } = await apiClient.GET('/comic-books/{id}/stream/{page}', {
+					params: {
+						path: {
+							id: String(props.comicBookId),
+							page: String(pageNum)
 						}
 					}
-				);
+				});
 
-				if (response.ok) {
-					const data = await response.json();
-					if (data.pagePath) {
-						const imageUrl = `http://localhost:8000/api/image/comic-book/${data.comicId}/page/${data.pagePath.split('/').pop()}`;
+				if (!streamError && data?.pagePath) {
+					const pageFilename = data.pagePath.split('/').pop();
+					const pageUrl = composeStaticUrl(`/api/image/comic-book/${data.comicId}/page/${pageFilename}`);
+					const imageUrl = await resolveImageSrc(pageUrl);
+					if (imageUrl) {
 						webtoonPages.value.push({ pageNumber: pageNum, imageUrl });
 					}
 				}
@@ -303,6 +318,11 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 defineExpose({
 	openReader
+});
+
+onBeforeUnmount(() => {
+	revokeBlobUrl(currentImageUrl.value || '');
+	revokeBlobUrls(webtoonPages.value.map((page) => page.imageUrl));
 });
 
 // Utilities
