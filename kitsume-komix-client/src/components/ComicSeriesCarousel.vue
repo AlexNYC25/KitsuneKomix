@@ -2,7 +2,7 @@
 import { ref, watch, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { composeStaticUrl, authenticatedImageFetch } from '@/utilities/apiClient';
+import { resolveImageSrc, toAbsoluteImageUrl, isProtectedImageUrl, revokeBlobUrls } from '@/utilities/image';
 import type { ComicSeriesCarouselItem } from '@/types/comic-series.types';
 import Button from 'primevue/button';
 
@@ -16,29 +16,11 @@ const props = defineProps<{
 
 const carousel = ref<HTMLElement | null>(null)
 const thumbnailBlobUrls = ref<Record<string, string>>({})
-
-// quick utility to determine if a thumbnail URL is protected and requires authenticated fetching, based on URL pattern
-const isProtectedImageUrl = (url: string): boolean => url.includes('/api/image/');
-
-// Converts a thumbnail URL to an absolute URL, 
-// handling both already absolute URLs and relative URLs that need to be composed with the static URL base
-const toAbsoluteUrl = (url: string): string => {
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
-    return url;
-  }
-
-  return composeStaticUrl(url);
-};
-
-// Revokes all currently stored thumbnail blob URLs to free up memory, and clears the state object
 const revokeAllThumbnailUrls = () => {
-  Object.values(thumbnailBlobUrls.value).forEach((blobUrl) => URL.revokeObjectURL(blobUrl));
+  revokeBlobUrls(Object.values(thumbnailBlobUrls.value));
   thumbnailBlobUrls.value = {};
 };
 
-// Loads thumbnail images for the comic series items. 
-// For protected URLs, it uses the authenticatedImageFetch function to retrieve the image as a blob and creates an object URL for it. 
-// For unprotected URLs, it uses them directly. The resulting URLs are stored in the thumbnailBlobUrls state object.
 const loadThumbnails = async () => {
   revokeAllThumbnailUrls();
 
@@ -50,24 +32,9 @@ const loadThumbnails = async () => {
         return;
       }
 
-      const requestUrl = toAbsoluteUrl(item.thumbnailUrl);
-
-      if (!isProtectedImageUrl(requestUrl)) {
-        nextBlobUrls[String(item.id)] = requestUrl;
-        return;
-      }
-
-      try {
-        const response = await authenticatedImageFetch(requestUrl);
-
-        if (!response.ok) {
-          return;
-        }
-
-        const blob = await response.blob();
-        nextBlobUrls[String(item.id)] = URL.createObjectURL(blob);
-      } catch {
-        return;
+      const resolvedSrc = await resolveImageSrc(item.thumbnailUrl);
+      if (resolvedSrc) {
+        nextBlobUrls[String(item.id)] = resolvedSrc;
       }
     })
   );
@@ -75,14 +42,6 @@ const loadThumbnails = async () => {
   thumbnailBlobUrls.value = nextBlobUrls;
 };
 
-/**
- * The entry point for getting the thumbnail source URL for a given comic series item.
- * It checks if a blob URL has already been generated for the item and returns it.
- * If not, it checks if the item has a thumbnail URL. If it does, it uses the toAbsoluteUrl function to get the absolute URL and checks if it's protected. 
- * - If it's protected, it returns an empty string (since the thumbnail can't be displayed without authentication). 
- * - If it's not protected, it returns the absolute URL to be used directly as the image source.
- * @param item 
- */
 const getThumbnailSrc = (item: ComicSeriesCarouselItem): string => {
   const itemId = String(item.id);
   if (thumbnailBlobUrls.value[itemId]) {
@@ -93,7 +52,7 @@ const getThumbnailSrc = (item: ComicSeriesCarouselItem): string => {
     return '';
   }
 
-  const requestUrl = toAbsoluteUrl(item.thumbnailUrl);
+  const requestUrl = toAbsoluteImageUrl(item.thumbnailUrl);
   if (isProtectedImageUrl(requestUrl)) {
     return '';
   }
