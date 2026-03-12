@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { composeStaticUrl } from '@/utilities/apiClient';
+import { useAuthStore } from '@/stores/auth';
+import { resolveImageSrc, revokeBlobUrls } from '@/utilities/image';
+import { apiClient } from '@/utilities/apiClient';
 import { useComicSeriesStore } from '@/stores/comic-series';
 import type { ComicBook, ComicBooksSeriesResponse } from '@/types/comic-books.types';
 import type { ComicSeriesResponseItem } from '@/types/comic-series.types';
@@ -14,6 +16,7 @@ import ComicThumbnail from '@/components/ComicThumbnail.vue';
 
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 const comicSeriesStore = useComicSeriesStore();
 
@@ -25,6 +28,20 @@ const itemsPerPage = 25;
 const viewMode = ref<'grid' | 'list'>('grid');
 const isLoading = ref(true);
 const activeTab = ref(0);
+const comicThumbnailUrls = ref<Record<number, string>>({});
+
+const getThumbnailPathFromFilePath = (filePath?: string | null): string | null => {
+	if (!filePath) {
+		return null;
+	}
+
+	const filename = filePath.split('/').pop();
+	if (!filename) {
+		return null;
+	}
+
+	return `/api/image/thumbnails/${filename}`;
+};
 
 onMounted(async () => {
   // Get series ID from route params
@@ -86,18 +103,52 @@ const firstComicYear = computed(() => {
 	return sorted[0]?.year || null;
 });
 
+const getComicThumbnailPath = (comic: ComicBook): string | null => {
+	return getThumbnailPathFromFilePath(comic.thumbnails?.[0]?.filePath);
+};
+
+const revokeComicThumbnailUrls = () => {
+	revokeBlobUrls(Object.values(comicThumbnailUrls.value));
+	comicThumbnailUrls.value = {};
+};
+
+const loadComicThumbnails = async () => {
+	revokeComicThumbnailUrls();
+
+	const nextUrls: Record<number, string> = {};
+
+	await Promise.all(
+		allComicsInSeries.value.map(async (comic) => {
+			let thumbnailPath = getComicThumbnailPath(comic);
+
+			if (!thumbnailPath) {
+				const { data } = await apiClient.GET('/comic-books/{id}/thumbnails', {
+					params: {
+						path: {
+							id: String(comic.id)
+						}
+					}
+				});
+
+				thumbnailPath = getThumbnailPathFromFilePath(data?.thumbnails?.[0]?.filePath);
+			}
+
+			if (!thumbnailPath) {
+				return;
+			}
+
+			const resolvedSrc = await resolveImageSrc(thumbnailPath);
+			if (resolvedSrc) {
+				nextUrls[comic.id] = resolvedSrc;
+			}
+		})
+	);
+
+	comicThumbnailUrls.value = nextUrls;
+};
+
 const getComicThumbnailUrl = (comic: ComicBook): string | null => {
-	const thumbnailPath = comic.thumbnails?.[0]?.filePath;
-	if (!thumbnailPath) {
-		return null;
-	}
-
-	const filename = thumbnailPath.split('/').pop();
-	if (!filename) {
-		return null;
-	}
-
-	return composeStaticUrl(`/api/image/thumbnails/${filename}`);
+	return comicThumbnailUrls.value[comic.id] ?? null;
 };
 
 const onPageChange = (event: any) => {
@@ -120,6 +171,18 @@ const navigateToComicBook = (comicBookId: number) => {
 	const seriesId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
 	router.push(`/comic-book/${comicBookId}?seriesId=${seriesId}`);
 };
+
+watch(
+	() => [allComicsInSeries.value, authStore.token],
+	() => {
+		void loadComicThumbnails();
+	},
+	{ immediate: true }
+);
+
+onBeforeUnmount(() => {
+	revokeComicThumbnailUrls();
+});
 
 </script>
 
