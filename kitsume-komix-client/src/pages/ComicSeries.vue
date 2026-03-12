@@ -160,7 +160,55 @@ const toggleViewMode = (mode: 'grid' | 'list') => {
 	currentPage.value = 0;
 };
 
-// helper to check if the selected comic series has metadata of a given type
+const seriesDetailsSource = computed<Record<string, unknown> | null>(() => {
+	if (!comicSeriesData.value) {
+		return null;
+	}
+
+	const seriesData = comicSeriesData.value as ComicSeriesResponseItem & {
+		credits?: Record<string, unknown>;
+		metadata?: Record<string, unknown>;
+	};
+
+	return seriesData.credits ?? seriesData.metadata ?? null;
+});
+
+const toDetailsString = (value: unknown): string | undefined => {
+	if (!value) {
+		return undefined;
+	}
+
+	if (typeof value === 'string') {
+		return value;
+	}
+
+	if (Array.isArray(value)) {
+		const names = value
+			.map((item) => {
+				if (typeof item === 'string') {
+					return item;
+				}
+
+				if (item && typeof item === 'object' && 'name' in item) {
+					const name = (item as { name?: unknown }).name;
+					return typeof name === 'string' ? name : '';
+				}
+
+				return '';
+			})
+			.filter((item) => item.length > 0);
+
+		return names.length ? names.join(', ') : undefined;
+	}
+
+	return undefined;
+};
+
+const getSeriesDetails = (key: string): string | undefined => {
+	return toDetailsString(seriesDetailsSource.value?.[key]);
+};
+
+// helper to check if the selected comic series has metadata/credits of a given type
 const hasMetadata = (data: string | undefined): boolean => {
 	return !!data && data.trim().length > 0;
 };
@@ -212,47 +260,47 @@ onBeforeUnmount(() => {
 					</div>
 
 					<!-- Metadata Contents -->
-					<div v-if="comicSeriesData?.metadata" class="space-y-3 border-t border-gray-700 pt-4">
+					<div v-if="seriesDetailsSource" class="space-y-3 border-t border-gray-700 pt-4">
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.characters)"
+							v-if="hasMetadata(getSeriesDetails('characters'))"
 							:comicMetadataDetailsLabel="'Characters'" 
-							:comicMetadataDetails="comicSeriesData.metadata.characters" 
+							:comicMetadataDetails="getSeriesDetails('characters')" 
 							:maxVisible="5"
 						/>
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.teams)"
+							v-if="hasMetadata(getSeriesDetails('teams'))"
 							:comicMetadataDetailsLabel="'Teams'" 
-							:comicMetadataDetails="comicSeriesData.metadata.teams" 
+							:comicMetadataDetails="getSeriesDetails('teams')" 
 						/>
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.writers)"
+							v-if="hasMetadata(getSeriesDetails('writers'))"
 							:comicMetadataDetailsLabel="'Writers'" 
-							:comicMetadataDetails="comicSeriesData.metadata.writers" 
+							:comicMetadataDetails="getSeriesDetails('writers')" 
 						/>
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.colorists)"
+							v-if="hasMetadata(getSeriesDetails('colorists'))"
 							:comicMetadataDetailsLabel="'Colorists'" 
-							:comicMetadataDetails="comicSeriesData.metadata.colorists" 
+							:comicMetadataDetails="getSeriesDetails('colorists')" 
 						/>
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.coverArtists)"
+							v-if="hasMetadata(getSeriesDetails('coverArtists'))"
 							:comicMetadataDetailsLabel="'Cover Artists'" 
-							:comicMetadataDetails="comicSeriesData.metadata.coverArtists" 
+							:comicMetadataDetails="getSeriesDetails('coverArtists')" 
 						/>
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.inkers)"
+							v-if="hasMetadata(getSeriesDetails('inkers'))"
 							:comicMetadataDetailsLabel="'Inkers'" 
-							:comicMetadataDetails="comicSeriesData.metadata.inkers" 
+							:comicMetadataDetails="getSeriesDetails('inkers')" 
 						/>
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.letterers)"
+							v-if="hasMetadata(getSeriesDetails('letterers'))"
 							:comicMetadataDetailsLabel="'Letterers'" 
-							:comicMetadataDetails="comicSeriesData.metadata.letterers" 
+							:comicMetadataDetails="getSeriesDetails('letterers')" 
 						/>
 						<ComicSeriesPageDetails 
-							v-if="hasMetadata(comicSeriesData.metadata.editors)"
+							v-if="hasMetadata(getSeriesDetails('editors'))"
 							:comicMetadataDetailsLabel="'Editors'" 
-							:comicMetadataDetails="comicSeriesData.metadata.editors" 
+							:comicMetadataDetails="getSeriesDetails('editors')" 
 						/>
 					</div>
 				</div>
