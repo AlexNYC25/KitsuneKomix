@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { authenticateUser } from "../services/auth.service.ts";
+import { authenticateUser, setAuthCookies } from "../services/auth.service.ts";
 import { checkIfAppSetupComplete } from "../services/users.service.ts";
 import {
   createRefreshTokenPair,
@@ -84,6 +84,9 @@ app.openapi(
       // Create refresh token pair instead of just access token
       const roles = user.admin ? ["admin"] : ["user"];
       const tokenPair = await createRefreshTokenPair(user.id, roles);
+
+      // Set HttpOnly cookies for browser-based (cookie-auth) clients.
+      setAuthCookies(c, tokenPair.accessToken, tokenPair.refreshToken);
 
       return c.json({
         message: "Login successful",
