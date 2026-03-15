@@ -1,7 +1,16 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { authenticateUser, setAuthCookies } from "../services/auth.service.ts";
+import {
+  authenticateUser,
+  clearAuthCookies,
+  getTokenFromCookie,
+  setAuthCookies,
+} from "../services/auth.service.ts";
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+} from "#utilities/environment.ts";
 import { checkIfAppSetupComplete } from "../services/users.service.ts";
 import {
   createRefreshTokenPair,
@@ -154,13 +163,19 @@ app.openapi(
   }),
   async (c) => {
     try {
-      const { refreshToken } = c.req.valid("json");
+      // Cookie-auth clients send no body; token-auth clients send refreshToken in body.
+      const body = c.req.valid("json");
+      const refreshToken =
+        body.refreshToken ?? getTokenFromCookie(c, REFRESH_COOKIE_NAME);
 
       if (!refreshToken) {
         return c.json({ message: "Refresh token is required" }, 400);
       }
 
       const newTokens = await refreshAccessToken(refreshToken);
+
+      // Rotate cookies for cookie-auth clients.
+      setAuthCookies(c, newTokens.accessToken, newTokens.refreshToken);
 
       return c.json({
         message: "Token refreshed successfully",
@@ -227,13 +242,19 @@ app.openapi(
   }),
   async (c) => {
     try {
-      const { refreshToken } = c.req.valid("json");
+      // Cookie-auth clients send no body; token-auth clients send refreshToken in body.
+      const body = c.req.valid("json");
+      const refreshToken =
+        body.refreshToken ?? getTokenFromCookie(c, REFRESH_COOKIE_NAME);
 
       if (!refreshToken) {
         return c.json({ message: "Refresh token is required" }, 400);
       }
 
       await revokeToken(refreshToken);
+
+      // Always clear cookies regardless of which auth path was used.
+      clearAuthCookies(c);
 
       return c.json({ message: "Logout successful" }, 200);
     } catch (error) {
@@ -290,17 +311,23 @@ app.openapi(
   }),
   async (c) => {
     try {
-      // Manual auth check since middleware doesn't work well with OpenAPIHono typed routes
+      // Accept token from Authorization header (token-auth) or access cookie (cookie-auth).
       const authHeader = c.req.header("Authorization");
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      const token = authHeader?.startsWith("Bearer ")
+        ? authHeader.split(" ")[1]
+        : getTokenFromCookie(c, ACCESS_COOKIE_NAME);
+
+      if (!token) {
         return c.json({ message: "Unauthorized" }, 401);
       }
 
-      const token = authHeader.split(" ")[1];
       const payload = await verifyAccessToken(token);
       const userId = parseInt(payload.sub);
 
       const revokedCount = await revokeAllUserTokens(userId);
+
+      // Always clear cookies regardless of which auth path was used.
+      clearAuthCookies(c);
 
       return c.json({
         message: `Logged out from all devices successfully`,
