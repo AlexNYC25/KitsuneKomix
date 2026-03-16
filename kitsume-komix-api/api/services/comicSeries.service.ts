@@ -232,20 +232,58 @@ export const complileTheCompleteComicSeriesCreditsMetadata = (
     }
   }
 
-  for (const creditType in completeCredits) {
-    if (completeCredits[creditType as keyof ComicBookMetadataOnly]) {
-      const creditItems =
-        completeCredits[creditType as keyof ComicBookMetadataOnly] as Array<
-          { id: number | string }
-        >;
-      const uniqueCredits = new Map<number | string, (typeof creditItems)[number]>();
-      for (const credit of creditItems) {
-        uniqueCredits.set(credit.id, credit);
-      }
-      completeCredits[creditType as keyof ComicBookMetadataOnly] = Array.from(
-        uniqueCredits.values(),
-      ) as ComicBookMetadataOnly[keyof ComicBookMetadataOnly];
+  const dedupeById = <T extends { id: number | string }>(items: T[]): T[] => {
+    const uniqueCredits = new Map<number | string, T>();
+    for (const credit of items) {
+      uniqueCredits.set(credit.id, credit);
     }
+    return Array.from(uniqueCredits.values());
+  };
+
+  if (completeCredits.writers) {
+    completeCredits.writers = dedupeById(completeCredits.writers);
+  }
+  if (completeCredits.pencillers) {
+    completeCredits.pencillers = dedupeById(completeCredits.pencillers);
+  }
+  if (completeCredits.inkers) {
+    completeCredits.inkers = dedupeById(completeCredits.inkers);
+  }
+  if (completeCredits.letterers) {
+    completeCredits.letterers = dedupeById(completeCredits.letterers);
+  }
+  if (completeCredits.editors) {
+    completeCredits.editors = dedupeById(completeCredits.editors);
+  }
+  if (completeCredits.colorists) {
+    completeCredits.colorists = dedupeById(completeCredits.colorists);
+  }
+  if (completeCredits.coverArtists) {
+    completeCredits.coverArtists = dedupeById(completeCredits.coverArtists);
+  }
+  if (completeCredits.publishers) {
+    completeCredits.publishers = dedupeById(completeCredits.publishers);
+  }
+  if (completeCredits.imprints) {
+    completeCredits.imprints = dedupeById(completeCredits.imprints);
+  }
+  if (completeCredits.genres) {
+    completeCredits.genres = dedupeById(completeCredits.genres);
+  }
+  if (completeCredits.characters) {
+    completeCredits.characters = dedupeById(completeCredits.characters);
+  }
+  if (completeCredits.teams) {
+    completeCredits.teams = dedupeById(completeCredits.teams);
+  }
+  if (completeCredits.locations) {
+    completeCredits.locations = dedupeById(completeCredits.locations);
+  }
+  if (completeCredits.storyArcs) {
+    completeCredits.storyArcs = dedupeById(completeCredits.storyArcs);
+  }
+  if (completeCredits.seriesGroups) {
+    completeCredits.seriesGroups = dedupeById(completeCredits.seriesGroups);
   }
 
   return completeCredits;

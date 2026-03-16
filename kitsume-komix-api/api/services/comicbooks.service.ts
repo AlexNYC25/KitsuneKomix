@@ -228,7 +228,15 @@ export const fetchAComicsAssociatedMetadataById = async (
       seriesGroups: await getSeriesGroupsByComicBookId(id),
     };
 
-    return metadata;
+    const thumbnail = await getThumbnailsByComicBookId(id);
+    const thumbnailUrl = thumbnail && thumbnail.length > 0 
+      ? `/api/image/thumbnails/${thumbnail[0].filePath.split("/").pop()}`
+      : undefined;
+
+    return {
+      ...metadata,
+      thumbnailUrl,
+    };
   } catch (error) {
     console.error("Error fetching comic book metadata:", error);
     throw error;

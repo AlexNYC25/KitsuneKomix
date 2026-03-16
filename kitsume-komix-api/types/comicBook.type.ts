@@ -37,6 +37,8 @@ export type ComicBookMetadataOnly = {
   locations?: ComicLocation[];
   storyArcs?: ComicStoryArc[];
   seriesGroups?: ComicSeriesGroup[];
+
+  thumbnailUrl?: string;
 };
 
 export type ComicBookWithMetadata = ComicBook & ComicBookMetadataOnly;
