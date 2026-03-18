@@ -18,7 +18,7 @@ import {
   revokeAllUserTokens,
   revokeToken,
 } from "../services/refreshToken.service.ts";
-import { verifyAccessToken } from "../../auth/auth.ts";
+import { verifyAccessToken } from "../auth/auth.ts";
 
 import { AuthHeaderSchema } from "#schemas/header.schema.ts";
 import {

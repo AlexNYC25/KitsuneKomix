@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
 
-import { verifyAccessToken, verifyRefreshToken } from "../../auth/auth.ts";
+import { verifyAccessToken, verifyRefreshToken } from "../auth/auth.ts";
 import { getValidRefreshToken } from "../../db/sqlite/models/refreshTokens.model.ts";
 import { apiLogger } from "../../logger/loggers.ts";
 import type { AccessRefreshTokenCombinedPayload } from "#types/index.ts";

@@ -1,4 +1,4 @@
-import { generateTokenPair, verifyRefreshToken } from "../../auth/auth.ts";
+import { generateTokenPair, verifyRefreshToken } from "../auth/auth.ts";
 
 import {
   cleanupExpiredTokens,
