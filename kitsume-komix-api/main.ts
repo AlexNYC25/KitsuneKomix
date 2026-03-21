@@ -1,5 +1,5 @@
-import app from "./api/app.ts";
-import { getWatcherManager } from "./file-watching/index.ts";
+import app from "./app/api.ts";
+import { getWatcherManager } from "./app/watcher.ts";
 import "./queue/workers/comicBook.worker.ts";
 import "./queue/workers/series.worker.ts";
 import "./queue/workers/file.worker.ts";
