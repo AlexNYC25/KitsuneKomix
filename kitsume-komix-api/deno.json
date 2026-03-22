@@ -5,8 +5,12 @@
     "#schemas/": "./zod/schemas/",
     "#utilities/": "./utilities/",
     "#sqlite/": "./db/sqlite/",
+
+    "#infrastructure/": "./infrastructure/",
     "#db/": "./infrastructure/db/",
     "#app/": "./app/",
+    "#zod/": "./shared/zod/",
+    "#config/": "./config/",
     "@hono/swagger-ui": "npm:@hono/swagger-ui@^0.5.2",
     "@hono/zod-openapi": "npm:@hono/zod-openapi@^1.1.3",
     "@hono/zod-validator": "npm:@hono/zod-validator@^0.7.3",
