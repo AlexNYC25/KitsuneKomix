@@ -1,20 +1,18 @@
-import app from "./app/api.ts";
-import { getWatcherManager } from "./app/watcher.ts";
-import "./queue/workers/comicBook.worker.ts";
-import "./queue/workers/series.worker.ts";
-import "./queue/workers/file.worker.ts";
+import app from "#app/api.ts";
+import { getWatcherManager } from "#app/watcher.ts";
 
-import { runMigrations } from "#db/migrate.ts";
-import { setUpAppSettings } from "#db/settingsSetup.ts";
+import { env } from "#config/env.ts";
 
-import { API_PORT } from "#utilities/environment.ts";
+import { runMigrations } from "#infrastructure/db/scripts/migrate.ts";
+import { setUpAppSettings } from "#infrastructure/db/scripts/seed.ts";
+
+import "#infrastructure/queue/workers/comicBook.worker.ts";
+import "#infrastructure/queue/workers/series.worker.ts";
+import "#infrastructure/queue/workers/file.worker.ts";
 
 await runMigrations();
-
 await setUpAppSettings();
 
 const _watchManager = getWatcherManager();
 
-const port = parseInt(API_PORT, 10);
-
-Deno.serve({ port: port }, app.fetch);
+Deno.serve({ port: env.PORT }, app.fetch);
