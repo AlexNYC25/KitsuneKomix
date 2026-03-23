@@ -3,9 +3,9 @@ import chokidar from "chokidar";
 import {
   getAllComicLibraries,
   getComicLibraryLastChangedTime,
-} from "#sqlite/models/comicLibraries.model.ts";
-import { addNewComicFile } from "./actions/newComicFile.ts";
-import { apiLogger } from "../logger/loggers.ts";
+} from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { orchestrateFile } from "#modules/queue/orchestrators/comic.orchestrator.ts";
+import { apiLogger } from "#infrastructure/logger/loggers.ts";
 
 let instance: WatchManager | null = null;
 
@@ -73,10 +73,10 @@ export class WatchManager {
       return;
     }
     try {
-      await addNewComicFile({ filePath: path, metadata: {} });
+      await orchestrateFile(path);
     } catch (error) {
       apiLogger.error(
-        `Error calling addNewComicFile for ${path}: ${
+        `Error calling orchestrateFile for ${path}: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
