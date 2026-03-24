@@ -1,6 +1,6 @@
 import { Queue, QueueEvents, QueueOptions } from "bullmq";
-import { redisConnection } from "../db/redis/redisConnection.ts";
-import { queueLogger } from "../logger/loggers.ts";
+import { redisConnection } from "#infrastructure/db/redis/client.ts";
+import { queueLogger } from "#infrastructure/logger/loggers.ts";
 
 export const appQueue = new Queue("appQueue", {
   connection: redisConnection,
