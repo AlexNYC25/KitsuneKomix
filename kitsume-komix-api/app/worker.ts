@@ -1,7 +1,9 @@
 import { Queue, QueueEvents, QueueOptions } from "bullmq";
+
 import { redisConnection } from "#infrastructure/db/redis/client.ts";
 import { queueLogger } from "#infrastructure/logger/loggers.ts";
 
+// Define the main application queue for processing tasks
 export const appQueue = new Queue("appQueue", {
   connection: redisConnection,
   defaultJobOptions: {
@@ -15,14 +17,15 @@ export const appQueue = new Queue("appQueue", {
   },
 } as QueueOptions);
 
-export const appQueueEvents = new QueueEvents("appQueue", {
-  connection: redisConnection,
-});
-
 // Add connection event handlers
 appQueue.on("error", (error) => {
   //console.error("Queue connection error:", error);
   queueLogger.error(`Queue connection error: ${error}`);
+});
+
+// Creates the event listeners for the main application queue: "appQueue"
+export const appQueueEvents = new QueueEvents("appQueue", {
+  connection: redisConnection,
 });
 
 appQueueEvents.on("completed", ({ jobId }) => {
@@ -54,13 +57,13 @@ export const fileOrchestrationQueue = new Queue("fileOrchestrationQueue", {
   },
 } as QueueOptions);
 
-export const fileOrchestrationQueueEvents = new QueueEvents("fileOrchestrationQueue", {
-  connection: redisConnection,
-});
-
 fileOrchestrationQueue.on("error", (error) => {
   //console.error("File orchestration queue connection error:", error);
   queueLogger.error(`File orchestration queue connection error: ${error}`);
+});
+
+export const fileOrchestrationQueueEvents = new QueueEvents("fileOrchestrationQueue", {
+  connection: redisConnection,
 });
 
 fileOrchestrationQueueEvents.on("completed", ({ jobId }) => {
