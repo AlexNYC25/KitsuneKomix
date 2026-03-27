@@ -3,8 +3,7 @@ import { Queue, QueueEvents, QueueOptions } from "bullmq";
 import { redisConnection } from "#infrastructure/db/redis/client.ts";
 import { queueLogger } from "#infrastructure/logger/loggers.ts";
 
-// Define the main application queue for processing tasks
-export const appQueue = new Queue("appQueue", {
+const defaultQueueOptions: QueueOptions = {
   connection: redisConnection,
   defaultJobOptions: {
     removeOnComplete: true,
@@ -15,7 +14,10 @@ export const appQueue = new Queue("appQueue", {
       delay: 5000, // Initial delay of 5 seconds
     },
   },
-} as QueueOptions);
+};
+
+// Define the main application queue for processing tasks
+export const appQueue = new Queue("appQueue", defaultQueueOptions);
 
 // Add connection event handlers
 appQueue.on("error", (error) => {
@@ -44,18 +46,7 @@ appQueueEvents.on("error", (error) => {
 });
 
 
-export const fileOrchestrationQueue = new Queue("fileOrchestrationQueue", {
-  connection: redisConnection,
-  defaultJobOptions: {
-    removeOnComplete: true,
-    removeOnFail: false,
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 5000, // Initial delay of 5 seconds
-    },
-  },
-} as QueueOptions);
+export const fileOrchestrationQueue = new Queue("fileOrchestrationQueue", defaultQueueOptions);
 
 fileOrchestrationQueue.on("error", (error) => {
   //console.error("File orchestration queue connection error:", error);
@@ -82,18 +73,7 @@ fileOrchestrationQueueEvents.on("error", (error) => {
 });
 
 
-export const fileQueue = new Queue("files", {
-  connection: redisConnection,
-  defaultJobOptions: {
-    removeOnComplete: true,
-    removeOnFail: false,
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 5000, // Initial delay of 5 seconds
-    },
-  },
-} as QueueOptions);
+export const fileQueue = new Queue("files", defaultQueueOptions);
 
 export const fileQueueEvents = new QueueEvents("files", {
   connection: redisConnection,
@@ -123,18 +103,7 @@ fileQueueEvents.on("error", (error) => {
  * The Series Queue is responsible for processing series information and linking comic books to their respective series based on the parent folder structure 
  * It handles the creation of new series records in the database if they don't already exist, and ensures that comic books are properly associated with their series.
  */
-export const seriesQueue = new Queue("comicSeries", {
-  connection: redisConnection,
-  defaultJobOptions: {
-    removeOnComplete: true,
-    removeOnFail: false,
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 5000, // Initial delay of 5 seconds
-    },
-  },
-} as QueueOptions);
+export const seriesQueue = new Queue("comicSeries", defaultQueueOptions);
 
 export const seriesQueueEvents = new QueueEvents("comicSeries", {
   connection: redisConnection,
@@ -164,18 +133,7 @@ seriesQueueEvents.on("error", (error) => {
  * The Comic Book Queue is responsible for the detailed processing of comic book files, including metadata extraction, thumbnail generation, and database insertion/updating.
  * It works closely with the file queue to receive jobs for new or updated comic files, and ensures that all necessary processing steps are completed before finalizing the comic book record in the database.
  */
-export const comicBookQueue = new Queue("comicBooks", {
-  connection: redisConnection,
-  defaultJobOptions: {
-    removeOnComplete: true,
-    removeOnFail: false,
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 5000, // Initial delay of 5 seconds
-    },
-  },
-} as QueueOptions);
+export const comicBookQueue = new Queue("comicBooks", defaultQueueOptions);
 
 export const comicBookQueueEvents = new QueueEvents("comicBooks", {
   connection: redisConnection,
