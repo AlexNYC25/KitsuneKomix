@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { basename } from "@std/path";
 
-import { requireAuth } from "../middleware/authChecks.ts";
+import { requireAuth } from "../modules_api/middleware/authChecks.ts";
 
 import {
   checkComicReadByUser,
@@ -22,7 +22,7 @@ import {
   startStreamingComicBookFile,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
-} from "../services/comicbooks.service.ts";
+} from "./comicbooks.service.ts";
 
 import { ComicBookSchema } from "#schemas/data/comicBooks.schema.ts";
 

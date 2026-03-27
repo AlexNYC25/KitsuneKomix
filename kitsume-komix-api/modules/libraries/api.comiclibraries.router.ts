@@ -1,9 +1,9 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { requireAuth } from "../middleware/authChecks.ts";
+import { requireAuth } from "../modules_api/middleware/authChecks.ts";
 
-import { getComicLibrariesAvailableToUser } from "../services/comicLibraries.service.ts";
+import { getComicLibrariesAvailableToUser } from "./comicLibraries.service.ts";
 
 import { createComicLibrary } from "#sqlite/models/comicLibraries.model.ts";
 
@@ -25,7 +25,7 @@ import type {
   ComicLibrary,
   LibraryRegistrationInput,
 } from "#types/index.ts";
-import { listFoldersInDirectoryService } from "../services/files.service.ts";
+import { listFoldersInDirectoryService } from "../files/files.service.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 

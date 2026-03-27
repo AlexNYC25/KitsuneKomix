@@ -1,5 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { MessageResponseSchema } from "../../zod/schemas/response.schema.ts";
+import { MessageResponseSchema } from "../zod/schemas/response.schema.ts";
 
 const healthRouter = new OpenAPIHono();
 

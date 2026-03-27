@@ -1,14 +1,14 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import apiUsersRouter from "./api.users.router.ts";
-import comicLibraryRouter from "./api.comiclibraries.router.ts";
-import adminRouter from "./api.admin.router.ts";
-import comicBookRouter from "./api.comicbooks.router.ts";
-import authRouter from "./api.auth.router.ts";
-import comicSeriesRouter from "./api.comicseries.router.ts";
-import comicPagesRouter from "./api.comicpages.router.ts";
-import collectionsRouter from "./api.collections.router.ts";
-import readlistsRouter from "./api.readlists.router.ts";
-import imageRouter from "./image.router.ts";
+import apiUsersRouter from "../modules_api/routes/api.users.router.ts";
+import comicLibraryRouter from "../modules_api/routes/api.comiclibraries.router.ts";
+import adminRouter from "../modules_api/routes/api.admin.router.ts";
+import comicBookRouter from "../modules_api/routes/api.comicbooks.router.ts";
+import authRouter from "../modules_api/routes/api.auth.router.ts";
+import comicSeriesRouter from "../modules_api/routes/api.comicseries.router.ts";
+import comicPagesRouter from "../modules_api/routes/api.comicpages.router.ts";
+import collectionsRouter from "../modules_api/routes/api.collections.router.ts";
+import readlistsRouter from "../modules_api/routes/api.readlists.router.ts";
+import imageRouter from "../modules_api/routes/image.router.ts";
 
 import { swaggerUI } from "@hono/swagger-ui";
 

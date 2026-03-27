@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { requireAuth } from "../middleware/authChecks.ts";
+import { requireAuth } from "../modules_api/middleware/authChecks.ts";
 
 import { purgeAllData } from "#sqlite/models/admin.model.ts";
 

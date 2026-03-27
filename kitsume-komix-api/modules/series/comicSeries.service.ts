@@ -5,7 +5,7 @@ import {
 import {
   attachThumbnailToComicBook,
   fetchComicBooksWithRelatedMetadata,
-} from "./comicbooks.service.ts";
+} from "../modules_api/services/comicbooks.service.ts";
 
 import type {
   ComicBookMetadataOnly,
