@@ -1,5 +1,5 @@
 import app from "#app/api.ts";
-import { getWatcherManager } from "#app/watcher.ts";
+import { startWatcher } from "#app/watcher.ts";
 
 import { env } from "#config/env.ts";
 
@@ -12,7 +12,6 @@ import "#infrastructure/queue/workers/file.worker.ts";
 
 await runMigrations();
 await setUpAppSettings();
-
-const _watchManager = getWatcherManager();
+await startWatcher();
 
 Deno.serve({ port: env.PORT }, app.fetch);
