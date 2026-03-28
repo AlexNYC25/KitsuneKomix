@@ -1,7 +1,12 @@
 import { Queue, QueueEvents, QueueOptions } from "bullmq";
 
 import { redisConnection } from "#infrastructure/db/redis/client.ts";
-import { queueLogger } from "#infrastructure/logger/loggers.ts";
+
+import { 
+  standardWorkerError, 
+  workerEventCompleted, 
+  workerEventFailed 
+} from "#utilities/workers.ts";
 
 const defaultQueueOptions: QueueOptions = {
   connection: redisConnection,
@@ -20,84 +25,48 @@ const defaultQueueOptions: QueueOptions = {
 export const appQueue = new Queue("appQueue", defaultQueueOptions);
 
 // Add connection event handlers
-appQueue.on("error", (error) => {
-  //console.error("Queue connection error:", error);
-  queueLogger.error(`Queue connection error: ${error}`);
-});
+appQueue.on("error", standardWorkerError);
 
 // Creates the event listeners for the main application queue: "appQueue"
 export const appQueueEvents = new QueueEvents("appQueue", {
   connection: redisConnection,
 });
 
-appQueueEvents.on("completed", ({ jobId }) => {
-  //console.log(`Queue event: Job ${jobId} completed`);
-  queueLogger.info(`Job ${jobId} has completed`);
-});
+appQueueEvents.on("completed", workerEventCompleted);
 
-appQueueEvents.on("failed", ({ jobId, failedReason }) => {
-  //console.log(`Queue event: Job ${jobId} failed - ${failedReason}`);
-  queueLogger.error(`Job ${jobId} has failed with reason: ${failedReason}`);
-});
+appQueueEvents.on("failed", workerEventFailed);
 
-appQueueEvents.on("error", (error) => {
-  console.error("Queue events error:", error);
-  queueLogger.error(`Queue error: ${error}`);
-});
+appQueueEvents.on("error", standardWorkerError);
 
 
 export const fileOrchestrationQueue = new Queue("fileOrchestrationQueue", defaultQueueOptions);
 
-fileOrchestrationQueue.on("error", (error) => {
-  //console.error("File orchestration queue connection error:", error);
-  queueLogger.error(`File orchestration queue connection error: ${error}`);
-});
-
+fileOrchestrationQueue.on("error", standardWorkerError);
+  
 export const fileOrchestrationQueueEvents = new QueueEvents("fileOrchestrationQueue", {
   connection: redisConnection,
 });
 
-fileOrchestrationQueueEvents.on("completed", ({ jobId }) => {
-  //console.log(`File orchestration queue event: Job ${jobId} completed`);
-  queueLogger.info(`File orchestration job ${jobId} has completed`);
-});
+fileOrchestrationQueueEvents.on("completed", workerEventCompleted);
 
-fileOrchestrationQueueEvents.on("failed", ({ jobId, failedReason }) => {
-  //console.log(`File orchestration queue event: Job ${jobId} failed - ${failedReason}`);
-  queueLogger.error(`File orchestration job ${jobId} has failed with reason: ${failedReason}`);
-});
+fileOrchestrationQueueEvents.on("failed", workerEventFailed);
 
-fileOrchestrationQueueEvents.on("error", (error) => {
-  console.error("File orchestration queue events error:", error);
-  queueLogger.error(`File orchestration queue error: ${error}`);
-});
+fileOrchestrationQueueEvents.on("error", standardWorkerError);
 
 
 export const fileQueue = new Queue("files", defaultQueueOptions);
+
+fileQueue.on("error", standardWorkerError);
 
 export const fileQueueEvents = new QueueEvents("files", {
   connection: redisConnection,
 });
 
-fileQueue.on("error", (error) => {
-  //console.error("File queue connection error:", error);
-  queueLogger.error(`File queue connection error: ${error}`);
-});
+fileQueueEvents.on("completed", workerEventCompleted);
 
-fileQueueEvents.on("completed", ({ jobId }) => {
-  //console.log(`File queue event: Job ${jobId} completed`);
-  queueLogger.info(`File processing job ${jobId} has completed`);
-});
+fileQueueEvents.on("failed", workerEventFailed);
 
-fileQueueEvents.on("failed", ({ jobId, failedReason }) => {
-  //console.log(`File queue event: Job ${jobId} failed - ${failedReason}`);
-  queueLogger.error(`File processing job ${jobId} has failed with reason: ${failedReason}`);
-});
-
-fileQueueEvents.on("error", (error) => {
-  console.error("File queue events error:", error);
-  queueLogger.error(`File queue error: ${error}`);
-});
+fileQueueEvents.on("error", standardWorkerError);
 
 /**
  * The Series Queue is responsible for processing series information and linking comic books to their respective series based on the parent folder structure 
@@ -105,29 +74,17 @@ fileQueueEvents.on("error", (error) => {
  */
 export const seriesQueue = new Queue("comicSeries", defaultQueueOptions);
 
+seriesQueue.on("error", standardWorkerError);
+
 export const seriesQueueEvents = new QueueEvents("comicSeries", {
   connection: redisConnection,
 });
 
-seriesQueue.on("error", (error) => {
-  //console.error("Series queue connection error:", error);
-  queueLogger.error(`Series queue connection error: ${error}`);
-});
+seriesQueueEvents.on("completed", workerEventCompleted);
 
-seriesQueueEvents.on("completed", ({ jobId }) => {
-  //console.log(`Series queue event: Job ${jobId} completed`);
-  queueLogger.info(`Series processing job ${jobId} has completed`);
-});
+seriesQueueEvents.on("failed", workerEventFailed);
 
-seriesQueueEvents.on("failed", ({ jobId, failedReason }) => {
-  //console.log(`Series queue event: Job ${jobId} failed - ${failedReason}`);
-  queueLogger.error(`Series processing job ${jobId} has failed with reason: ${failedReason}`);
-});
-
-seriesQueueEvents.on("error", (error) => {
-  console.error("Series queue events error:", error);
-  queueLogger.error(`Series queue error: ${error}`);
-});
+seriesQueueEvents.on("error", standardWorkerError);
 
 /**
  * The Comic Book Queue is responsible for the detailed processing of comic book files, including metadata extraction, thumbnail generation, and database insertion/updating.
@@ -135,26 +92,14 @@ seriesQueueEvents.on("error", (error) => {
  */
 export const comicBookQueue = new Queue("comicBooks", defaultQueueOptions);
 
+comicBookQueue.on("error", standardWorkerError);
+
 export const comicBookQueueEvents = new QueueEvents("comicBooks", {
   connection: redisConnection,
 });
 
-comicBookQueue.on("error", (error) => {
-  //console.error("Comic book queue connection error:", error);
-  queueLogger.error(`Comic book queue connection error: ${error}`);
-});
+comicBookQueueEvents.on("completed", workerEventCompleted);
 
-comicBookQueueEvents.on("completed", ({ jobId }) => {
-  //console.log(`Comic book queue event: Job ${jobId} completed`);
-  queueLogger.info(`Comic book processing job ${jobId} has completed`);
-});
+comicBookQueueEvents.on("failed", workerEventFailed);
 
-comicBookQueueEvents.on("failed", ({ jobId, failedReason }) => {
-  //console.log(`Comic book queue event: Job ${jobId} failed - ${failedReason}`);
-  queueLogger.error(`Comic book processing job ${jobId} has failed with reason: ${failedReason}`);
-});
-
-comicBookQueueEvents.on("error", (error) => {
-  console.error("Comic book queue events error:", error);
-  queueLogger.error(`Comic book queue error: ${error}`);
-});
+comicBookQueueEvents.on("error", standardWorkerError);
