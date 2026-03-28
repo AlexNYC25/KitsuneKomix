@@ -6,7 +6,7 @@ import {
   standardWorkerError, 
   workerEventCompleted, 
   workerEventFailed 
-} from "#utilities/workers.ts";
+} from "#infrastructure/queue/callbacks.ts";
 
 const defaultQueueOptions: QueueOptions = {
   connection: redisConnection,
