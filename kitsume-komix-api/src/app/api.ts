@@ -1,13 +1,12 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 
-import apiRouter from "./routes/api.router.ts";
-import webRouter from "./routes/web.router.ts";
-import healthRouter from "./routes/health.router.ts";
+import { apiLogger } from "#logger/loggers.ts";
+import { env } from "#config/env.ts";
 
-import { apiLogger } from "../logger/loggers.ts";
-
-import { CLIENT_URL } from "../utilities/environment.ts";
+import apiRouter from "../routes/api/api.router.ts";
+import webRouter from "../routes/web/web.router.ts";
+import healthRouter from "../routes/health/health.router.ts";
 
 const app = new OpenAPIHono();
 
@@ -15,7 +14,7 @@ const app = new OpenAPIHono();
 app.use(
   "*",
   cors({
-    origin: CLIENT_URL,
+    origin: env.CLIENT_URL,
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE"],
     allowHeaders: ["Content-Type", "Authorization"],
