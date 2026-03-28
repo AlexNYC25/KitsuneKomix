@@ -172,3 +172,7 @@ export async function getFileSize(filePath: string): Promise<number> {
     throw error;
   }
 }
+
+export const isHiddenPath = (path: string): boolean => {
+  return path.startsWith(".") || path.includes("/.");
+};
