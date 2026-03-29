@@ -1,7 +1,9 @@
 import pino from "pino";
 import { join } from "@std/path";
 
-const configLocation = "/app/config";
+import { env } from "#config/env.ts";
+
+const configLocation = env.APP_CONFIG_PATH;
 const logsDir = join(configLocation, "logs");
 
 // Ensure logs directory exists
