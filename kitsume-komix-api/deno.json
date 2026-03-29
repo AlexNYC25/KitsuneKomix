@@ -1,7 +1,5 @@
 {
   "imports": {
-    "#types/": "./types/",
-    "#interfaces/": "./interfaces/",
     "#schemas/": "./zod/schemas/",
     "#sqlite/": "./db/sqlite/",
 
@@ -10,6 +8,8 @@
     "#logger/": "./src/infrastructure/logger/",
     "#app/": "./src/app/",
     "#zod/": "./src/shared/zod/",
+    "#types/": "./src/shared/types/",
+    "#interfaces/": "./src/shared/interfaces/",
     "#utilities/": "./src/shared/utilities/",
     "#config/": "./src/config/",
     "#modules/": "./src/modules/",
