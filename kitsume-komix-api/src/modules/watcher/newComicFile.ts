@@ -1,5 +1,5 @@
-import { apiLogger } from "../../logger/loggers.ts";
-import { orchestrateFile } from "../../queue/orchestrators/comic.orchestrator.ts";
+import { apiLogger } from "#logger/loggers.ts";
+import { orchestrateFile } from "#modules/queue/orchestrators/comic.orchestrator.ts";
 
 export async function addNewComicFile(
   params: { filePath: string; metadata: object },

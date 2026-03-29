@@ -1,4 +1,4 @@
-import { fileQueue } from "../../app/worker.ts";
+import { fileQueue } from "#app/worker.ts";
 
 /**
  * Starts the comic processing workflow by enqueueing the first job.
