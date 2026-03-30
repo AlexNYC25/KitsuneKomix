@@ -20,6 +20,16 @@ export type WorkerLibrarySeriesJob = {
 }
 
 /**
+ * Type representing the job data for jobs related to processing new comic book insertions.
+ * - `filePath`: The path to the comic file that needs to be processed.
+ * - `seriesId`: The ID of the comic series that the new comic book belongs to.
+ */
+export type WorkerFilePathSeriesJob = {
+  filePath: string;
+  seriesId: number;
+}
+
+/**
  * Result type for checking if a file should be processed by the worker.
  * - `shouldBeProcessed`: Indicates if the file needs processing.
  * - `dbRecord`: Optional existing comic book record from the database (if found).
