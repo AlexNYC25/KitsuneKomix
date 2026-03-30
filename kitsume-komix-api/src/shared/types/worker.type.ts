@@ -1,12 +1,23 @@
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { ComicBook, NewComicBook } from "./database.types.ts";
 
-export type WorkerJob = {
-  data: {
-    filePath: string;
-    metadata: object;
-  };
-};
+/**
+ * Type representing the job data for jobs realted to processing comic files
+ * - `filePath`: The path to the comic file that needs to be processed.
+ */
+export type WorkerFileJob = {
+  filePath: string;
+}
+
+/**
+ * Type representing the job data for jobs related to linking comic series to libraries.
+ * - `seriesId`: The ID of the comic series that needs to be linked.
+ * - `folderPath`: The folder path of the comic library that the series should be linked to.
+ */
+export type WorkerLibrarySeriesJob = {
+  seriesId: number;
+  folderPath: string;
+}
 
 /**
  * Result type for checking if a file should be processed by the worker.
