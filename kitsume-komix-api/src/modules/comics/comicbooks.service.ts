@@ -114,6 +114,7 @@ import {
   extractComicBookByStreaming,
   extractComicPage,
 } from "#utilities/extract.ts";
+import { getFileNameFromPath } from "#utilities/file.ts";
 
 import {
   ComicBook,
@@ -230,7 +231,7 @@ export const fetchAComicsAssociatedMetadataById = async (
 
     const thumbnail = await getThumbnailsByComicBookId(id);
     const thumbnailUrl = thumbnail && thumbnail.length > 0 
-      ? `/api/image/thumbnails/${thumbnail[0].filePath.split("/").pop()}`
+      ? `/api/image/thumbnails/${getFileNameFromPath(thumbnail[0].filePath)}`
       : undefined;
 
     return {
@@ -1172,7 +1173,7 @@ export const attachThumbnailToComicBook = async (
   const comicWithThumbnail: ComicBookWithThumbnail = {
     ...comic,
     thumbnailUrl: thumbnails && thumbnails.length > 0
-      ? `/api/image/thumbnails/${thumbnails[0].filePath.split("/").pop()}`
+      ? `/api/image/thumbnails/${getFileNameFromPath(thumbnails[0].filePath)}`
       : undefined,
   };
 
