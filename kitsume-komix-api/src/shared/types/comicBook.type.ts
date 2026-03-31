@@ -82,3 +82,14 @@ export type ComicBookStreamingServiceResult = {
   format: string;
   cached: boolean;
 };
+
+/**
+ * Type representing the an internal structure of data
+ * when processing comic metadata
+ */
+export type MetadataProcessor = {
+	label: string;
+	values?: string[];
+	insert: (name: string) => Promise<number>;
+	link: (entityId: number, comicId: number) => Promise<void>;
+};
