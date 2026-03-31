@@ -8,6 +8,7 @@ import { getComicSeriesByPath, insertComicSeries, insertComicSeriesIntoLibrary }
 import { getLibraryContainingPath } from "#db/sqlite/models/comicLibraries.model.ts";
 
 import { retrieveMetadataFromCache } from "#utilities/metadata.ts";
+import { getFileNameFromPath } from "#utilities/file.ts";
 
 import { 
 	ComicSeries, 
@@ -89,7 +90,7 @@ export const processAddingANewComicSeries = async (job: WorkerFileJob) => {
 
 	const parentPath = dirname(job.filePath);
 
-	const seriesName = parentPath.split("/").pop();
+	const seriesName = getFileNameFromPath(parentPath);
 	if (!seriesName) {
 		throw new Error(
 			`Could not extract series name from path: ${parentPath}`,
