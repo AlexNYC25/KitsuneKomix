@@ -76,7 +76,7 @@ import { extractComicBook } from "#utilities/extract.ts";
 import { getComicFileRawDetails } from "#utilities/comic-parser.ts";
 import { getFileSize, getImageDimensions } from "#utilities/imageUtils.ts";
 import { createImageThumbnail } from "#utilities/image.ts";
-import { deleteFolderRecursive } from "#utilities/file.ts";
+import { deleteFolderRecursive, getFileNameFromPath } from "#utilities/file.ts";
 import { 
 	combineMetadataWithParsedFileDetails, 
 	retrieveMetadataFromCache, 
@@ -90,6 +90,9 @@ import type {
 	ComicFileDetails,
 	MetadataProcessor,
   NewComicBook,
+  ComicMetadataPage,
+  CoverPageRecord,
+	
 } from "#types/index.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { calculateFileHash } from "#utilities/hash.ts";
@@ -156,6 +159,177 @@ const processMetadataGroup = async (
 			);
 		}
 	}
+};
+
+/**
+ * Helper function to find the corresponding metadata page for a given page number.
+ * @param metadataPages An array of metadata pages extracted from the standardized metadata.
+ * @param pageNumber The page number to find metadata for.
+ * @returns The matching metadata page if found, otherwise undefined.
+ */
+const findMetadataPageForPageNumber = (
+	metadataPages: ComicMetadataPage[],
+	pageNumber: number,
+): ComicMetadataPage | undefined => {
+	return metadataPages.find((page) => Number.parseInt(page.image) === pageNumber);
+};
+
+/**
+ * Helper function to resolve image metadata for a given image path.
+ * @param imagePath The path to the image file.
+ * @param metadataPage The metadata page associated with the image, if available.
+ * @returns An object containing the file size, image width, and image height.
+ */
+const resolveImageMetadata = async (
+	imagePath: string,
+	metadataPage?: ComicMetadataPage,
+): Promise<{ fileSize: number; imageWidth: number | null; imageHeight: number | null }> => {
+	if (metadataPage?.size && metadataPage?.width && metadataPage?.height) {
+		return {
+			fileSize: metadataPage.size,
+			imageWidth: metadataPage.width,
+			imageHeight: metadataPage.height,
+		};
+	}
+
+	const fileSize = await getFileSize(imagePath);
+	const dimensions = await getImageDimensions(imagePath);
+
+	return {
+		fileSize,
+		imageWidth: dimensions?.width || null,
+		imageHeight: dimensions?.height || null,
+	};
+};
+
+/**
+ * Inserts a single comic page into the database.
+ * @param comicId The ID of the comic book.
+ * @param imagePath The path to the image file.
+ * @param pageNumber The page number of the comic page.
+ * @param metadataPage The metadata page associated with the image, if available.
+ * @returns An object containing the page ID and a boolean indicating if it's a cover page.
+ */
+const insertSingleComicPage = async (
+	comicId: number,
+	imagePath: string,
+	pageNumber: number,
+	metadataPage?: ComicMetadataPage,
+): Promise<{ pageId: number; isCover: boolean }> => {
+	const imageHash = await calculateFileHash(imagePath);
+	const relativePath = getFileNameFromPath(imagePath);
+	const { fileSize, imageWidth, imageHeight } = await resolveImageMetadata(
+		imagePath,
+		metadataPage,
+	);
+
+	const pageId = await insertComicPage(
+		comicId,
+		relativePath,
+		pageNumber,
+		imageHash,
+		fileSize,
+		metadataPage?.type || (pageNumber === 1 ? "Cover" : "Story"),
+		metadataPage?.doublePage ? 1 : 0,
+		imageWidth,
+		imageHeight,
+	);
+
+	const isFirstPage = pageNumber === 1;
+	const isFrontCoverFromMetadata = metadataPage?.type === "FrontCover";
+
+	return {
+		pageId,
+		isCover: isFirstPage || isFrontCoverFromMetadata,
+	};
+};
+
+/**
+ * Handles the building of data payload and processing of comic book metadata and images for a given comic book file.
+ * - Extracts metadata and image details from the comic file.
+ * - Inserts comic page records into the database.
+ * - Creates cover records and thumbnails for cover pages.
+ * @param comicId The ID of the comic book.
+ * @param imagePaths An array of image paths for the comic pages.
+ * @param metadataPages An array of metadata pages extracted from the standardized metadata.
+ * @returns An array of cover page records.
+ */
+const processAndInsertComicPages = async (
+	comicId: number,
+	imagePaths: string[],
+	metadataPages: ComicMetadataPage[],
+): Promise<CoverPageRecord[]> => {
+	const coverPages: CoverPageRecord[] = [];
+
+	for (let i = 0; i < imagePaths.length; i++) {
+		const imagePath = imagePaths[i];
+		const pageNumber = i + 1;
+		const metadataPage = findMetadataPageForPageNumber(metadataPages, pageNumber);
+
+		const { pageId, isCover } = await insertSingleComicPage(
+			comicId,
+			imagePath,
+			pageNumber,
+			metadataPage,
+		);
+
+		if (isCover) {
+			coverPages.push({ pageId, imagePath, pageNumber });
+		}
+	}
+
+	return coverPages;
+};
+
+/**
+ * Processes cover pages for a comic book.
+ * - Inserts cover records into the database.
+ * - Creates thumbnails for cover images.
+ * @param comicId The ID of the comic book.
+ * @param coverPages An array of cover page records.
+ */
+const processCoverPages = async (
+	comicId: number,
+	coverPages: CoverPageRecord[],
+): Promise<void> => {
+	for (const coverPage of coverPages) {
+		const coverRelativePath = getFileNameFromPath(coverPage.imagePath);
+		const coverId = await insertComicBookCover(coverPage.pageId, coverRelativePath);
+
+		const thumbnail = await createImageThumbnail(coverPage.imagePath, {
+			width: 300,
+			height: 450,
+		});
+
+		if (thumbnail.success && thumbnail.thumbnailPath) {
+			await insertComicBookThumbnail(comicId, coverId, thumbnail.thumbnailPath);
+		} else {
+			queueLogger.error(
+				`Failed to create thumbnail for cover image: ${coverPage.imagePath}. Error: ${thumbnail.error || "Unknown error"}`,
+			);
+		}
+	}
+};
+
+/**
+ * A helper to handle the call to extract comic book images into a temporary directory and return the paths of the extracted images.
+ * - Uses the extractComicBook utility to perform the extraction.
+ * - Handles errors and returns a structured result indicating success or failure.
+ * 
+ * @param filePath The file path of the comic book
+ */
+const extractComicImages = async (
+	filePath: string,
+): Promise<{ imagePaths: string[]; extractedPath?: string }> => {
+	const extractionResult = await extractComicBook(filePath);
+	if (!extractionResult.success) {
+		throw new Error(`Failed to extract images from comic file: ${filePath}`);
+	}
+
+	return {
+		imagePaths: extractionResult.pages,
+		extractedPath: extractionResult.extractedPath,
+	};
 };
 
 
@@ -378,6 +552,13 @@ export const saveComicBookMetadata = async (job: { comicId: number; filePath: st
 /**
  * Processes comic images by extracting pages, storing page metadata,
  * creating cover records, and generating thumbnails.
+ * - Extracts images from the comic file.
+ * - Inserts comic page records into the database.
+ * - Identifies cover pages and creates cover records.
+ * - Generates thumbnails for cover images.
+ * - Cleans up extracted images after processing.
+ * @param job Job data containing comicId and filePath
+ * @returns void
  */
 export const processComicBookImages = async (job: { comicId: number; filePath: string }): Promise<void> => {
 	const comicId: number = job.comicId;
@@ -391,77 +572,13 @@ export const processComicBookImages = async (job: { comicId: number; filePath: s
 		const standardizedMetadata = await retrieveMetadataFromCache(filePath);
 		const metadataPages = standardizedMetadata?.pages || [];
 
-		const extractionResult = await extractComicBook(filePath);
-		if (!extractionResult.success) {
-			throw new Error(`Failed to extract images from comic file: ${filePath}`);
-		}
-
-		const {
-			pages: imagePaths,
-			extractedPath,
-		} = extractionResult;
-
-		const coverPages: Array<{ pageId: number; imagePath: string; pageNumber: number }> = [];
-
-		for (let i = 0; i < imagePaths.length; i++) {
-			const imagePath = imagePaths[i];
-			const pageNumber = i + 1;
-			const imageHash = await calculateFileHash(imagePath);
-			const relativePath = imagePath.split("/").pop() || imagePath;
-
-			const metadataPage = metadataPages.find((page) => Number.parseInt(page.image) === pageNumber);
-
-			let fileSize: number;
-			let imageWidth: number | null = null;
-			let imageHeight: number | null = null;
-
-			if (metadataPage?.size && metadataPage?.width && metadataPage?.height) {
-				fileSize = metadataPage.size;
-				imageWidth = metadataPage.width;
-				imageHeight = metadataPage.height;
-			} else {
-				fileSize = await getFileSize(imagePath);
-				const dimensions = await getImageDimensions(imagePath);
-				imageWidth = dimensions?.width || null;
-				imageHeight = dimensions?.height || null;
-			}
-
-			const pageId = await insertComicPage(
-				comicId,
-				relativePath,
-				pageNumber,
-				imageHash,
-				fileSize,
-				metadataPage?.type || (pageNumber === 1 ? "Cover" : "Story"),
-				metadataPage?.doublePage ? 1 : 0,
-				imageWidth,
-				imageHeight,
-			);
-
-			const isFirstPage = pageNumber === 1;
-			const isFrontCoverFromMetadata = metadataPage?.type === "FrontCover";
-			if (isFirstPage || isFrontCoverFromMetadata) {
-				coverPages.push({ pageId, imagePath, pageNumber });
-			}
-		}
-
-		for (const coverPage of coverPages) {
-			const coverRelativePath = coverPage.imagePath.split("/").pop() || coverPage.imagePath;
-			const coverId = await insertComicBookCover(coverPage.pageId, coverRelativePath);
-
-			const thumbnail = await createImageThumbnail(coverPage.imagePath, {
-				width: 300,
-				height: 450,
-			});
-
-			if (thumbnail.success && thumbnail.thumbnailPath) {
-				await insertComicBookThumbnail(comicId, coverId, thumbnail.thumbnailPath);
-			} else {
-				queueLogger.error(
-					`Failed to create thumbnail for cover image: ${coverPage.imagePath}. Error: ${thumbnail.error || "Unknown error"}`,
-				);
-			}
-		}
+		const { imagePaths, extractedPath } = await extractComicImages(filePath);
+		const coverPages = await processAndInsertComicPages(
+			comicId,
+			imagePaths,
+			metadataPages,
+		);
+		await processCoverPages(comicId, coverPages);
 
 		if (extractedPath) {
 			await deleteFolderRecursive(extractedPath);
