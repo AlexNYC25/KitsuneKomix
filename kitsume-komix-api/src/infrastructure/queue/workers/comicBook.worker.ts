@@ -2,6 +2,8 @@ import { Worker } from "bullmq";
 import { redisConnection } from "#db/redis/client.ts";
 import { queueLogger } from "#logger/loggers.ts";
 
+import { queueNames } from "#config/queues.ts";
+
 import {
 	saveComicBook,
 	saveComicBookMetadata,
@@ -9,7 +11,7 @@ import {
 } from "../jobs/comicBook.jobs.ts";
 
 export const comicBookWorker = new Worker(
-	"comicBooks",
+	queueNames.COMIC_BOOK_QUEUE,
 	async (job) => {
 		switch (job.name) {
 			case "save-comic-book":
