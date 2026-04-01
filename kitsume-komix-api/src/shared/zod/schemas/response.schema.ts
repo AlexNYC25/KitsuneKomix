@@ -112,6 +112,27 @@ const BasicUserInfoSchema = z.object({
 // **** Full response schemas **** //
 
 /**
+ * Schema for the health check response, including application metadata and database health status
+ */
+export const HealthCheckResponseSchema = z.object({
+  message: z.string(),
+  status: z.enum(["ok", "error"]),
+  app: z.object({
+    name: z.string(),
+    version: z.string(),
+    description: z.string(),
+  }).optional(),
+  details: z.object({
+    sqlite: z.enum(["ok", "failed"]),
+    redis: z.enum(["ok", "failed"]),
+  }).optional(),
+}).openapi({
+  title: "HealthCheckResponse",
+  description:
+    "Response for health check endpoint, including application metadata and database health status",
+});
+
+/**
  * Schema for paginated comic series response
  */
 export const ComicSeriesMultipleResponseSchema = z.object({
