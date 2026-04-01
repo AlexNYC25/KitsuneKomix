@@ -1,8 +1,9 @@
 {
+  "name": "kitsume-komix-api",
+  "version": "0.0.2",
+  "description": "Kitsune Komix REST API service",
   "imports": {
-    "#schemas/": "./zod/schemas/",
-    "#sqlite/": "./db/sqlite/",
-
+    "#root/": "./",
     "#infrastructure/": "./src/infrastructure/",
     "#db/": "./src/infrastructure/db/",
     "#logger/": "./src/infrastructure/logger/",
