@@ -1,7 +1,7 @@
 import { serveStatic } from "hono/deno";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { MessageResponseSchema } from "../zod/schemas/response.schema.ts";
+import { MessageResponseSchema } from "#zod/schemas/response.schema.ts";
 
 // Router to serve the Vue.js production build from dist folder
 
@@ -21,8 +21,8 @@ app.openapi(
       },
     },
   }),
-  (_c) => {
-    return _c.json({ message: "Welcome to the API" }, 200);
+  (c) => {
+    return c.json({ message: "Welcome to the API" }, 200);
   },
 );
 
