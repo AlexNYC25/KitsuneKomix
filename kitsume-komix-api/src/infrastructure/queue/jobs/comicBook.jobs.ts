@@ -70,8 +70,6 @@ import { insertComicPage } from "#db/sqlite/models/comicPages.model.ts";
 import { insertComicBookCover } from "#db/sqlite/models/comicBookCovers.model.ts";
 import { insertComicBookThumbnail } from "#db/sqlite/models/comicBookThumbnails.model.ts";
 
-import { checkIfTheFileShouldBeProcessed, processTheUpdateOrInsertionOfComicBook } from "../actions/processComicFile.ts";
-
 import { extractComicBook } from "#utilities/extract.ts";
 import { getComicFileRawDetails } from "#utilities/comic-parser.ts";
 import { getFileSize, getImageDimensions } from "#utilities/imageUtils.ts";
@@ -92,10 +90,61 @@ import type {
 	MetadataProcessor,
   NewComicBook,
   ComicMetadataPage,
-  CoverPageRecord,	
+  CoverPageRecord,
+  ComicBook,	
 } from "#types/index.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { calculateFileHash } from "#utilities/hash.ts";
+import { getComicBookByFilePath, insertComicBook, updateComicBook } from "#db/sqlite/models/comicBooks.model.ts";
+
+/**
+ * Determines whether a file should be processed by comparing its current hash to the stored hash.
+ * @param filePath File path to check.
+ * @returns Object containing `shouldBeProcessed` and the current file `hash`.
+ */
+export const checkIfTheFileShouldBeProcessed = async (
+	filePath: string
+): Promise<WorkerFileCheckResult> => {
+	const dbRecord: ComicBook | null = await getComicBookByFilePath(filePath);
+	const fileHash: string = await calculateFileHash(filePath);
+
+	// The comic book file is new
+	if (!dbRecord) {
+		// If the record doesn't exist, we consider it as new
+		return { shouldBeProcessed: true, hash: fileHash};
+	}
+
+	// The comic book file exists, check if the hash has changed
+	const shouldBeProcessed: boolean = fileHash !== dbRecord.hash;
+
+	// If the file exists in records but the hash has changed, we need to process it
+	return { shouldBeProcessed, hash: fileHash, dbRecord };
+};
+
+/**
+ * Handles the logic for either updating an existing comic book record or inserting a new one based on the provided metadata and file check results.
+ * @param shouldProcessFile The result of the initial checks over the comic file against the db
+ * @param comicData The generated data insertion object for adding a new/updated comic book data
+ * @returns The ID of the comic book that was updated or inserted
+ */
+export const processTheUpdateOrInsertionOfComicBook = async (
+	shouldProcessFile: WorkerFileCheckResult,
+	comicData: NewComicBook
+) => {
+	let comicId: number;
+
+	if (shouldProcessFile.dbRecord) {
+		// Update existing record
+		await updateComicBook(shouldProcessFile.dbRecord.id, comicData);
+		comicId = shouldProcessFile.dbRecord.id;
+	} else {
+		// Insert new record
+		const newRecord: NewComicBook = comicData;
+		comicId = await insertComicBook(newRecord);
+	}
+
+	return comicId;
+}
 
 /**
  * Helper function to compile and combine metadata from different sources for a comic book.
