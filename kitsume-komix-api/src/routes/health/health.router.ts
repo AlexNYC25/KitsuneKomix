@@ -1,6 +1,11 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { MessageResponseSchema } from "#zod/schemas/response.schema.ts";
+import { HealthCheckResponseSchema } from "#zod/schemas/response.schema.ts";
+
+import { appMeta } from "#config/appMeta.ts";
+
+import { testRedisConnection } from "#infrastructure/db/redis/client.ts";
+import { testSQLiteConnection } from "#infrastructure/db/sqlite/client.ts";
 
 const healthRouter = new OpenAPIHono();
 
@@ -12,19 +17,45 @@ healthRouter.openapi(
     tags: ["Root"],
     responses: {
       200: {
-        content: { "application/json": { schema: MessageResponseSchema } },
+        content: { "application/json": { schema: HealthCheckResponseSchema } },
         description: "Health check",
+      },
+      503: {
+        content: { "application/json": { schema: HealthCheckResponseSchema } },
+        description: "Service Unavailable - Health check failed",
       },
     },
   }),
-  (c) => {
-    // TODO: Add db checks to see if the databases are responsive and healthy
+  async (c) => {
+    // Check SQLite connection
+    const sqliteHealthy = await testSQLiteConnection();
 
-    // TODO: return info about the system, such as version, uptime, etc.
+    // Check Redis connection
+    const redisHealthy = await testRedisConnection();
 
-    // For now, just return a simple message indicating the API is up
+    if (!sqliteHealthy || !redisHealthy) {
+      return c.json(
+        {
+          message: "Health check failed",
+          status: "error" as const,
+          details: {
+            sqlite: (sqliteHealthy ? "ok" : "failed") as "ok" | "failed",
+            redis: (redisHealthy ? "ok" : "failed") as "ok" | "failed",
+          },
+        },
+        503,
+      );
+    }
 
-    return c.json({ message: "Health check passed", status: "ok" });
+    return c.json({
+      message: "Kitsune Komix API is healthy",
+      status: "ok" as const,
+      app: {
+        name: appMeta.name,
+        version: appMeta.version,
+        description: appMeta.description,
+      },
+    }, 200);
   },
 );
 
