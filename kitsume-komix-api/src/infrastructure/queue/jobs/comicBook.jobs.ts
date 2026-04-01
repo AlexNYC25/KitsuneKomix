@@ -87,12 +87,12 @@ import type {
 	WorkerDataForBuildingComicInsertion,
 	WorkerFileCheckResult,
 	WorkerFilePathSeriesJob,
+	WorkerComicFileJob,
 	ComicFileDetails,
 	MetadataProcessor,
   NewComicBook,
   ComicMetadataPage,
-  CoverPageRecord,
-	
+  CoverPageRecord,	
 } from "#types/index.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { calculateFileHash } from "#utilities/hash.ts";
@@ -560,7 +560,7 @@ export const saveComicBookMetadata = async (job: { comicId: number; filePath: st
  * @param job Job data containing comicId and filePath
  * @returns void
  */
-export const processComicBookImages = async (job: { comicId: number; filePath: string }): Promise<void> => {
+export const processComicBookImages = async (job: WorkerComicFileJob): Promise<void> => {
 	const comicId: number = job.comicId;
 	const filePath: string = job.filePath;
 

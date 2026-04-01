@@ -10,6 +10,16 @@ export type WorkerFileJob = {
 }
 
 /**
+ * Type representing the job data for jobs related to processing comic book images.
+ * - `comicId`: The ID of the comic book for which images need to be processed.
+ * - `filePath`: The path to the comic file that contains the images to be processed.
+ */
+export type WorkerComicFileJob = {
+  comicId: number;
+  filePath: string;
+}
+
+/**
  * Type representing the job data for jobs related to linking comic series to libraries.
  * - `seriesId`: The ID of the comic series that needs to be linked.
  * - `folderPath`: The folder path of the comic library that the series should be linked to.
