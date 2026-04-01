@@ -20,3 +20,18 @@ export const createNewClient = () => {
   const newDb = drizzle(newClient, { casing: "snake_case" });
   return { client: newClient, db: newDb };
 };
+
+/**
+ * Checks if a connection to the SQLite database can be established using the provided configuration.
+ * @returns a promise that resolves to true if the connection is successful, or false if it fails
+ */
+export const testSQLiteConnection: () => Promise<boolean> = async () => {
+  try {
+    const { client } = getClient();
+    await client.execute("SELECT 1");
+    return true;
+  } catch (error) {
+    console.error("Error connecting to SQLite database:", error);
+    return false;
+  }
+};
