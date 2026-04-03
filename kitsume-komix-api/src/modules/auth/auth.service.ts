@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
-import { getUserByEmail } from "#sqlite/models/users.model.ts";
+import { getUserByEmail } from "#db/sqlite/models/users.model.ts";
 
 import { verifyPassword } from "#utilities/hash.ts";
 import { User } from "#types/index.ts";

@@ -1,12 +1,12 @@
 import * as jose from "jose";
-import {
-  ACCESS_KEY,
-  ACCESS_TTL,
-  AUDIENCE,
-  ISSUER,
-  REFRESH_KEY,
-  REFRESH_TTL,
-} from "./jwtSetUp.ts";
+import { env } from "#config/env.ts";
+
+const ACCESS_KEY = new TextEncoder().encode(env.JWT_SECRET);
+const REFRESH_KEY = new TextEncoder().encode(env.JWT_REFRESH_SECRET);
+const ISSUER = env.JWT_ISSUER;
+const AUDIENCE = env.JWT_AUDIENCE;
+const ACCESS_TTL = `${env.JWT_ACCESS_TTL}s`;
+const REFRESH_TTL = `${env.JWT_REFRESH_TTL}s`;
 
 export type AccessClaims = {
   sub: string;

@@ -6,7 +6,7 @@ import {
   revokeAllUserRefreshTokens,
   revokeRefreshToken,
   storeRefreshToken,
-} from "#sqlite/models/refreshTokens.model.ts";
+} from "#db/sqlite/models/refreshTokens.model.ts";
 
 import { RefreshTokenResponse, TokenPair } from "#interfaces/index.ts";
 
