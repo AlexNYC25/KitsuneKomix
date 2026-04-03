@@ -6,32 +6,33 @@ import {
   clearAuthCookies,
   getTokenFromCookie,
   setAuthCookies,
-} from "../../modules/services/auth.service.ts";
-import {
-  ACCESS_COOKIE_NAME,
-  REFRESH_COOKIE_NAME,
-} from "#utilities/environment.ts";
-import { checkIfAppSetupComplete } from "../../modules/services/users.service.ts";
+} from "#modules/auth/auth.service.ts";
 import {
   createRefreshTokenPair,
   refreshAccessToken,
   revokeAllUserTokens,
   revokeToken,
-} from "../../modules/services/refreshToken.service.ts";
-import { verifyAccessToken } from "./auth.ts";
+} from "#modules/auth/refreshToken.service.ts";
+import { verifyAccessToken } from "#modules/auth/auth.ts";
+import { checkIfAppSetupComplete } from "#modules/users/users.service.ts";
 
-import { AuthHeaderSchema } from "#schemas/header.schema.ts";
+import {
+  ACCESS_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+} from "#utilities/environment.ts";
+
+import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
   LoginRequestSchema,
   RefreshTokenRequestSchema,
-} from "#schemas/request.schema.ts";
+} from "#zod/schemas/request.schema.ts";
 import {
   ErrorResponseSchema,
   LoginResponseSchema,
   LogoutAllResponseSchema,
   MessageResponseSchema,
   RefreshTokenResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
 
 import { AppEnv } from "#types/index.ts";
 
