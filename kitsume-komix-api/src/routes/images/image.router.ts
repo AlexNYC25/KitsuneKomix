@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { apiLogger } from "../../logger/loggers.ts";
 import { existsSync } from "@std/fs";
 import { join } from "@std/path";
-import { requireAuth } from "../middleware/authChecks.ts";
+import { requireAuth } from "../../modules/middleware/authChecks.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,

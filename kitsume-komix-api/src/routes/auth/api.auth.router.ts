@@ -6,19 +6,19 @@ import {
   clearAuthCookies,
   getTokenFromCookie,
   setAuthCookies,
-} from "../services/auth.service.ts";
+} from "../../modules/services/auth.service.ts";
 import {
   ACCESS_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
 } from "#utilities/environment.ts";
-import { checkIfAppSetupComplete } from "../services/users.service.ts";
+import { checkIfAppSetupComplete } from "../../modules/services/users.service.ts";
 import {
   createRefreshTokenPair,
   refreshAccessToken,
   revokeAllUserTokens,
   revokeToken,
-} from "../services/refreshToken.service.ts";
-import { verifyAccessToken } from "../auth/auth.ts";
+} from "../../modules/services/refreshToken.service.ts";
+import { verifyAccessToken } from "./auth.ts";
 
 import { AuthHeaderSchema } from "#schemas/header.schema.ts";
 import {

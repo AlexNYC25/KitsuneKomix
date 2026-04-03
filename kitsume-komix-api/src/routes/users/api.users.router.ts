@@ -1,13 +1,13 @@
 import { ZodSafeParseResult } from "zod";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
-import { requireAuth } from "../middleware/authChecks.ts";
+import { requireAuth } from "../../modules/middleware/authChecks.ts";
 import {
   assignLibraryToUserService,
   checkIfAppSetupComplete,
   createUserService,
   deleteUserService,
-} from "../services/users.service.ts";
+} from "../../modules/services/users.service.ts";
 
 import {
   ParamIdSchema,

@@ -1,9 +1,9 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import camelcasekeys from "camelcase-keys";
 
-import { requireAuth } from "../middleware/authChecks.ts";
+import { requireAuth } from "../../modules/middleware/authChecks.ts";
 
-import { fetchComicStoryArcs } from "../services/comicStoryArcs.service.ts";
+import { fetchComicStoryArcs } from "../../modules/services/comicStoryArcs.service.ts";
 import {
   ComicStoryArcMultipleResponseSchema,
   ErrorResponseSchema,

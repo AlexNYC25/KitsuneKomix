@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { requireAuth } from "../modules_api/middleware/authChecks.ts";
+import { requireAuth } from "../../modules/modules_api/middleware/authChecks.ts";
 
 import { getComicLibrariesAvailableToUser } from "./comicLibraries.service.ts";
 
