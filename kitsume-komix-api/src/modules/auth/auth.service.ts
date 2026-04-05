@@ -1,22 +1,25 @@
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
-import { getUserByEmail } from "#db/sqlite/models/users.model.ts";
+import { getUserByEmail } from "#infrastructure/db/sqlite/models/users.model.ts";
+import {
+  cleanupExpiredTokens,
+  getValidRefreshToken,
+  revokeAllUserRefreshTokens,
+  revokeRefreshToken,
+  storeRefreshToken,
+} from "#infrastructure/db/sqlite/models/refreshTokens.model.ts";
+
+import { generateTokenPair, verifyRefreshToken } from "./jwt.service.ts";
 
 import { verifyPassword } from "#utilities/hash.ts";
-import { User } from "#types/index.ts";
+
 import {
-  ACCESS_COOKIE_MAX_AGE_SECONDS,
-  ACCESS_COOKIE_NAME,
-  COOKIE_DOMAIN,
-  COOKIE_HTTP_ONLY,
-  COOKIE_PATH,
-  COOKIE_SAME_SITE,
-  COOKIE_SECURE,
-  REFRESH_COOKIE_MAX_AGE_SECONDS,
-  REFRESH_COOKIE_NAME,
-  REFRESH_COOKIE_PATH,
-} from "#utilities/environment.ts";
+  env
+} from "#config/env.ts";
+
+import { User } from "#types/index.ts";
+import { RefreshTokenResponse, TokenPair } from "#interfaces/index.ts";
 
 /**
  * Authenticates a user by email and password.
@@ -56,24 +59,24 @@ export const setAuthCookies = (
   refreshToken: string,
 ): void => {
   const sharedOptions = {
-    httpOnly: COOKIE_HTTP_ONLY,
-    secure: COOKIE_SECURE,
-    sameSite: COOKIE_SAME_SITE,
-    ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+    httpOnly: env.COOKIE_HTTP_ONLY,
+    secure: env.COOKIE_SECURE,
+    sameSite: env.COOKIE_SAME_SITE,
+    ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   } as const;
 
   // Access token: short-lived, available to all API paths.
-  setCookie(c, ACCESS_COOKIE_NAME, accessToken, {
+  setCookie(c, env.ACCESS_COOKIE_NAME, accessToken, {
     ...sharedOptions,
-    path: COOKIE_PATH,
-    maxAge: ACCESS_COOKIE_MAX_AGE_SECONDS,
+    path: env.COOKIE_PATH,
+    maxAge: env.ACCESS_COOKIE_MAX_AGE_SECONDS,
   });
 
   // Refresh token: long-lived, scoped to auth endpoints only.
-  setCookie(c, REFRESH_COOKIE_NAME, refreshToken, {
+  setCookie(c, env.REFRESH_COOKIE_NAME, refreshToken, {
     ...sharedOptions,
-    path: REFRESH_COOKIE_PATH,
-    maxAge: REFRESH_COOKIE_MAX_AGE_SECONDS,
+    path: env.REFRESH_COOKIE_PATH,
+    maxAge: env.REFRESH_COOKIE_MAX_AGE_SECONDS,
   });
 };
 
@@ -84,18 +87,18 @@ export const setAuthCookies = (
  */
 export const clearAuthCookies = (c: Context): void => {
   const sharedOptions = {
-    secure: COOKIE_SECURE,
-    ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+    secure: env.COOKIE_SECURE,
+    ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   } as const;
 
-  deleteCookie(c, ACCESS_COOKIE_NAME, {
+  deleteCookie(c, env.ACCESS_COOKIE_NAME, {
     ...sharedOptions,
-    path: COOKIE_PATH,
+    path: env.COOKIE_PATH,
   });
 
-  deleteCookie(c, REFRESH_COOKIE_NAME, {
+  deleteCookie(c, env.REFRESH_COOKIE_NAME, {
     ...sharedOptions,
-    path: REFRESH_COOKIE_PATH,
+    path: env.REFRESH_COOKIE_PATH,
   });
 };
 
@@ -113,3 +116,140 @@ export const getTokenFromCookie = (
   const value = getCookie(c, name);
   return value && value.length > 0 ? value : undefined;
 };
+
+/**
+ * Creates and stores a new refresh token pair for a user
+ */
+export async function createRefreshTokenPair(
+  userId: number,
+  roles?: string[],
+): Promise<TokenPair> {
+  // Generate the token pair
+  const { accessToken, refreshToken, refreshTokenId } = await generateTokenPair(
+    userId.toString(),
+    roles,
+  );
+
+  // Calculate expiration time (7 days from now by default)
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  // Store the refresh token in the database
+  await storeRefreshToken({
+    userId: userId,
+    tokenId: refreshTokenId,
+    expiresAt: expiresAt.toISOString(),
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+}
+
+/**
+ * Refreshes an access token using a valid refresh token
+ */
+export async function refreshAccessToken(
+  refreshToken: string,
+): Promise<RefreshTokenResponse> {
+  try {
+    // Verify the refresh token JWT
+    const payload = await verifyRefreshToken(refreshToken);
+
+    // Check if the refresh token exists and is valid in the database
+    const storedToken = await getValidRefreshToken(payload.jti);
+    if (!storedToken) {
+      throw new Error("Refresh token not found or expired");
+    }
+
+    // Generate a new token pair
+    const userId = parseInt(payload.sub);
+
+    // For simplicity, we'll use empty roles array here
+    // In a real app, you'd fetch user roles from the database
+    const newTokenPair = await createRefreshTokenPair(userId);
+
+    // Revoke the old refresh token
+    await revokeRefreshToken(payload.jti);
+
+    return {
+      accessToken: newTokenPair.accessToken,
+      refreshToken: newTokenPair.refreshToken,
+    };
+  } catch (error) {
+    throw new Error(
+      `Invalid refresh token: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+}
+
+/**
+ * Revokes a specific refresh token (for logout)
+ */
+export async function revokeToken(refreshToken: string): Promise<boolean> {
+  try {
+    const payload = await verifyRefreshToken(refreshToken);
+    return await revokeRefreshToken(payload.jti);
+  } catch (error) {
+    // Even if token is invalid, we return true since the goal is achieved
+    return true;
+  }
+}
+
+/**
+ * Revokes all refresh tokens for a user (for logout from all devices)
+ */
+export async function revokeAllUserTokens(userId: number): Promise<number> {
+  return await revokeAllUserRefreshTokens(userId);
+}
+
+/**
+ * Cleanup expired tokens (can be run as a scheduled job)
+ */
+export async function cleanupExpiredRefreshTokens(): Promise<number> {
+  return await cleanupExpiredTokens();
+}
+
+/**
+ * Enhanced refresh with user roles from database
+ * This is a more complete version that fetches user data
+ */
+export async function refreshAccessTokenWithUserData(
+  refreshToken: string,
+  getUserRoles: (userId: number) => Promise<string[]>,
+): Promise<RefreshTokenResponse> {
+  try {
+    // Verify the refresh token JWT
+    const payload = await verifyRefreshToken(refreshToken);
+
+    // Check if the refresh token exists and is valid in the database
+    const storedToken = await getValidRefreshToken(payload.jti);
+    if (!storedToken) {
+      throw new Error("Refresh token not found or expired");
+    }
+
+    // Get fresh user data and roles
+    const userId = parseInt(payload.sub);
+    const userRoles = await getUserRoles(userId);
+
+    // Generate a new token pair with current user roles
+    const newTokenPair = await createRefreshTokenPair(userId, userRoles);
+
+    // Revoke the old refresh token
+    await revokeRefreshToken(payload.jti);
+
+    return {
+      accessToken: newTokenPair.accessToken,
+      refreshToken: newTokenPair.refreshToken,
+    };
+  } catch (error) {
+    throw new Error(
+      `Invalid refresh token: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
+}
