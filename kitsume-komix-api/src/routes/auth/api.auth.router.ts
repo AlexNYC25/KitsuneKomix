@@ -6,20 +6,17 @@ import {
   clearAuthCookies,
   getTokenFromCookie,
   setAuthCookies,
-} from "#modules/auth/auth.service.ts";
-import {
   createRefreshTokenPair,
   refreshAccessToken,
   revokeAllUserTokens,
   revokeToken,
-} from "#modules/auth/refreshToken.service.ts";
-import { verifyAccessToken } from "#modules/auth/auth.ts";
+} from "#modules/auth/auth.service.ts";
+import { verifyAccessToken } from "#modules/auth/jwt.service.ts";
 import { checkIfAppSetupComplete } from "#modules/users/users.service.ts";
 
 import {
-  ACCESS_COOKIE_NAME,
-  REFRESH_COOKIE_NAME,
-} from "#utilities/environment.ts";
+  env 
+} from "#config/env.ts";
 
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
@@ -167,7 +164,7 @@ app.openapi(
       // Cookie-auth clients send no body; token-auth clients send refreshToken in body.
       const body = c.req.valid("json");
       const refreshToken =
-        body.refreshToken ?? getTokenFromCookie(c, REFRESH_COOKIE_NAME);
+        body.refreshToken ?? getTokenFromCookie(c, env.REFRESH_COOKIE_NAME);
 
       if (!refreshToken) {
         return c.json({ message: "Refresh token is required" }, 400);
@@ -246,7 +243,7 @@ app.openapi(
       // Cookie-auth clients send no body; token-auth clients send refreshToken in body.
       const body = c.req.valid("json");
       const refreshToken =
-        body.refreshToken ?? getTokenFromCookie(c, REFRESH_COOKIE_NAME);
+        body.refreshToken ?? getTokenFromCookie(c, env.REFRESH_COOKIE_NAME);
 
       if (!refreshToken) {
         return c.json({ message: "Refresh token is required" }, 400);
@@ -316,7 +313,7 @@ app.openapi(
       const authHeader = c.req.header("Authorization");
       const token = authHeader?.startsWith("Bearer ")
         ? authHeader.split(" ")[1]
-        : getTokenFromCookie(c, ACCESS_COOKIE_NAME);
+        : getTokenFromCookie(c, env.ACCESS_COOKIE_NAME);
 
       if (!token) {
         return c.json({ message: "Unauthorized" }, 401);
