@@ -1,23 +1,23 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
-import { requireAuth } from "../../modules/modules_api/middleware/authChecks.ts";
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+import { getComicLibrariesAvailableToUser } from "#modules/libraries/comicLibraries.service.ts";
+import { listFoldersInDirectoryService } from "#modules/files/files.service.ts";
 
-import { getComicLibrariesAvailableToUser } from "./comicLibraries.service.ts";
-
-import { createComicLibrary } from "#sqlite/models/comicLibraries.model.ts";
+import { createComicLibrary } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
 
 import {
   ErrorResponseSchema,
   MessageResponseSchema,
   SuccessCreationResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
 import {
   ComicLibrarySchema,
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
-} from "#schemas/request.schema.ts";
-import { ComicLibrariesSchema } from "#schemas/data/comicLibraries.schema.ts";
+} from "#zod/schemas/request.schema.ts";
+import { ComicLibrariesSchema } from "#zod/schemas/data/comicLibraries.schema.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,
@@ -25,7 +25,7 @@ import type {
   ComicLibrary,
   LibraryRegistrationInput,
 } from "#types/index.ts";
-import { listFoldersInDirectoryService } from "../files/files.service.ts";
+
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -57,7 +57,9 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: ComicLibrariesSchema,
+            schema: z.object({
+              libraries: z.array(ComicLibrarySchema),
+            }),
           },
         },
         description: "Comic Libraries retrieved successfully",

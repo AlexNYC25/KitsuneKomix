@@ -3,12 +3,13 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   ErrorResponseSchema,
   MessageResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
 import {
   AddCollectionSchema,
   ParamIdSchema,
   ParamIdThumbnailIdSchema,
-} from "#schemas/request.schema.ts";
+} from "#zod/schemas/request.schema.ts";
+
 import type { AppEnv } from "#types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();

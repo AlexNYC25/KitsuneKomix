@@ -1,21 +1,25 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { requireAuth } from "../../modules/modules_api/middleware/authChecks.ts";
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+import { fetchComicSeries } from "#modules/series/comicSeries.service.ts";
 
-import { fetchComicSeries } from "./comicSeries.service.ts";
-
-import { AuthHeaderSchema } from "#schemas/header.schema.ts";
+import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
   PaginationLetterQuerySchema,
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamIdThumbnailIdSchema,
-} from "#schemas/request.schema.ts";
+} from "#zod/schemas/request.schema.ts";
 import {
   ComicSeriesMultipleResponseSchema,
   ErrorResponseSchema,
   MessageResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
+
+import {
+  validateAndBuildQueryParams,
+  validatePagination,
+} from "#utilities/parameters.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,
@@ -33,11 +37,6 @@ import type {
   RequestParametersValidated,
   RequestSortParametersValidated,
 } from "#types/index.ts";
-
-import {
-  validateAndBuildQueryParams,
-  validatePagination,
-} from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
