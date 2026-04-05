@@ -1,10 +1,10 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { requireAuth } from "../modules_api/middleware/authChecks.ts";
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 
-import { purgeAllData } from "#sqlite/models/admin.model.ts";
+import { purgeAllData } from "#infrastructure/db/sqlite/models/admin.model.ts";
 
-import { MessageResponseSchema } from "#schemas/response.schema.ts";
+import { MessageResponseSchema } from "#zod/schemas/response.schema.ts";
 
 import { AccessRefreshTokenCombinedPayload, AppEnv } from "#types/index.ts";
 
