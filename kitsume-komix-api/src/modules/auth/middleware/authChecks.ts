@@ -1,11 +1,18 @@
 import type { Context, Next } from "hono";
 
-import { verifyAccessToken, verifyRefreshToken } from "../auth/auth.ts";
-import { getValidRefreshToken } from "../../db/sqlite/models/refreshTokens.model.ts";
-import { apiLogger } from "../../logger/loggers.ts";
+import { apiLogger } from "#logger/loggers.ts";
+
+import { getValidRefreshToken } from "#infrastructure/db/sqlite/models/refreshTokens.model.ts";
+
+
+import { getTokenFromCookie } from "#modules/auth/auth.service.ts";
+import { verifyAccessToken, verifyRefreshToken } from "#modules/auth/jwt.service.ts";
+
+import {
+  env
+} from "#config/env.ts";
+
 import type { AccessRefreshTokenCombinedPayload } from "#types/index.ts";
-import { getTokenFromCookie } from "../services/auth.service.ts";
-import { ACCESS_COOKIE_NAME } from "#utilities/environment.ts";
 
 /**
  * Middleware to require authentication for a route.
@@ -54,7 +61,7 @@ export const requireTokenAuth = requireAuth;
  * @returns A response indicating whether the user is authenticated.
  */
 export const requireCookieAuth = async (c: Context, next: Next) => {
-  const token = getTokenFromCookie(c, ACCESS_COOKIE_NAME);
+  const token = getTokenFromCookie(c, env.ACCESS_COOKIE_NAME);
   if (!token) {
     return c.json({ message: "Unauthorized - Missing session cookie" }, 401);
   }
