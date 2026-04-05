@@ -1,25 +1,25 @@
 import { ZodSafeParseResult } from "zod";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
-import { requireAuth } from "../../modules/middleware/authChecks.ts";
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import {
   assignLibraryToUserService,
   checkIfAppSetupComplete,
   createUserService,
   deleteUserService,
-} from "../../modules/services/users.service.ts";
+} from "#modules/users/users.service.ts";
 
 import {
   ParamIdSchema,
   ParamUserLibraryIdSchema,
   UserSchema,
-} from "#schemas/request.schema.ts";
-import { AuthHeaderSchema } from "#schemas/header.schema.ts";
+} from "#zod/schemas/request.schema.ts";
+import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
   ErrorResponseSchema,
   MessageResponseSchema,
   UserCreationResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
 
 import {
   AccessRefreshTokenCombinedPayload,
