@@ -17,5 +17,17 @@ export const envSchema = z.object({
   
   JWT_ISSUER: z.string().default("kitsunekomix"),
   JWT_AUDIENCE: z.string().default("kitsunekomix_users"),
+
+  // Cookie settings
+  ACCESS_COOKIE_NAME: z.string().default("kk_access_token"),
+  REFRESH_COOKIE_NAME: z.string().default("kk_refresh_token"),
+  ACCESS_COOKIE_MAX_AGE_SECONDS: z.string().transform((val) => parseInt(val, 10)).default(18000), // 5 hours
+  REFRESH_COOKIE_MAX_AGE_SECONDS: z.string().transform((val) => parseInt(val, 10)).default(604800), // 7 days
+  COOKIE_DOMAIN: z.string().optional(),
+  COOKIE_PATH: z.string().default("/"),
+  REFRESH_COOKIE_PATH: z.string().default("/api/auth"),
+  COOKIE_HTTP_ONLY: z.string().transform((val) => val.toLowerCase() === "true").default(true),
+  COOKIE_SECURE: z.string().transform((val) => val.toLowerCase() === "true").default(true),
+  COOKIE_SAME_SITE: z.enum(["Lax", "Strict", "None"]).default("Lax"),
   
 });
