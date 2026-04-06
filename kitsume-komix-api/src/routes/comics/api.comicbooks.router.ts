@@ -1,8 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { basename } from "@std/path";
 
-import { requireAuth } from "../../modules/modules_api/middleware/authChecks.ts";
-
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import {
   checkComicReadByUser,
   createCustomThumbnail,
@@ -22,12 +21,10 @@ import {
   startStreamingComicBookFile,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
-} from "./comicbooks.service.ts";
+} from "#modules/comics/comicbooks.service.ts";
 
-import { ComicBookSchema } from "#schemas/data/comicBooks.schema.ts";
-
-import { MetadataExpandedSchema } from "#schemas/data/comicMetadata.schema.ts";
-
+import { ComicBookSchema } from "#zod/schemas/data/comicBooks.schema.ts";
+import { MetadataExpandedSchema } from "#zod/schemas/data/comicMetadata.schema.ts";
 import {
   BulkUpdateResponseSchema,
   ComicBookMultipleResponseSchema,
@@ -39,8 +36,7 @@ import {
   ErrorResponseSchema,
   FileDownloadResponseSchema,
   SuccessResponseSchema,
-} from "#schemas/response.schema.ts";
-
+} from "#zod/schemas/response.schema.ts";
 import {
   ComicMetadataBulkUpdateSchema,
   ComicMetadataSingleUpdateSchema,
@@ -52,7 +48,7 @@ import {
   ParamIdSchema,
   ParamIdStreamPageSchema,
   ParamIdThumbnailIdSchema,
-} from "#schemas/request.schema.ts";
+} from "#zod/schemas/request.schema.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,
@@ -861,7 +857,7 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const comicBookIds: number[] = data.comicBookIds.map((idStr) =>
+    const comicBookIds: number[] = data.comicBookIds.map((idStr: string) =>
       Number(idStr)
     );
     const metadataUpdates: ComicMetadataUpdateData[] = data.metadataUpdates;
@@ -2221,10 +2217,10 @@ app.openapi(
         id,
       );
 
-      if (thumbnails) {
+      if (thumbnails && thumbnails.length > 0) {
         return c.json({
-          thumbnails: thumbnails,
           message: "Fetched comic book thumbnails successfully",
+          thumbnails: thumbnails as { [x: string]: unknown }[],
         }, 200);
       } else {
         return c.json({
