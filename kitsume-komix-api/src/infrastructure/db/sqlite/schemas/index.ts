@@ -3,6 +3,7 @@ export * from "./tables/appSettings.table.ts";
 
 export * from "./tables/comicBooks.table.ts";
 export * from "./tables/comicLibraries.table.ts";
+export * from "./tables/comicSeries.table.ts";
 export * from "./tables/comicSeriesGroups.table.ts";
 export * from "./tables/users.table.ts";
 export * from "./tables/refreshTokens.table.ts";
@@ -19,6 +20,7 @@ export * from "./tables/comicCoverArtists.table.ts";
 export * from "./tables/comicEditors.table.ts";
 export * from "./tables/comicLetterers.table.ts";
 export * from "./tables/comicPencillers.table.ts";
+export * from "./tables/comicInkers.table.ts";
 export * from "./tables/comicWriters.table.ts";
 export * from "./tables/comicGenres.table.ts";
 export * from "./tables/comicImprints.table.ts";
