@@ -1,12 +1,10 @@
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
-import { ComicPage } from "./database.types.ts";
+import { z } from "zod";
 
-export type ComicBookPagesInfo = {
-  comicId: number;
-  totalPages: number;
-  pagesInDb: number;
-  pages: ComicPage[];
-};
+import { StandardizedComicMetadata } from "#interfaces/index.ts";
+
+import { ComicBookPagesInfoResponseSchema } from "#zod/schemas/response.schema.ts";
+
+export type ComicBookPagesInfo = z.infer<typeof ComicBookPagesInfoResponseSchema>;
 
 export type ComicMetadataPage = NonNullable<StandardizedComicMetadata["pages"]>[number];
 export type CoverPageRecord = { pageId: number; imagePath: string; pageNumber: number };
