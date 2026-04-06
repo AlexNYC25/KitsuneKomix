@@ -75,6 +75,7 @@ import type {
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   RequestSortParametersValidated,
+  ComicBookThumbnailItem
 } from "#types/index.ts";
 
 import {
@@ -2220,7 +2221,7 @@ app.openapi(
       if (thumbnails && thumbnails.length > 0) {
         return c.json({
           message: "Fetched comic book thumbnails successfully",
-          thumbnails: thumbnails as { [x: string]: unknown }[],
+          thumbnails: thumbnails as ComicBookThumbnailItem[],
         }, 200);
       } else {
         return c.json({
@@ -2311,7 +2312,7 @@ app.openapi(
     }
 
     try {
-      const thumbnail: ComicBookThumbnail | null =
+      const thumbnail: ComicBookThumbnailItem | null =
         await getComicThumbnailByComicIdThumbnailId(id, thumbId);
 
       if (thumbnail) {

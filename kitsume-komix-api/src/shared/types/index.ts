@@ -20,6 +20,7 @@ export * from "./comicBook.type.ts";
 export * from "./comicStoryArcs.type.ts";
 export * from "./comicSeries.type.ts";
 export * from "./comicPages.type.ts";
+export * from "./comicThumbnails.type.ts";
 
 // Re-export auth types
 export * from "./auth.type.ts";
