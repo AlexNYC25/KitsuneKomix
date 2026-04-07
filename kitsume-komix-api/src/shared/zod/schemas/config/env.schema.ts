@@ -7,6 +7,7 @@ export const envSchema = z.object({
 
   // folder paths
   APP_CONFIG_PATH: z.string().default("/app/config"),
+  APP_CACHE_PATH: z.string().default("/app/cache"),
 
   // JWT secrets and settings
   JWT_SECRET: z.string().default("supersecretkey"),
