@@ -1,56 +1,8 @@
 import { basename, extname, join } from "@std/path";
 
-/**
- * Supported comic book archive formats
- */
-export const SUPPORTED_COMIC_FORMATS = [
-  ".cbz",
-  ".cbr",
-  ".cb7",
-  ".cbt",
-  ".cba",
-  ".zip",
-  ".rar",
-  ".7z",
-  ".tar",
-] as const;
+import { env } from "#config/env.ts";
 
-/**
- * Supported image formats within comic archives
- */
-export const SUPPORTED_IMAGE_FORMATS = [
-  ".jpg",
-  ".jpeg",
-  ".png",
-  ".gif",
-  ".webp",
-  ".bmp",
-  ".tiff",
-  ".tif",
-] as const;
-
-/**
- * Result type for comic extraction operations
- */
-export type ComicExtractionResult = {
-  success: boolean;
-  extractedPath: string;
-  pageCount: number;
-  pages: string[];
-  coverImagePath?: string;
-  fileSizeBytes: number;
-  error?: string;
-};
-
-/**
- * Information about a comic book archive
- */
-export type ComicArchiveInfo = {
-  filePath: string;
-  format: string;
-  isSupported: boolean;
-  estimatedPageCount?: number;
-};
+import { ComicExtractionResult } from "#types/index.ts";
 
 /**
  * Check if a file is a supported comic book format
@@ -59,8 +11,8 @@ export type ComicArchiveInfo = {
  */
 export function isComicBookFile(filePath: string): boolean {
   const ext = extname(filePath).toLowerCase();
-  return SUPPORTED_COMIC_FORMATS.includes(
-    ext as typeof SUPPORTED_COMIC_FORMATS[number],
+  return env.SUPPORTED_COMIC_FORMATS.includes(
+    ext as typeof env.SUPPORTED_COMIC_FORMATS[number],
   );
 }
 
@@ -71,46 +23,9 @@ export function isComicBookFile(filePath: string): boolean {
  */
 export function isImageFile(filePath: string): boolean {
   const ext = extname(filePath).toLowerCase();
-  return SUPPORTED_IMAGE_FORMATS.includes(
-    ext as typeof SUPPORTED_IMAGE_FORMATS[number],
+  return env.SUPPORTED_IMAGE_FORMATS.includes(
+    ext as typeof env.SUPPORTED_IMAGE_FORMATS[number],
   );
-}
-
-/**
- * Get information about a comic book archive
- * @param filePath - path to the comic book file
- * @returns ComicArchiveInfo object with details about the archive
- */
-export async function getComicArchiveInfo(
-  filePath: string,
-): Promise<ComicArchiveInfo> {
-  const format = extname(filePath).toLowerCase();
-  const isSupported = isComicBookFile(filePath);
-
-  const info: ComicArchiveInfo = {
-    filePath,
-    format,
-    isSupported,
-  };
-
-  if (!isSupported) {
-    return info;
-  }
-
-  try {
-    const stat = await Deno.stat(filePath);
-    if (!stat.isFile) {
-      throw new Error("Path is not a file");
-    }
-
-    // For now, we can't easily get page count without extracting
-    // In the future, we could use archive libraries to list contents
-    info.estimatedPageCount = 0;
-  } catch (error) {
-    console.error(`Error getting comic archive info: ${error}`);
-  }
-
-  return info;
 }
 
 /**
@@ -339,47 +254,6 @@ export async function findImageFiles(directoryPath: string): Promise<string[]> {
   }
 
   return imageFiles;
-}
-
-/**
- * Clean up extracted comic files
- * @param extractedPath - path to the extracted comic directory
- */
-export async function cleanupExtractedComic(
-  extractedPath: string,
-): Promise<void> {
-  try {
-    await Deno.remove(extractedPath, { recursive: true });
-  } catch (error) {
-    console.error(`Error cleaning up extracted comic: ${error}`);
-  }
-}
-
-/**
- * Get the cover image from a comic book without full extraction
- * @param comicPath - path to the comic book archive
- * @returns Promise<string | null> path to the extracted cover image or null if failed
- */
-export async function extractComicCover(
-  comicPath: string,
-): Promise<string | null> {
-  try {
-    const result = await extractComicBook(comicPath);
-
-    if (!result.success || !result.coverImagePath) {
-      return null;
-    }
-
-    // Copy cover to a permanent location if needed
-    const coverPath = result.coverImagePath;
-
-    // TODO: extract to the permanent covers directory and clean up temp files
-    // note the location of the cover image for later use
-    return coverPath;
-  } catch (error) {
-    console.error(`Error extracting comic cover: ${error}`);
-    return null;
-  }
 }
 
 /**
