@@ -26,3 +26,5 @@ export * from "./comicThumbnails.type.ts";
 export * from "./auth.type.ts";
 
 export * from "./parameters.type.ts";
+
+export * from "./utilities.type.ts";
