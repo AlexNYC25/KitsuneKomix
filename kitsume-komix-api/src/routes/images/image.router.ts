@@ -1,8 +1,9 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { apiLogger } from "../../logger/loggers.ts";
 import { existsSync } from "@std/fs";
 import { join } from "@std/path";
-import { requireAuth } from "../../modules/middleware/authChecks.ts";
+
+import { apiLogger } from "#logger/loggers.ts";
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,
@@ -11,15 +12,18 @@ import type {
 import {
   ErrorResponseSchema,
   ImageResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
 import {
   ParamComicPageImageSchema,
   ParamImagePathSchema,
-} from "#schemas/request.schema.ts";
+} from "#zod/schemas/request.schema.ts";
+
+import {
+  env
+} from "#config/env.ts";
 
 const imageRouter = new OpenAPIHono<AppEnv>();
 
-const CACHE_DIRECTORY = "/app/cache"; // Ensure this matches your actual cache directory TODO: move to config
 
 /**
  * GET /image/thumbnails/:imagePath
@@ -103,7 +107,7 @@ imageRouter.openapi(
 
       // Construct the full thumbnail path
       const thumbnailPath: string = join(
-        CACHE_DIRECTORY,
+        env.APP_CACHE_PATH,
         "thumbnails",
         imagePath,
       );
@@ -225,7 +229,7 @@ imageRouter.openapi(
 
       // Construct the full page image path: cache/pages/{comicId}/{imagePath}
       const pagePath: string = join(
-        CACHE_DIRECTORY,
+        env.APP_CACHE_PATH,
         "pages",
         comicId,
         imagePath,

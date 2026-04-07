@@ -1,21 +1,20 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import camelcasekeys from "camelcase-keys";
 
-import { requireAuth } from "../../modules/middleware/authChecks.ts";
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 
-import { fetchComicStoryArcs } from "../../modules/services/comicStoryArcs.service.ts";
 import {
   ComicStoryArcMultipleResponseSchema,
   ErrorResponseSchema,
   MessageResponseSchema,
   ReadlistsResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
 import {
   AddReadlistSchema,
   PaginationSortFilterQuerySchema,
   ParamComicBookIdSchema,
   ParamIdSchema,
-} from "#schemas/request.schema.ts";
+} from "#zod/schemas/request.schema.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,

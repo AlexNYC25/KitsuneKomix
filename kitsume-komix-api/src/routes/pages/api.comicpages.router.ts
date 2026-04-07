@@ -1,8 +1,9 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
-import { ErrorResponseSchema } from "#schemas/response.schema.ts";
-import { ParamIdSchema } from "#schemas/request.schema.ts";
-import { requireAuth } from "../../modules/middleware/authChecks.ts";
+import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+
+import { ErrorResponseSchema } from "#zod/schemas/response.schema.ts";
+import { ParamIdSchema } from "#zod/schemas/request.schema.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,
