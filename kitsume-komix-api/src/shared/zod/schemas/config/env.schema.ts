@@ -31,4 +31,8 @@ export const envSchema = z.object({
   COOKIE_SECURE: z.string().transform((val) => val.toLowerCase() === "true").default(true),
   COOKIE_SAME_SITE: z.enum(["Lax", "Strict", "None"]).default("Lax"),
   
+  // Pagination settings
+  PAGE_SIZE: z.string().transform((val) => parseInt(val, 10)).default(20),
+  PAGE_NUMBER: z.string().transform((val) => parseInt(val, 10)).default(1),
+  FILTER_SORT: z.enum(["asc", "desc"]).default("asc"),
 });

@@ -20,7 +20,9 @@ import type {
   ComicReadlistsSortField,
 } from "#types/parameters.type.ts";
 
-import { PAGE_SIZE_DEFAULT } from "#utilities/constants.ts";
+import {
+  env
+} from "#config/env.ts";
 
 /**
  * Exclusive dynamic filtering function for comic story arcs.
@@ -93,7 +95,7 @@ export const getComicStoryArcsFilteringSorting = async (
   }
 
   const offset = serviceDetails.offset || 0;
-  const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
+  const limit = serviceDetails.limit || env.PAGE_SIZE;
 
   try {
     let query = db.select(

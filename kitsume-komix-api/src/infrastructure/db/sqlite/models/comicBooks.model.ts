@@ -32,7 +32,9 @@ import type {
   NewComicBook,
 } from "#types/index.ts";
 
-import { PAGE_SIZE_DEFAULT } from "../../../constants/index.ts";
+import {
+  env
+} from "#config/env.ts";
 
 /**
  * Exclusive dynamic filtering function specifcally for getComicBooksWithMetadataFilteringSorting
@@ -243,7 +245,7 @@ export const getComicBooksWithMetadataFilteringSorting = async (
   }
 
   const offset = serviceDetails.offset || 0;
-  const limit = serviceDetails.limit || PAGE_SIZE_DEFAULT;
+  const limit = serviceDetails.limit || env.PAGE_SIZE;
 
   try {
     let query = db.select(

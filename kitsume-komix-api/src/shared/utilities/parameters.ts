@@ -12,10 +12,8 @@ import {
 } from "#types/index.ts";
 
 import {
-  FILTER_SORT_DEFAULT,
-  PAGE_NUMBER_DEFAULT,
-  PAGE_SIZE_DEFAULT,
-} from "../utilities/constants.ts";
+  env
+} from "#config/env.ts";
 
 import { QueryableColumns } from "../constants/index.ts";
 
@@ -33,8 +31,8 @@ export const validatePagination = (
   page?: number,
   pageSize?: number,
 ): RequestPaginationParametersValidated => {
-  const validPageNumber = page && page > 0 ? page : PAGE_NUMBER_DEFAULT;
-  const validPageSize = pageSize && pageSize > 0 ? pageSize : PAGE_SIZE_DEFAULT;
+  const validPageNumber = page && page > 0 ? page : env.PAGE_NUMBER;
+  const validPageSize = pageSize && pageSize > 0 ? pageSize : env.PAGE_SIZE;
 
   return { pageNumber: validPageNumber, pageSize: validPageSize };
 };
@@ -63,7 +61,7 @@ const validateSort = (
   const validSortOrder: SortOrder =
     (sortDirection === "asc" || sortDirection === "desc")
       ? sortDirection
-      : FILTER_SORT_DEFAULT as SortOrder;
+      : env.FILTER_SORT as SortOrder;
 
   return {
     sortProperty: validSortProperty,
