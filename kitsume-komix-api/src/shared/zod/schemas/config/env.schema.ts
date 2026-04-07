@@ -35,4 +35,8 @@ export const envSchema = z.object({
   PAGE_SIZE: z.string().transform((val) => parseInt(val, 10)).default(20),
   PAGE_NUMBER: z.string().transform((val) => parseInt(val, 10)).default(1),
   FILTER_SORT: z.enum(["asc", "desc"]).default("asc"),
+
+  // comic parser settings
+  SUPPORTED_COMIC_FORMATS: z.enum([".cbz", ".cbr", "cb7", ".zip", ".rar", ".7z"]).array().default([".cbz", ".cbr", "cb7", ".zip", ".rar", ".7z"]),
+  SUPPORTED_IMAGE_FORMATS: z.enum([".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff", ".tif"]).array().default([".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"]),
 });
