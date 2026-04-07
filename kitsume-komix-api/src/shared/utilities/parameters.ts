@@ -15,7 +15,7 @@ import {
   env
 } from "#config/env.ts";
 
-import { QueryableColumns } from "../constants/index.ts";
+import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
 // ============================================================================
 // PARAMETER VALIDATION FUNCTIONS

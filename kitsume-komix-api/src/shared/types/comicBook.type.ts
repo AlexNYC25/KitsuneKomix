@@ -43,7 +43,7 @@ export type ComicBookMetadataOnly = {
 
 export type ComicBookWithMetadata = ComicBook & ComicBookMetadataOnly;
 
-import { QueryableColumns } from "../constants/index.ts";
+import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
 export type AllowedFilterProperties =
   keyof typeof QueryableColumns["comics"]["filter"];

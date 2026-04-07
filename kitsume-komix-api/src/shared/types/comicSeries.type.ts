@@ -1,4 +1,4 @@
-import { QueryableColumns } from "../constants/index.ts";
+import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
 import type { ComicSeries } from "#types/database.types.ts";
 

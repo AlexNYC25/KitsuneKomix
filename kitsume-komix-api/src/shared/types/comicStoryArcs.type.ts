@@ -1,6 +1,5 @@
 import { ComicStoryArc } from "./database.types.ts";
-import { QueryableColumns } from "../constants/index.ts";
-
+import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 export type AllowedComicStoryArcFilterProperties =
   keyof typeof QueryableColumns["comicReadlists"]["filter"];
 
