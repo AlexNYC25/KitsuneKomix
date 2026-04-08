@@ -10,3 +10,27 @@ export type ComicExtractionResult = {
   fileSizeBytes: number;
   error?: string;
 };
+
+/**
+ * Configuration for thumbnail generation
+ */
+export type ThumbnailConfig = {
+  width?: number;
+  height?: number;
+  quality?: number;
+  preserveAspectRatio?: boolean;
+  outputFormat?: "jpeg" | "png" | "webp"; // Sharp supports many formats
+}
+
+/**
+ * Result of thumbnail generation
+ */
+export type ThumbnailResult = {
+  success: boolean;
+  thumbnailPath?: string;
+  originalPath: string;
+  error?: string;
+  width?: number;
+  height?: number;
+  fileSize?: number;
+}
