@@ -7,7 +7,7 @@ import {
 
 import { getFileSize } from "#utilities/file.ts";
 
-import { getLibraryContainingPath } from "#sqlite/models/comicLibraries.model.ts";
+import { getLibraryContainingPath } from "#db/sqlite/models/comicLibraries.model.ts";
 
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
@@ -24,7 +24,7 @@ const metadataCache = new Map<
  * @returns A promise that resolves to the metadata object or null if an error occurs.
  * @throws Will log an error if metadata reading fails.
  */
-export const getMetadata = async (filePath: string) => {
+const getMetadata = async (filePath: string) => {
   try {
     const metadata = await readComicFileMetadata(filePath);
     return metadata;
