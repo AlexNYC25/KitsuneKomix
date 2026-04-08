@@ -109,8 +109,15 @@ app.openapi(
       const libraries: ComicLibrary[] = await getComicLibrariesAvailableToUser(
         userId,
       );
+      const formattedLibraries = libraries.map((lib) => ({
+        id: lib.id,
+        name: lib.name,
+        path: lib.path,
+        enabled: lib.enabled ? true : false,
+        description: lib.description || undefined,
+      }));
       return c.json(
-        { libraries },
+        { libraries: formattedLibraries },
         200,
       );
     } catch (error) {
