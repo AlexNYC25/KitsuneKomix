@@ -72,9 +72,8 @@ import { insertComicBookThumbnail } from "#db/sqlite/models/comicBookThumbnails.
 
 import { extractComicBook } from "#utilities/extract.ts";
 import { getComicFileRawDetails } from "#utilities/comic-parser.ts";
-import { getFileSize, getImageDimensions } from "#utilities/imageUtils.ts";
-import { createImageThumbnail } from "#utilities/image.ts";
-import { deleteFolderRecursive, getFileNameFromPath } from "#utilities/file.ts";
+import { createImageThumbnail, getImageDimensions } from "#utilities/image.ts";
+import { deleteFolderRecursive, getFileNameFromPath, getFileSize } from "#utilities/file.ts";
 import { 
 	combineMetadataWithParsedFileDetails, 
 	retrieveMetadataFromCache, 

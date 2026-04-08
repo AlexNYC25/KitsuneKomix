@@ -192,3 +192,23 @@ export async function createImageThumbnail(
     };
   }
 }
+
+export async function getImageDimensions(
+  imagePath: string,
+): Promise<{ width: number; height: number } | null> {
+  try {
+    const metadata = await sharp(imagePath).metadata();
+
+    if (metadata.width && metadata.height) {
+      return {
+        width: metadata.width,
+        height: metadata.height,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Error getting image dimensions for ${imagePath}:`, error);
+    return null;
+  }
+}
