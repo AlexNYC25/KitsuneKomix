@@ -1,8 +1,8 @@
 import {
   getAllComicLibraries,
   getUsersComicLibraries,
-} from "#sqlite/models/comicLibraries.model.ts";
-import { getUserById } from "#sqlite/models/users.model.ts";
+} from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { getUserById } from "#infrastructure/db/sqlite/models/users.model.ts";
 
 import type { ComicLibrary } from "#types/index.ts";
 

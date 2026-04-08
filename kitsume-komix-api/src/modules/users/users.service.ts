@@ -3,17 +3,17 @@ import {
   deleteUser,
   getUserByEmail,
   getUserById,
-} from "#sqlite/models/users.model.ts";
+} from "#infrastructure/db/sqlite/models/users.model.ts";
 import {
   assignLibraryToUser,
   getComicLibraryById,
-} from "#sqlite/models/comicLibraries.model.ts";
+} from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
 
 import { hashPassword } from "#utilities/hash.ts";
 
 import { UserRegistrationInput } from "#types/index.ts";
 
-import { getSetting, setSetting } from "#sqlite/models/appSettings.model.ts";
+import { getSetting, setSetting } from "#infrastructure/db/sqlite/models/appSettings.model.ts";
 
 /**
  * Checks whether initial application setup has been completed.

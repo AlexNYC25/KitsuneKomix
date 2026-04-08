@@ -1,6 +1,6 @@
 import { asc, desc, eq, ilike, sql } from "drizzle-orm";
 import { getClient } from "../client.ts";
-import { appSettingsTable } from "../schema.ts";
+import { appSettingsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Retrieves a single application setting by its key.

@@ -2,7 +2,7 @@ import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
 
 import { comicBooksTable } from "../tables/comicBooks.table.ts";
-import { comicTeamsTable } from "../comicTeams.table.ts";
+import { comicTeamsTable } from "../tables/comicTeams.table.ts";
 
 
 export const comicBookTeamsTable = sqliteTable("comic_book_teams", {

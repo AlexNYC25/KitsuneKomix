@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicBookCovers } from "../schema.ts";
+import { comicBookCovers } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Insertion function for a new comic book cover record

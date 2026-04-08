@@ -858,8 +858,8 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    const comicBookIds: number[] = data.comicBookIds.map((idStr: string) =>
-      Number(idStr)
+    const comicBookIds: number[] = data.comicBookIds.map((item: { id: string }) =>
+      Number(item.id)
     );
     const metadataUpdates: ComicMetadataUpdateData[] = data.metadataUpdates;
 

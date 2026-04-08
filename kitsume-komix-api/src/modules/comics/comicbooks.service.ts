@@ -1,4 +1,4 @@
-import { getClient } from "#sqlite/client.ts";
+import { getClient } from "#infrastructure/db/sqlite/client.ts";
 
 import {
   deleteComicBook,
@@ -6,109 +6,109 @@ import {
   getComicBooksWithMetadataFilteringSorting,
   getComicDuplicates,
   getRandomBook,
-} from "#sqlite/models/comicBooks.model.ts";
+} from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 import {
   getWritersByComicBookId,
   insertComicWriter,
   linkWriterToComicBook,
   unlinkWritersToComicBook,
-} from "#sqlite/models/comicWriters.model.ts";
+} from "#infrastructure/db/sqlite/models/comicWriters.model.ts";
 import {
   getColoristByComicBookId,
   insertComicColorist,
   linkColoristToComicBook,
   unlinkColoristsToComicBook,
-} from "#sqlite/models/comicColorists.model.ts";
+} from "#infrastructure/db/sqlite/models/comicColorists.model.ts";
 import {
   getPencillersByComicBookId,
   insertComicPenciller,
   linkPencillerToComicBook,
   unlinkPencillersToComicBook,
-} from "#sqlite/models/comicPencillers.model.ts";
+} from "#infrastructure/db/sqlite/models/comicPencillers.model.ts";
 import {
   getInkersByComicBookId,
   insertComicInker,
   linkInkerToComicBook,
   unlinkInkersToComicBook,
-} from "#sqlite/models/comicInkers.model.ts";
+} from "#infrastructure/db/sqlite/models/comicInkers.model.ts";
 import {
   getLetterersByComicBookId,
   insertComicLetterer,
   linkLettererToComicBook,
   unlinkLetterersToComicBook,
-} from "#sqlite/models/comicLetterers.model.ts";
+} from "#infrastructure/db/sqlite/models/comicLetterers.model.ts";
 import {
   getEditorsByComicBookId,
   insertComicEditor,
   linkEditorToComicBook,
   unlinkEditorsToComicBook,
-} from "#sqlite/models/comicEditors.model.ts";
+} from "#infrastructure/db/sqlite/models/comicEditors.model.ts";
 import {
   getCoverArtistsByComicBookId,
   insertComicCoverArtist,
   linkCoverArtistToComicBook,
   unlinkCoverArtistsToComicBook,
-} from "#sqlite/models/comicCoverArtists.model.ts";
+} from "#infrastructure/db/sqlite/models/comicCoverArtists.model.ts";
 import {
   getPublishersByComicBookId,
   insertComicPublisher,
   linkPublisherToComicBook,
   unlinkPublishersToComicBook,
-} from "#sqlite/models/comicPublishers.model.ts";
+} from "#infrastructure/db/sqlite/models/comicPublishers.model.ts";
 import {
   getImprintsByComicBookId,
   insertComicImprint,
   linkImprintToComicBook,
   unlinkImprintsToComicBook,
-} from "#sqlite/models/comicImprints.model.ts";
+} from "#infrastructure/db/sqlite/models/comicImprints.model.ts";
 import {
   getGenresForComicBook,
   insertComicGenre,
   linkGenreToComicBook,
   unlinkGenresToComicBook,
-} from "#sqlite/models/comicGenres.model.ts";
+} from "#infrastructure/db/sqlite/models/comicGenres.model.ts";
 import {
   getCharactersByComicBookId,
   insertComicCharacter,
   linkCharacterToComicBook,
   unlinkCharactersToComicBook,
-} from "#sqlite/models/comicCharacters.model.ts";
+} from "#infrastructure/db/sqlite/models/comicCharacters.model.ts";
 import {
   getTeamsByComicBookId,
   insertComicTeam,
   linkTeamToComicBook,
   unlinkTeamsToComicBook,
-} from "#sqlite/models/comicTeams.model.ts";
+} from "#infrastructure/db/sqlite/models/comicTeams.model.ts";
 import {
   getLocationsByComicBookId,
   insertComicLocation,
   linkLocationToComicBook,
   unlinkLocationsToComicBook,
-} from "#sqlite/models/comicLocations.model.ts";
+} from "#infrastructure/db/sqlite/models/comicLocations.model.ts";
 import {
   getStoryArcsByComicBookId,
   unlinkStoryArcsToComicBook,
-} from "#sqlite/models/comicStoryArcs.model.ts";
+} from "#infrastructure/db/sqlite/models/comicStoryArcs.model.ts";
 import {
   getSeriesGroupsByComicBookId,
   unlinkSeriesGroupsToComicBook,
-} from "#sqlite/models/comicSeriesGroups.model.ts";
-import { getComicPagesByComicBookId } from "#sqlite/models/comicPages.model.ts";
+} from "#infrastructure/db/sqlite/models/comicSeriesGroups.model.ts";
+import { getComicPagesByComicBookId } from "#infrastructure/db/sqlite/models/comicPages.model.ts";
 import {
   deleteComicBookThumbnail,
   getComicThumbnailById,
   getThumbnailsByComicBookId,
   insertCustomComicBookThumbnail,
-} from "#sqlite/models/comicBookThumbnails.model.ts";
+} from "#infrastructure/db/sqlite/models/comicBookThumbnails.model.ts";
 import {
   getComicBooksInSeries,
   getSeriesIdFromComicBook,
-} from "#sqlite/models/comicSeries.model.ts";
+} from "#infrastructure/db/sqlite/models/comicSeries.model.ts";
 import {
   getComicBookHistoryByUserAndComic,
   insertComicBookHistory,
   updateComicBookHistory,
-} from "#sqlite/models/comicBookHistory.model.ts";
+} from "#infrastructure/db/sqlite/models/comicBookHistory.model.ts";
 
 import {
   extractComicBookByStreaming,

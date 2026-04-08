@@ -1,11 +1,11 @@
 import {
   getComicSeriesWithMetadataFilteringSorting,
-} from "#sqlite/models/comicSeries.model.ts";
+} from "#infrastructure/db/sqlite/models/comicSeries.model.ts";
 
 import {
   attachThumbnailToComicBook,
   fetchComicBooksWithRelatedMetadata,
-} from "../modules_api/services/comicbooks.service.ts";
+} from "#modules/comics/comicbooks.service.ts";
 
 import type {
   ComicBookMetadataOnly,

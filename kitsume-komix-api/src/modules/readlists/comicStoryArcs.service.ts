@@ -3,9 +3,7 @@ import {
   getComicStoryArcById,
   getComicStoryArcsFilteringSorting,
   insertComicStoryArc,
-} from "#sqlite/models/comicStoryArcs.model.ts";
-
-import { ComicStoryArcQueryParams } from "#interfaces/index.ts";
+} from "#infrastructure/db/sqlite/models/comicStoryArcs.model.ts";
 
 import {
   ComicReadlistsFilterField,
@@ -13,13 +11,11 @@ import {
   ComicStoryArc,
   ComicStoryArcFilterItem,
   // Filter and sort types
-  RequestFilterParameters,
   RequestFilterParametersValidated,
   // Request parameter types
   RequestPaginationParametersValidated,
   //
   RequestParametersValidated,
-  RequestSortParameters,
   RequestSortParametersValidated,
 } from "#types/index.ts";
 

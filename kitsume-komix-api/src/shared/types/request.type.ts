@@ -5,9 +5,9 @@ import {
   ComicMetadataSingleUpdateSchema,
   PaginationLetterQuerySchema,
   PaginationSortFilterQuerySchema,
-} from "#schemas/request.schema.ts";
+} from "#zod/schemas/request.schema.ts";
 
-import { metadataUpdateSchema } from "#schemas/data/comicMetadata.schema.ts";
+import { metadataUpdateSchema } from "#zod/schemas/data/comicMetadata.schema.ts";
 
 // *** Zod Inferred Types ***
 

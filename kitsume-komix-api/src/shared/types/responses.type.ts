@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   ComicBookMultipleResponseSchema,
   ComicSeriesMultipleResponseSchema,
-} from "#schemas/response.schema.ts";
+} from "#zod/schemas/response.schema.ts";
 
 export type ComicBookMultipleResponse = z.infer<
   typeof ComicBookMultipleResponseSchema
