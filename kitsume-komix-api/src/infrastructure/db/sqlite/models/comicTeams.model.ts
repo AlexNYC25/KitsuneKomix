@@ -1,7 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-import { comicBookTeamsTable, comicTeamsTable } from "../schema.ts";
+import { comicBookTeamsTable, comicTeamsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicTeam } from "#types/index.ts";
 

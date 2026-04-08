@@ -4,7 +4,7 @@ import { getClient } from "../client.ts";
 import {
   comicBookSeriesGroupsTable,
   comicSeriesGroupsTable,
-} from "../schema.ts";
+} from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicSeriesGroup } from "#types/index.ts";
 

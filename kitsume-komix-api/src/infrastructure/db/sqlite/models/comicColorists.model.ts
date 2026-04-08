@@ -3,7 +3,7 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 
 import { ComicColorist } from "#types/index.ts";
-import { comicBookColoristsTable, comicColoristsTable } from "../schema.ts";
+import { comicBookColoristsTable, comicColoristsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Inserts a new comic colorist into the database or returns the ID of an existing colorist with the same name

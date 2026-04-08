@@ -6,7 +6,7 @@ import { ComicCoverArtist } from "#types/index.ts";
 import {
   comicBookCoverArtistsTable,
   comicCoverArtistsTable,
-} from "../schema.ts";
+} from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Inserts a new comic cover artist into the database or returns the ID of an existing cover artist with the same name

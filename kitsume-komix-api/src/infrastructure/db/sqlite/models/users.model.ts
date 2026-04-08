@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-import { usersTable } from "../schema.ts";
+import { usersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { NewUser, User } from "#types/index.ts";
 

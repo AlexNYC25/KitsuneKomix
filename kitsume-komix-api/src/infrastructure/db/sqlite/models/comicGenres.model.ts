@@ -3,7 +3,7 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 
 import type { ComicGenre } from "#types/index.ts";
-import { comicBookGenresTable, comicGenresTable } from "../schema.ts";
+import { comicBookGenresTable, comicGenresTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Inserts a new comic genre into the database or returns the ID of an existing genre with the same name

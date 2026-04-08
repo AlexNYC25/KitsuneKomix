@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-import { comicPagesTable } from "../schema.ts";
+import { comicPagesTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicPage } from "#types/index.ts";
 

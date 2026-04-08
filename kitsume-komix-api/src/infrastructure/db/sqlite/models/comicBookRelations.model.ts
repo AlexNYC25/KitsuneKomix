@@ -17,7 +17,7 @@ import {
   comicBookStoryArcsTable,
   comicBookTeamsTable,
   comicBookWritersTable,
-} from "../schema.ts";
+} from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
   NewComicBookCharacter,

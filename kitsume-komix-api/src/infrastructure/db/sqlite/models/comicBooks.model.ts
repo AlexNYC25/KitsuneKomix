@@ -22,7 +22,7 @@ import {
   comicSeriesBooksTable,
   comicSeriesTable,
   comicWebLinksTable,
-} from "../schema.ts";
+} from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
   ComicBook,

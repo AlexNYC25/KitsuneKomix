@@ -3,7 +3,7 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 
 import { ComicEditor } from "#types/index.ts";
-import { comicBookEditorsTable, comicEditorsTable } from "../schema.ts";
+import { comicBookEditorsTable, comicEditorsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Inserts a new comic editor into the database or returns the ID of an existing editor with the same name

@@ -1,5 +1,5 @@
 import { getClient } from "../client.ts";
-import { comicBookThumbnailsTable } from "../schema.ts";
+import { comicBookThumbnailsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import { eq } from "drizzle-orm";
 import type { ComicBookThumbnail } from "#types/index.ts";

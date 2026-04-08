@@ -7,7 +7,7 @@ import {
   comicLibrariesSeriesTable,
   comicSeriesBooksTable,
   comicSeriesTable,
-} from "../schema.ts";
+} from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
   ComicSeries,

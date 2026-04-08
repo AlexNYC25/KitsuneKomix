@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-import { comicWebLinksTable } from "../schema.ts";
+import { comicWebLinksTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Inserts a new comic web link into the database

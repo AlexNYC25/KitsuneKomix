@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-import { comicBookHistoryTable } from "../schema.ts";
+import { comicBookHistoryTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicBookHistory, NewComicBookHistory } from "#types/index.ts";
 
