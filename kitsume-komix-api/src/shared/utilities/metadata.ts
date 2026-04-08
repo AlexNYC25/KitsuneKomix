@@ -12,7 +12,8 @@ import { getLibraryContainingPath } from "#db/sqlite/models/comicLibraries.model
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
 
-const METADATA_CACHE_TTL_MS = 60 * 60 * 1000;
+import { env } from "#config/env.ts";
+
 const metadataCache = new Map<
   string,
   { value: StandardizedComicMetadata; expiresAt: number }
@@ -282,7 +283,7 @@ export const loadMetadataIntoCache = async (
 ): Promise<void> => {
   metadataCache.set(filePath, {
     value: metadata,
-    expiresAt: Date.now() + METADATA_CACHE_TTL_MS,
+    expiresAt: Date.now() + env.METADATA_CACHE_TTL_MS,
   });
 };
 
