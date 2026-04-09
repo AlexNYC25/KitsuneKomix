@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const envSchema = z.object({
-  MODE: z.enum(['development', 'production', 'test']),
+  MODE: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().transform((val) => parseInt(val, 10)).default(8000),
   CLIENT_URL: z.url().default("http://localhost:5173"),
 
