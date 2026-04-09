@@ -23,7 +23,7 @@ export async function runMigrations() {
 
   try {
     // Use absolute path to drizzle migrations folder
-    const migrationsPath = join(Deno.cwd(), "drizzle");
+    const migrationsPath = join(Deno.cwd(), "src", "infrastructure", "db", "sqlite", "drizzle");
     dbLogger.info(`Looking for migrations in: ${migrationsPath}`);
 
     // Check if migrations directory exists
