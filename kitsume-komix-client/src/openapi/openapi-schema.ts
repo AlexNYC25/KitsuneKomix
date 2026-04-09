@@ -4,6 +4,474 @@
  */
 
 export interface paths {
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * User login
+         * @description Authenticate a user and return access and refresh tokens
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email: string;
+                        /** @example password123 */
+                        password: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Login successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Login successful */
+                            message: string;
+                            /**
+                             * BasicUserInfo
+                             * @description Basic information about a user
+                             */
+                            user: {
+                                id: number;
+                                /** Format: email */
+                                email: string;
+                                /** @default false */
+                                admin: boolean;
+                            };
+                            /**
+                             * AuthAccessToken
+                             * @description An access token used for authenticating API requests
+                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                             */
+                            accessToken: string;
+                            /**
+                             * AuthRefreshToken
+                             * @description A refresh token used for obtaining new access tokens
+                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                             */
+                            refreshToken: string;
+                        };
+                    };
+                };
+                /** @description Authentication failed */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh-token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh access token
+         * @description Get a new access token using a refresh token
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /**
+                         * AuthRefreshToken
+                         * @description A refresh token used for obtaining new access tokens
+                         * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                         */
+                        refreshToken: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Token refreshed successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Token refreshed successfully */
+                            message: string;
+                            /**
+                             * AuthAccessToken
+                             * @description An access token used for authenticating API requests
+                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                             */
+                            accessToken: string;
+                            /**
+                             * AuthRefreshToken
+                             * @description A refresh token used for obtaining new access tokens
+                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                             */
+                            refreshToken: string;
+                        };
+                    };
+                };
+                /** @description Refresh token is required */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Token refresh failed */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * User logout
+         * @description Revoke a refresh token
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /**
+                         * AuthRefreshToken
+                         * @description A refresh token used for obtaining new access tokens
+                         * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                         */
+                        refreshToken: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Logout successful */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Refresh token is required */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Logout failed */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout from all devices
+         * @description Revoke all refresh tokens for the authenticated user
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Bearer token for authentication */
+                    authorization: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Logged out from all devices successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Logged out from all devices successfully */
+                            message: string;
+                            /** @example 3 */
+                            revokedTokens: number;
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Logout from all devices failed */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/check-setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Check if app setup is complete
+         * @description Check if the application has been initially set up (i.e. if an admin user exists)
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Setup status retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            isSetup: boolean;
+                        };
+                    };
+                };
+                /** @description Failed to check setup status */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/purge-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Purge all data
+         * @description Delete all data from the system (admin only)
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description All data purged successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Invalid user ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/create-user": {
         parameters: {
             query?: never;
@@ -571,14 +1039,11 @@ export interface paths {
                     content: {
                         "application/json": {
                             libraries: {
-                                id: number;
+                                id?: number;
                                 name: string;
+                                description?: string | null;
                                 path: string;
-                                description: string | null;
-                                enabled: number;
-                                changedAt: string;
-                                createdAt: string;
-                                updatedAt: string;
+                                enabled: boolean;
                             }[];
                         };
                     };
@@ -1158,155 +1623,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/login": {
+    "/comic-series": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /**
-         * User login
-         * @description Authenticate a user and return access and refresh tokens
+         * Get all comic series
+         * @description Retrieve all comic series from the database
          */
-        post: {
+        get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    /** @description The specific property to sort by */
+                    sort?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: email
-                         * @example user@example.com
-                         */
-                        email: string;
-                        /** @example password123 */
-                        password: string;
-                    };
-                };
-            };
+            requestBody?: never;
             responses: {
-                /** @description Login successful */
+                /** @description Series retrieved successfully */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
-                            /** @example Login successful */
-                            message: string;
-                            /**
-                             * BasicUserInfo
-                             * @description Basic information about a user
-                             */
-                            user: {
+                            data: {
                                 id: number;
-                                /** Format: email */
-                                email: string;
+                                name: string;
+                                description: string | null;
+                                folderPath: string;
+                                createdAt: string;
+                                updatedAt: string;
+                                /**
+                                 * @description Total number of comic books in the series
+                                 * @example 42
+                                 */
+                                totalComicBooks: number;
+                                /**
+                                 * @description Total file size of all comic books in the series (in bytes)
+                                 * @example 123456789
+                                 */
+                                totalSize: number;
+                                /**
+                                 * Format: uri
+                                 * @description URL to the thumbnail image for the comic series
+                                 * @example https://example.com/thumbnails/series123.jpg
+                                 */
+                                thumbnailUrl?: string;
+                                /**
+                                 * ComicSeriesMetadata
+                                 * @description Metadata for a comic series
+                                 */
+                                metadata?: {
+                                    writers?: string;
+                                    pencillers?: string;
+                                    inkers?: string;
+                                    colorists?: string;
+                                    letterers?: string;
+                                    editors?: string;
+                                    coverArtists?: string;
+                                    publishers?: string;
+                                    imprints?: string;
+                                    genres?: string;
+                                    characters?: string;
+                                    teams?: string;
+                                    locations?: string;
+                                    storyArcs?: string;
+                                    seriesGroups?: string;
+                                };
+                                comicBooks?: {
+                                    id: number;
+                                    libraryId: number;
+                                    filePath: string;
+                                    hash: string;
+                                    title: string | null;
+                                    series: string | null;
+                                    issueNumber: string | null;
+                                    count: number | null;
+                                    volume: string | null;
+                                    alternateSeries: string | null;
+                                    alternateIssueNumber: string | null;
+                                    alternateCount: number | null;
+                                    pageCount: number | null;
+                                    fileSize: number | null;
+                                    summary: string | null;
+                                    notes: string | null;
+                                    year: number | null;
+                                    month: number | null;
+                                    day: number | null;
+                                    publisher: string | null;
+                                    publicationDate: string | null;
+                                    scanInfo: string | null;
+                                    language: string | null;
+                                    format: string | null;
+                                    blackAndWhite: number | null;
+                                    manga: number | null;
+                                    readingDirection: string | null;
+                                    review: string | null;
+                                    ageRating: string | null;
+                                    communityRating: number | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                    /**
+                                     * ComicSeriesMetadata
+                                     * @description Metadata for a comic series
+                                     */
+                                    metadata?: {
+                                        writers?: string;
+                                        pencillers?: string;
+                                        inkers?: string;
+                                        colorists?: string;
+                                        letterers?: string;
+                                        editors?: string;
+                                        coverArtists?: string;
+                                        publishers?: string;
+                                        imprints?: string;
+                                        genres?: string;
+                                        characters?: string;
+                                        teams?: string;
+                                        locations?: string;
+                                        storyArcs?: string;
+                                        seriesGroups?: string;
+                                    };
+                                    thumbnails?: {
+                                        id: number;
+                                        comicBookId: number;
+                                        comicBookCoverId: number | null;
+                                        filePath: string;
+                                        thumbnailType: string;
+                                        name: string | null;
+                                        description: string | null;
+                                        uploadedBy: number | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                }[];
+                            }[];
+                            meta: {
+                                /** @default 0 */
+                                count: number;
                                 /** @default false */
-                                admin: boolean;
-                            };
-                            /**
-                             * AuthAccessToken
-                             * @description An access token used for authenticating API requests
-                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-                             */
-                            accessToken: string;
-                            /**
-                             * AuthRefreshToken
-                             * @description A refresh token used for obtaining new access tokens
-                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-                             */
-                            refreshToken: string;
-                        };
-                    };
-                };
-                /** @description Authentication failed */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
+                                hasNextPage: boolean;
+                                /** @default 1 */
+                                currentPage: number;
+                                /** @default 1 */
+                                pageSize: number;
+                                filterProperty?: string;
+                                filterValue?: string;
+                                sortProperty?: string;
+                                /** @enum {string} */
+                                sortOrder?: "asc" | "desc";
                             };
                         };
                     };
                 };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/refresh-token": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Refresh access token
-         * @description Get a new access token using a refresh token
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /**
-                         * AuthRefreshToken
-                         * @description A refresh token used for obtaining new access tokens
-                         * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-                         */
-                        refreshToken: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Token refreshed successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @example Token refreshed successfully */
-                            message: string;
-                            /**
-                             * AuthAccessToken
-                             * @description An access token used for authenticating API requests
-                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-                             */
-                            accessToken: string;
-                            /**
-                             * AuthRefreshToken
-                             * @description A refresh token used for obtaining new access tokens
-                             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-                             */
-                            refreshToken: string;
-                        };
-                    };
-                };
-                /** @description Refresh token is required */
+                /** @description Bad Request */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -1314,13 +1801,10 @@ export interface paths {
                     content: {
                         "application/json": {
                             message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
                         };
                     };
                 };
-                /** @description Token refresh failed */
+                /** @description Unauthorized */
                 401: {
                     headers: {
                         [name: string]: unknown;
@@ -1328,116 +1812,54 @@ export interface paths {
                     content: {
                         "application/json": {
                             message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
+                        };
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
                         };
                     };
                 };
             };
         };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/auth/logout": {
+    "/comic-series/latest": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
-        /**
-         * User logout
-         * @description Revoke a refresh token
-         */
-        post: {
+        /** Get latest comic series */
+        get: {
             parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /**
-                         * AuthRefreshToken
-                         * @description A refresh token used for obtaining new access tokens
-                         * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-                         */
-                        refreshToken: string;
-                    };
+                query?: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    /** @description The specific property to sort by */
+                    sort?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
                 };
-            };
-            responses: {
-                /** @description Logout successful */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Refresh token is required */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Logout failed */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/logout-all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Logout from all devices
-         * @description Revoke all refresh tokens for the authenticated user
-         */
-        post: {
-            parameters: {
-                query?: never;
                 header: {
                     /** @description Bearer token for authentication */
                     authorization: string;
@@ -1447,17 +1869,793 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Logged out from all devices successfully */
+                /** @description Latest series retrieved successfully */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": {
-                            /** @example Logged out from all devices successfully */
+                            data: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                folderPath: string;
+                                createdAt: string;
+                                updatedAt: string;
+                                /**
+                                 * @description Total number of comic books in the series
+                                 * @example 42
+                                 */
+                                totalComicBooks: number;
+                                /**
+                                 * @description Total file size of all comic books in the series (in bytes)
+                                 * @example 123456789
+                                 */
+                                totalSize: number;
+                                /**
+                                 * Format: uri
+                                 * @description URL to the thumbnail image for the comic series
+                                 * @example https://example.com/thumbnails/series123.jpg
+                                 */
+                                thumbnailUrl?: string;
+                                /**
+                                 * ComicSeriesMetadata
+                                 * @description Metadata for a comic series
+                                 */
+                                metadata?: {
+                                    writers?: string;
+                                    pencillers?: string;
+                                    inkers?: string;
+                                    colorists?: string;
+                                    letterers?: string;
+                                    editors?: string;
+                                    coverArtists?: string;
+                                    publishers?: string;
+                                    imprints?: string;
+                                    genres?: string;
+                                    characters?: string;
+                                    teams?: string;
+                                    locations?: string;
+                                    storyArcs?: string;
+                                    seriesGroups?: string;
+                                };
+                                comicBooks?: {
+                                    id: number;
+                                    libraryId: number;
+                                    filePath: string;
+                                    hash: string;
+                                    title: string | null;
+                                    series: string | null;
+                                    issueNumber: string | null;
+                                    count: number | null;
+                                    volume: string | null;
+                                    alternateSeries: string | null;
+                                    alternateIssueNumber: string | null;
+                                    alternateCount: number | null;
+                                    pageCount: number | null;
+                                    fileSize: number | null;
+                                    summary: string | null;
+                                    notes: string | null;
+                                    year: number | null;
+                                    month: number | null;
+                                    day: number | null;
+                                    publisher: string | null;
+                                    publicationDate: string | null;
+                                    scanInfo: string | null;
+                                    language: string | null;
+                                    format: string | null;
+                                    blackAndWhite: number | null;
+                                    manga: number | null;
+                                    readingDirection: string | null;
+                                    review: string | null;
+                                    ageRating: string | null;
+                                    communityRating: number | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                    /**
+                                     * ComicSeriesMetadata
+                                     * @description Metadata for a comic series
+                                     */
+                                    metadata?: {
+                                        writers?: string;
+                                        pencillers?: string;
+                                        inkers?: string;
+                                        colorists?: string;
+                                        letterers?: string;
+                                        editors?: string;
+                                        coverArtists?: string;
+                                        publishers?: string;
+                                        imprints?: string;
+                                        genres?: string;
+                                        characters?: string;
+                                        teams?: string;
+                                        locations?: string;
+                                        storyArcs?: string;
+                                        seriesGroups?: string;
+                                    };
+                                    thumbnails?: {
+                                        id: number;
+                                        comicBookId: number;
+                                        comicBookCoverId: number | null;
+                                        filePath: string;
+                                        thumbnailType: string;
+                                        name: string | null;
+                                        description: string | null;
+                                        uploadedBy: number | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                }[];
+                            }[];
+                            meta: {
+                                /** @default 0 */
+                                count: number;
+                                /** @default false */
+                                hasNextPage: boolean;
+                                /** @default 1 */
+                                currentPage: number;
+                                /** @default 1 */
+                                pageSize: number;
+                                filterProperty?: string;
+                                filterValue?: string;
+                                sortProperty?: string;
+                                /** @enum {string} */
+                                sortOrder?: "asc" | "desc";
+                            };
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
                             message: string;
-                            /** @example 3 */
-                            revokedTokens: number;
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-series/updated": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get updated comic series */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    /** @description The specific property to sort by */
+                    sort?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
+                };
+                header: {
+                    /** @description Bearer token for authentication */
+                    authorization: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Updated series retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                folderPath: string;
+                                createdAt: string;
+                                updatedAt: string;
+                                /**
+                                 * @description Total number of comic books in the series
+                                 * @example 42
+                                 */
+                                totalComicBooks: number;
+                                /**
+                                 * @description Total file size of all comic books in the series (in bytes)
+                                 * @example 123456789
+                                 */
+                                totalSize: number;
+                                /**
+                                 * Format: uri
+                                 * @description URL to the thumbnail image for the comic series
+                                 * @example https://example.com/thumbnails/series123.jpg
+                                 */
+                                thumbnailUrl?: string;
+                                /**
+                                 * ComicSeriesMetadata
+                                 * @description Metadata for a comic series
+                                 */
+                                metadata?: {
+                                    writers?: string;
+                                    pencillers?: string;
+                                    inkers?: string;
+                                    colorists?: string;
+                                    letterers?: string;
+                                    editors?: string;
+                                    coverArtists?: string;
+                                    publishers?: string;
+                                    imprints?: string;
+                                    genres?: string;
+                                    characters?: string;
+                                    teams?: string;
+                                    locations?: string;
+                                    storyArcs?: string;
+                                    seriesGroups?: string;
+                                };
+                                comicBooks?: {
+                                    id: number;
+                                    libraryId: number;
+                                    filePath: string;
+                                    hash: string;
+                                    title: string | null;
+                                    series: string | null;
+                                    issueNumber: string | null;
+                                    count: number | null;
+                                    volume: string | null;
+                                    alternateSeries: string | null;
+                                    alternateIssueNumber: string | null;
+                                    alternateCount: number | null;
+                                    pageCount: number | null;
+                                    fileSize: number | null;
+                                    summary: string | null;
+                                    notes: string | null;
+                                    year: number | null;
+                                    month: number | null;
+                                    day: number | null;
+                                    publisher: string | null;
+                                    publicationDate: string | null;
+                                    scanInfo: string | null;
+                                    language: string | null;
+                                    format: string | null;
+                                    blackAndWhite: number | null;
+                                    manga: number | null;
+                                    readingDirection: string | null;
+                                    review: string | null;
+                                    ageRating: string | null;
+                                    communityRating: number | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                    /**
+                                     * ComicSeriesMetadata
+                                     * @description Metadata for a comic series
+                                     */
+                                    metadata?: {
+                                        writers?: string;
+                                        pencillers?: string;
+                                        inkers?: string;
+                                        colorists?: string;
+                                        letterers?: string;
+                                        editors?: string;
+                                        coverArtists?: string;
+                                        publishers?: string;
+                                        imprints?: string;
+                                        genres?: string;
+                                        characters?: string;
+                                        teams?: string;
+                                        locations?: string;
+                                        storyArcs?: string;
+                                        seriesGroups?: string;
+                                    };
+                                    thumbnails?: {
+                                        id: number;
+                                        comicBookId: number;
+                                        comicBookCoverId: number | null;
+                                        filePath: string;
+                                        thumbnailType: string;
+                                        name: string | null;
+                                        description: string | null;
+                                        uploadedBy: number | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                }[];
+                            }[];
+                            meta: {
+                                /** @default 0 */
+                                count: number;
+                                /** @default false */
+                                hasNextPage: boolean;
+                                /** @default 1 */
+                                currentPage: number;
+                                /** @default 1 */
+                                pageSize: number;
+                                filterProperty?: string;
+                                filterValue?: string;
+                                sortProperty?: string;
+                                /** @enum {string} */
+                                sortOrder?: "asc" | "desc";
+                            };
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-series/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a comic series by ID */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    /** @description The specific property to sort by */
+                    sort?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value to search by */
+                    filter?: string;
+                    /** @description Property used for filter */
+                    filterProperty?: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Series retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                folderPath: string;
+                                createdAt: string;
+                                updatedAt: string;
+                                /**
+                                 * @description Total number of comic books in the series
+                                 * @example 42
+                                 */
+                                totalComicBooks: number;
+                                /**
+                                 * @description Total file size of all comic books in the series (in bytes)
+                                 * @example 123456789
+                                 */
+                                totalSize: number;
+                                /**
+                                 * Format: uri
+                                 * @description URL to the thumbnail image for the comic series
+                                 * @example https://example.com/thumbnails/series123.jpg
+                                 */
+                                thumbnailUrl?: string;
+                                /**
+                                 * ComicSeriesMetadata
+                                 * @description Metadata for a comic series
+                                 */
+                                metadata?: {
+                                    writers?: string;
+                                    pencillers?: string;
+                                    inkers?: string;
+                                    colorists?: string;
+                                    letterers?: string;
+                                    editors?: string;
+                                    coverArtists?: string;
+                                    publishers?: string;
+                                    imprints?: string;
+                                    genres?: string;
+                                    characters?: string;
+                                    teams?: string;
+                                    locations?: string;
+                                    storyArcs?: string;
+                                    seriesGroups?: string;
+                                };
+                                comicBooks?: {
+                                    id: number;
+                                    libraryId: number;
+                                    filePath: string;
+                                    hash: string;
+                                    title: string | null;
+                                    series: string | null;
+                                    issueNumber: string | null;
+                                    count: number | null;
+                                    volume: string | null;
+                                    alternateSeries: string | null;
+                                    alternateIssueNumber: string | null;
+                                    alternateCount: number | null;
+                                    pageCount: number | null;
+                                    fileSize: number | null;
+                                    summary: string | null;
+                                    notes: string | null;
+                                    year: number | null;
+                                    month: number | null;
+                                    day: number | null;
+                                    publisher: string | null;
+                                    publicationDate: string | null;
+                                    scanInfo: string | null;
+                                    language: string | null;
+                                    format: string | null;
+                                    blackAndWhite: number | null;
+                                    manga: number | null;
+                                    readingDirection: string | null;
+                                    review: string | null;
+                                    ageRating: string | null;
+                                    communityRating: number | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                    /**
+                                     * ComicSeriesMetadata
+                                     * @description Metadata for a comic series
+                                     */
+                                    metadata?: {
+                                        writers?: string;
+                                        pencillers?: string;
+                                        inkers?: string;
+                                        colorists?: string;
+                                        letterers?: string;
+                                        editors?: string;
+                                        coverArtists?: string;
+                                        publishers?: string;
+                                        imprints?: string;
+                                        genres?: string;
+                                        characters?: string;
+                                        teams?: string;
+                                        locations?: string;
+                                        storyArcs?: string;
+                                        seriesGroups?: string;
+                                    };
+                                    thumbnails?: {
+                                        id: number;
+                                        comicBookId: number;
+                                        comicBookCoverId: number | null;
+                                        filePath: string;
+                                        thumbnailType: string;
+                                        name: string | null;
+                                        description: string | null;
+                                        uploadedBy: number | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                }[];
+                            }[];
+                            meta: {
+                                /** @default 0 */
+                                count: number;
+                                /** @default false */
+                                hasNextPage: boolean;
+                                /** @default 1 */
+                                currentPage: number;
+                                /** @default 1 */
+                                pageSize: number;
+                                filterProperty?: string;
+                                filterValue?: string;
+                                sortProperty?: string;
+                                /** @enum {string} */
+                                sortOrder?: "asc" | "desc";
+                            };
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-series/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get series by letter */
+        get: {
+            parameters: {
+                query: {
+                    /** @description Page number for pagination (default is 1) */
+                    page?: number;
+                    /** @description Number of items per page (default is 20, max is 100) */
+                    pageSize?: number;
+                    letter: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Alphabetical series retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                id: number;
+                                name: string;
+                                description: string | null;
+                                folderPath: string;
+                                createdAt: string;
+                                updatedAt: string;
+                                /**
+                                 * @description Total number of comic books in the series
+                                 * @example 42
+                                 */
+                                totalComicBooks: number;
+                                /**
+                                 * @description Total file size of all comic books in the series (in bytes)
+                                 * @example 123456789
+                                 */
+                                totalSize: number;
+                                /**
+                                 * Format: uri
+                                 * @description URL to the thumbnail image for the comic series
+                                 * @example https://example.com/thumbnails/series123.jpg
+                                 */
+                                thumbnailUrl?: string;
+                                /**
+                                 * ComicSeriesMetadata
+                                 * @description Metadata for a comic series
+                                 */
+                                metadata?: {
+                                    writers?: string;
+                                    pencillers?: string;
+                                    inkers?: string;
+                                    colorists?: string;
+                                    letterers?: string;
+                                    editors?: string;
+                                    coverArtists?: string;
+                                    publishers?: string;
+                                    imprints?: string;
+                                    genres?: string;
+                                    characters?: string;
+                                    teams?: string;
+                                    locations?: string;
+                                    storyArcs?: string;
+                                    seriesGroups?: string;
+                                };
+                                comicBooks?: {
+                                    id: number;
+                                    libraryId: number;
+                                    filePath: string;
+                                    hash: string;
+                                    title: string | null;
+                                    series: string | null;
+                                    issueNumber: string | null;
+                                    count: number | null;
+                                    volume: string | null;
+                                    alternateSeries: string | null;
+                                    alternateIssueNumber: string | null;
+                                    alternateCount: number | null;
+                                    pageCount: number | null;
+                                    fileSize: number | null;
+                                    summary: string | null;
+                                    notes: string | null;
+                                    year: number | null;
+                                    month: number | null;
+                                    day: number | null;
+                                    publisher: string | null;
+                                    publicationDate: string | null;
+                                    scanInfo: string | null;
+                                    language: string | null;
+                                    format: string | null;
+                                    blackAndWhite: number | null;
+                                    manga: number | null;
+                                    readingDirection: string | null;
+                                    review: string | null;
+                                    ageRating: string | null;
+                                    communityRating: number | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                    /**
+                                     * ComicSeriesMetadata
+                                     * @description Metadata for a comic series
+                                     */
+                                    metadata?: {
+                                        writers?: string;
+                                        pencillers?: string;
+                                        inkers?: string;
+                                        colorists?: string;
+                                        letterers?: string;
+                                        editors?: string;
+                                        coverArtists?: string;
+                                        publishers?: string;
+                                        imprints?: string;
+                                        genres?: string;
+                                        characters?: string;
+                                        teams?: string;
+                                        locations?: string;
+                                        storyArcs?: string;
+                                        seriesGroups?: string;
+                                    };
+                                    thumbnails?: {
+                                        id: number;
+                                        comicBookId: number;
+                                        comicBookCoverId: number | null;
+                                        filePath: string;
+                                        thumbnailType: string;
+                                        name: string | null;
+                                        description: string | null;
+                                        uploadedBy: number | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                }[];
+                            }[];
+                            meta: {
+                                /** @default 0 */
+                                count: number;
+                                /** @default false */
+                                hasNextPage: boolean;
+                                /** @default 1 */
+                                currentPage: number;
+                                /** @default 1 */
+                                pageSize: number;
+                                filterProperty?: string;
+                                filterValue?: string;
+                                sortProperty?: string;
+                                /** @enum {string} */
+                                sortOrder?: "asc" | "desc";
+                            };
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
                         };
                     };
                 };
@@ -1475,60 +2673,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Logout from all devices failed */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/check-setup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Check if app setup is complete
-         * @description Check if the application has been initially set up (i.e. if an admin user exists)
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Setup status retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            isSetup: boolean;
-                        };
-                    };
-                };
-                /** @description Failed to check setup status */
+                /** @description Internal Server Error */
                 500: {
                     headers: {
                         [name: string]: unknown;
@@ -1546,6 +2691,575 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-series/{id}/thumbnails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get series thumbnails */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnails retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-series/{id}/thumbnail/{thumbId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete series thumbnail */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    thumbnailId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnail deleted successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-series/{id}/thumbnails/{thumbId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get specific thumbnail */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    thumbnailId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnail retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-series/{id}/thumbnail/{thumbId}/cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update thumbnail cover */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    thumbnailId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnail cover updated successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all collections */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Collections retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            name: string;
+                        }[];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a collection by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Collection retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            name: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete a collection */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/{id}/series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get series in a collection */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Series retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            title: string;
+                        }[];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/{id}/thumbnails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get thumbnails for a collection */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Thumbnails retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                            url: string;
+                        }[];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/{id}/thumbnail/select/{thumbnailId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set selected thumbnail for collection */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    thumbnailId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/add-collection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a new collection */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @example My Collection */
+                        name: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Invalid request body */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/{id}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update a collection */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/{id}/add-comics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add comics to collection */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/{id}/remove-comics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Remove comic series from collection */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -4830,1937 +6544,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/purge-data": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Purge all data
-         * @description Delete all data from the system (admin only)
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description All data purged successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Invalid user ID */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get all comic series
-         * @description Retrieve all comic series from the database
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number for pagination (default is 1) */
-                    page?: number;
-                    /** @description Number of items per page (default is 20, max is 100) */
-                    pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
-                    /** @description Sort direction */
-                    sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Series retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            data: {
-                                id: number;
-                                name: string;
-                                description: string | null;
-                                folderPath: string;
-                                createdAt: string;
-                                updatedAt: string;
-                                /**
-                                 * @description Total number of comic books in the series
-                                 * @example 42
-                                 */
-                                totalComicBooks: number;
-                                /**
-                                 * @description Total file size of all comic books in the series (in bytes)
-                                 * @example 123456789
-                                 */
-                                totalSize: number;
-                                /**
-                                 * Format: uri
-                                 * @description URL to the thumbnail image for the comic series
-                                 * @example https://example.com/thumbnails/series123.jpg
-                                 */
-                                thumbnailUrl?: string;
-                                /**
-                                 * ComicSeriesMetadata
-                                 * @description Metadata for a comic series
-                                 */
-                                metadata?: {
-                                    writers?: string;
-                                    pencillers?: string;
-                                    inkers?: string;
-                                    colorists?: string;
-                                    letterers?: string;
-                                    editors?: string;
-                                    coverArtists?: string;
-                                    publishers?: string;
-                                    imprints?: string;
-                                    genres?: string;
-                                    characters?: string;
-                                    teams?: string;
-                                    locations?: string;
-                                    storyArcs?: string;
-                                    seriesGroups?: string;
-                                };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencillers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                }[];
-                            }[];
-                            meta: {
-                                /** @default 0 */
-                                count: number;
-                                /** @default false */
-                                hasNextPage: boolean;
-                                /** @default 1 */
-                                currentPage: number;
-                                /** @default 1 */
-                                pageSize: number;
-                                filterProperty?: string;
-                                filterValue?: string;
-                                sortProperty?: string;
-                                /** @enum {string} */
-                                sortOrder?: "asc" | "desc";
-                            };
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/latest": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get latest comic series */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number for pagination (default is 1) */
-                    page?: number;
-                    /** @description Number of items per page (default is 20, max is 100) */
-                    pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
-                    /** @description Sort direction */
-                    sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
-                };
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Latest series retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            data: {
-                                id: number;
-                                name: string;
-                                description: string | null;
-                                folderPath: string;
-                                createdAt: string;
-                                updatedAt: string;
-                                /**
-                                 * @description Total number of comic books in the series
-                                 * @example 42
-                                 */
-                                totalComicBooks: number;
-                                /**
-                                 * @description Total file size of all comic books in the series (in bytes)
-                                 * @example 123456789
-                                 */
-                                totalSize: number;
-                                /**
-                                 * Format: uri
-                                 * @description URL to the thumbnail image for the comic series
-                                 * @example https://example.com/thumbnails/series123.jpg
-                                 */
-                                thumbnailUrl?: string;
-                                /**
-                                 * ComicSeriesMetadata
-                                 * @description Metadata for a comic series
-                                 */
-                                metadata?: {
-                                    writers?: string;
-                                    pencillers?: string;
-                                    inkers?: string;
-                                    colorists?: string;
-                                    letterers?: string;
-                                    editors?: string;
-                                    coverArtists?: string;
-                                    publishers?: string;
-                                    imprints?: string;
-                                    genres?: string;
-                                    characters?: string;
-                                    teams?: string;
-                                    locations?: string;
-                                    storyArcs?: string;
-                                    seriesGroups?: string;
-                                };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencillers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                }[];
-                            }[];
-                            meta: {
-                                /** @default 0 */
-                                count: number;
-                                /** @default false */
-                                hasNextPage: boolean;
-                                /** @default 1 */
-                                currentPage: number;
-                                /** @default 1 */
-                                pageSize: number;
-                                filterProperty?: string;
-                                filterValue?: string;
-                                sortProperty?: string;
-                                /** @enum {string} */
-                                sortOrder?: "asc" | "desc";
-                            };
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/updated": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get updated comic series */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number for pagination (default is 1) */
-                    page?: number;
-                    /** @description Number of items per page (default is 20, max is 100) */
-                    pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
-                    /** @description Sort direction */
-                    sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
-                };
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Updated series retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            data: {
-                                id: number;
-                                name: string;
-                                description: string | null;
-                                folderPath: string;
-                                createdAt: string;
-                                updatedAt: string;
-                                /**
-                                 * @description Total number of comic books in the series
-                                 * @example 42
-                                 */
-                                totalComicBooks: number;
-                                /**
-                                 * @description Total file size of all comic books in the series (in bytes)
-                                 * @example 123456789
-                                 */
-                                totalSize: number;
-                                /**
-                                 * Format: uri
-                                 * @description URL to the thumbnail image for the comic series
-                                 * @example https://example.com/thumbnails/series123.jpg
-                                 */
-                                thumbnailUrl?: string;
-                                /**
-                                 * ComicSeriesMetadata
-                                 * @description Metadata for a comic series
-                                 */
-                                metadata?: {
-                                    writers?: string;
-                                    pencillers?: string;
-                                    inkers?: string;
-                                    colorists?: string;
-                                    letterers?: string;
-                                    editors?: string;
-                                    coverArtists?: string;
-                                    publishers?: string;
-                                    imprints?: string;
-                                    genres?: string;
-                                    characters?: string;
-                                    teams?: string;
-                                    locations?: string;
-                                    storyArcs?: string;
-                                    seriesGroups?: string;
-                                };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencillers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                }[];
-                            }[];
-                            meta: {
-                                /** @default 0 */
-                                count: number;
-                                /** @default false */
-                                hasNextPage: boolean;
-                                /** @default 1 */
-                                currentPage: number;
-                                /** @default 1 */
-                                pageSize: number;
-                                filterProperty?: string;
-                                filterValue?: string;
-                                sortProperty?: string;
-                                /** @enum {string} */
-                                sortOrder?: "asc" | "desc";
-                            };
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a comic series by ID */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page number for pagination (default is 1) */
-                    page?: number;
-                    /** @description Number of items per page (default is 20, max is 100) */
-                    pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
-                    /** @description Sort direction */
-                    sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
-                };
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Series retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            data: {
-                                id: number;
-                                name: string;
-                                description: string | null;
-                                folderPath: string;
-                                createdAt: string;
-                                updatedAt: string;
-                                /**
-                                 * @description Total number of comic books in the series
-                                 * @example 42
-                                 */
-                                totalComicBooks: number;
-                                /**
-                                 * @description Total file size of all comic books in the series (in bytes)
-                                 * @example 123456789
-                                 */
-                                totalSize: number;
-                                /**
-                                 * Format: uri
-                                 * @description URL to the thumbnail image for the comic series
-                                 * @example https://example.com/thumbnails/series123.jpg
-                                 */
-                                thumbnailUrl?: string;
-                                /**
-                                 * ComicSeriesMetadata
-                                 * @description Metadata for a comic series
-                                 */
-                                metadata?: {
-                                    writers?: string;
-                                    pencillers?: string;
-                                    inkers?: string;
-                                    colorists?: string;
-                                    letterers?: string;
-                                    editors?: string;
-                                    coverArtists?: string;
-                                    publishers?: string;
-                                    imprints?: string;
-                                    genres?: string;
-                                    characters?: string;
-                                    teams?: string;
-                                    locations?: string;
-                                    storyArcs?: string;
-                                    seriesGroups?: string;
-                                };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencillers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                }[];
-                            }[];
-                            meta: {
-                                /** @default 0 */
-                                count: number;
-                                /** @default false */
-                                hasNextPage: boolean;
-                                /** @default 1 */
-                                currentPage: number;
-                                /** @default 1 */
-                                pageSize: number;
-                                filterProperty?: string;
-                                filterValue?: string;
-                                sortProperty?: string;
-                                /** @enum {string} */
-                                sortOrder?: "asc" | "desc";
-                            };
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get series by letter */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Page number for pagination (default is 1) */
-                    page?: number;
-                    /** @description Number of items per page (default is 20, max is 100) */
-                    pageSize?: number;
-                    letter: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Alphabetical series retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            data: {
-                                id: number;
-                                name: string;
-                                description: string | null;
-                                folderPath: string;
-                                createdAt: string;
-                                updatedAt: string;
-                                /**
-                                 * @description Total number of comic books in the series
-                                 * @example 42
-                                 */
-                                totalComicBooks: number;
-                                /**
-                                 * @description Total file size of all comic books in the series (in bytes)
-                                 * @example 123456789
-                                 */
-                                totalSize: number;
-                                /**
-                                 * Format: uri
-                                 * @description URL to the thumbnail image for the comic series
-                                 * @example https://example.com/thumbnails/series123.jpg
-                                 */
-                                thumbnailUrl?: string;
-                                /**
-                                 * ComicSeriesMetadata
-                                 * @description Metadata for a comic series
-                                 */
-                                metadata?: {
-                                    writers?: string;
-                                    pencillers?: string;
-                                    inkers?: string;
-                                    colorists?: string;
-                                    letterers?: string;
-                                    editors?: string;
-                                    coverArtists?: string;
-                                    publishers?: string;
-                                    imprints?: string;
-                                    genres?: string;
-                                    characters?: string;
-                                    teams?: string;
-                                    locations?: string;
-                                    storyArcs?: string;
-                                    seriesGroups?: string;
-                                };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencillers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                }[];
-                            }[];
-                            meta: {
-                                /** @default 0 */
-                                count: number;
-                                /** @default false */
-                                hasNextPage: boolean;
-                                /** @default 1 */
-                                currentPage: number;
-                                /** @default 1 */
-                                pageSize: number;
-                                filterProperty?: string;
-                                filterValue?: string;
-                                sortProperty?: string;
-                                /** @enum {string} */
-                                sortOrder?: "asc" | "desc";
-                            };
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/{id}/thumbnails": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get series thumbnails */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Thumbnails retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/{id}/thumbnail/{thumbId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete series thumbnail */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                    thumbnailId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Thumbnail deleted successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/{id}/thumbnails/{thumbId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get specific thumbnail */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                    thumbnailId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Thumbnail retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-series/{id}/thumbnail/{thumbId}/cover": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update thumbnail cover */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                    thumbnailId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Thumbnail cover updated successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-pages/duplicates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get duplicate comic pages
-         * @description Detect duplicate comic pages in the system
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Invalid user ID */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-pages/duplicates/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get duplicate for specific comic page */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Invalid user ID */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-pages/duplicates/{id}/delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Delete a duplicate comic page */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Invalid user ID */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all collections */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Collections retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            id: number;
-                            name: string;
-                        }[];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a collection by ID */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Collection retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            id: string;
-                            name: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        /** Delete a collection */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/{id}/series": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get series in a collection */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Series retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            id: number;
-                            title: string;
-                        }[];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/{id}/thumbnails": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get thumbnails for a collection */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Thumbnails retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            id: number;
-                            url: string;
-                        }[];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/{id}/thumbnail/select/{thumbnailId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Set selected thumbnail for collection */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                    thumbnailId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/add-collection": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add a new collection */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": {
-                        /** @example My Collection */
-                        name: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Invalid request body */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/{id}/update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Update a collection */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/{id}/add-comics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add comics to collection */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/collections/{id}/remove-comics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Remove comic series from collection */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/readlists": {
         parameters: {
             query?: never;
@@ -7199,6 +6982,220 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-pages/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get duplicate comic pages
+         * @description Detect duplicate comic pages in the system
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Invalid user ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-pages/duplicates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get duplicate for specific comic page */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Invalid user ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-pages/duplicates/{id}/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a duplicate comic page */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Invalid user ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Not implemented */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
