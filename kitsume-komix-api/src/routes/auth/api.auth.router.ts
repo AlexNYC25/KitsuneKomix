@@ -1,5 +1,4 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { z } from "zod";
 
 import {
   authenticateUser,
@@ -14,10 +13,6 @@ import {
 import { verifyAccessToken } from "#modules/auth/jwt.service.ts";
 import { checkIfAppSetupComplete } from "#modules/users/users.service.ts";
 
-import {
-  env 
-} from "#config/env.ts";
-
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
   LoginRequestSchema,
@@ -29,9 +24,12 @@ import {
   LogoutAllResponseSchema,
   MessageResponseSchema,
   RefreshTokenResponseSchema,
+  InitialSetupCheckResponseSchema,
 } from "#zod/schemas/response.schema.ts";
 
-import { AppEnv } from "#types/index.ts";
+import { env } from "#config/env.ts";
+
+import type { AdminSetUp, AppEnv } from "#types/index.ts";
 
 
 const app = new OpenAPIHono<AppEnv>();
@@ -364,9 +362,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: z.object({
-              isSetup: z.boolean(),
-            }),
+            schema: InitialSetupCheckResponseSchema,
           },
         },
         description: "Setup status retrieved successfully",
@@ -383,7 +379,7 @@ app.openapi(
   }),
   async (c) => {
     try {
-      const isSetup = {isSetup: await checkIfAppSetupComplete()};
+      const isSetup: AdminSetUp = {isSetup: await checkIfAppSetupComplete()};
       return c.json(isSetup, 200);
     } catch (error) {
       return c.json({

@@ -1,4 +1,4 @@
-import {
+import type {
   ComicBook,
   ComicCharacter,
   ComicColorist,
@@ -17,7 +17,7 @@ import {
   ComicWriter,
 } from "./database.types.ts";
 
-import { ComicSortField } from "./parameters.type.ts";
+import type { ComicSortField } from "./parameters.type.ts";
 
 export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
 

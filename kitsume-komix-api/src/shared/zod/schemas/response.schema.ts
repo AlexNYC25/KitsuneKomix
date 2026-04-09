@@ -112,6 +112,16 @@ const BasicUserInfoSchema = z.object({
 // **** Full response schemas **** //
 
 /**
+ * Schema for the initial setup check response, indicating whether the application has been initially set up (i.e. if an admin user exists)
+ */
+export const InitialSetupCheckResponseSchema = z.object({
+  isSetup: z.boolean(),
+}).openapi({
+  title: "InitialSetupCheckResponse",
+  description: "Response indicating whether the application has been initially set up",
+});
+
+/**
  * Schema for the health check response, including application metadata and database health status
  */
 export const HealthCheckResponseSchema = z.object({

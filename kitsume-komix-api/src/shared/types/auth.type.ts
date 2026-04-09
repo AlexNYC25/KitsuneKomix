@@ -1,5 +1,8 @@
-import type { JWTPayload } from "jose";
+import type { z } from "zod";
 
+import type { InitialSetupCheckResponseSchema } from "#zod/schemas/response.schema.ts";
+
+import type { JWTPayload } from "jose";
 /**
  * Claims included in the access token JWT.
  */
@@ -29,3 +32,9 @@ export type AppEnv = {
     user?: AccessClaims & JWTPayload;
   };
 };
+
+/**
+ * Type to represent whether the admin account has been set up or not. 
+ * Used for inital set up flow to determine if initial admin account creation is needed.
+ */
+export type AdminSetUp = z.infer<typeof InitialSetupCheckResponseSchema>;
