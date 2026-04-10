@@ -1,4 +1,4 @@
-import { ZodSafeParseResult } from "zod";
+import type { ZodSafeParseResult } from "zod";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
@@ -21,7 +21,7 @@ import {
   UserCreationResponseSchema,
 } from "#zod/schemas/response.schema.ts";
 
-import {
+import type {
   AccessRefreshTokenCombinedPayload,
   AppEnv,
   UserRegistrationInput,
@@ -107,21 +107,25 @@ apiUsersRouter.openapi(
         return c.json({ message: "Invalid user ID" }, 400);
       }
 
-      const parsed: ZodSafeParseResult<UserRegistrationInput> = UserSchema
-        .safeParse(userData);
+      const parsedUserData = UserSchema.safeParse(userData);
 
-      if (!parsed.success) {
+      if (!parsedUserData.success) {
         return c.json({
           message: "Invalid user data",
-          errors: z.treeifyError(parsed.error),
+          errors: z.treeifyError(parsedUserData.error),
         }, 400);
       }
 
       // Use the service layer to handle user creation logic
-      const newUserId = await createUserService(parsed.data);
+      const cleanedData = {
+        ...parsedUserData.data,
+        firstName: parsedUserData.data.firstName ?? undefined,
+        lastName: parsedUserData.data.lastName ?? undefined,
+      };
+      const newUserId = await createUserService(cleanedData);
 
       return c.json({
-        message: `User[${parsed.data.email}] created successfully`,
+        message: `User[${parsedUserData.data.email}] created successfully`,
         userId: newUserId,
       }, 201);
     } catch (error) {
@@ -192,23 +196,22 @@ apiUsersRouter.openapi(
         return c.json({ message: "Initial setup is already complete. Cannot create user through this endpoint." }, 400);
       }
 
-      const userData: UserRegistrationInput = await c.req.json();
+      const userData = await c.req.json();
 
-      const parsed: ZodSafeParseResult<UserRegistrationInput> = UserSchema
-        .safeParse(userData);
+      const parsedUserData = UserSchema.safeParse(userData);
 
-      if (!parsed.success) {
+      if (!parsedUserData.success) {
         return c.json({
           message: "Invalid user data",
-          errors: z.treeifyError(parsed.error),
+          errors: z.treeifyError(parsedUserData.error),
         }, 400);
       }
 
       // Use the service layer to handle user creation logic
-      const newUserId = await createUserService(parsed.data);
+      const newUserId = await createUserService(parsedUserData.data);
 
       return c.json({
-        message: `User[${parsed.data.email}] created successfully`,
+        message: `User[${parsedUserData.data.email}] created successfully`,
         userId: newUserId,
       }, 201);
     } catch (error) {

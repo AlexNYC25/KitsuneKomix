@@ -76,7 +76,7 @@ export async function createUserService(
 
       // Create the user as an admin
       const newUserId = await createUser({
-        username: user.username,
+        username: user.email, // Using email as username for simplicity
         email: user.email,
         passwordHash: hashedPassword,
         firstName: user.firstName ?? null,
@@ -92,7 +92,7 @@ export async function createUserService(
 
   // Insert new user into the database
   const newUserId = await createUser({
-    username: user.username,
+    username: user.email, // Using email as username for simplicity
     email: user.email,
     passwordHash: hashedPassword,
     firstName: user.firstName ?? null,
