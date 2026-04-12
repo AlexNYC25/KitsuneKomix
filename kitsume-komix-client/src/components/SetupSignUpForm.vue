@@ -60,7 +60,7 @@
 </script>
 
 <template>
-	<div class="bg-slate-900 shadow-lg p-8">
+	<div class="rounded-lg bg-slate-900 shadow-lg p-8">
 
 		<div class="flex justify-center mb-6">
 			<h1 class="text-2xl font-bold text-white">
