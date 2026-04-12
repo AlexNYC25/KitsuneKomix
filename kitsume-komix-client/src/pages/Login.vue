@@ -10,6 +10,8 @@ import { loadFromStorage, saveToStorage } from '@/utilities/storage';
 import { validateEmailPassword } from '@/zod/login.schema.ts';
 import { validateSignup } from '@/zod/signup.schema.ts';
 
+import LoadingLoginForm from '@/components/LoadingLoginForm.vue';
+
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
@@ -133,10 +135,8 @@ const signupFormSubmit = handleSignupSubmit(async (values) => {
 <template>
   <div id="login-page" class="flex justify-center items-center h-screen bg-gray-600">
     <!-- Loading state while checking setup -->
-    <div v-if="checkingSetup" class="bg-black shadow-lg p-8 rounded-lg w-full max-w-md">
-      <div class="flex justify-center items-center">
-        <p class="text-white">Loading...</p>
-      </div>
+    <div v-if="true" class="w-full max-w-2xl">
+      <LoadingLoginForm />
     </div>
 
     <!-- Initial Setup Form -->
