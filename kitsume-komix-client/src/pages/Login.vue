@@ -135,12 +135,12 @@ const signupFormSubmit = handleSignupSubmit(async (values) => {
 <template>
   <div id="login-page" class="flex justify-center items-center h-screen bg-gray-600">
     <!-- Loading state while checking setup -->
-    <div v-if="true" class="w-full max-w-2xl">
+    <div v-if="checkingSetup" class="w-full max-w-md">
       <LoadingLoginForm />
     </div>
 
     <!-- Initial Setup Form -->
-    <div v-else-if="showSetupForm" class="bg-black shadow-lg p-8 rounded-lg w-full max-w-md">
+    <div v-else-if="showSetupForm" class="bg-slate-900 shadow-lg p-8 rounded-lg w-full max-w-md">
       <div class="flex justify-center mb-6">
         <h1 class="text-2xl font-bold text-white">
           Initial Setup
@@ -210,7 +210,7 @@ const signupFormSubmit = handleSignupSubmit(async (values) => {
     </div>
 
     <!-- Login Form -->
-    <div v-else class="bg-black shadow-lg p-8 rounded-lg w-full max-w-md">
+    <div v-else class="bg-slate-900 shadow-lg p-8 rounded-lg w-full max-w-md">
       <div class="flex justify-center mb-6">
         <h1 class="text-2xl font-bold text-white">
           Kistume Komix Login
