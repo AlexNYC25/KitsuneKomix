@@ -496,12 +496,11 @@ export interface paths {
                 content: {
                     "application/json": {
                         id?: number;
-                        username: string;
                         /** Format: email */
                         email: string;
                         password: string;
-                        first_name?: string | null;
-                        last_name?: string | null;
+                        firstName?: string;
+                        lastName?: string;
                     };
                 };
             };
@@ -592,12 +591,11 @@ export interface paths {
                 content: {
                     "application/json": {
                         id?: number;
-                        username: string;
                         /** Format: email */
                         email: string;
                         password: string;
-                        first_name?: string | null;
-                        last_name?: string | null;
+                        firstName?: string;
+                        lastName?: string;
                     };
                 };
             };
