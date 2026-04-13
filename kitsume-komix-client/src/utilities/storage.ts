@@ -1,3 +1,6 @@
+
+export const REMEMBERED_USERNAME_STORAGE_KEY = 'kitsune_remembered_username';
+
 // Utility function to safely read from localStorage
 export function loadFromStorage<T>(key: string, defaultValue: T): T {
   try {

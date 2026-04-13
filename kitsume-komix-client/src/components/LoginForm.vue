@@ -4,7 +4,7 @@
 	import { useRouter, useRoute } from 'vue-router';
 
 	import { useAuthStore } from '@/stores/auth';
-	import { loadFromStorage, saveToStorage } from '@/utilities/storage';
+	import { REMEMBERED_USERNAME_STORAGE_KEY, loadFromStorage, saveToStorage } from '@/utilities/storage';
 
 	import { validateEmailPassword } from '@/zod/login.schema.ts';
 
@@ -13,8 +13,6 @@
 	const authStore = useAuthStore();
 
 	const loginFormMessage = ref<string | null>(null);
-
-	const REMEMBERED_USERNAME_STORAGE_KEY = 'kitsune_remembered_username';
 
 	onMounted(async () => {
 		
