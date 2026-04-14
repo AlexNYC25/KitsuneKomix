@@ -541,8 +541,8 @@ apiUsersRouter.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    // Only allow users to delete their own account or admins (TODO: implement admin check)
-    if (userId !== deleteUserId) {
+    // Only allow users to delete their own account or admins
+    if (userId !== deleteUserId && (!user.roles || !user.roles.includes("admin"))) {
       return c.json({ message: "Unauthorized to delete this user" }, 401);
     }
 
