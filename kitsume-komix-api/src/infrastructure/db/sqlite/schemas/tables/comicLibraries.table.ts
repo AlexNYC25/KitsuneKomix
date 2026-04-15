@@ -6,7 +6,7 @@ export const comicLibrariesTable = sqliteTable("comic_libraries", {
   name: text().notNull(),
   path: text().notNull(),
   description: text(),
-  enabled: int().notNull().default(1),
+  enabled: int({mode: "boolean"}).notNull().default(true),
   changedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
