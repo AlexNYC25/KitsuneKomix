@@ -2,6 +2,20 @@ import z from "zod";
 import { ComicLibrarySelectSchema } from "./database.schema.ts";
 
 /**
+ * Schema for creating a comic library
+ */
+export const ComicLibraryCreateSchema = ComicLibrarySelectSchema.omit({ 
+  id: true,
+  enabled: true,
+  changedAt: true,
+  createdAt: true,
+  updatedAt: true,
+}).openapi({
+  title: "ComicLibraryCreate",
+  description: "Schema for creating a comic library",
+});
+
+/**
  * Schema for a list of comic libraries
  */
 export const ComicLibrariesSchema = z.object({
