@@ -5,7 +5,7 @@ import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import { getComicLibrariesAvailableToUser } from "#modules/libraries/comicLibraries.service.ts";
 import { listFoldersInDirectoryService } from "#modules/files/files.service.ts";
 
-import { createComicLibrary } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { createComicLibrary, deleteComicLibrary } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
 
 import {
   ErrorResponseSchema,
@@ -408,6 +408,14 @@ app.openapi(
         },
         description: "Unauthorized",
       },
+      403: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Forbidden",
+      },
       500: {
         content: {
           "application/json": {
@@ -423,6 +431,10 @@ app.openapi(
 
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    if (!user.isAdmin) {
+      return c.json({ message: "Forbidden" }, 403);
     }
 
     const userId: number = parseInt(user.sub, 10);
@@ -441,15 +453,7 @@ app.openapi(
         }, 400);
       }
 
-      // Use the service layer to handle library registration logic
-      // Convert null description to undefined to match LibraryRegistrationInput type
-      const libraryData: LibraryRegistrationInput = {
-        ...parsed.data,
-        description: parsed.data.description || undefined,
-        // Optionally associate with user.id if needed
-        // userId: user.id,
-      };
-      const newLibraryId = await createComicLibrary(libraryData);
+      const newLibraryId = await createComicLibrary(parsed.data as LibraryRegistrationInput);
 
       return c.json({
         success: true,
@@ -480,12 +484,10 @@ app.openapi(
     summary: "Delete a comic library",
     description: "Delete a comic library from the system",
     tags: ["Comic Libraries"],
+    middleware: [requireAuth],
     request: {
       params: ParamIdSchema,
     },
-    security: [
-      { Bearer: [] },
-    ],
     responses: {
       200: {
         content: {
@@ -511,6 +513,14 @@ app.openapi(
         },
         description: "Unauthorized",
       },
+      403: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Forbidden",
+      },
       500: {
         content: {
           "application/json": {
@@ -522,8 +532,6 @@ app.openapi(
     },
   }),
   async (c) => {
-    const id = parseInt(c.req.valid("param").id, 10);
-
     const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
 
     if (!user || !user.sub) {
@@ -535,10 +543,24 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
+    if (!user.isAdmin) {
+      return c.json({ message: "Forbidden" }, 403);
+    }
+
     try {
-      // TODO: use user.id and id to delete the library from the database
+      const id = parseInt(c.req.valid("param").id, 10);
+      if (isNaN(id)) {
+        return c.json({ message: "Invalid library ID" }, 400);
+      }
+
+      const deletionSucceded = await deleteComicLibrary(id);
+
+      if (!deletionSucceded) {
+        return c.json({ message: `Library[${id}] not found or could not be deleted` }, 400);
+      }
+
       return c.json(
-        { message: `Library[${id}] deleted for user ${user.id}` },
+        { message: `Library[${id}] deleted for user ${userId}` },
         200,
       );
     } catch (error) {
