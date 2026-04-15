@@ -17,7 +17,7 @@ import {
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
 } from "#zod/schemas/request.schema.ts";
-import { ComicLibrariesSchema } from "#zod/schemas/data/comicLibraries.schema.ts";
+import { ComicLibraryCreateSchema } from "#zod/schemas/data/comicLibraries.schema.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,
@@ -378,7 +378,7 @@ app.openapi(
       body: {
         content: {
           "application/json": {
-            schema: ComicLibrarySchema,
+            schema: ComicLibraryCreateSchema,
           },
         },
       },
@@ -432,11 +432,12 @@ app.openapi(
 
     try {
       const requestData = c.req.valid("json");
-      const parsed = ComicLibrarySchema.safeParse(requestData);
+      const parsed = ComicLibraryCreateSchema.safeParse(requestData);
 
       if (!parsed.success) {
         return c.json({
           message: "Invalid library data",
+          errors: z.treeifyError(parsed.error),
         }, 400);
       }
 
