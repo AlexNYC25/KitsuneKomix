@@ -10,6 +10,8 @@ export const ComicLibraryCreateSchema = ComicLibrarySelectSchema.omit({
   changedAt: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  description: z.string().optional(),
 }).openapi({
   title: "ComicLibraryCreate",
   description: "Schema for creating a comic library",
