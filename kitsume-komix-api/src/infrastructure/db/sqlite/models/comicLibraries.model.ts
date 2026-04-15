@@ -29,8 +29,7 @@ export const createComicLibrary = async (
       .values({
         name: library.name,
         path: library.path,
-        description: library.description ?? null,
-        enabled: library.enabled ? 1 : 0,
+        description: library.description ?? null
       })
       .returning({ id: comicLibrariesTable.id });
 
@@ -144,7 +143,7 @@ export const getLibraryContainingPath = async (
       .select()
       .from(comicLibrariesTable)
       .where(
-        eq(comicLibrariesTable.enabled, 1),
+        eq(comicLibrariesTable.enabled, true),
       );
 
     // Find the library whose path is a parent of the file path
