@@ -21,7 +21,11 @@ export type RefreshClaims = {
   jti: string; // JWT ID for refresh token tracking
 };
 
-export type AccessRefreshTokenCombinedPayload = AccessClaims & JWTPayload;
+export type AdminClaims = {
+  isAdmin: boolean;
+}
+
+export type AccessRefreshTokenCombinedPayload = AccessClaims & JWTPayload & AdminClaims;
 
 /**
  * AppEnv type to include user information in the environment variables.
@@ -29,7 +33,7 @@ export type AccessRefreshTokenCombinedPayload = AccessClaims & JWTPayload;
  */
 export type AppEnv = {
   Variables: {
-    user?: AccessClaims & JWTPayload;
+    user?: AccessRefreshTokenCombinedPayload;
   };
 };
 
