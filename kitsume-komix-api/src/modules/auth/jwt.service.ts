@@ -1,5 +1,6 @@
 import * as jose from "jose";
 import { env } from "#config/env.ts";
+import { AccessRefreshTokenCombinedPayload } from "#types/index.ts";
 
 const ACCESS_KEY = new TextEncoder().encode(env.JWT_SECRET);
 const REFRESH_KEY = new TextEncoder().encode(env.JWT_REFRESH_SECRET);
@@ -42,12 +43,15 @@ export async function signAccessToken(claims: AccessClaims): Promise<string> {
  */
 export async function verifyAccessToken(
   token: string,
-): Promise<AccessClaims & jose.JWTPayload> {
+): Promise<AccessRefreshTokenCombinedPayload> {
   const { payload } = await jose.jwtVerify(token, ACCESS_KEY, {
     issuer: ISSUER,
     audience: AUDIENCE,
   });
-  return payload as AccessClaims & jose.JWTPayload;
+
+  payload.isAdmin = Array.isArray(payload.roles) && payload.roles.includes("admin") || false;
+  
+  return payload as AccessRefreshTokenCombinedPayload;
 }
 
 /**
