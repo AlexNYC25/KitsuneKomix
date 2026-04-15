@@ -542,7 +542,7 @@ apiUsersRouter.openapi(
     }
 
     // Only allow users to delete their own account or admins
-    if (userId !== deleteUserId && (!user.roles || !user.roles.includes("admin"))) {
+    if (userId !== deleteUserId && (!user.isAdmin)) {
       return c.json({ message: "Unauthorized to delete this user" }, 401);
     }
 
