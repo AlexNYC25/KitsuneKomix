@@ -1,0 +1,254 @@
+<script setup lang="ts">
+	import { computed, ref, onMounted } from 'vue';
+	import Button from 'primevue/button';
+
+	import { useAuthStore } from '@/stores/auth';
+	import { useLibrariesStore } from '@/stores/libraries';
+	import { apiClient } from '@/utilities/apiClient';
+
+	const authStore = useAuthStore();
+	const librariesStore = useLibrariesStore();
+
+	const libraries = computed(() => librariesStore.getLibraries);
+	const isAdmin = computed(() => Boolean(authStore.user?.admin));
+
+	const showAddLibraryForm = ref(false);
+	const newLibraryName = ref('');
+	const selectedLibraryPath = ref('');
+	const currentBrowsePath = ref('');
+	const isSavingLibrary = ref(false);
+
+	const pathNavigationStack = ref<string[]>([]);
+	const availableDirectories = ref<string[]>([]);
+	const loadingDirectories = ref(false);
+	
+	const addLibraryError = ref<string | null>(null);
+	const directoryError = ref<string | null>(null);
+
+	const fetchDirectories = async (path?: string) => {
+		loadingDirectories.value = true;
+		directoryError.value = null;
+
+		try {
+			const { data, error } = await apiClient.POST('/comic-libraries/find-path', {
+				body: path ? { path } : {},
+			});
+
+			if (error || !data) {
+				throw new Error(error?.message || 'Failed to load directories.');
+			}
+
+			availableDirectories.value = data.directories ?? [];
+			currentBrowsePath.value = path ?? '';
+			selectedLibraryPath.value = path ?? '';
+		} catch (error) {
+			directoryError.value = error instanceof Error
+				? error.message
+				: 'Failed to load directories.';
+		} finally {
+			loadingDirectories.value = false;
+		}
+	};
+
+	const handleAddLibrary = async () => {
+		showAddLibraryForm.value = true;
+		addLibraryError.value = null;
+		pathNavigationStack.value = [];
+		await fetchDirectories();
+	};
+
+	const submitAddLibraryForm = async () => {
+		const name = newLibraryName.value.trim();
+		const path = selectedLibraryPath.value.trim();
+
+		if (!name || !path) {
+			addLibraryError.value = 'Library name and library path are required.';
+			return;
+		}
+
+		isSavingLibrary.value = true;
+		addLibraryError.value = null;
+
+		try {
+			await librariesStore.createLibrary({
+				name,
+				path,
+			});
+
+			resetAddLibraryForm();
+		} catch (error) {
+			addLibraryError.value = error instanceof Error
+				? error.message
+				: 'Failed to create library.';
+		} finally {
+			isSavingLibrary.value = false;
+		}
+	};
+
+	const resetAddLibraryForm = () => {
+		showAddLibraryForm.value = false;
+		newLibraryName.value = '';
+		selectedLibraryPath.value = '';
+		currentBrowsePath.value = '';
+		pathNavigationStack.value = [];
+		availableDirectories.value = [];
+		directoryError.value = null;
+		addLibraryError.value = null;
+	};
+
+	const getDirectoryName = (directoryPath: string): string => {
+		const normalized = directoryPath.replace(/\\/g, '/').replace(/\/+$/, '');
+		const segments = normalized.split('/').filter(Boolean);
+		return segments.length > 0 ? segments[segments.length - 1] : directoryPath;
+	};
+
+	const openDirectory = async (directoryPath: string) => {
+		pathNavigationStack.value.push(currentBrowsePath.value);
+		await fetchDirectories(directoryPath);
+	};
+
+	const navigateUpDirectory = async () => {
+		if (pathNavigationStack.value.length === 0) {
+			return;
+		}
+
+		const previousPath = pathNavigationStack.value.pop() ?? '';
+		await fetchDirectories(previousPath || undefined);
+	};
+
+	onMounted(async () => {
+		if (librariesStore.getLibraries.length === 0) {
+			try {
+				await librariesStore.requestUsersLibraries();
+			} catch (error) {
+				console.error('Failed to load libraries for settings page:', error);
+			}
+		}
+	});
+</script>
+
+<template>
+  <div id="libraries-section" class="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+		<div class="flex items-center justify-between mb-4">
+			<h2 class="text-2xl font-semibold">Libraries</h2>
+
+			<Button
+				v-if="isAdmin"
+				label="Add Library"
+				icon="pi pi-plus"
+				severity="info"
+				@click="handleAddLibrary"
+			/>
+		</div>
+
+		<form
+			v-if="showAddLibraryForm && isAdmin"
+			class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4"
+			@submit.prevent="submitAddLibraryForm"
+		>
+			<h3 class="text-lg font-semibold">Add New Library</h3>
+
+			<div>
+				<label for="library-name" class="block text-sm font-medium mb-1">Library Name</label>
+				<input
+					id="library-name"
+					v-model="newLibraryName"
+					type="text"
+					placeholder="e.g. My Comics"
+					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				/>
+			</div>
+
+			<div>
+				<label class="block text-sm font-medium mb-2">Library Path</label>
+
+				<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
+					<div class="flex items-center justify-between gap-2">
+						<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
+							Current: {{ currentBrowsePath || 'App Comic Directory Base' }}
+						</p>
+						<Button
+							type="button"
+							label="Up"
+							icon="pi pi-arrow-up"
+							severity="secondary"
+							text
+							size="small"
+							@click="navigateUpDirectory"
+							:disabled="loadingDirectories || pathNavigationStack.length === 0"
+						/>
+					</div>
+
+					<div v-if="directoryError" class="text-sm text-red-500">
+						{{ directoryError }}
+					</div>
+
+					<div v-else-if="loadingDirectories" class="text-sm text-gray-600 dark:text-gray-400">
+						Loading directories...
+					</div>
+
+					<div v-else-if="availableDirectories.length === 0" class="text-sm text-gray-600 dark:text-gray-400">
+						No subdirectories found.
+					</div>
+
+					<div v-else class="max-h-48 overflow-y-auto space-y-2">
+						<button
+							v-for="directoryPath in availableDirectories"
+							:key="directoryPath"
+							type="button"
+							class="w-full text-left px-3 py-2 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+							@click="openDirectory(directoryPath)"
+						>
+							{{ getDirectoryName(directoryPath) }}
+						</button>
+					</div>
+
+					<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
+						Selected: {{ selectedLibraryPath || 'None' }}
+					</p>
+				</div>
+			</div>
+
+			<p v-if="addLibraryError" class="text-sm text-red-500">{{ addLibraryError }}</p>
+
+			<div class="flex items-center gap-2">
+				<Button
+					type="submit"
+					label="Save Library"
+					icon="pi pi-check"
+					severity="info"
+					:loading="isSavingLibrary"
+				/>
+				<Button
+					type="button"
+					label="Cancel"
+					icon="pi pi-times"
+					severity="secondary"
+					text
+					@click="resetAddLibraryForm"
+					:disabled="isSavingLibrary"
+				/>
+			</div>
+		</form>
+
+		<div v-if="libraries.length === 0" class="text-gray-600 dark:text-gray-400">
+			No libraries found.
+		</div>
+
+		<div
+			v-else
+			class="flex flex-col gap-4 w-full"
+		>
+			<div
+				v-for="library in libraries"
+				:key="library.id"
+				class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-full"
+			>
+				<h3 class="text-lg font-semibold mb-1">{{ library.name }}</h3>
+				<p class="text-sm text-gray-600 dark:text-gray-400 break-all">
+					Library Path: {{ library.path }}
+				</p>
+			</div>
+		</div>
+	</div>
+</template>
