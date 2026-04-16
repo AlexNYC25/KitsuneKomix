@@ -128,7 +128,7 @@
 </script>
 
 <template>
-  <div id="libraries-section" class="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+  <div id="libraries-section" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="text-2xl font-semibold">Libraries</h2>
 
@@ -143,7 +143,7 @@
 
 		<form
 			v-if="showAddLibraryForm && isAdmin"
-			class="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4"
+			class="lg:w-[520px] lg:h-[400px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
 			@submit.prevent="submitAddLibraryForm"
 		>
 			<h3 class="text-lg font-semibold">Add New Library</h3>
