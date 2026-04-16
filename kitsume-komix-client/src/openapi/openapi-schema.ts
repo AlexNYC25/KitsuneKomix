@@ -1376,11 +1376,9 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": {
-                        id?: number;
                         name: string;
-                        description?: string | null;
                         path: string;
-                        enabled: boolean;
+                        description?: string;
                     };
                 };
             };
@@ -1413,6 +1411,20 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Forbidden */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1499,6 +1511,20 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Forbidden */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
