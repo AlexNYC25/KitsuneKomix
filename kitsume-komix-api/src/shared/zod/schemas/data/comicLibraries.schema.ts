@@ -18,6 +18,23 @@ export const ComicLibraryCreateSchema = ComicLibrarySelectSchema.omit({
 });
 
 /**
+ * Schema for updating a comic library
+ */
+export const ComicLibraryUpdateSchema = ComicLibrarySelectSchema.omit({ 
+  changedAt: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  description: z.string().optional(),
+  enabled: z.boolean().optional(),
+  name: z.string().optional(),
+  path: z.string().optional(),
+}).openapi({
+  title: "ComicLibraryUpdate",
+  description: "Schema for updating a comic library",
+});
+
+/**
  * Schema for a list of comic libraries
  */
 export const ComicLibrariesSchema = z.object({
