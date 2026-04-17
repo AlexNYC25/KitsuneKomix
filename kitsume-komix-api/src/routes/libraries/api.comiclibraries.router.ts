@@ -5,7 +5,7 @@ import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import { getComicLibrariesAvailableToUser } from "#modules/libraries/comicLibraries.service.ts";
 import { listFoldersInDirectoryService } from "#modules/files/files.service.ts";
 
-import { createComicLibrary, deleteComicLibrary } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { createComicLibrary, deleteComicLibrary, updateComicLibrary } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
 
 import {
   ErrorResponseSchema,
@@ -17,13 +17,14 @@ import {
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
 } from "#zod/schemas/request.schema.ts";
-import { ComicLibraryCreateSchema } from "#zod/schemas/data/comicLibraries.schema.ts";
+import { ComicLibraryCreateSchema, ComicLibraryUpdateSchema } from "#zod/schemas/data/comicLibraries.schema.ts";
 
 import type {
   AccessRefreshTokenCombinedPayload,
   AppEnv,
   ComicLibrary,
   LibraryRegistrationInput,
+  LibraryUpdateInput,
 } from "#types/index.ts";
 
 
@@ -473,6 +474,121 @@ app.openapi(
 );
 
 /**
+ * POST /api/comic-libraries/update-library/{id}
+ *
+ * Update a comic library in the system.
+ */
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/update-library/{id}",
+    summary: "Update a comic library",
+    description: "Update a comic library in the system",
+    tags: ["Comic Libraries"],
+    middleware: [requireAuth],
+    request: {
+      params: ParamIdSchema,
+      body: {
+        content: {
+          "application/json": {
+            schema: ComicLibraryUpdateSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
+        },
+        description: "Library updated successfully",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Invalid library ID",
+      },
+      401: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Unauthorized",
+      },
+      403: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Forbidden",
+      },
+      500: {
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+        description: "Internal server error",
+      },
+    },
+  }),
+  async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    if (!user.isAdmin) {
+      return c.json({ message: "Forbidden: User does not have admin privileges" }, 403);
+    }
+
+    try {
+      const id = parseInt(c.req.valid("param").id, 10);
+      if (isNaN(id)) {
+        return c.json({ message: "Invalid library ID" }, 400);
+      }
+
+      const requestData = c.req.valid("json");
+      const parsed = ComicLibraryUpdateSchema.safeParse(requestData);
+
+      if (!parsed.success) {
+        return c.json({
+          message: "Invalid library data",
+          errors: z.treeifyError(parsed.error),
+        }, 400);
+      }
+
+      const updatedSuccessfully = await updateComicLibrary(id, parsed.data as LibraryUpdateInput);
+
+      if (!updatedSuccessfully) {
+        return c.json({ message: `Library[${id}] not found or could not be updated` }, 400);
+      }
+
+      return c.json(
+        { message: `Library[${id}] updated for user ${userId}` },
+        200,
+      );
+    } catch (error ) {
+      console.error("Error updating comic library:", error);
+      return c.json({ message: "Internal server error" }, 500);
+    }
+  }
+)
+
+/**
  * DELETE /api/comic-libraries/delete-library/{id}
  *
  * Delete a comic library from the system.
@@ -544,7 +660,7 @@ app.openapi(
     }
 
     if (!user.isAdmin) {
-      return c.json({ message: "Forbidden" }, 403);
+      return c.json({ message: "Forbidden: User does not have admin privileges" }, 403);
     }
 
     try {
@@ -653,7 +769,6 @@ app.openapi(
         200,
       );
     } catch (error) {
-      console.error("Error finding comic library path:", error);
       if (error instanceof Error && error.message.startsWith("Invalid path")) {
         return c.json({ message: error.message }, 400);
       }
