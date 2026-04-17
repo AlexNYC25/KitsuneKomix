@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
-import { getUserByEmail } from "#infrastructure/db/sqlite/models/users.model.ts";
+import { getUserByEmail, getUserById } from "#infrastructure/db/sqlite/models/users.model.ts";
 import {
   cleanupExpiredTokens,
   getValidRefreshToken,
@@ -213,13 +213,26 @@ export async function cleanupExpiredRefreshTokens(): Promise<number> {
   return await cleanupExpiredTokens();
 }
 
+const getUserRoles = async (userId: number): Promise<string[]> => {
+  const user = await getUserById(userId);
+  if (!user) {
+    return [];
+  }
+
+  if(user.admin) {
+    return ["admin", "user"];
+  }
+
+  return ["user"];
+};
+
+
 /**
  * Enhanced refresh with user roles from database
  * This is a more complete version that fetches user data
  */
 export async function refreshAccessTokenWithUserData(
-  refreshToken: string,
-  getUserRoles: (userId: number) => Promise<string[]>,
+  refreshToken: string
 ): Promise<RefreshTokenResponse> {
   try {
     // Verify the refresh token JWT

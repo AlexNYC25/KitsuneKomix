@@ -6,7 +6,7 @@ import {
   getTokenFromCookie,
   setAuthCookies,
   createRefreshTokenPair,
-  refreshAccessToken,
+  refreshAccessTokenWithUserData,
   revokeAllUserTokens,
   revokeToken,
 } from "#modules/auth/auth.service.ts";
@@ -168,7 +168,7 @@ app.openapi(
         return c.json({ message: "Refresh token is required" }, 400);
       }
 
-      const newTokens = await refreshAccessToken(refreshToken);
+      const newTokens = await refreshAccessTokenWithUserData(refreshToken);
 
       // Rotate cookies for cookie-auth clients.
       setAuthCookies(c, newTokens.accessToken, newTokens.refreshToken);
