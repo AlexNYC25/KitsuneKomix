@@ -242,7 +242,7 @@ export const updateComicLibrary = async (
       updateData.description = updates.description;
     }
     if (updates.enabled !== undefined) {
-      updateData.enabled = updates.enabled ? 1 : 0;
+      updateData.enabled = updates.enabled ? true : false;
     }
 
     const result: { id: number }[] = await db
