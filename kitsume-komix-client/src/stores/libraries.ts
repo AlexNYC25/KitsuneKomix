@@ -1,12 +1,8 @@
 import { defineStore } from 'pinia'
 import { apiClient } from '../utilities/apiClient'
-import type { ComicLibrary } from '../types/comic-libraries.types'
 
-type CreateLibraryPayload = {
-	name: string;
-	path: string;
-	description?: string | null;
-};
+import type { ComicLibrary, CreateLibraryPayload, UpdateLibraryPayload } from '../types/comic-libraries.types'
+
 
 // Convert ComicLibrary to objects compatible with MenuItem
 function transformToMenuItems(libraries: Array<ComicLibrary>) {
@@ -40,8 +36,7 @@ export const useLibrariesStore = defineStore('libraries', {
 				body: {
 					name: payload.name,
 					path: payload.path,
-					description: payload.description ?? null,
-					enabled: true,
+					description: payload.description ?? undefined,
 				}
 			});
 
@@ -52,6 +47,33 @@ export const useLibrariesStore = defineStore('libraries', {
 			await this.requestUsersLibraries();
 
 			return true;
+		},
+		async updateLibrary(payload: UpdateLibraryPayload): Promise<boolean> {
+			const { data, error } = await apiClient.POST('/comic-libraries/update-library/{id}', {
+				params: {
+					path: {
+						id: String(payload.id)
+					}
+				},
+				body: {
+					id: payload.id,
+					name: payload.name,
+					path: payload.path,
+					description: payload.description ?? undefined,
+				}
+			});
+
+			if (error) {
+				throw new Error(error?.message || 'Failed to update library');
+			}
+
+			if (data) {
+				await this.requestUsersLibraries();
+				return true;
+			}
+
+			return false;
+			
 		},
 		async requestUsersLibraries() {
 			// The authorization header is automatically added by the apiClient middleware
@@ -70,6 +92,24 @@ export const useLibrariesStore = defineStore('libraries', {
 					: [];
 
 			this.setLibraries(libraries);
+		},
+		async deleteLibrary(libraryId: number): Promise<boolean> {
+			const { data, error } = await apiClient.DELETE('/comic-libraries/delete-library/{id}', {
+				params: {
+					path: {
+						id: String(libraryId)
+					}
+				}
+			});
+
+			if (error || !data) {
+				throw new Error(error?.message || 'Failed to delete library');
+			}
+
+			await this.requestUsersLibraries();
+
+			return true;
 		}
+
 	}
 })
