@@ -36,7 +36,6 @@ export const listFoldersInDirectoryService = async (path?: string): Promise<Arra
 
     return folders.sort((a, b) => a.localeCompare(b));
   } catch (error) {
-    console.error("Error listing folders:", error);
     throw error;
   }
 };
