@@ -2,9 +2,9 @@
 	import { computed, ref, onMounted } from 'vue';
 	import Button from 'primevue/button';
 
+	import LibraryPathNavigation from '@/components/Settings/LibraryPathNavigation.vue';
 	import { useAuthStore } from '@/stores/auth';
 	import { useLibrariesStore } from '@/stores/libraries';
-	import { apiClient } from '@/utilities/apiClient';
 
 	const authStore = useAuthStore();
 	const librariesStore = useLibrariesStore();
@@ -18,12 +18,6 @@
 	const isSavingLibrary = ref(false);
 	const newLibraryDescription = ref<string | null>(null);
 
-	const currentBrowsePath = ref('');
-
-	const pathNavigationStack = ref<string[]>([]);
-	const availableDirectories = ref<string[]>([]);
-	const loadingDirectories = ref(false);
-
 	const showEditLibraryForm = ref(false);
 	const editLibraryId = ref<number | null>(null);
 	const editLibraryName = ref('');
@@ -33,39 +27,12 @@
 	const editLibraryEnabled = ref<boolean>(false);
 	
 	const addLibraryError = ref<string | null>(null);
-	const directoryError = ref<string | null>(null);
 	const editLibraryError = ref<string | null>(null);
-
-	const fetchDirectories = async (path?: string) => {
-		loadingDirectories.value = true;
-		directoryError.value = null;
-
-		try {
-			const { data, error } = await apiClient.POST('/comic-libraries/find-path', {
-				body: path ? { path } : {},
-			});
-
-			if (error || !data) {
-				throw new Error(error?.message || 'Failed to load directories.');
-			}
-
-			availableDirectories.value = data.directories ?? [];
-			currentBrowsePath.value = path ?? '';
-			selectedLibraryPath.value = path ?? '';
-		} catch (error) {
-			directoryError.value = error instanceof Error
-				? error.message
-				: 'Failed to load directories.';
-		} finally {
-			loadingDirectories.value = false;
-		}
-	};
 
 	const handleAddLibrary = async () => {
 		showAddLibraryForm.value = true;
 		addLibraryError.value = null;
-		pathNavigationStack.value = [];
-		await fetchDirectories();
+		selectedLibraryPath.value = '';
 	};
 
 	const submitAddLibraryForm = async () => {
@@ -136,10 +103,6 @@
 		showAddLibraryForm.value = false;
 		newLibraryName.value = '';
 		selectedLibraryPath.value = '';
-		currentBrowsePath.value = '';
-		pathNavigationStack.value = [];
-		availableDirectories.value = [];
-		directoryError.value = null;
 		addLibraryError.value = null;
 		newLibraryDescription.value = null;
 	};
@@ -151,34 +114,9 @@
 		editLibraryPath.value = '';
 		isEditingLibrary.value = false;
 		editLibraryError.value = null;
-		currentBrowsePath.value = '';
-		pathNavigationStack.value = [];
-		availableDirectories.value = [];
-		directoryError.value = null;
 		editLibraryDescription.value = null;
 		editLibraryEnabled.value = false;
 		editLibraryError.value = null;
-	};
-
-
-	const getDirectoryName = (directoryPath: string): string => {
-		const normalized = directoryPath.replace(/\\/g, '/').replace(/\/+$/, '');
-		const segments = normalized.split('/').filter(Boolean);
-		return segments.length > 0 ? segments[segments.length - 1] : directoryPath;
-	};
-
-	const openDirectory = async (directoryPath: string) => {
-		pathNavigationStack.value.push(currentBrowsePath.value);
-		await fetchDirectories(directoryPath);
-	};
-
-	const navigateUpDirectory = async () => {
-		if (pathNavigationStack.value.length === 0) {
-			return;
-		}
-
-		const previousPath = pathNavigationStack.value.pop() ?? '';
-		await fetchDirectories(previousPath || undefined);
 	};
 
 	const handleEditLibrary = async (libraryId: number) => {
@@ -194,8 +132,6 @@
 			editLibraryId.value = library.id ?? null;
 			editLibraryDescription.value = library.description ?? null;
 			editLibraryEnabled.value = library.enabled ?? false;
-
-			openDirectory(library.path);
 		}
 
 	};
@@ -267,53 +203,7 @@
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium mb-2">Library Path</label>
-
-				<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
-							Current: {{ currentBrowsePath || 'App Comic Directory Base' }}
-						</p>
-						<Button
-							type="button"
-							label="Up"
-							icon="pi pi-arrow-up"
-							severity="secondary"
-							text
-							size="small"
-							@click="navigateUpDirectory"
-							:disabled="loadingDirectories || pathNavigationStack.length === 0"
-						/>
-					</div>
-
-					<div v-if="directoryError" class="text-sm text-red-500">
-						{{ directoryError }}
-					</div>
-
-					<div v-else-if="loadingDirectories" class="text-sm text-gray-600 dark:text-gray-400">
-						Loading directories...
-					</div>
-
-					<div v-else-if="availableDirectories.length === 0" class="text-sm text-gray-600 dark:text-gray-400">
-						No subdirectories found.
-					</div>
-
-					<div v-else class="max-h-48 overflow-y-auto space-y-2">
-						<button
-							v-for="directoryPath in availableDirectories"
-							:key="directoryPath"
-							type="button"
-							class="w-full text-left px-3 py-2 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-							@click="openDirectory(directoryPath)"
-						>
-							{{ getDirectoryName(directoryPath) }}
-						</button>
-					</div>
-
-					<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
-						Selected: {{ selectedLibraryPath || 'None' }}
-					</p>
-				</div>
+				<LibraryPathNavigation v-model="selectedLibraryPath" />
 			</div>
 
 			<p v-if="addLibraryError" class="text-sm text-red-500">{{ addLibraryError }}</p>
@@ -379,53 +269,7 @@
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium mb-2">Library Path</label>
-
-				<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
-					<div class="flex items-center justify-between gap-2">
-						<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
-							Current: {{ editLibraryPath || 'App Comic Directory Base' }}
-						</p>
-						<Button
-							type="button"
-							label="Up"
-							icon="pi pi-arrow-up"
-							severity="secondary"
-							text
-							size="small"
-							@click="navigateUpDirectory"
-							:disabled="loadingDirectories || pathNavigationStack.length === 0"
-						/>
-					</div>
-
-					<div v-if="directoryError" class="text-sm text-red-500">
-						{{ directoryError }}
-					</div>
-
-					<div v-else-if="loadingDirectories" class="text-sm text-gray-600 dark:text-gray-400">
-						Loading directories...
-					</div>
-
-					<div v-else-if="availableDirectories.length === 0" class="text-sm text-gray-600 dark:text-gray-400">
-						No subdirectories found.
-					</div>
-
-					<div v-else class="max-h-48 overflow-y-auto space-y-2">
-						<button
-							v-for="directoryPath in availableDirectories"
-							:key="directoryPath"
-							type="button"
-							class="w-full text-left px-3 py-2 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-							@click="openDirectory(directoryPath)"
-						>
-							{{ getDirectoryName(directoryPath) }}
-						</button>
-					</div>
-
-					<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
-						Selected: {{ selectedLibraryPath || 'None' }}
-					</p>
-				</div>
+				<LibraryPathNavigation v-model="editLibraryPath" />
 			</div>
 
 			<p v-if="editLibraryError" class="text-sm text-red-500">{{ editLibraryError }}</p>
