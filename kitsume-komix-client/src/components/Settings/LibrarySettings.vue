@@ -16,6 +16,7 @@
 	const newLibraryName = ref('');
 	const selectedLibraryPath = ref('');
 	const isSavingLibrary = ref(false);
+	const newLibraryDescription = ref<string | null>(null);
 
 	const currentBrowsePath = ref('');
 
@@ -28,6 +29,7 @@
 	const editLibraryName = ref('');
 	const editLibraryPath = ref('')
 	const isEditingLibrary = ref(false);
+	const editLibraryDescription = ref<string | null>(null);
 	
 	const addLibraryError = ref<string | null>(null);
 	const directoryError = ref<string | null>(null);
@@ -81,6 +83,7 @@
 			await librariesStore.createLibrary({
 				name,
 				path,
+				description: newLibraryDescription.value ?? undefined,
 			});
 
 			resetAddLibraryForm();
@@ -114,6 +117,7 @@
 				id: editLibraryId.value,
 				name,
 				path,
+				description: editLibraryDescription.value ?? undefined,
 			});
 
 			resetEditLibraryForm();
@@ -135,6 +139,7 @@
 		availableDirectories.value = [];
 		directoryError.value = null;
 		addLibraryError.value = null;
+		newLibraryDescription.value = null;
 	};
 
 	const resetEditLibraryForm = () => {
@@ -148,6 +153,7 @@
 		pathNavigationStack.value = [];
 		availableDirectories.value = [];
 		directoryError.value = null;
+		editLibraryDescription.value = null;
 		editLibraryError.value = null;
 	};
 
@@ -183,6 +189,7 @@
 			editLibraryName.value = library.name;
 			editLibraryPath.value = library.path;
 			editLibraryId.value = library.id ?? null;
+			editLibraryDescription.value = library.description ?? null;
 
 			openDirectory(library.path);
 		}
@@ -241,6 +248,18 @@
 					placeholder="e.g. My Comics"
 					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
 				/>
+			</div>
+
+			<div>
+				<label for="library-description" class="block text-sm font-medium mb-1">Library Description</label>
+				<input
+					id="library-description"
+					v-model="newLibraryDescription"
+					type="text"
+					placeholder="e.g. My Comics Description"
+					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				/>
+
 			</div>
 
 			<div>
@@ -335,6 +354,17 @@
 			</div>
 
 			<div>
+				<label for="library-description-edit" class="block text-sm font-medium mb-1">Library Description</label>
+				<input
+					id="library-description-edit"
+					v-model="editLibraryDescription"
+					type="text"
+					placeholder="e.g. My Comics Description"
+					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				/>
+			</div>
+
+			<div>
 				<label class="block text-sm font-medium mb-2">Library Path</label>
 
 				<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
@@ -406,6 +436,7 @@
 			</div>
 		</form>
 
+		<!-- Libraries List -->
 		<div v-if="libraries.length === 0" class="text-gray-600 dark:text-gray-400">
 			No libraries found.
 		</div>
@@ -419,10 +450,11 @@
 				:key="library.id"
 				class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-full"
 			>
-				<h3 class="text-lg font-semibold mb-1">{{ library.name }}</h3>
+				<h3 class="text-lg font-semibold mb-1">{{ library.name }} {{ library.description ? `- ${library.description}` : '' }}</h3>
 				<p class="text-sm text-gray-600 dark:text-gray-400 break-all">
 					Library Path: {{ library.path }}
-				</p>
+				</p> 
+
 				<div class="grid grid-cols-5 gap-2 mt-6">
 					<div class="col-span-2 grid grid-rows-2 gap-2">
 						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Series</p></div>
