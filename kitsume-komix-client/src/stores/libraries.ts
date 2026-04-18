@@ -60,6 +60,7 @@ export const useLibrariesStore = defineStore('libraries', {
 					name: payload.name,
 					path: payload.path,
 					description: payload.description ?? undefined,
+					enabled: payload.enabled ?? undefined,
 				}
 			});
 

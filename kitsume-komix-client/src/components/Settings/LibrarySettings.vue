@@ -30,6 +30,7 @@
 	const editLibraryPath = ref('')
 	const isEditingLibrary = ref(false);
 	const editLibraryDescription = ref<string | null>(null);
+	const editLibraryEnabled = ref<boolean>(false);
 	
 	const addLibraryError = ref<string | null>(null);
 	const directoryError = ref<string | null>(null);
@@ -118,6 +119,7 @@
 				name,
 				path,
 				description: editLibraryDescription.value ?? undefined,
+				enabled: editLibraryEnabled.value,
 			});
 
 			resetEditLibraryForm();
@@ -154,6 +156,7 @@
 		availableDirectories.value = [];
 		directoryError.value = null;
 		editLibraryDescription.value = null;
+		editLibraryEnabled.value = false;
 		editLibraryError.value = null;
 	};
 
@@ -190,6 +193,7 @@
 			editLibraryPath.value = library.path;
 			editLibraryId.value = library.id ?? null;
 			editLibraryDescription.value = library.description ?? null;
+			editLibraryEnabled.value = library.enabled ?? false;
 
 			openDirectory(library.path);
 		}
@@ -234,7 +238,7 @@
 		<!-- Add Library Form -->
 		<form
 			v-if="showAddLibraryForm && isAdmin"
-			class="lg:w-[520px] lg:h-[400px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
+			class="lg:w-[520px] lg:h-[475px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
 			@submit.prevent="submitAddLibraryForm"
 		>
 			<h3 class="text-lg font-semibold">Add New Library</h3>
@@ -337,7 +341,7 @@
 		<!-- Edit Library Form -->
 		<form
 			v-if="showEditLibraryForm && isAdmin"
-			class="lg:w-[520px] lg:h-[400px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
+			class="lg:w-[520px] lg:h-[520px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
 			@submit.prevent="submitEditLibraryForm"
 		>
 			<h3 class="text-lg font-semibold">Edit Library</h3>
@@ -361,6 +365,16 @@
 					type="text"
 					placeholder="e.g. My Comics Description"
 					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				/>
+			</div>
+
+			<div class="flex items-left gap-2">
+				<label for="library-enabled-edit" class="block text-sm font-medium">Library Enabled</label>
+				<input
+					id="library-enabled-edit"
+					v-model="editLibraryEnabled"
+					type="checkbox"
+					class="px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
 				/>
 			</div>
 
@@ -448,7 +462,8 @@
 			<div
 				v-for="library in libraries"
 				:key="library.id"
-				class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-full"
+				class="border rounded-lg p-4 w-full"
+				:class="{'border-blue-500': library.enabled, 'border-red-500': !library.enabled}"
 			>
 				<h3 class="text-lg font-semibold mb-1">{{ library.name }} {{ library.description ? `- ${library.description}` : '' }}</h3>
 				<p class="text-sm text-gray-600 dark:text-gray-400 break-all">
