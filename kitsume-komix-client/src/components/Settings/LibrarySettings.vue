@@ -15,15 +15,23 @@
 	const showAddLibraryForm = ref(false);
 	const newLibraryName = ref('');
 	const selectedLibraryPath = ref('');
-	const currentBrowsePath = ref('');
 	const isSavingLibrary = ref(false);
+
+	const currentBrowsePath = ref('');
 
 	const pathNavigationStack = ref<string[]>([]);
 	const availableDirectories = ref<string[]>([]);
 	const loadingDirectories = ref(false);
+
+	const showEditLibraryForm = ref(false);
+	const editLibraryId = ref<number | null>(null);
+	const editLibraryName = ref('');
+	const editLibraryPath = ref('')
+	const isEditingLibrary = ref(false);
 	
 	const addLibraryError = ref<string | null>(null);
 	const directoryError = ref<string | null>(null);
+	const editLibraryError = ref<string | null>(null);
 
 	const fetchDirectories = async (path?: string) => {
 		loadingDirectories.value = true;
@@ -85,6 +93,39 @@
 		}
 	};
 
+	const submitEditLibraryForm = async () => {
+		const name = editLibraryName.value.trim();
+		const path = editLibraryPath.value.trim();
+
+		if (!name || !path) {
+			editLibraryError.value = 'Library name and library path are required.';
+			return;
+		}
+
+		isEditingLibrary.value = true;
+		editLibraryError.value = null;
+
+		try {
+			if (isNaN(editLibraryId.value ?? NaN ) || editLibraryId.value === null) {
+				throw new Error('Invalid library ID.');
+			}
+
+			await librariesStore.updateLibrary({
+				id: editLibraryId.value,
+				name,
+				path,
+			});
+
+			resetEditLibraryForm();
+		} catch (error) {
+			editLibraryError.value = error instanceof Error
+				? error.message
+				: 'Failed to update library.';
+		} finally {
+			isEditingLibrary.value = false;
+		}
+	};
+
 	const resetAddLibraryForm = () => {
 		showAddLibraryForm.value = false;
 		newLibraryName.value = '';
@@ -95,6 +136,21 @@
 		directoryError.value = null;
 		addLibraryError.value = null;
 	};
+
+	const resetEditLibraryForm = () => {
+		editLibraryId.value = null;
+		showEditLibraryForm.value = false;
+		editLibraryName.value = '';
+		editLibraryPath.value = '';
+		isEditingLibrary.value = false;
+		editLibraryError.value = null;
+		currentBrowsePath.value = '';
+		pathNavigationStack.value = [];
+		availableDirectories.value = [];
+		directoryError.value = null;
+		editLibraryError.value = null;
+	};
+
 
 	const getDirectoryName = (directoryPath: string): string => {
 		const normalized = directoryPath.replace(/\\/g, '/').replace(/\/+$/, '');
@@ -115,6 +171,33 @@
 		const previousPath = pathNavigationStack.value.pop() ?? '';
 		await fetchDirectories(previousPath || undefined);
 	};
+
+	const handleEditLibrary = async (libraryId: number) => {
+		// Implement edit library functionality here
+		showEditLibraryForm.value = true;
+
+		// fill in the form values
+		const library = librariesStore.getLibraries.find(library => library.id === libraryId);
+
+		if (library) {
+			editLibraryName.value = library.name;
+			editLibraryPath.value = library.path;
+			editLibraryId.value = library.id ?? null;
+
+			openDirectory(library.path);
+		}
+
+	};
+
+
+	const handleDeleteLibrary = async (libraryId: number) => {
+		try {
+			await librariesStore.deleteLibrary(libraryId);
+		} catch (error) {
+			console.error('Failed to delete library:', error);
+		}
+	};
+
 
 	onMounted(async () => {
 		if (librariesStore.getLibraries.length === 0) {
@@ -141,6 +224,7 @@
 			/>
 		</div>
 
+		<!-- Add Library Form -->
 		<form
 			v-if="showAddLibraryForm && isAdmin"
 			class="lg:w-[520px] lg:h-[400px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
@@ -231,6 +315,97 @@
 			</div>
 		</form>
 
+		<!-- Edit Library Form -->
+		<form
+			v-if="showEditLibraryForm && isAdmin"
+			class="lg:w-[520px] lg:h-[400px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
+			@submit.prevent="submitEditLibraryForm"
+		>
+			<h3 class="text-lg font-semibold">Edit Library</h3>
+
+			<div>
+				<label for="library-name-edit" class="block text-sm font-medium mb-1">Library Name</label>
+				<input
+					id="library-name-edit"
+					v-model="editLibraryName"
+					type="text"
+					placeholder="e.g. My Comics"
+					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				/>
+			</div>
+
+			<div>
+				<label class="block text-sm font-medium mb-2">Library Path</label>
+
+				<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
+					<div class="flex items-center justify-between gap-2">
+						<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
+							Current: {{ editLibraryPath || 'App Comic Directory Base' }}
+						</p>
+						<Button
+							type="button"
+							label="Up"
+							icon="pi pi-arrow-up"
+							severity="secondary"
+							text
+							size="small"
+							@click="navigateUpDirectory"
+							:disabled="loadingDirectories || pathNavigationStack.length === 0"
+						/>
+					</div>
+
+					<div v-if="directoryError" class="text-sm text-red-500">
+						{{ directoryError }}
+					</div>
+
+					<div v-else-if="loadingDirectories" class="text-sm text-gray-600 dark:text-gray-400">
+						Loading directories...
+					</div>
+
+					<div v-else-if="availableDirectories.length === 0" class="text-sm text-gray-600 dark:text-gray-400">
+						No subdirectories found.
+					</div>
+
+					<div v-else class="max-h-48 overflow-y-auto space-y-2">
+						<button
+							v-for="directoryPath in availableDirectories"
+							:key="directoryPath"
+							type="button"
+							class="w-full text-left px-3 py-2 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+							@click="openDirectory(directoryPath)"
+						>
+							{{ getDirectoryName(directoryPath) }}
+						</button>
+					</div>
+
+					<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
+						Selected: {{ selectedLibraryPath || 'None' }}
+					</p>
+				</div>
+			</div>
+
+			<p v-if="editLibraryError" class="text-sm text-red-500">{{ editLibraryError }}</p>
+
+			<div class="flex items-center gap-2">
+				<Button
+					type="submit"
+					label="Save Library"
+					icon="pi pi-check"
+					severity="info"
+					:loading="isEditingLibrary"
+				/>
+				<Button
+					type="button"
+					label="Cancel"
+					icon="pi pi-times"
+					severity="secondary"
+					text
+					@click="resetEditLibraryForm"
+					:disabled="isEditingLibrary"
+				/>
+			</div>
+		</form>
+
 		<div v-if="libraries.length === 0" class="text-gray-600 dark:text-gray-400">
 			No libraries found.
 		</div>
@@ -248,6 +423,39 @@
 				<p class="text-sm text-gray-600 dark:text-gray-400 break-all">
 					Library Path: {{ library.path }}
 				</p>
+				<div class="grid grid-cols-5 gap-2 mt-6">
+					<div class="col-span-2 grid grid-rows-2 gap-2">
+						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Series</p></div>
+						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Books</p></div>
+					</div>
+
+					<div class="col-span-2 grid grid-rows-2 gap-2">
+						<div><p class="text-gray-500 dark:text-gray-300">Total Library Size</p></div>
+						<div><p class="text-gray-500 dark:text-gray-300">Number of Users</p></div>
+					</div>
+
+					<!-- Library Actions -->
+					<div class="col-span-1 grid grid-rows-2 gap-2">
+						<Button
+							type="button"
+							label="Edit"
+							icon="pi pi-pencil"
+							severity="secondary"
+							text
+							size="small"
+							@click="library.id !== undefined && handleEditLibrary(library.id)"
+						/>
+						<Button
+							type="button"
+							label="Delete"
+							icon="pi pi-trash"
+							severity="danger"
+							text
+							size="small"
+							@click="library.id !== undefined && handleDeleteLibrary(library.id)"
+						/>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
