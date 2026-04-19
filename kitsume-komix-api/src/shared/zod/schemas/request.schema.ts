@@ -2,6 +2,7 @@ import { z } from "@hono/zod-openapi";
 import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 import { AuthRefreshToken } from "./data/auth.schema.ts";
+import { ComicLibrarySelectSchema } from "./data/database.schema.ts";
 
 /**
  * Common schema for path parameter 'id'
@@ -232,12 +233,8 @@ export const ComicBookUpdateSchema = z.object({
 });
 
 // TODO: Check these if this can be replaced by existing schemas from the db table generated schemas
-export const ComicLibrarySchema = z.object({
-  id: z.number().int().positive().optional(),
-  name: z.string().min(1).max(100),
-  description: z.string().max(255).nullable().optional(),
-  path: z.string().min(1).max(255),
-  enabled: z.boolean(),
+export const ComicLibraryResponseSchema = z.object({
+  libraries: z.array(ComicLibrarySelectSchema)
 });
 
 export const UserSchema = z.object({

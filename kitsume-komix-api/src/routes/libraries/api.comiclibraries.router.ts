@@ -13,7 +13,7 @@ import {
   SuccessCreationResponseSchema,
 } from "#zod/schemas/response.schema.ts";
 import {
-  ComicLibrarySchema,
+  ComicLibraryResponseSchema,
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
 } from "#zod/schemas/request.schema.ts";
@@ -58,9 +58,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: z.object({
-              libraries: z.array(ComicLibrarySchema),
-            }),
+            schema: ComicLibraryResponseSchema
           },
         },
         description: "Comic Libraries retrieved successfully",
@@ -110,15 +108,9 @@ app.openapi(
       const libraries: ComicLibrary[] = await getComicLibrariesAvailableToUser(
         userId,
       );
-      const formattedLibraries = libraries.map((lib) => ({
-        id: lib.id,
-        name: lib.name,
-        path: lib.path,
-        enabled: lib.enabled ? true : false,
-        description: lib.description || undefined,
-      }));
+
       return c.json(
-        { libraries: formattedLibraries },
+        { "libraries": libraries },
         200,
       );
     } catch (error) {
