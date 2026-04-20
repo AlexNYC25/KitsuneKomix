@@ -34,6 +34,16 @@ export const ComicLibraryUpdateSchema = ComicLibrarySelectSchema.omit({
   description: "Schema for updating a comic library",
 });
 
+export const ComicLibraryCompiledInfoSchema = ComicLibrarySelectSchema.extend({
+  totalNumberOfSeries: z.number().default(0),
+  totalNumberOfBooks: z.number().default(0),
+  totalNumberOfUsers: z.number().default(0),
+  totalSize: z.number().default(0)
+}).openapi({
+  title: "ComicLibraryCompiledInfo",
+  description: "Schema for compiled information of a comic library",
+});
+
 /**
  * Schema for a list of comic libraries
  */
