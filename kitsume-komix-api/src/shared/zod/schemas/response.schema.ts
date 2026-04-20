@@ -5,6 +5,7 @@ import {
   ComicBookThumbnailSelectSchema,
   ComicPageSelectSchema,
   ComicStoryArcSelectSchema,
+  UserSelectSchema
 } from "./data/database.schema.ts";
 import { ComicBookSchema } from "./data/comicBooks.schema.ts";
 import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
@@ -364,6 +365,16 @@ export const ReadlistsResponseSchema = z.array(z.object({
   title: "ReadlistsResponse",
   description: "Array of readlists with id and name",
 });
+
+/**
+ * Schema for users response containing an array of users
+ */
+export const UsersResponseSchema = z.object({
+  users: z.array(UserSelectSchema),
+}).openapi({
+  title: "UsersResponse",
+  description: "Response containing an array of users",
+})
 
 /**
  * Schema for user creation response containing a success message and the new user's ID
