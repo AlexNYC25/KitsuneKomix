@@ -3,6 +3,7 @@ import {
   deleteUser,
   getUserByEmail,
   getUserById,
+  getAllUsers
 } from "#infrastructure/db/sqlite/models/users.model.ts";
 import {
   assignLibraryToUser,
@@ -11,7 +12,7 @@ import {
 
 import { hashPassword } from "#utilities/hash.ts";
 
-import { UserRegistrationInput } from "#types/index.ts";
+import type { User, UserRegistrationInput } from "#types/index.ts";
 
 import { getSetting, setSetting } from "#infrastructure/db/sqlite/models/appSettings.model.ts";
 
@@ -177,3 +178,19 @@ export async function assignLibraryToUserService(
     throw new Error("Internal server error");
   }
 }
+
+/**
+ * Retrieves all registered users.
+ *
+ * @returns An array of `User` objects representing all registered users.
+ * @throws {Error} Throws when fetching users fails.
+ */
+export const getUsersRegistered = async (): Promise<User[]> => {
+  try {
+    const users = await getAllUsers();
+    return users;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw new Error("Internal server error");
+  }
+};
