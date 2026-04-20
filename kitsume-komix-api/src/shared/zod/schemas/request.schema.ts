@@ -3,6 +3,7 @@ import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 import { AuthRefreshToken } from "./data/auth.schema.ts";
 import { ComicLibrarySelectSchema } from "./data/database.schema.ts";
+import { ComicLibraryCompiledInfoSchema } from "./data/comicLibraries.schema.ts";
 
 /**
  * Common schema for path parameter 'id'
@@ -232,9 +233,8 @@ export const ComicBookUpdateSchema = z.object({
   description: "Partial comic book updates for PATCH/PUT requests",
 });
 
-// TODO: Check these if this can be replaced by existing schemas from the db table generated schemas
 export const ComicLibraryResponseSchema = z.object({
-  libraries: z.array(ComicLibrarySelectSchema)
+  libraries: z.array(ComicLibraryCompiledInfoSchema)
 });
 
 export const UserSchema = z.object({
