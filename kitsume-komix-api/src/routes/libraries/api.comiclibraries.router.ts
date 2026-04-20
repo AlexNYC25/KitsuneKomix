@@ -203,6 +203,8 @@ app.openapi(
  * POST /api/comic-libraries/{id}/analyze
  *
  * Start analysis of a comic library.
+ * 
+ * NOTE: Not functional yet, maybe remove?
  */
 app.openapi(
   createRoute({
@@ -281,6 +283,8 @@ app.openapi(
  * POST /api/comic-libraries/{id}/empty-trash
  *
  * Empty the trash for a specific comic library.
+ * 
+ * NOTE: Not functional yet, in next stage when enabling/disabling libraries takes a larger approach
  */
 app.openapi(
   createRoute({
