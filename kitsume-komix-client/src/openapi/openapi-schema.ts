@@ -1037,11 +1037,22 @@ export interface paths {
                     content: {
                         "application/json": {
                             libraries: {
-                                id?: number;
+                                id: number;
                                 name: string;
-                                description?: string | null;
                                 path: string;
+                                description: string | null;
                                 enabled: boolean;
+                                changedAt: string;
+                                createdAt: string;
+                                updatedAt: string;
+                                /** @default 0 */
+                                totalNumberOfSeries: number;
+                                /** @default 0 */
+                                totalNumberOfBooks: number;
+                                /** @default 0 */
+                                totalNumberOfUsers: number;
+                                /** @default 0 */
+                                totalSize: number;
                             }[];
                         };
                     };
