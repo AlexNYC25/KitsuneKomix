@@ -1,12 +1,13 @@
 import { eq, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
-import { comicLibrariesTable, userComicLibrariesTable } from "#infrastructure/db/sqlite/schemas/index.ts";
+import { comicLibrariesTable, userComicLibrariesTable, usersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
   ComicLibrary,
   LibraryRegistrationInput,
   LibraryUpdateInput,
+  User,
 } from "#types/index.ts";
 
 /**
@@ -347,3 +348,40 @@ export const assignLibraryToUser = async (
     throw error;
   }
 };
+
+/**
+ * Gets all users assigned to a specific comic library.
+ * Note: This does not count admins
+ * 
+ * @param libraryId - ID of the comic library
+ * @returns Array of users (type User[]) assigned to the library
+ */
+export const getUsersAssignedToLibrary = async (libraryId: number): Promise<User[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: { user: User }[] = await db
+      .select(
+        { user: usersTable },
+      )
+      .from(usersTable)
+      .innerJoin(
+        userComicLibrariesTable,
+        eq(usersTable.id, userComicLibrariesTable.userId),
+      )
+      .where(eq(userComicLibrariesTable.libraryId, libraryId))
+      .groupBy(usersTable.id);
+
+    const users: User[] = result.map((row) => row.user);
+
+    return users;
+  } catch (error) {
+    console.error("Error fetching users assigned to library:", error);
+    throw error;
+  }
+};
+
