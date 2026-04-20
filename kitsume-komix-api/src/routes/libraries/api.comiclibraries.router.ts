@@ -25,6 +25,7 @@ import type {
   ComicLibrary,
   LibraryRegistrationInput,
   LibraryUpdateInput,
+  LibraryCompiledInfo
 } from "#types/index.ts";
 
 
@@ -105,7 +106,7 @@ app.openapi(
       // TODO: Updated the validation function to handle comic libraries
       //const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, "comicLibraries");
 
-      const libraries: ComicLibrary[] = await getComicLibrariesAvailableToUser(
+      const libraries: LibraryCompiledInfo[] = await getComicLibrariesAvailableToUser(
         userId,
       );
 
