@@ -19,6 +19,8 @@ import {
   comicBookStoryArcsTable,
   comicBookTeamsTable,
   comicBookWritersTable,
+  comicLibrariesSeriesTable,
+  comicLibrariesTable,
   comicSeriesBooksTable,
   comicSeriesTable,
   comicWebLinksTable,
@@ -140,6 +142,10 @@ const addFilteringToQuery = <T extends SQLiteSelect>(
     case "listLetter":
       query.where(ilike(comicBooksTable.title, `${filterValue}%`));
       break;
+    case "libraryId":
+      query.where(eq(comicLibrariesTable.id, Number(filterValue)));
+      break;
+
   }
 
   return query;
@@ -351,6 +357,14 @@ export const getComicBooksWithMetadataFilteringSorting = async (
       .leftJoin(
         comicWebLinksTable,
         eq(comicBooksTable.id, comicWebLinksTable.comicBookId),
+      )
+      .leftJoin(
+        comicLibrariesSeriesTable,
+        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comicSeriesId),
+      )
+      .leftJoin(
+        comicLibrariesTable,
+        eq(comicLibrariesTable.id, comicLibrariesSeriesTable.libraryId),
       )
       .groupBy(comicBooksTable.id)
       .offset(offset)

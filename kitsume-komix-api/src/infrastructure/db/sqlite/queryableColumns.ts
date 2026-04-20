@@ -31,6 +31,7 @@ export const QueryableColumns = {
       createdAt: "createdAt",
       updatedAt: "updatedAt",
       listLetter: "listLetter", // Special filter for first letter of title
+      libraryId: "libraryId"
     },
     sort: {
       title: "title",
@@ -61,6 +62,7 @@ export const QueryableColumns = {
       id: "id",
       name: "name",
       description: "description",
+      libraryId: "libraryId"
     },
     sort: {
       id: "id",

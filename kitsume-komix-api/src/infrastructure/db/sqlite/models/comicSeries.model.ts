@@ -5,6 +5,7 @@ import { getClient } from "../client.ts";
 
 import {
   comicLibrariesSeriesTable,
+  comicLibrariesTable,
   comicSeriesBooksTable,
   comicSeriesTable,
 } from "#infrastructure/db/sqlite/schemas/index.ts";
@@ -48,6 +49,10 @@ const addFilteringToQuery = <T extends SQLiteSelect>(
     case "description":
       query.where(ilike(comicSeriesTable.description, `%${filterValue}%`));
       break;
+    case "libraryId":
+      query.where(eq(comicLibrariesTable.id, Number(filterValue)));
+      break;
+
   }
 
   return query;
@@ -117,6 +122,14 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
         updatedAt: comicSeriesTable.updatedAt,
       },
     ).from(comicSeriesTable)
+      .leftJoin(
+        comicLibrariesSeriesTable,
+        eq(comicSeriesTable.id, comicLibrariesSeriesTable.comicSeriesId)
+      )
+      .leftJoin(
+        comicLibrariesTable,
+        eq(comicLibrariesSeriesTable.libraryId, comicLibrariesTable.id)
+      )
       .groupBy(comicSeriesTable.id)
       .offset(offset)
       .limit(limit)
@@ -152,8 +165,6 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
  * Inserts a new comic series into the database
  *
  * used by the internal worker
- *
- * TODO: Check if this should be broken into a service/worker function
  *
  * @param seriesData The series data to insert including name, description, and folder path
  * @returns The ID of the newly inserted or existing series
