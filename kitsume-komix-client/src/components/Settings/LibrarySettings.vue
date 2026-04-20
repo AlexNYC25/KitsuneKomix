@@ -5,6 +5,7 @@
 	import LibraryPathNavigation from '@/components/Settings/LibraryPathNavigation.vue';
 	import { useAuthStore } from '@/stores/auth';
 	import { useLibrariesStore } from '@/stores/libraries';
+	import { numberToDataSize } from '@/utilities/formating';
 
 	const authStore = useAuthStore();
 	const librariesStore = useLibrariesStore();
@@ -316,13 +317,13 @@
 
 				<div class="grid grid-cols-5 gap-2 mt-6">
 					<div class="col-span-2 grid grid-rows-2 gap-2">
-						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Series</p></div>
-						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Books</p></div>
+						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Series: {{ library.totalNumberOfSeries}}</p></div>
+						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Books: {{ library.totalNumberOfBooks }}</p></div>
 					</div>
 
 					<div class="col-span-2 grid grid-rows-2 gap-2">
-						<div><p class="text-gray-500 dark:text-gray-300">Total Library Size</p></div>
-						<div><p class="text-gray-500 dark:text-gray-300">Number of Users</p></div>
+						<div><p class="text-gray-500 dark:text-gray-300">Total Library Size: {{ numberToDataSize(library.totalSize) }}</p></div>
+						<div><p class="text-gray-500 dark:text-gray-300">Number of Users: {{ library.totalNumberOfUsers }}</p></div>
 					</div>
 
 					<!-- Library Actions -->
