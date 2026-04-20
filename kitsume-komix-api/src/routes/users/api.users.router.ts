@@ -1,4 +1,3 @@
-import type { ZodSafeParseResult } from "zod";
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
@@ -7,6 +6,7 @@ import {
   checkIfAppSetupComplete,
   createUserService,
   deleteUserService,
+  getUsersRegistered
 } from "#modules/users/users.service.ts";
 
 import {
@@ -19,6 +19,7 @@ import {
   ErrorResponseSchema,
   MessageResponseSchema,
   UserCreationResponseSchema,
+  UsersResponseSchema
 } from "#zod/schemas/response.schema.ts";
 
 import type {
@@ -34,6 +35,77 @@ apiUsersRouter.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",
   scheme: "bearer",
 });
+
+/**
+ * GET /api/users
+ *
+ * Retrieve all users in the system. Requires authentication and must be an admin
+ */
+apiUsersRouter.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "Get all users",
+    description: "Endpoint to retrieve all users in the system.",
+    tags: ["Users"],
+    middleware: [requireAuth],
+    responses: {
+      200: {
+        description: "List of users",
+        content: {
+          "application/json": {
+            schema: UsersResponseSchema,
+          },
+        },
+      },
+      401: {
+        description: "Unauthorized - User must be logged in",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      403: {
+        description: "Forbidden - Admin access required",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      500: {
+        description: "Internal server error",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    if(!user.isAdmin) {
+      return c.json({ message: "Forbidden - Admin access required" }, 403);
+    }
+
+    try {
+      const users = await getUsersRegistered();
+      return c.json({
+        "users": users
+      }, 200);
+    } catch (error) {
+      console.error("Error retrieving users:", error);
+      return c.json({ message: "Internal server error" }, 500);
+    }
+  }
+)
 
 /**
  * POST /api/users/create-user
@@ -82,6 +154,14 @@ apiUsersRouter.openapi(
           },
         },
       },
+      403: {
+        description: "Forbidden - Admin access required",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
       500: {
         description: "Internal server error",
         content: {
@@ -93,19 +173,22 @@ apiUsersRouter.openapi(
     },
   }),
   async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    const userId: number = parseInt(user.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    if(!user.isAdmin) {
+      return c.json({ message: "Forbidden - Admin access required" }, 403);
+    }
     try {
       const userData: UserRegistrationInput = await c.req.json();
-
-      const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-      if (!user || !user.sub) {
-        return c.json({ message: "Unauthorized" }, 401);
-      }
-
-      const userId: number = parseInt(user.sub, 10);
-      if (isNaN(userId)) {
-        return c.json({ message: "Invalid user ID" }, 400);
-      }
 
       const parsedUserData = UserSchema.safeParse(userData);
 
