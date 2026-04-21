@@ -148,7 +148,7 @@
 
 
 	onMounted(async () => {
-		if (librariesStore.getLibraries.length === 0) {
+		if (librariesStore.getLibraries.length === 0 && isAdmin.value) {
 			try {
 				await librariesStore.requestUsersLibraries();
 			} catch (error) {
@@ -159,7 +159,7 @@
 </script>
 
 <template>
-  <div id="libraries-section" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+  <div v-if="isAdmin" id="libraries-section" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="text-2xl font-semibold">Libraries</h2>
 
@@ -297,7 +297,7 @@
 
 		<!-- Libraries List -->
 		<div v-if="libraries.length === 0" class="text-gray-600 dark:text-gray-400">
-			No libraries found.
+			<p>No libraries found.</p>
 		</div>
 
 		<div

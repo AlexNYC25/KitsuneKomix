@@ -2,6 +2,7 @@
   import { useRouter } from 'vue-router';
 
   import LibrarySettings from '@/components/Settings/LibrarySettings.vue';
+  import UserSettings from '@/components/Settings/UserSettings.vue';
 
   const router = useRouter();
 
@@ -32,6 +33,8 @@
     </div>
 
     <LibrarySettings />
+    
+    <UserSettings />
   </div>
 </template>
 
