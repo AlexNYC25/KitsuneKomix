@@ -329,3 +329,19 @@ export const ParamUserLibraryIdSchema = z.object({
     example: "1",
   }),
 });
+
+/**
+ * Schema for updating a user
+ * 
+ * Used in the route for updating a user's info in the db
+ */
+export const EditUserRequestSchema = z
+  .object({
+    id: z.number().int().positive(),
+    email: z.email().optional(),
+    password: z.string().min(1).optional(),
+  })
+  .refine((data) => data.email !== undefined || data.password !== undefined, {
+    message: "Either email or password must be provided",
+    path: ["email"],
+  });
