@@ -13,6 +13,7 @@ import {
   ParamIdSchema,
   ParamUserLibraryIdSchema,
   UserSchema,
+  EditUserRequestSchema,
 } from "#zod/schemas/request.schema.ts";
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
@@ -216,6 +217,96 @@ apiUsersRouter.openapi(
       if (error instanceof SyntaxError && error.message.includes("JSON")) {
         return c.json({ message: "Invalid JSON format in request body" }, 400);
       }
+      return c.json({ message: "Internal server error" }, 500);
+    }
+  },
+);
+
+/**
+ * POST /api/users/edit-user
+ *
+ * Edit a user's email and/or password. Requires authentication.
+ */
+apiUsersRouter.openapi(
+  createRoute({
+    method: "post",
+    path: "/edit-user",
+    summary: "Edit a user",
+    description: "Endpoint to edit a user email and/or password.",
+    tags: ["Users"],
+    middleware: [requireAuth],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: EditUserRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "User edit placeholder response",
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
+        },
+      },
+      400: {
+        description: "Invalid request data",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      401: {
+        description: "Unauthorized - User must be logged in",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      500: {
+        description: "Internal server error",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+
+    if (!user || !user.sub) {
+      return c.json({ message: "Unauthorized" }, 401);
+    }
+
+    try {
+      const body = await c.req.json();
+      const parsedBody = EditUserRequestSchema.safeParse(body);
+
+      if (!parsedBody.success) {
+        return c.json(
+          {
+            message: "Invalid request data",
+            errors: z.treeifyError(parsedBody.error),
+          },
+          400,
+        );
+      }
+
+      return c.json({ message: "Placeholder: user edit endpoint" }, 200);
+    } catch (error) {
+      console.error("Error parsing edit-user request:", error);
+      if (error instanceof SyntaxError && error.message.includes("JSON")) {
+        return c.json({ message: "Invalid JSON format in request body" }, 400);
+      }
+
       return c.json({ message: "Internal server error" }, 500);
     }
   },
