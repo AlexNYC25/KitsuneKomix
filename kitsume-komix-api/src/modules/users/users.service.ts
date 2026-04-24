@@ -3,7 +3,8 @@ import {
   deleteUser,
   getUserByEmail,
   getUserById,
-  getAllUsers
+  getAllUsers,
+  updateUser
 } from "#infrastructure/db/sqlite/models/users.model.ts";
 import {
   assignLibraryToUser,
@@ -12,7 +13,7 @@ import {
 
 import { hashPassword } from "#utilities/hash.ts";
 
-import type { User, UserRegistrationInput } from "#types/index.ts";
+import type { User, UserRegistrationInput, UserEditInput } from "#types/index.ts";
 
 import { getSetting, setSetting } from "#infrastructure/db/sqlite/models/appSettings.model.ts";
 
@@ -191,6 +192,26 @@ export const getUsersRegistered = async (): Promise<User[]> => {
     return users;
   } catch (error) {
     console.error("Error fetching users:", error);
+    throw new Error("Internal server error");
+  }
+};
+
+/**
+ * Updated a user's info such as email, password
+ * @param userData 
+ * @returns 
+ */
+export const updateUserService = async (userData: UserEditInput): Promise<boolean> => {
+  try {
+    if(userData.password){
+      const hashedPassword = await hashPassword(userData.password);
+      userData.password = hashedPassword;
+    }
+    
+    const updatedUser = await updateUser(userData.id, userData);
+    return updatedUser;
+  } catch (error) {
+    console.error("Error updating user:", error);
     throw new Error("Internal server error");
   }
 };
