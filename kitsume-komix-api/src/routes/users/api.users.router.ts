@@ -6,7 +6,8 @@ import {
   checkIfAppSetupComplete,
   createUserService,
   deleteUserService,
-  getUsersRegistered
+  getUsersRegistered,
+  updateUserService
 } from "#modules/users/users.service.ts";
 
 import {
@@ -27,6 +28,7 @@ import type {
   AccessRefreshTokenCombinedPayload,
   AppEnv,
   UserRegistrationInput,
+  UserEditInput
 } from "#types/index.ts";
 
 const apiUsersRouter = new OpenAPIHono<AppEnv>();
@@ -269,6 +271,14 @@ apiUsersRouter.openapi(
           },
         },
       },
+      403: {
+        description: "Forbidden - Admin access required",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
       500: {
         description: "Internal server error",
         content: {
@@ -286,6 +296,11 @@ apiUsersRouter.openapi(
       return c.json({ message: "Unauthorized" }, 401);
     }
 
+    if(!user.isAdmin) {
+      return c.json({ message: "Forbidden - Admin access required" }, 403);
+    }
+
+
     try {
       const body = await c.req.json();
       const parsedBody = EditUserRequestSchema.safeParse(body);
@@ -300,7 +315,11 @@ apiUsersRouter.openapi(
         );
       }
 
-      return c.json({ message: "Placeholder: user edit endpoint" }, 200);
+      const editUserData: UserEditInput = parsedBody.data;
+
+      const updatedUser = await updateUserService(editUserData);
+
+      return c.json({ message: "User updated successfully", success: updatedUser }, 200);
     } catch (error) {
       console.error("Error parsing edit-user request:", error);
       if (error instanceof SyntaxError && error.message.includes("JSON")) {
