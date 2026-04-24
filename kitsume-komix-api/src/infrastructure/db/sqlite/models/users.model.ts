@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { usersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
-import type { NewUser, User } from "#types/index.ts";
+import type { NewUser, User, UserEditInput } from "#types/index.ts";
 
 /**
  * Creates a new user in the database
@@ -144,14 +144,7 @@ export const getAllUsers = async (): Promise<User[]> => {
  */
 export const updateUser = async (
   id: number,
-  updates: Partial<{
-    username: string;
-    email: string;
-    password_hash: string;
-    first_name?: string | null;
-    last_name?: string | null;
-    admin: boolean;
-  }>,
+  updates: UserEditInput
 ): Promise<boolean> => {
   const { db, client } = getClient();
 
@@ -161,18 +154,8 @@ export const updateUser = async (
 
   try {
     const updateData: Record<string, unknown> = {};
-    if (updates.username !== undefined) updateData.username = updates.username;
     if (updates.email !== undefined) updateData.email = updates.email;
-    if (updates.password_hash !== undefined) {
-      updateData.password_hash = updates.password_hash;
-    }
-    if (updates.first_name !== undefined) {
-      updateData.first_name = updates.first_name;
-    }
-    if (updates.last_name !== undefined) {
-      updateData.last_name = updates.last_name;
-    }
-    if (updates.admin !== undefined) updateData.admin = updates.admin ? 1 : 0;
+    if (updates.password !== undefined) updateData.passwordHash = updates.password;
 
     const result: { id: number }[] = await db
       .update(usersTable)
