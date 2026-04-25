@@ -464,6 +464,14 @@ apiUsersRouter.openapi(
           },
         },
       },
+      403: {
+        description: "Forbidden",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
       500: {
         description: "Internal server error",
         content: {
@@ -485,6 +493,11 @@ apiUsersRouter.openapi(
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
     }
+
+    if(!user.isAdmin) {
+      return c.json({ message: "Forbidden" }, 403);
+    }
+
 
     try {
       // TODO: expand the possiblility of assigning multiple libraries at once
