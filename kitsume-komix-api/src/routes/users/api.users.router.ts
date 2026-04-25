@@ -24,11 +24,16 @@ import {
   UsersResponseSchema
 } from "#zod/schemas/response.schema.ts";
 
+import {
+  ComicLibrariesAssignmentSchema
+} from "#zod/schemas/data/comicLibraries.schema.ts";
+
 import type {
   AccessRefreshTokenCombinedPayload,
   AppEnv,
   UserRegistrationInput,
-  UserEditInput
+  UserEditInput,
+  LibraryAssignmentsInput
 } from "#types/index.ts";
 
 const apiUsersRouter = new OpenAPIHono<AppEnv>();
@@ -500,16 +505,23 @@ apiUsersRouter.openapi(
 
 
     try {
-      // TODO: expand the possiblility of assigning multiple libraries at once
-      const { userId, libraryId } = await c.req.json();
+      const { userId, libraryAssignments } = await c.req.json();
 
       // Validate input
-      if (!userId || !libraryId) {
-        return c.json({ message: "User ID and Library ID are required" }, 400);
+      if (!userId || !libraryAssignments) {
+        return c.json({ message: "User ID and Library assignments are required" }, 400);
       }
 
+      const parsedLibraryAssignments = ComicLibrariesAssignmentSchema.array().safeParse(libraryAssignments);
+
+      if (!parsedLibraryAssignments.success) {
+        return c.json({ message: "Invalid library assignments", errors: z.treeifyError(parsedLibraryAssignments.error) }, 400);
+      }
+
+      const validLibraryAssignments: LibraryAssignmentsInput[] = parsedLibraryAssignments.data;
+
       // Call the service to assign the library to the user
-      await assignLibraryToUserService(userId, libraryId);
+      await assignLibraryToUserService(userId, validLibraryAssignments);
 
       return c.json({ message: "Library assigned to user successfully" }, 200);
     } catch (error) {
@@ -562,6 +574,14 @@ apiUsersRouter.openapi(
           },
         },
       },
+      403: {
+        description: "Forbidden",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
       500: {
         description: "Internal server error",
         content: {
@@ -584,6 +604,11 @@ apiUsersRouter.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
+    if(!user.isAdmin) {
+      return c.json({ message: "Forbidden" }, 403);
+    }
+
+
     const paramId = c.req.param("id");
     const libraryId = parseInt(paramId, 10);
 
@@ -591,8 +616,13 @@ apiUsersRouter.openapi(
       return c.json({ message: "Invalid library ID" }, 400);
     }
 
+    const newAssignment: LibraryAssignmentsInput = {
+      id: libraryId,
+      enabled: true
+    }
+
     try {
-      await assignLibraryToUserService(userId, libraryId);
+      await assignLibraryToUserService(userId, [newAssignment]);
     } catch (error) {
       console.error("Error assigning library to user:", error);
       return c.json({ message: "Internal server error" }, 500);
