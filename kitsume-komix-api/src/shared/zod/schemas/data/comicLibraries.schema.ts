@@ -53,3 +53,16 @@ export const ComicLibrariesSchema = z.object({
   title: "ComicLibrariesResponse",
   description: "Response schema for a list of comic libraries",
 });
+
+export const ComicLibrariesAssignmentSchema = z.object({
+  id: z.string().openapi({
+    param: { name: "libraryId", in: "path" },
+    example: "1",
+  }),
+  enabled: z.boolean().default(true).openapi({
+    description: "Indicates if the library is enabled for the user",
+  })
+}).openapi({
+  title: "ComicLibrariesAssignment",
+  description: "Schema for assigning comic libraries to a user",
+})
