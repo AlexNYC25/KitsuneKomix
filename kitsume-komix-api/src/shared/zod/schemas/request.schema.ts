@@ -3,7 +3,7 @@ import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 import { AuthRefreshToken } from "./data/auth.schema.ts";
 import { ComicLibrarySelectSchema } from "./data/database.schema.ts";
-import { ComicLibraryCompiledInfoSchema } from "./data/comicLibraries.schema.ts";
+import { ComicLibraryCompiledInfoSchema, ComicLibrariesAssignmentSchema } from "./data/comicLibraries.schema.ts";
 
 /**
  * Common schema for path parameter 'id'
@@ -324,10 +324,9 @@ export const ParamUserLibraryIdSchema = z.object({
     param: { name: "userId", in: "path" },
     example: "1",
   }),
-  libraryId: z.string().openapi({
-    param: { name: "libraryId", in: "path" },
-    example: "1",
-  }),
+  librarys: z.array(
+    ComicLibrariesAssignmentSchema
+  )
 });
 
 /**
