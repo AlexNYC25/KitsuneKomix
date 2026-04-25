@@ -1,9 +1,11 @@
 import type { z } from "zod"; 
 
 
-import type { ComicLibraryCreateSchema, ComicLibraryUpdateSchema, ComicLibraryCompiledInfoSchema } from "#zod/schemas/data/comicLibraries.schema.ts"
+import type { ComicLibraryCreateSchema, ComicLibraryUpdateSchema, ComicLibraryCompiledInfoSchema, ComicLibrariesAssignmentSchema } from "#zod/schemas/data/comicLibraries.schema.ts"
 
 export type LibraryRegistrationInput = z.infer<typeof ComicLibraryCreateSchema>;
+
+export type LibraryAssignmentsInput = z.infer<typeof ComicLibrariesAssignmentSchema>;
 
 export type LibraryUpdateInput = z.infer<typeof ComicLibraryUpdateSchema>;
 
