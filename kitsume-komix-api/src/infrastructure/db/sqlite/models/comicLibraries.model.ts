@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 import { comicLibrariesTable, userComicLibrariesTable, usersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
@@ -345,6 +345,37 @@ export const assignLibraryToUser = async (
       });
   } catch (error) {
     console.error("Error assigning library to user:", error);
+    throw error;
+  }
+};
+
+/**
+ * Unassigns a comic library from a user by removing the entry from the user_comic_libraries table.
+ *
+ * @param userId - ID of the user
+ * @param libraryId - ID of the comic library to unassign
+ */
+export const unassignLibraryFromUser = async (
+  userId: number,
+  libraryId: number,
+): Promise<void> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    await db
+      .delete(userComicLibrariesTable)
+      .where(
+        and(
+          eq(userComicLibrariesTable.userId, userId),
+          eq(userComicLibrariesTable.libraryId, libraryId),
+        ),
+      );
+  } catch (error) {
+    console.error("Error unassigning library from user:", error);
     throw error;
   }
 };
