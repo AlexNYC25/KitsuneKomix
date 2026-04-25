@@ -55,9 +55,9 @@ export const ComicLibrariesSchema = z.object({
 });
 
 export const ComicLibrariesAssignmentSchema = z.object({
-  id: z.string().openapi({
+  id: z.number().openapi({
     param: { name: "libraryId", in: "path" },
-    example: "1",
+    example: 1,
   }),
   enabled: z.boolean().default(true).openapi({
     description: "Indicates if the library is enabled for the user",
