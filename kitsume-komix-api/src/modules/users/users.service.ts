@@ -9,11 +9,12 @@ import {
 import {
   assignLibraryToUser,
   getComicLibraryById,
+  unassignLibraryFromUser
 } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
 
 import { hashPassword } from "#utilities/hash.ts";
 
-import type { User, UserRegistrationInput, UserEditInput } from "#types/index.ts";
+import type { User, UserRegistrationInput, UserEditInput, LibraryAssignmentsInput } from "#types/index.ts";
 
 import { getSetting, setSetting } from "#infrastructure/db/sqlite/models/appSettings.model.ts";
 
@@ -149,7 +150,7 @@ export const deleteUserService = async (userId: number): Promise<boolean> => {
  */
 export async function assignLibraryToUserService(
   userId: number,
-  libraryId: number,
+  libraryAssignments: LibraryAssignmentsInput[]
 ): Promise<void> {
   // first we want to validate that the userId and libraryId exist in their respective tables
   try {
@@ -162,22 +163,36 @@ export async function assignLibraryToUserService(
     throw new Error("Internal server error");
   }
 
-  try {
-    const library = await getComicLibraryById(libraryId);
-    if (!library) {
-      throw new Error("Library does not exist");
-    }
-  } catch (error) {
-    console.error("Error fetching library by ID:", error);
-    throw new Error("Internal server error");
+  if (libraryAssignments.length === 0) {
+    throw new Error("No library assignments provided");
   }
 
-  try {
-    await assignLibraryToUser(userId, libraryId);
-  } catch (error) {
-    console.error("Error assigning library to user:", error);
-    throw new Error("Internal server error");
+  for (const assignment of libraryAssignments) {
+    const libraryId = assignment.id;
+
+    try {
+      const library = await getComicLibraryById(libraryId);
+      if (!library) {
+        throw new Error("Library does not exist");
+      }
+    } catch (error) {
+      console.error("Error fetching library by ID:", error);
+      throw new Error("Internal server error");
+    }
+    
+    try {
+      if (assignment.enabled) {
+        await assignLibraryToUser(userId, libraryId);
+      } else {
+        await unassignLibraryFromUser(userId, libraryId);
+      }
+    } catch (error) {
+      console.error("Error assigning/unassigning library to/from user:", error);
+      throw new Error("Internal server error");
+    }  
   }
+
+  
 }
 
 /**
