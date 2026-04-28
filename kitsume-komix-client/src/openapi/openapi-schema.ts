@@ -506,7 +506,7 @@ export interface paths {
                                 firstName: string | null;
                                 lastName: string | null;
                                 passwordHash: string;
-                                admin: number;
+                                admin: boolean;
                                 createdAt: string;
                                 updatedAt: string;
                             }[];
@@ -589,11 +589,14 @@ export interface paths {
                 content: {
                     "application/json": {
                         id?: number;
-                        /** Format: email */
+                        username: string;
                         email: string;
+                        firstName?: string | null;
+                        lastName?: string | null;
+                        admin?: boolean;
+                        createdAt?: string;
+                        updatedAt?: string;
                         password: string;
-                        firstName?: string;
-                        lastName?: string;
                     };
                 };
             };
@@ -804,11 +807,14 @@ export interface paths {
                 content: {
                     "application/json": {
                         id?: number;
-                        /** Format: email */
+                        username: string;
                         email: string;
+                        firstName?: string | null;
+                        lastName?: string | null;
+                        admin?: boolean;
+                        createdAt?: string;
+                        updatedAt?: string;
                         password: string;
-                        firstName?: string;
-                        lastName?: string;
                     };
                 };
             };
