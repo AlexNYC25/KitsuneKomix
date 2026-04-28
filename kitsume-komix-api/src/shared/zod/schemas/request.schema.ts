@@ -2,7 +2,6 @@ import { z } from "@hono/zod-openapi";
 import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 import { AuthRefreshToken } from "./data/auth.schema.ts";
-import { ComicLibrarySelectSchema } from "./data/database.schema.ts";
 import { ComicLibraryCompiledInfoSchema, ComicLibrariesAssignmentSchema } from "./data/comicLibraries.schema.ts";
 
 /**
@@ -235,14 +234,6 @@ export const ComicBookUpdateSchema = z.object({
 
 export const ComicLibraryResponseSchema = z.object({
   libraries: z.array(ComicLibraryCompiledInfoSchema)
-});
-
-export const UserSchema = z.object({
-  id: z.number().int().positive().optional(),
-  email: z.email(),
-  password: z.string().min(8).max(100),
-  firstName: z.string().max(50).optional(),
-  lastName: z.string().max(50).optional(),
 });
 
 /**

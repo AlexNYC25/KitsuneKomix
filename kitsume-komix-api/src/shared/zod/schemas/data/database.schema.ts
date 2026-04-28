@@ -1,4 +1,4 @@
-import { createSelectSchema } from "../../factory.ts";
+import { createInsertSchema, createSelectSchema } from "../../factory.ts";
 import {
   appSettingsTable,
   comicBookCharactersTable,
@@ -42,6 +42,12 @@ import {
 
 // Inferred schemas from Drizzle schema
 export const UserSelectSchema = createSelectSchema(usersTable);
+
+export const UserInsertSchema = createInsertSchema(usersTable).omit({
+  passwordHash: true, // Exclude passwordHash from insert schema as it will be generated from the plain text password
+}).extend({
+  password: createInsertSchema(usersTable).shape.passwordHash, // Add plain text password field for user registration
+});
 
 export const AppSettingSelectSchema = createSelectSchema(appSettingsTable);
 
