@@ -11,9 +11,11 @@ import {
 } from "#modules/users/users.service.ts";
 
 import {
+  UserInsertSchema,
+} from "#zod/schemas/data/database.schema.ts";
+import {
   ParamIdSchema,
   ParamUserLibraryIdSchema,
-  UserSchema,
   EditUserRequestSchema,
 } from "#zod/schemas/request.schema.ts";
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
@@ -132,7 +134,7 @@ apiUsersRouter.openapi(
       body: {
         content: {
           "application/json": {
-            schema: UserSchema,
+            schema: UserInsertSchema,
           },
         },
       },
@@ -198,7 +200,7 @@ apiUsersRouter.openapi(
     try {
       const userData: UserRegistrationInput = await c.req.json();
 
-      const parsedUserData = UserSchema.safeParse(userData);
+      const parsedUserData = UserInsertSchema.safeParse(userData);
 
       if (!parsedUserData.success) {
         return c.json({
@@ -353,7 +355,7 @@ apiUsersRouter.openapi(
       body: {
         content: {
           "application/json": {
-            schema: UserSchema,
+            schema: UserInsertSchema,
           },
         },
       },
@@ -396,7 +398,7 @@ apiUsersRouter.openapi(
 
       const userData = await c.req.json();
 
-      const parsedUserData = UserSchema.safeParse(userData);
+      const parsedUserData = UserInsertSchema.safeParse(userData);
 
       if (!parsedUserData.success) {
         return c.json({

@@ -84,7 +84,7 @@ export async function createUserService(
         passwordHash: hashedPassword,
         firstName: user.firstName ?? null,
         lastName: user.lastName ?? null,
-        admin: 1, // Make the first user an admin
+        admin: true, // Make the first user an admin
       });
 
       return newUserId;
@@ -100,7 +100,7 @@ export async function createUserService(
     passwordHash: hashedPassword,
     firstName: user.firstName ?? null,
     lastName: user.lastName ?? null,
-    admin: 0, // Default to non-admin
+    admin: user?.admin ?? false
   });
 
   return newUserId;
