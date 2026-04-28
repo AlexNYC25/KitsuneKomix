@@ -8,7 +8,7 @@ export const usersTable = sqliteTable("users", {
   firstName: text(),
   lastName: text(),
   passwordHash: text().notNull(),
-  admin: int().notNull().default(0),
+  admin: int({mode: "boolean"}).notNull().default(false),
   createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
