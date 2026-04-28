@@ -1,5 +1,5 @@
-import { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import {
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import type {
   appSettingsTable,
   comicBookCharactersTable,
   comicBookColoristsTable,
