@@ -8,9 +8,12 @@
 	const authStore = useAuthStore();
 	const usersStore = useUsersStore();
 
+	import AddUser from '../forms/AddUser.vue';
+
 	const users = computed(() => usersStore.getUsers);
 	const isAdmin = computed(() => Boolean(authStore.user?.admin));
 
+	const showAddUserForm = ref(false);
 	const showEditUserForm = ref(false);
 	const showResetPasswordForm = ref(false);
 	const showEditUserLibrariesForm = ref(false);
@@ -21,7 +24,7 @@
 	const editedUserPasswordConfirmation = ref('')
 
 	const handleAddUser = () => {
-		// Logic to handle adding a user
+		showAddUserForm.value = true;
 	};
 
 	onMounted(async () => {
@@ -116,6 +119,9 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Add User Form -->
+		<AddUser v-if="showAddUserForm && isAdmin" @cancel="showAddUserForm = false" />
 
 		<!-- Edit User Form -->
 		<form
