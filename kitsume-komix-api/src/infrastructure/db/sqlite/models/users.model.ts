@@ -156,6 +156,7 @@ export const updateUser = async (
     const updateData: Record<string, unknown> = {};
     if (updates.email !== undefined) updateData.email = updates.email;
     if (updates.password !== undefined) updateData.passwordHash = updates.password;
+    if (updates.admin !== undefined) updateData.admin = updates.admin;
 
     const result: { id: number }[] = await db
       .update(usersTable)

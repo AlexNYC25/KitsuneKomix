@@ -45,8 +45,13 @@ export const UserSelectSchema = createSelectSchema(usersTable);
 
 export const UserInsertSchema = createInsertSchema(usersTable).omit({
   passwordHash: true, // Exclude passwordHash from insert schema as it will be generated from the plain text password
+  id: true, // Exclude id from insert schema as it will be auto-generated
+  createdAt: true, // Exclude createdAt from insert schema as it will be auto-generated
+  updatedAt: true, // Exclude updatedAt from insert schema as it will be auto-generated
+  username: true, // Exclude username from insert schema as it will be generated from the email
 }).extend({
   password: createInsertSchema(usersTable).shape.passwordHash, // Add plain text password field for user registration
+  username: createInsertSchema(usersTable).shape.username.optional(), // Add optional username field for user registration (will be generated from email if not provided)
 });
 
 export const AppSettingSelectSchema = createSelectSchema(appSettingsTable);

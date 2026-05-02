@@ -22,6 +22,7 @@ import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
   ErrorResponseSchema,
   MessageResponseSchema,
+  SuccessResponseSchema,
   UserCreationResponseSchema,
   UsersResponseSchema
 } from "#zod/schemas/response.schema.ts";
@@ -258,7 +259,7 @@ apiUsersRouter.openapi(
         description: "User edit placeholder response",
         content: {
           "application/json": {
-            schema: MessageResponseSchema,
+            schema: SuccessResponseSchema,
           },
         },
       },
@@ -324,9 +325,9 @@ apiUsersRouter.openapi(
 
       const editUserData: UserEditInput = parsedBody.data;
 
-      const updatedUser = await updateUserService(editUserData);
+      const updatedUser: boolean = await updateUserService(editUserData);
 
-      return c.json({ message: "User updated successfully", success: updatedUser }, 200);
+      return c.json({ success: updatedUser }, 200);
     } catch (error) {
       console.error("Error parsing edit-user request:", error);
       if (error instanceof SyntaxError && error.message.includes("JSON")) {
@@ -708,7 +709,7 @@ apiUsersRouter.openapi(
 );
 
 /**
- * DELETE /api/delete-user/:id
+ * DELETE /api/delete-user/{id}
  * Deletes a user by ID. Requires admin privileges or the user themselves.
  *
  * Ideally should just be for the admin user to delete other users, but allowing
@@ -717,7 +718,7 @@ apiUsersRouter.openapi(
 apiUsersRouter.openapi(
   createRoute({
     method: "delete",
-    path: "/delete-user/:id",
+    path: "/delete-user/{id}",
     summary: "Delete a user",
     description: "Delete a user from the system. Requires authentication.",
     tags: ["Users"],
@@ -730,7 +731,7 @@ apiUsersRouter.openapi(
         description: "User deleted successfully",
         content: {
           "application/json": {
-            schema: MessageResponseSchema,
+            schema: SuccessResponseSchema,
           },
         },
       },
@@ -744,6 +745,14 @@ apiUsersRouter.openapi(
       },
       401: {
         description: "Unauthorized",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      404: {
+        description: "User not found",
         content: {
           "application/json": {
             schema: ErrorResponseSchema,
@@ -785,13 +794,17 @@ apiUsersRouter.openapi(
     }
 
     try {
-      await deleteUserService(deleteUserId);
+      const deleteUserResult = await deleteUserService(deleteUserId);
+
+      if (!deleteUserResult) {
+        return c.json({ message: "User not found or could not be deleted" }, 404);
+      }
+
+      return c.json({ success: true }, 200);
     } catch (error) {
       console.error("Error deleting user:", error);
       return c.json({ message: "Error deleting user" }, 500);
     }
-
-    return c.json({ message: "User deleted successfully" }, 200);
   },
 );
 

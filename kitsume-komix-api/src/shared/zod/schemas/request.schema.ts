@@ -330,6 +330,7 @@ export const EditUserRequestSchema = z
     id: z.number().int().positive(),
     email: z.email().optional(),
     password: z.string().min(1).optional(),
+    admin: z.boolean().optional(),
   })
   .refine((data) => data.email !== undefined || data.password !== undefined, {
     message: "Either email or password must be provided",
