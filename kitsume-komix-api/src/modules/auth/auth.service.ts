@@ -42,7 +42,7 @@ export const authenticateUser = async (
     throw new Error("Invalid password");
   }
 
-  return { id: user.id, email: user.email, admin: user.admin === 1 };
+  return { id: user.id, email: user.email, admin: user.admin };
 };
 
 /**
