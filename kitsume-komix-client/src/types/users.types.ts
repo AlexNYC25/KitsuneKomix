@@ -9,3 +9,9 @@ export type UserRegistrationRequestBody = NonNullable<
 >;
 
 export type UserRegistractionPayload = UserRegistrationRequestBody['content']['application/json']
+
+export type UserEditRequestBody = NonNullable<
+  paths['/users/edit-user']['post']['requestBody']
+>;
+
+export type UserEditPayload = UserEditRequestBody['content']['application/json']
