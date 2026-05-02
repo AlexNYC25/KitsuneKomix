@@ -588,15 +588,12 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": {
-                        id?: number;
-                        username: string;
                         email: string;
                         firstName?: string | null;
                         lastName?: string | null;
                         admin?: boolean;
-                        createdAt?: string;
-                        updatedAt?: string;
                         password: string;
+                        username?: string;
                     };
                 };
             };
@@ -704,6 +701,7 @@ export interface paths {
                         /** Format: email */
                         email?: string;
                         password?: string;
+                        admin?: boolean;
                     };
                 };
             };
@@ -715,7 +713,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            message: string;
+                            success: boolean;
                         };
                     };
                 };
@@ -806,15 +804,12 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": {
-                        id?: number;
-                        username: string;
                         email: string;
                         firstName?: string | null;
                         lastName?: string | null;
                         admin?: boolean;
-                        createdAt?: string;
-                        updatedAt?: string;
                         password: string;
+                        username?: string;
                     };
                 };
             };
@@ -1165,7 +1160,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/delete-user/:id": {
+    "/users/delete-user/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1197,7 +1192,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            message: string;
+                            success: boolean;
                         };
                     };
                 };
@@ -1217,6 +1212,20 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description User not found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
