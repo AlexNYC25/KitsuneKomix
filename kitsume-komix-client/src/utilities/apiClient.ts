@@ -7,6 +7,7 @@ const apiRootBaseURL = "http://localhost:8000";
 let authToken: string | null = null;
 let refreshToken: string | null = null;
 let onTokenRefresh: (() => Promise<boolean>) | null = null;
+const retryableRequests = new WeakMap<Request, Request>();
 
 export function composeStaticUrl(path: string): string {
   return `${apiRootBaseURL}${path}`;
@@ -59,6 +60,9 @@ export async function authenticatedImageFetch(input: RequestInfo | URL, init?: R
 // Client middleware to handle authentication
 const authMiddleware: Middleware = {
   async onRequest({ request }) {
+    // Keep a cloned copy so retry logic can resend requests with bodies.
+    retryableRequests.set(request, request.clone());
+
     if (authToken) {
       request.headers.set("Authorization", `Bearer ${authToken}`);
     }
@@ -70,15 +74,20 @@ const authMiddleware: Middleware = {
       const refreshed = await onTokenRefresh();
       
       if (refreshed && authToken) {
-        // Retry the request with the new token
-        const newRequest = new Request(request, {
-          headers: new Headers(request.headers),
+        // Retry the request with the new token and original request body.
+        const retrySource = retryableRequests.get(request) ?? request;
+        const newRequest = new Request(retrySource, {
+          headers: new Headers(retrySource.headers),
         });
         newRequest.headers.set("Authorization", `Bearer ${authToken}`);
+
+        retryableRequests.delete(request);
         
         return fetch(newRequest);
       }
     }
+
+    retryableRequests.delete(request);
     
     return response;
   },
