@@ -9,6 +9,9 @@
 	const usersStore = useUsersStore();
 
 	import AddUser from '../forms/AddUser.vue';
+	import EditUser from '../forms/EditUser.vue';
+	import EditPassword from '../forms/EditPassword.vue';
+	import DeleteUser from '../forms/DeleteUser.vue';
 
 	const users = computed(() => usersStore.getUsers);
 	const isAdmin = computed(() => Boolean(authStore.user?.admin));
@@ -18,13 +21,42 @@
 	const showResetPasswordForm = ref(false);
 	const showEditUserLibrariesForm = ref(false);
 	const showDeleteUserConfirmationForm = ref(false)
-
-	const editedUserEmail = ref('')
-	const editedUserPassword = ref('')
-	const editedUserPasswordConfirmation = ref('')
+	const selectedUserIdForEdit = ref<number | null>(null);
+	const selectedUserIdForPasswordEdit = ref<number | null>(null);
+	const selectedUserIdForDelete = ref<number | null>(null);
 
 	const handleAddUser = () => {
 		showAddUserForm.value = true;
+	};
+
+	const handleOpenEditUserForm = (userId: number) => {
+		selectedUserIdForEdit.value = userId;
+		showEditUserForm.value = true;
+	};
+
+	const handleCloseEditUserForm = () => {
+		showEditUserForm.value = false;
+		selectedUserIdForEdit.value = null;
+	};
+
+	const handleOpenEditPasswordForm = (userId: number) => {
+		selectedUserIdForPasswordEdit.value = userId;
+		showResetPasswordForm.value = true;
+	};
+
+	const handleCloseEditPasswordForm = () => {
+		showResetPasswordForm.value = false;
+		selectedUserIdForPasswordEdit.value = null;
+	};
+
+	const handleOpenDeleteUserConfirmationForm = (userId: number) => {
+		selectedUserIdForDelete.value = userId;
+		showDeleteUserConfirmationForm.value = true;
+	};
+
+	const handleCloseDeleteUserConfirmationForm = () => {
+		showDeleteUserConfirmationForm.value = false;
+		selectedUserIdForDelete.value = null;
 	};
 
 	onMounted(async () => {
@@ -86,7 +118,7 @@
 					>
 						<div>
 							<button
-								@click="showEditUserForm = true"
+								@click="handleOpenEditUserForm(user.id)"
 							>
 								<v-icon name="io-pencil-sharp" title="Edit User" scale="2" />
 							</button>
@@ -94,7 +126,7 @@
 
 						<div>
 							<button
-								@click="showResetPasswordForm = true"
+								@click="handleOpenEditPasswordForm(user.id)"
 							>
 								<v-icon name="io-lock-closed" title="Edit Password" scale="2" />
 							</button>
@@ -110,7 +142,7 @@
 
 						<div>
 							<button
-								@click="showDeleteUserConfirmationForm = true"
+								@click="handleOpenDeleteUserConfirmationForm(user.id)"
 							>
 								<v-icon name="io-trash" title="Delete User" scale="2" />
 							</button>
@@ -124,84 +156,24 @@
 		<AddUser v-if="showAddUserForm && isAdmin" @cancel="showAddUserForm = false" />
 
 		<!-- Edit User Form -->
-		<form
-			v-if="showEditUserForm && isAdmin"
-			class="lg:w-[520px] lg:h-[220px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
-			@submit.prevent=""
-		>
-			<h3 class="text-lg font-semibold">Edit User</h3>
-
-			<div>
-				<label for="library-name-edit" class="block text-sm font-medium mb-1">New Email</label>
-				<input
-					id="library-name-edit"
-					v-model="editedUserEmail"
-					type="text"
-					placeholder="e.g. user@example.com"
-					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
-				/>
-			</div>
-
-			<div class="flex items-center gap-2">
-				<Button
-					type="submit"
-					label="Save User"
-					severity="info"
-				/>
-
-				<Button
-					type="button"
-					label="Cancel"
-					severity="info"
-					@click="showEditUserForm = false"
-				/>
-			</div>
-		</form>
+		<EditUser
+			v-if="showEditUserForm && isAdmin && selectedUserIdForEdit !== null"
+			:user-id="selectedUserIdForEdit"
+			:on-cancel="handleCloseEditUserForm"
+		/>
 
 		<!-- Change User Password Form -->
-		<form
-			v-if="showResetPasswordForm && isAdmin"
-			class="lg:w-[520px] lg:h-[420px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
-			@submit.prevent=""
-		>
-			<h3 class="text-lg font-semibold">Edit User's Password</h3>
+		<EditPassword
+			v-if="showResetPasswordForm && isAdmin && selectedUserIdForPasswordEdit !== null"
+			:user-id="selectedUserIdForPasswordEdit"
+			:on-cancel="handleCloseEditPasswordForm"
+		/>
 
-			<div>
-				<label for="library-name-edit" class="block text-sm font-medium mb-1">New Password</label>
-				<input
-					id="library-name-edit"
-					v-model="editedUserPassword"
-					type="password"
-					placeholder="Enter new password"
-					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
-				/>
-			</div>
-
-			<div>
-				<label for="library-name-edit" class="block text-sm font-medium mb-1">Confirm New Password</label>
-				<input
-					id="library-name-edit"
-					v-model="editedUserPasswordConfirmation"
-					type="password"
-					placeholder="Confirm new password"
-					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
-				/>
-			</div>
-
-			<div class="flex items-center gap-2">
-				<Button
-					type="submit"
-					label="Save Password"
-					severity="info"
-				/>
-
-				<Button
-					type="button"
-					label="Cancel"
-					severity="info"
-					@click="showResetPasswordForm = false"
-				/>
-			</div>
-		</form>
+		<!-- Delete User Confirmation -->
+		<DeleteUser
+			v-if="showDeleteUserConfirmationForm && isAdmin && selectedUserIdForDelete !== null"
+			:user-id="selectedUserIdForDelete"
+			:on-cancel="handleCloseDeleteUserConfirmationForm"
+		/>
 	</div>
 </template>
