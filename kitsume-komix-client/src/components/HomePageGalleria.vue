@@ -63,8 +63,14 @@ const images = ref(
 
 <template>
   <div class="card w-full">
-		<Galleria :value="images" :responsiveOptions="responsiveOptions" :numVisible="5" :circular="false"
-			:showItemNavigators="true" :showThumbnails="false" :showItemNavigatorsOnHover="true" :showIndicators="true">
+		<Galleria
+			:value="images"
+			:responsiveOptions="responsiveOptions"
+			:numVisible="5"
+			:circular="false"
+			:showItemNavigatorsOnHover="true"
+			:showIndicators="true"
+		>
 			<template #item="slotProps" class="flex justify-center">
 				<img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" />
 			</template>
