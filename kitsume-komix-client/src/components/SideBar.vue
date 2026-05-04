@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router';
 import { useLibrariesStore } from '@/stores/libraries';
 import { useAuthStore } from '@/stores/auth';
 import Button from 'primevue/button';
-import PanelMenu from 'primevue/panelmenu';
 
 const router = useRouter();
 const authStore = useAuthStore();

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 	import { ref, onMounted } from 'vue';
-	import { useForm, useField } from 'vee-validate';
+	import { useForm } from 'vee-validate';
 	import { useRouter, useRoute } from 'vue-router';
 
 	import { useAuthStore } from '@/stores/auth';

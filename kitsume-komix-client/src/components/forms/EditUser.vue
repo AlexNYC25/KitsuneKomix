@@ -2,7 +2,6 @@
 	import { onMounted } from 'vue';
 
 	import { useForm } from 'vee-validate';
-	import Button from 'primevue/button';
 
 	import { useUsersStore } from '@/stores/users';
 
