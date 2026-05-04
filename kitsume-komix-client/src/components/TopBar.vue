@@ -12,12 +12,12 @@ const route = useRoute()
 const comicSeriesStore = useComicSeriesStore()
 const breadcrumbStore = useBreadcrumbStore()
 
-const breadcrumbItems = ref<any[]>([])
+const breadcrumbItems = ref<{label: string, icon: string, to: string}[]>([])
 
 const getComicSeriesName = async (seriesId: number): Promise<string> => {
 	try {
 		const seriesArr = await comicSeriesStore.lookupComicSeriesById(seriesId)
-		return seriesArr && seriesArr.length > 0 ? seriesArr[0].name : 'Comic Series'
+		return seriesArr && seriesArr.comicBooks && seriesArr?.comicBooks.length > 0 ? seriesArr.name : 'Comic Series'
 	} catch (error) {
 		console.error('Failed to fetch series name:', error)
 	}
@@ -25,7 +25,7 @@ const getComicSeriesName = async (seriesId: number): Promise<string> => {
 }
 
 const generateBreadcrumbs = async () => {
-	const items: any[] = [
+	const items: {label: string, icon: string, to: string}[] = [
 		{
 			label: 'Home',
 			icon: 'pi pi-home',
