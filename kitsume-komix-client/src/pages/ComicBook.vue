@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/auth';
 import { apiClient } from '@/utilities/apiClient';
 import { convertArrayOfCreditsToString } from '@/utilities/metadata';
 
-import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail } from '@/types/comic-books.types';
+import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist } from '@/types/comic-books.types';
 
 import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
@@ -27,7 +27,7 @@ const comicBookId = ref<number | null>(null);
 const comicBookData = ref<ComicBookById | null>(null);
 const comicBookMetadata = ref<ComicBookMetadata | null>(null);
 const thumbnailUrl = ref<string | null>(null);
-const comicBookListsData = ref<any[]>([]);
+const comicBookListsData = ref<ComicBookReadlist[]>([]);
 
 const comicReaderRef = ref<InstanceType<typeof ComicReader>>();
 const isLoading = ref(true);
@@ -491,3 +491,5 @@ const downloadComic = async (comicBookId: number) => {
 </template>
 
 <style scoped></style>
+
+

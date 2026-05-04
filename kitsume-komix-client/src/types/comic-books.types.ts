@@ -23,6 +23,10 @@ export type ComicBookMetadata = paths['/comic-books/{id}/metadata']['get']['resp
 // /comic-books/{id} endpoint types - base comic book details
 export type ComicBookById = paths['/comic-books/{id}']['get']['responses']['200']['content']['application/json'];
 
+// /comic-books/{id}/readlists endpoint types
+export type GetComicBookReadlistsResponse = paths['/comic-books/{id}/readlists']['get']['responses']['200']['content']['application/json'];
+export type ComicBookReadlist = NonNullable<GetComicBookReadlistsResponse>['readLists'][number];
+
 // /comic-books/{id}/thumbnails endpoint types
 export type GetComicBookThumbnailsResponse = paths['/comic-books/{id}/thumbnails']['get']['responses']['200']['content']['application/json'];
 
