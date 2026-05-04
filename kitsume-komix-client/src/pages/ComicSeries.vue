@@ -7,6 +7,7 @@ import { apiClient } from '@/utilities/apiClient';
 import { useComicSeriesStore } from '@/stores/comic-series';
 import type { ComicBook, ComicBooksSeriesResponse } from '@/types/comic-books.types';
 import type { ComicSeriesResponseItem } from '@/types/comic-series.types';
+import type { PageState } from 'primevue/paginator';
 import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
 import Paginator from 'primevue/paginator';
 import Button from 'primevue/button';
@@ -151,7 +152,7 @@ const getComicThumbnailUrl = (comic: ComicBook): string | null => {
 	return comicThumbnailUrls.value[comic.id] ?? null;
 };
 
-const onPageChange = (event: any) => {
+const onPageChange = (event: PageState) => {
 	currentPage.value = event.page;
 };
 
