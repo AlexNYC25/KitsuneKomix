@@ -344,7 +344,7 @@ onBeforeUnmount(() => {
 					<div v-else-if="viewMode === 'grid' && paginatedComics.length > 0">
 						<div class="grid grid-cols-5 gap-4">
 							<div 
-								v-for="(comic, index) in paginatedComics" 
+								v-for="(comic) in paginatedComics" 
 								:key="comic.id"
 								class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
 								@click="navigateToComicBook(comic.id)"
@@ -368,7 +368,7 @@ onBeforeUnmount(() => {
 					<!-- List View -->
 					<div v-else-if="viewMode === 'list' && paginatedComics.length > 0" class="space-y-3">
 						<div 
-							v-for="(comic, index) in paginatedComics" 
+							v-for="(comic) in paginatedComics" 
 							:key="comic.id" 
 							class="w-full flex items-start gap-4 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer border-l-4 border-cyan-800"
 							@click="navigateToComicBook(comic.id)"
