@@ -98,9 +98,8 @@ const goToComicSeries = (id: string | number) => {
         @click="scrollLeft"
         unstyled
         class="left-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-20 hover:bg-slate-600/50"
-      >
-        <
-      </Button>
+        icon="pi pi-chevron-left"
+      ></Button>
 
       <div
         ref="carousel"
@@ -142,9 +141,8 @@ const goToComicSeries = (id: string | number) => {
         @click="scrollRight"
         unstyled
         class="right-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-10 hover:bg-slate-600/50"
-      >
-        >
-      </Button>
+        icon="pi pi-chevron-right"
+      ></Button>
     </div>
   </div>
 </template>
