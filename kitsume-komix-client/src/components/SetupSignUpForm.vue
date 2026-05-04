@@ -47,8 +47,13 @@
 			} else {
 				setupError.value = authStore.error || 'Initial setup failed. Please try again.';
 			}
-		} catch (error: any) {
-			setupError.value = error.message || 'An error occurred during signup.';
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				setupError.value = error.message || 'An error occured during signup.';
+			} else {
+				console.log(String(error))
+				setupError.value = 'An unknown error occured during signup.';
+			}
 		}
 
 	});
