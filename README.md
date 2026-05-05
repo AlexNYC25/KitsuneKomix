@@ -41,8 +41,8 @@ Work in progress...
 
 ## Usage
 - Access the KitsuneKomix Client at `http://localhost:5173`
-- Access the KitsuneKomix API at `http://localhost:8000`
-- Access the OpenAPI documentation with Swagger UI at `http://localhost:8000/api/ui`
+- Access the KitsuneKomix API at `http://localhost:8001`
+- Access the OpenAPI documentation with Swagger UI at `http://localhost:8001/api/ui`
 
 
 ## Development

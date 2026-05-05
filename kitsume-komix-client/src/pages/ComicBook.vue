@@ -237,7 +237,7 @@ const downloadComic = async (comicBookId: number) => {
 	
 	isDownloading.value = true;
 	try {
-		const response = await fetch(`http://localhost:8000/api/comic-books/${comicBookId}/download`, {
+		const response = await fetch(`http://localhost:8001/api/comic-books/${comicBookId}/download`, {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${authStore.token}`

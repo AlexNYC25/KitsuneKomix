@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "sh -c 'pnpm run generate-api-types || echo Skipping API type generation for this startup; pnpm run dev:vite'",
     "dev:vite": "vite --host",
-    "generate-api-types": "sh -c 'i=1; while [ $i -le 30 ]; do npx openapi-typescript ${OPENAPI_URL:-http://localhost:8000}/api/doc --output src/openapi/openapi-schema.ts && exit 0; echo Waiting for API OpenAPI doc... $i/30; i=$((i+1)); sleep 2; done; echo Failed to generate API types after retries; exit 1'",
+    "generate-api-types": "sh -c 'i=1; while [ $i -le 30 ]; do npx openapi-typescript ${OPENAPI_URL:-http://localhost:8001}/api/doc --output src/openapi/openapi-schema.ts && exit 0; echo Waiting for API OpenAPI doc... $i/30; i=$((i+1)); sleep 2; done; echo Failed to generate API types after retries; exit 1'",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",

@@ -10,7 +10,7 @@ This guide outlines high-signal architectural and workflow constraints for worki
     *   **Workers:** Background comic scanning/processing runs via a separate worker service using BullMQ and Redis.
 
 ## 🚀 Development Workflow (Client)
-*   **API Type Generation:** When running the client's `dev` script, be aware that it *polls* the API's OpenAPI documentation endpoint (`http://localhost:8000/api/doc`) for up to 30 seconds to dynamically generate required API types before starting the development server. This API must be running for type generation to succeed.
+*   **API Type Generation:** When running the client's `dev` script, be aware that it *polls* the API's OpenAPI documentation endpoint (`http://localhost:8001/api/doc`) for up to 30 seconds to dynamically generate required API types before starting the development server. This API must be running for type generation to succeed.
 *   **Execution:** Use `pnpm dev` for starting the client in development mode.
 
 ## 🛠️ Commands & Tooling
