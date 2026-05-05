@@ -13,11 +13,11 @@ import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdMan
 import { useAuthStore } from './stores/auth'
 
 import App from './App.vue';
-import Home from './pages/Home.vue';
-import Login from './pages/Login.vue'
-import ComicSeries from './pages/ComicSeries.vue';
-import ComicBook from './pages/ComicBook.vue';
-import Settings from './pages/Settings.vue';
+import Home from './pages/HomePage.vue';
+import Login from './pages/LoginPage.vue'
+import ComicSeries from './pages/ComicSeriesPage.vue';
+import ComicBook from './pages/ComicBookPage.vue';
+import Settings from './pages/SettingsPage.vue';
 
 const app = createApp(App)
 
