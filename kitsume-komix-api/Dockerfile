@@ -45,7 +45,7 @@ USER deno
 COPY --chown=deno:deno . .
 
 # Mount volumes in compose for hot reload
-EXPOSE 8000
+EXPOSE 8001
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["deno", "task", "dev"]
 
