@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useHomeStore } from '@/stores/home';
 import { useAuthStore } from '@/stores/auth';
 
