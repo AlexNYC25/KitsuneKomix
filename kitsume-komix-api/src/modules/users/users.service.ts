@@ -113,12 +113,17 @@ export async function createUserService(
  * @returns `true` when the user is deleted.
  * @throws {Error} Throws when the user does not exist or deletion fails.
  */
-export const deleteUserService = async (userId: number): Promise<boolean> => {
+export const deleteUserService = async (userId: number, userIdOfRequester: number): Promise<boolean> => {
   // First, check if the user exists
   try {
     const user = await getUserById(userId);
     if (!user) {
       throw new Error("User does not exist");
+    }
+
+    // To prevent issues an admin cannot delete themselves
+    if (user.admin && userId === userIdOfRequester ) {
+     throw new Error("Admin cannot delete themselves");
     }
   } catch (error) {
     console.error("Error fetching user by ID:", error);

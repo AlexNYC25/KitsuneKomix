@@ -697,8 +697,21 @@ apiUsersRouter.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
+    if (user.isAdmin) {
+      return c.json({
+        message: "Admin cannot delete themselves, request other admin to delete your account"
+      }, 400)
+    }
+
     try {
-      await deleteUserService(userId);
+      const successfullyDeletedUser = await deleteUserService(userId, userId);
+
+      if (!successfullyDeletedUser) {
+        return c.json({
+          message: "Failed to delete user",
+        })
+      }
+
     } catch (error) {
       console.error("Error deleting user:", error);
       return c.json({ message: "Error deleting user" }, 500);
@@ -794,7 +807,7 @@ apiUsersRouter.openapi(
     }
 
     try {
-      const deleteUserResult = await deleteUserService(deleteUserId);
+      const deleteUserResult = await deleteUserService(deleteUserId, userId);
 
       if (!deleteUserResult) {
         return c.json({ message: "User not found or could not be deleted" }, 404);
