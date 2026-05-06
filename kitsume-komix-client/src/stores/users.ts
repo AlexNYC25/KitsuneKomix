@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 import { apiClient } from '../utilities/apiClient'
-import type { User, UserRegistractionPayload, UserEditPayload } from '@/types/users.types'
+import type { User, UserRegistrationPayload, UserEditPayload } from '@/types/users.types'
 
 export const useUsersStore = defineStore('users', {
 	state: () => ({
@@ -23,7 +23,7 @@ export const useUsersStore = defineStore('users', {
 			}
 			this.setUsers(data.users);
 		},
-		async registerNewUser(newUser: UserRegistractionPayload) {
+		async registerNewUser(newUser: UserRegistrationPayload) {
 			const { data, error } = await apiClient.POST('/users/create-user', {
 				body: {
 					email: newUser.email,

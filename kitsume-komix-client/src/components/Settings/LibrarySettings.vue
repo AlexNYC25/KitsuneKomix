@@ -5,7 +5,7 @@
 	import LibraryPathNavigation from '@/components/Settings/LibraryPathNavigation.vue';
 	import { useAuthStore } from '@/stores/auth';
 	import { useLibrariesStore } from '@/stores/libraries';
-	import { numberToDataSize } from '@/utilities/formating';
+	import { numberToDataSize } from '@/utilities/formatting';
 
 	const authStore = useAuthStore();
 	const librariesStore = useLibrariesStore();
