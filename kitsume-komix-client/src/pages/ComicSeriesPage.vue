@@ -76,14 +76,15 @@ const allComicsInSeries = computed<ComicBook[]>(() => {
 
 const totalComics = computed(() => allComicsInSeries.value.length);
 
+const comicIssueNumberSorter = (a: ComicBook, b: ComicBook) => {
+	if (!a.issueNumber || !b.issueNumber) return 0;
+	return parseFloat(a.issueNumber) - parseFloat(b.issueNumber);
+}
+
 const paginatedComics = computed(() => {
 	if (!allComicsInSeries.value.length) return [];
 
-	const sorted = [...allComicsInSeries.value].sort((a, b) => {
-		const aNum = parseFloat(a.issueNumber ?? '0') || 0;
-		const bNum = parseFloat(b.issueNumber ?? '0') || 0;
-		return aNum - bNum;
-	});
+	const sorted = [...allComicsInSeries.value].sort(comicIssueNumberSorter);
 
 	const start = currentPage.value * itemsPerPage;
 	const end = start + itemsPerPage;
@@ -95,11 +96,7 @@ const firstComicYear = computed(() => {
 	if (!allComicsInSeries.value.length) return null;
 
 	// Sort all comics by issue number to get the first one
-	const sorted = [...allComicsInSeries.value].sort((a, b) => {
-		const aNum = parseFloat(a.issueNumber ?? '0') || 0;
-		const bNum = parseFloat(b.issueNumber ?? '0') || 0;
-		return aNum - bNum;
-	});
+	const sorted = [...allComicsInSeries.value].sort(comicIssueNumberSorter);
 
 	return sorted[0]?.year || null;
 });
