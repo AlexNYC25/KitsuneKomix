@@ -61,6 +61,7 @@ services:
       OPENAPI_URL: http://api:8001
       # Helpful for file watching on macOS/docker
       CHOKIDAR_USEPOLLING: "true"
+      API_URL: http://localhost:8001
     volumes:
       - ./kitsume-komix-client:/app
       - client_node_modules:/app/node_modules

@@ -4,6 +4,8 @@ import type { LatestComicSeriesSingle, UpdatedComicSeriesSingle } from '../types
 
 import { DEFAULT_HEADER_AUTHORIZATION } from '../utilities/constants';
 
+import { env } from "@/config/env"
+
 export const useHomeStore = defineStore('home', {
   state: () => ({
     latestSeries: [] as LatestComicSeriesSingle[],
@@ -30,7 +32,7 @@ export const useHomeStore = defineStore('home', {
         this.latestSeries = data.data.map((series) => ({
           ...series,
           thumbnailUrl: series.thumbnailUrl 
-            ? 'http://localhost:8001' + series.thumbnailUrl 
+            ? env.API_URL + series.thumbnailUrl 
             : 'https://placehold.co/400x400/gray/white'
         }));
       } catch (error) {
@@ -54,7 +56,7 @@ export const useHomeStore = defineStore('home', {
         this.updatedSeries = data.data.map((series) => ({
           ...series,
           thumbnailUrl: series.thumbnailUrl 
-            ? 'http://localhost:8001' + series.thumbnailUrl 
+            ? env.API_URL + series.thumbnailUrl 
             : 'https://placehold.co/400x400/gray/white'
         }));
       } catch (error) {

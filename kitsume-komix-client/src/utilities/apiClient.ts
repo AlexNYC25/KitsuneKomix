@@ -1,8 +1,10 @@
 import createClient, { type Middleware } from "openapi-fetch";
 import type { paths } from "@/openapi/openapi-schema";
 
-const apiClientBaseURL = "http://localhost:8001/api";
-const apiRootBaseURL = "http://localhost:8001";
+import { env } from "@/config/env";
+
+const apiClientBaseURL = env.API_URL + "/api";
+const apiRootBaseURL = env.API_URL;
 
 let authToken: string | null = null;
 let refreshToken: string | null = null;

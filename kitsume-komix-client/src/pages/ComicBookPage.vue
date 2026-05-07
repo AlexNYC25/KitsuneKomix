@@ -18,6 +18,8 @@ import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
 import ComicThumbnail from '../components/ComicThumbnail.vue';
 
+import { env } from "@/config/env"
+
 const route = useRoute();
 
 const breadcrumbStore = useBreadcrumbStore();
@@ -237,7 +239,7 @@ const downloadComic = async (comicBookId: number) => {
 	
 	isDownloading.value = true;
 	try {
-		const response = await fetch(`http://localhost:8001/api/comic-books/${comicBookId}/download`, {
+		const response = await fetch( env.API_URL + `/api/comic-books/${comicBookId}/download`, {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${authStore.token}`
