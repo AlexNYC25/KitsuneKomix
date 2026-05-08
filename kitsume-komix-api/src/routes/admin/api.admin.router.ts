@@ -6,7 +6,9 @@ import { purgeAllData } from "#infrastructure/db/sqlite/models/admin.model.ts";
 
 import { MessageResponseSchema } from "#zod/schemas/response.schema.ts";
 
-import { AccessRefreshTokenCombinedPayload, AppEnv } from "#types/index.ts";
+import type { AccessRefreshTokenCombinedPayload, AppEnv } from "#types/index.ts";
+
+import { env } from "#config/env.ts"
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -49,6 +51,14 @@ app.openapi(
         },
         description: "Unauthorized",
       },
+      403: {
+        content: {
+          "application/json": {
+            schema: MessageResponseSchema,
+          },
+        },
+        description: "Forbidden",
+      },
       500: {
         content: {
           "application/json": {
@@ -71,6 +81,14 @@ app.openapi(
     const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
+    }
+
+    if(!user.admin) {
+      return c.json({ message: "Unauthorized: Admin only" }, 401)
+    }
+
+    if (env.MODE !== "development") {
+      return c.json({ message: "Data purge is only available in development" }, 403)
     }
 
     try {
