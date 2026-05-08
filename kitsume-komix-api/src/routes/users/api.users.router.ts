@@ -713,7 +713,6 @@ apiUsersRouter.openapi(
       }
 
     } catch (error) {
-      console.error("Error deleting user:", error);
       return c.json({ message: "Error deleting user" }, 500);
     }
 
@@ -802,7 +801,7 @@ apiUsersRouter.openapi(
     }
 
     // Only allow users to delete their own account or admins
-    if (userId !== deleteUserId && (!user.isAdmin)) {
+    if (((userId !== deleteUserId) && !user.isAdmin) || (user.isAdmin && (userId == deleteUserId))) {
       return c.json({ message: "Unauthorized to delete this user" }, 401);
     }
 
