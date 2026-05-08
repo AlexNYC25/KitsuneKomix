@@ -18,7 +18,7 @@ import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
 import ComicReader from '../components/ComicReader.vue';
 import ComicThumbnail from '../components/ComicThumbnail.vue';
 
-import { env } from "@/config/env"
+import { getThumbnailPathFromFilePath, buildComicDownloadUrl } from "@/utilities/urls";
 
 const route = useRoute();
 
@@ -88,7 +88,7 @@ onMounted(async () => {
 					const thumbnails: ComicBookThumbnailsData = (thumbnailData as GetComicBookThumbnailsResponse).thumbnails;
 					if (thumbnails && thumbnails.length > 0) {
 						const firstThumbnail: ComicBookThumbnail = thumbnails[0];
-						thumbnailUrl.value = `/api/image/thumbnails/${firstThumbnail.filePath.split('/').pop()}`;
+						thumbnailUrl.value = getThumbnailPathFromFilePath(firstThumbnail.filePath.split('/').pop())
 					}
 				}
 			} catch (error) {
@@ -239,7 +239,7 @@ const downloadComic = async (comicBookId: number) => {
 	
 	isDownloading.value = true;
 	try {
-		const response = await fetch( env.API_URL + `/api/comic-books/${comicBookId}/download`, {
+		const response = await fetch(buildComicDownloadUrl(comicBookId), {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${authStore.token}`

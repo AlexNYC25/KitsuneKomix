@@ -15,6 +15,8 @@ import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import ComicThumbnail from '@/components/ComicThumbnail.vue';
 
+import { getThumbnailPathFromFilePath } from "@/utilities/urls";
+
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
@@ -31,18 +33,6 @@ const isLoading = ref(true);
 const activeTab = ref(0);
 const comicThumbnailUrls = ref<Record<number, string>>({});
 
-const getThumbnailPathFromFilePath = (filePath?: string | null): string | null => {
-	if (!filePath) {
-		return null;
-	}
-
-	const filename = filePath.split('/').pop();
-	if (!filename) {
-		return null;
-	}
-
-	return `/api/image/thumbnails/${filename}`;
-};
 
 onMounted(async () => {
   // Get series ID from route params
