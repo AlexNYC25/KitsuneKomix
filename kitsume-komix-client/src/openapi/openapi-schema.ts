@@ -453,6 +453,17 @@ export interface paths {
                         };
                     };
                 };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
