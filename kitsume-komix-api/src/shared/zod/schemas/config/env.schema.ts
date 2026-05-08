@@ -16,8 +16,8 @@ export const envSchema = z.object({
   COMICS_DIRECTORY: z.string().default("/app/comics"),
 
   // JWT secrets and settings
-  JWT_SECRET: z.string().default("supersecretkey"),
-  JWT_REFRESH_SECRET: z.string().default("supersecretkey_refresh"),
+  JWT_SECRET: z.string(),
+  JWT_REFRESH_SECRET: z.string(),
   
   JWT_ACCESS_TTL: z.string().transform((val) => parseInt(val, 10)).default(15 * 60), // 15 minutes
   JWT_REFRESH_TTL: z.string().transform((val) => parseInt(val, 10)).default(7 * 24 * 60 * 60), // 7 days
