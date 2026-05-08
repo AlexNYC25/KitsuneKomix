@@ -5,9 +5,15 @@ export const envSchema = z.object({
   PORT: z.string().transform((val) => parseInt(val, 10)).default(8000),
   CLIENT_URL: z.url().default("http://localhost:5173"),
 
+  // Redis settings
+  REDIS_HOST: z.string().default("redis"),
+  REDIS_PORT: z.string().transform((val) => parseInt(val, 10)).default(6379),
+
   // folder paths
   APP_CONFIG_PATH: z.string().default("/app/config"),
   APP_CACHE_PATH: z.string().default("/app/cache"),
+
+  COMICS_DIRECTORY: z.string().default("/app/comics"),
 
   // JWT secrets and settings
   JWT_SECRET: z.string().default("supersecretkey"),
