@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
 import { apiLogger } from "#logger/loggers.ts";
-import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+import { requireAdmin, requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import { getComicLibrariesAvailableToUser } from "#modules/libraries/comicLibraries.service.ts";
 import { listFoldersInDirectoryService } from "#modules/files/files.service.ts";
 
@@ -372,7 +372,7 @@ app.openapi(
     summary: "Create a new comic library",
     description: "Create a new comic library in the system",
     tags: ["Comic Libraries"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     request: {
       body: {
         content: {
@@ -432,10 +432,6 @@ app.openapi(
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    if (!user.isAdmin) {
-      return c.json({ message: "Forbidden" }, 403);
-    }
-
     const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
@@ -483,7 +479,7 @@ app.openapi(
     summary: "Update a comic library",
     description: "Update a comic library in the system",
     tags: ["Comic Libraries"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     request: {
       params: ParamIdSchema,
       body: {
@@ -549,10 +545,6 @@ app.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    if (!user.isAdmin) {
-      return c.json({ message: "Forbidden: User does not have admin privileges" }, 403);
-    }
-
     try {
       const id = parseInt(c.req.valid("param").id, 10);
       if (isNaN(id)) {
@@ -598,7 +590,7 @@ app.openapi(
     summary: "Delete a comic library",
     description: "Delete a comic library from the system",
     tags: ["Comic Libraries"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     request: {
       params: ParamIdSchema,
     },
@@ -655,10 +647,6 @@ app.openapi(
     const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
-    }
-
-    if (!user.isAdmin) {
-      return c.json({ message: "Forbidden: User does not have admin privileges" }, 403);
     }
 
     try {

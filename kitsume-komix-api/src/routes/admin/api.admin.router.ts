@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
 import { apiLogger } from "#logger/loggers.ts";
-import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+import { requireAdmin, requireAuth } from "#modules/auth/middleware/authChecks.ts";
 
 import { purgeAllData } from "#infrastructure/db/sqlite/models/admin.model.ts";
 
@@ -26,7 +26,7 @@ app.openapi(
     summary: "Purge all data",
     description: "Delete all data from the system (admin only)",
     tags: ["Admin"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     responses: {
       200: {
         content: {
@@ -82,10 +82,6 @@ app.openapi(
     const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
-    }
-
-    if(!user.admin) {
-      return c.json({ message: "Unauthorized: Admin only" }, 401)
     }
 
     if (env.MODE !== "development") {

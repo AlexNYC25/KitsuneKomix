@@ -87,8 +87,8 @@ export const requireCookieAuth = async (c: Context, next: Next) => {
  * @returns A response indicating whether the user has admin privileges.
  */
 export const requireAdmin = async (c: Context, next: Next) => {
-  const user = c.get("user") as { id: string; roles: string[] } | undefined;
-  if (!user || !user.roles || !user.roles.includes("admin")) {
+  const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
+  if (!user || !user.isAdmin) {
     return c.json({ message: "Forbidden" }, 403);
   }
   await next();

@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { apiLogger } from "#logger/loggers.ts";
-import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+import { requireAdmin, requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import {
   assignLibraryToUserService,
   checkIfAppSetupComplete,
@@ -60,7 +60,7 @@ apiUsersRouter.openapi(
     summary: "Get all users",
     description: "Endpoint to retrieve all users in the system.",
     tags: ["Users"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     responses: {
       200: {
         description: "List of users",
@@ -103,10 +103,6 @@ apiUsersRouter.openapi(
       return c.json({ message: "Unauthorized" }, 401);
     }
 
-    if(!user.isAdmin) {
-      return c.json({ message: "Forbidden - Admin access required" }, 403);
-    }
-
     try {
       const users = await getUsersRegistered();
       return c.json({
@@ -131,7 +127,7 @@ apiUsersRouter.openapi(
     summary: "Create a new user",
     description: "Endpoint to create a new user in the system.",
     tags: ["Users"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     request: {
       body: {
         content: {
@@ -196,9 +192,6 @@ apiUsersRouter.openapi(
       return c.json({ message: "Invalid user ID" }, 400);
     }
 
-    if(!user.isAdmin) {
-      return c.json({ message: "Forbidden - Admin access required" }, 403);
-    }
     try {
       const userData: UserRegistrationInput = await c.req.json();
 
@@ -245,7 +238,7 @@ apiUsersRouter.openapi(
     summary: "Edit a user",
     description: "Endpoint to edit a user email and/or password.",
     tags: ["Users"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     request: {
       body: {
         content: {
@@ -303,10 +296,6 @@ apiUsersRouter.openapi(
 
     if (!user || !user.sub) {
       return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    if(!user.isAdmin) {
-      return c.json({ message: "Forbidden - Admin access required" }, 403);
     }
 
 
@@ -438,7 +427,7 @@ apiUsersRouter.openapi(
     description:
       "Endpoint to assign a library to a user. Requires authentication.",
     tags: ["Users"],
-    middleware: [requireAuth],
+    middleware: [requireAuth, requireAdmin],
     request: {
       body: {
         content: {
@@ -501,10 +490,6 @@ apiUsersRouter.openapi(
     const userId: number = parseInt(user.sub, 10);
     if (isNaN(userId)) {
       return c.json({ message: "Invalid user ID" }, 400);
-    }
-
-    if(!user.isAdmin) {
-      return c.json({ message: "Forbidden" }, 403);
     }
 
 
@@ -749,7 +734,7 @@ apiUsersRouter.openapi(
         },
       },
       400: {
-        description: "Invalid user ID",
+        description: "Invalid request data",
         content: {
           "application/json": {
             schema: ErrorResponseSchema,
@@ -758,6 +743,14 @@ apiUsersRouter.openapi(
       },
       401: {
         description: "Unauthorized",
+        content: {
+          "application/json": {
+            schema: ErrorResponseSchema,
+          },
+        },
+      },
+      403: {
+        description: "Forbidden",
         content: {
           "application/json": {
             schema: ErrorResponseSchema,
