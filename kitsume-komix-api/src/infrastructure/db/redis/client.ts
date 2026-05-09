@@ -1,8 +1,10 @@
 import IORedis from "ioredis";
 
+import { env } from "#config/env.ts"
+
 export const redisConnection = {
-  host: Deno.env.get("REDIS_HOST") ?? "redis",
-  port: Number(Deno.env.get("REDIS_PORT") ?? 6379),
+  host: env.REDIS_HOST,
+  port: env.REDIS_PORT,
 
   // Optional extras for stability in containers:
   maxRetriesPerRequest: null, // recommended for BullMQ
