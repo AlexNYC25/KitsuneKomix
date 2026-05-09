@@ -1,4 +1,5 @@
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookThumbnailsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import { eq, inArray } from "drizzle-orm";
@@ -72,7 +73,7 @@ export const insertComicBookThumbnail = async (
       return result[0].id;
     }
   } catch (error) {
-    console.error("Error inserting comic book thumbnail:", error);
+    dbLogger.error("Error inserting comic book thumbnail:" + error);
     throw error;
   }
 };
@@ -111,7 +112,7 @@ export const getThumbnailsByComicBookId = async (
 
     return sorted.length > 0 ? sorted : null;
   } catch (error) {
-    console.error("Error fetching thumbnails by comic book ID:", error);
+    dbLogger.error("Error fetching thumbnails by comic book ID:" + error);
     throw error;
   }
 };
@@ -138,7 +139,7 @@ export const getComicThumbnailById = async (
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching comic book thumbnail by ID:", error);
+    dbLogger.error("Error fetching comic book thumbnail by ID:" + error);
     throw error;
   }
 };
@@ -181,7 +182,7 @@ export const insertCustomComicBookThumbnail = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting custom comic book thumbnail:", error);
+    dbLogger.error("Error inserting custom comic book thumbnail:" + error);
     throw error;
   }
 };
@@ -204,7 +205,7 @@ export const deleteComicBookThumbnail = async (
       .delete(comicBookThumbnailsTable)
       .where(eq(comicBookThumbnailsTable.id, thumbnailId));
   } catch (error) {
-    console.error("Error deleting comic book thumbnail:", error);
+    dbLogger.error("Error deleting comic book thumbnail:" + error);
     throw error;
   }
 };
@@ -249,7 +250,7 @@ export const getThumbnailsByComicBookIds = async (
 
     return sorted;
   } catch (error) {
-    console.error("Error fetching thumbnails by comic book IDs:", error);
+    dbLogger.error("Error fetching thumbnails by comic book IDs:" + error);
     throw error;
   }
 };

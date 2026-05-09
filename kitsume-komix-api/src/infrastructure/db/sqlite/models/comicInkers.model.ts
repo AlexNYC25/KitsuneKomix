@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookInkersTable, comicInkersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import { ComicInker } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicInker = async (name: string): Promise<number> => {
         .where(eq(comicInkersTable.name, name));
 
       if (existingInker.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic inker already exists with name: ${name}, returning existing ID: ${
             existingInker[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicInker = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic inker:", error);
+    dbLogger.error("Error inserting comic inker:" + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkInkerToComicBook = async (
       .values({ comicInkerId: inkerId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking inker to comic book:", error);
+    dbLogger.error("Error linking inker to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkInkersToComicBook = async (
       .delete(comicBookInkersTable)
       .where(eq(comicBookInkersTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking inkers from comic book:", error);
+    dbLogger.error("Error unlinking inkers from comic book:" + error);
     throw error;
   }
 };
@@ -132,7 +133,7 @@ export const getInkersByComicBookId = async (
 
     return result.map(({ comicInker }) => comicInker);
   } catch (error) {
-    console.error("Error fetching inkers by comic book ID:", error);
+    dbLogger.error("Error fetching inkers by comic book ID:" + error);
     throw error;
   }
 };
@@ -159,7 +160,7 @@ export const getInkerIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching inker IDs by filter:", error);
+    dbLogger.error("Error fetching inker IDs by filter:" + error);
     throw error;
   }
 };

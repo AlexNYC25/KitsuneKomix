@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 
 import { comicBookCharactersTable, comicCharactersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 import type { ComicCharacter } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicCharacter = async (name: string): Promise<number> => {
         .where(eq(comicCharactersTable.name, name));
 
       if (existingCharacter.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic character already exists with name: ${name}, returning existing ID: ${
             existingCharacter[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicCharacter = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error(`Error inserting comic character`, error);
+    dbLogger.error(`Error inserting comic character` + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkCharacterToComicBook = async (
       .values({ comicCharacterId: characterId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking character to comic book:", error);
+    dbLogger.error("Error linking character to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkCharactersToComicBook = async (
       .delete(comicBookCharactersTable)
       .where(eq(comicBookCharactersTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking characters from comic book:", error);
+    dbLogger.error("Error unlinking characters from comic book:" + error);
     throw error;
   }
 };
@@ -135,7 +136,7 @@ export const getCharactersByComicBookId = async (
 
     return result.map((row) => row.comicCharacter);
   } catch (error) {
-    console.error("Error fetching characters by comic book ID:", error);
+    dbLogger.error("Error fetching characters by comic book ID:" + error);
     throw error;
   }
 };
@@ -169,7 +170,7 @@ export const getCharactersIdsByFilter = async (
 
     return characterIds;
   } catch (error) {
-    console.error("Error fetching character IDs by filter:", error);
+    dbLogger.error("Error fetching character IDs by filter:" + error);
     throw error;
   }
 };

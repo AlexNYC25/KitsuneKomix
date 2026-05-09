@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookPublishersTable, comicPublishersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicPublisher } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicPublisher = async (name: string): Promise<number> => {
         .where(eq(comicPublishersTable.name, name));
 
       if (existingPublisher.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic publisher already exists with name: ${name}, returning existing ID: ${
             existingPublisher[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicPublisher = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic publisher:", error);
+    dbLogger.error("Error inserting comic publisher:" + error);
     throw new Error("Failed to insert comic publisher.");
   }
 };
@@ -75,7 +76,7 @@ export const linkPublisherToComicBook = async (
       .values({ comicPublisherId: publisherId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking publisher to comic book:", error);
+    dbLogger.error("Error linking publisher to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkPublishersToComicBook = async (
       .delete(comicBookPublishersTable)
       .where(eq(comicBookPublishersTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking publishers from comic book:", error);
+    dbLogger.error("Error unlinking publishers from comic book:" + error);
     throw error;
   }
 };
@@ -135,7 +136,7 @@ export const getPublishersByComicBookId = async (
 
     return result.map((row) => row.comic_publisher);
   } catch (error) {
-    console.error("Error fetching publishers for comic book:", error);
+    dbLogger.error("Error fetching publishers for comic book:" + error);
     throw error;
   }
 };
@@ -162,7 +163,7 @@ export const getPublisherIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching publisher IDs by filter:", error);
+    dbLogger.error("Error fetching publisher IDs by filter:" + error);
     throw error;
   }
 };

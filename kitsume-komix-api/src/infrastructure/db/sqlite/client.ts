@@ -2,6 +2,8 @@ import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import { join } from "@std/path";
 
+import { dbLogger } from "#logger/loggers.ts";
+
 const DB_PATH = join(Deno.cwd(), "config", "database.sqlite");
 
 let client: ReturnType<typeof createClient> | null = null;
@@ -31,7 +33,7 @@ export const testSQLiteConnection: () => Promise<boolean> = async () => {
     await client.execute("SELECT 1");
     return true;
   } catch (error) {
-    console.error("Error connecting to SQLite database:", error);
+    dbLogger.error("Error connecting to SQLite database:" + error);
     return false;
   }
 };

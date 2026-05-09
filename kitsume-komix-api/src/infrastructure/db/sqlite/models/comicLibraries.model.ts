@@ -1,6 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicLibrariesTable, userComicLibrariesTable, usersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
@@ -36,7 +37,7 @@ export const createComicLibrary = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error creating comic library:", error);
+    dbLogger.error("Error creating comic library:" + error);
     throw error;
   }
 };
@@ -56,7 +57,7 @@ export const getAllComicLibraries = async (): Promise<ComicLibrary[]> => {
     const result: ComicLibrary[] = await db.select().from(comicLibrariesTable);
     return result;
   } catch (error) {
-    console.error("Error fetching comic libraries:", error);
+    dbLogger.error("Error fetching comic libraries:" + error);
     throw error;
   }
 };
@@ -87,7 +88,7 @@ export const getComicLibraryById = async (
 
     return result[0];
   } catch (error) {
-    console.error("Error fetching comic library by ID:", error);
+    dbLogger.error("Error fetching comic library by ID:" + error);
     throw error;
   }
 };
@@ -118,7 +119,7 @@ export const getComicLibraryByPath = async (
 
     return result[0];
   } catch (error) {
-    console.error("Error fetching comic library by path:", error);
+    dbLogger.error("Error fetching comic library by path:" + error);
     throw error;
   }
 };
@@ -164,7 +165,7 @@ export const getLibraryContainingPath = async (
 
     return null;
   } catch (error) {
-    console.error("Error finding library containing path:", error);
+    dbLogger.error("Error finding library containing path:" + error);
     throw error;
   }
 };
@@ -191,7 +192,7 @@ export const getComicLibraryLastChangedTime = async (
 
     return result.length > 0 ? result[0].changedAt : null;
   } catch (error) {
-    console.error("Error fetching comic library changed time:", error);
+    dbLogger.error("Error fetching comic library changed time:" + error);
     throw error;
   }
 };
@@ -214,7 +215,7 @@ export const setComicLibraryChangedTime = async (id: number): Promise<void> => {
       .set({ changedAt: sql`CURRENT_TIMESTAMP` })
       .where(eq(comicLibrariesTable.id, id));
   } catch (error) {
-    console.error("Error updating comic library changed time:", error);
+    dbLogger.error("Error updating comic library changed time:" + error);
     throw error;
   }
 };
@@ -254,7 +255,7 @@ export const updateComicLibrary = async (
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error updating comic library:", error);
+    dbLogger.error("Error updating comic library:" + error);
     throw error;
   }
 };
@@ -279,7 +280,7 @@ export const deleteComicLibrary = async (id: number): Promise<boolean> => {
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error deleting comic library:", error);
+    dbLogger.error("Error deleting comic library:" + error);
     throw error;
   }
 };
@@ -315,7 +316,7 @@ export const getUsersComicLibraries = async (
 
     return libraries;
   } catch (error) {
-    console.error("Error fetching user's comic libraries:", error);
+    dbLogger.error("Error fetching user's comic libraries:" + error);
     throw error;
   }
 };
@@ -344,7 +345,7 @@ export const assignLibraryToUser = async (
         libraryId: libraryId,
       });
   } catch (error) {
-    console.error("Error assigning library to user:", error);
+    dbLogger.error("Error assigning library to user:" + error);
     throw error;
   }
 };
@@ -375,7 +376,7 @@ export const unassignLibraryFromUser = async (
         ),
       );
   } catch (error) {
-    console.error("Error unassigning library from user:", error);
+    dbLogger.error("Error unassigning library from user:" + error);
     throw error;
   }
 };
@@ -411,7 +412,7 @@ export const getUsersAssignedToLibrary = async (libraryId: number): Promise<User
 
     return users;
   } catch (error) {
-    console.error("Error fetching users assigned to library:", error);
+    dbLogger.error("Error fetching users assigned to library:" + error);
     throw error;
   }
 };

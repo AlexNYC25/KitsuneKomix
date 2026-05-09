@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import {
   createUser,
   deleteUser,
@@ -31,7 +32,7 @@ export async function checkIfAppSetupComplete(): Promise<boolean> {
     const settingValue = await getSetting("appSetupComplete");
     return settingValue === "true";
   } catch (error) {
-    console.error("Error checking app setup status:", error);
+    apiLogger.error("Error checking app setup status:" + error);
     throw new Error("Internal server error");
   }
 }
@@ -58,7 +59,7 @@ export async function createUserService(
     // Check if user with the same email already exists
     existingUser = await getUserByEmail(user.email);
   } catch (error) {
-    console.error("Error checking existing user:", error);
+    apiLogger.error("Error checking existing user:" + error);
     throw new Error("Internal server error");
   }
 
@@ -126,7 +127,7 @@ export const deleteUserService = async (userId: number, userIdOfRequester: numbe
      throw new Error("Admin cannot delete themselves");
     }
   } catch (error) {
-    console.error("Error fetching user by ID:", error);
+    apiLogger.error("Error fetching user by ID:" + error);
     throw new Error("Internal server error");
   }
 
@@ -138,7 +139,7 @@ export const deleteUserService = async (userId: number, userIdOfRequester: numbe
     }
     return true;
   } catch (error) {
-    console.error("Error deleting user:", error);
+    apiLogger.error("Error deleting user:" + error);
     throw new Error("Internal server error");
   }
 };
@@ -164,7 +165,7 @@ export async function assignLibraryToUserService(
       throw new Error("User does not exist");
     }
   } catch (error) {
-    console.error("Error fetching user by ID:", error);
+    apiLogger.error("Error fetching user by ID:" + error);
     throw new Error("Internal server error");
   }
 
@@ -181,7 +182,7 @@ export async function assignLibraryToUserService(
         throw new Error("Library does not exist");
       }
     } catch (error) {
-      console.error("Error fetching library by ID:", error);
+      apiLogger.error("Error fetching library by ID:" + error);
       throw new Error("Internal server error");
     }
     
@@ -192,7 +193,7 @@ export async function assignLibraryToUserService(
         await unassignLibraryFromUser(userId, libraryId);
       }
     } catch (error) {
-      console.error("Error assigning/unassigning library to/from user:", error);
+      apiLogger.error("Error assigning/unassigning library to/from user:" + error);
       throw new Error("Internal server error");
     }  
   }
@@ -211,7 +212,7 @@ export const getUsersRegistered = async (): Promise<User[]> => {
     const users = await getAllUsers();
     return users;
   } catch (error) {
-    console.error("Error fetching users:", error);
+    apiLogger.error("Error fetching users:" + error);
     throw new Error("Internal server error");
   }
 };
@@ -231,7 +232,7 @@ export const updateUserService = async (userData: UserEditInput): Promise<boolea
     const updatedUser = await updateUser(userData.id, userData);
     return updatedUser;
   } catch (error) {
-    console.error("Error updating user:", error);
+    apiLogger.error("Error updating user:" + error);
     throw new Error("Internal server error");
   }
 };

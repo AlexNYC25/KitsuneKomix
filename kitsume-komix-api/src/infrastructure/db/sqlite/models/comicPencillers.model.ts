@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookPencillersTable, comicPencillersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicPenciller } from "#types/index.ts";
@@ -37,7 +38,7 @@ export const insertComicPenciller = async (
         .where(eq(comicPencillersTable.name, name));
 
       if (existingPenciller.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic penciller already exists with name: ${name}, returning existing ID: ${
             existingPenciller[0].id
           }`,
@@ -52,7 +53,7 @@ export const insertComicPenciller = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic penciller:", error);
+    dbLogger.error("Error inserting comic penciller:" + error);
     throw error;
   }
 };
@@ -79,7 +80,7 @@ export const linkPencillerToComicBook = async (
       .values({ comicPencillerId: pencillerId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking penciller to comic book:", error);
+    dbLogger.error("Error linking penciller to comic book:" + error);
     throw error;
   }
 };
@@ -103,7 +104,7 @@ export const unlinkPencillersToComicBook = async (
       .delete(comicBookPencillersTable)
       .where(eq(comicBookPencillersTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking pencillers from comic book:", error);
+    dbLogger.error("Error unlinking pencillers from comic book:" + error);
     throw error;
   }
 };
@@ -139,7 +140,7 @@ export const getPencillersByComicBookId = async (
 
     return result.map(({ comic_penciller }) => comic_penciller);
   } catch (error) {
-    console.error("Error fetching pencillers by comic book ID:", error);
+    dbLogger.error("Error fetching pencillers by comic book ID:" + error);
     throw error;
   }
 };
@@ -166,7 +167,7 @@ export const getPencillerIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching penciller IDs by filter:", error);
+    dbLogger.error("Error fetching penciller IDs by filter:" + error);
     throw error;
   }
 };

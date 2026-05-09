@@ -1,5 +1,6 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 
+import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import {
   assignLibraryToUserService,
@@ -112,7 +113,7 @@ apiUsersRouter.openapi(
         "users": users
       }, 200);
     } catch (error) {
-      console.error("Error retrieving users:", error);
+      apiLogger.error("Error retrieving users:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   }
@@ -223,7 +224,7 @@ apiUsersRouter.openapi(
         userId: newUserId,
       }, 201);
     } catch (error) {
-      console.error("Error parsing JSON or creating user:", error);
+      apiLogger.error("Error parsing JSON or creating user:" + error);
       if (error instanceof SyntaxError && error.message.includes("JSON")) {
         return c.json({ message: "Invalid JSON format in request body" }, 400);
       }
@@ -329,7 +330,7 @@ apiUsersRouter.openapi(
 
       return c.json({ success: updatedUser }, 200);
     } catch (error) {
-      console.error("Error parsing edit-user request:", error);
+      apiLogger.error("Error parsing edit-user request:" + error);
       if (error instanceof SyntaxError && error.message.includes("JSON")) {
         return c.json({ message: "Invalid JSON format in request body" }, 400);
       }
@@ -416,7 +417,7 @@ apiUsersRouter.openapi(
         userId: newUserId,
       }, 201);
     } catch (error) {
-      console.error("Error parsing JSON or creating user:", error);
+      apiLogger.error("Error parsing JSON or creating user:" + error);
       if (error instanceof SyntaxError && error.message.includes("JSON")) {
         return c.json({ message: "Invalid JSON format in request body" }, 400);
       }
@@ -528,7 +529,7 @@ apiUsersRouter.openapi(
 
       return c.json({ message: "Library assigned to user successfully" }, 200);
     } catch (error) {
-      console.error("Error assigning library to user:", error);
+      apiLogger.error("Error assigning library to user:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },
@@ -627,7 +628,7 @@ apiUsersRouter.openapi(
     try {
       await assignLibraryToUserService(userId, [newAssignment]);
     } catch (error) {
-      console.error("Error assigning library to user:", error);
+      apiLogger.error("Error assigning library to user:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
 
@@ -814,7 +815,7 @@ apiUsersRouter.openapi(
 
       return c.json({ success: true }, 200);
     } catch (error) {
-      console.error("Error deleting user:", error);
+      apiLogger.error("Error deleting user:" + error);
       return c.json({ message: "Error deleting user" }, 500);
     }
   },

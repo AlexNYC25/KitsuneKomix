@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { basename } from "@std/path";
 
+import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import {
   checkComicReadByUser,
@@ -201,7 +202,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("API Route Error:", error);
+      apiLogger.error("API Route Error:" + error);
       return c.json({ message: "Failed to fetch comic books" }, 500);
     }
   },
@@ -319,7 +320,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching latest comic books:", error);
+      apiLogger.error("Error fetching latest comic books:" + error);
       return c.json({ message: "Failed to fetch latest comic books" }, 500);
     }
   },
@@ -437,7 +438,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching latest comic books:", error);
+      apiLogger.error("Error fetching latest comic books:" + error);
       return c.json({ message: "Failed to fetch latest comic books" }, 500);
     }
   },
@@ -553,7 +554,7 @@ app.openapi(
         return c.json(returnObj, 200);
       }
     } catch (error) {
-      console.error("Error fetching comic book duplicates:", error);
+      apiLogger.error("Error fetching comic book duplicates:" + error);
       return c.json({ message: "Failed to fetch comic book duplicates" }, 500);
     }
   },
@@ -665,7 +666,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching random comic book:", error);
+      apiLogger.error("Error fetching random comic book:" + error);
       return c.json({ message: "Failed to fetch random comic book" }, 500);
     }
   },
@@ -777,7 +778,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching comic book list:", error);
+      apiLogger.error("Error fetching comic book list:" + error);
       return c.json({ message: "Failed to fetch comic book list" }, 500);
     }
   },
@@ -890,7 +891,7 @@ app.openapi(
         );
       }
     } catch (error) {
-      console.error("Error updating comic book metadata in batch:", error);
+      apiLogger.error("Error updating comic book metadata in batch:" + error);
       return c.json({
         message: "Failed to update comic book metadata in batch",
       }, 500);
@@ -993,7 +994,7 @@ app.openapi(
 
       return c.json({ message: "Comic book not found" }, 404);
     } catch (error) {
-      console.error("Error fetching comic book by ID:", error);
+      apiLogger.error("Error fetching comic book by ID:" + error);
       return c.json({ message: "Failed to fetch comic book" }, 500);
     }
   },
@@ -1084,7 +1085,7 @@ app.openapi(
 
       return c.json({ message: "Comic book not found" }, 404);
     } catch (error) {
-      console.error("Error fetching comic book metadata by ID:", error);
+      apiLogger.error("Error fetching comic book metadata by ID:" + error);
       return c.json({ message: "Failed to fetch comic book metadata" }, 500);
     }
   },
@@ -1203,7 +1204,7 @@ app.openapi(
         },
       });
     } catch (error) {
-      console.error("Error downloading comic book:", error);
+      apiLogger.error("Error downloading comic book:" + error);
       return c.json({ message: "Failed to download comic book file" }, 500);
     }
   },
@@ -1295,7 +1296,7 @@ app.openapi(
 
       return c.json(streamingResult, 200);
     } catch (error) {
-      console.error("Error starting comic book streaming:", error);
+      apiLogger.error("Error starting comic book streaming:" + error);
       return c.json({ message: "Failed to start comic book streaming" }, 500);
     }
   },
@@ -1387,7 +1388,7 @@ app.openapi(
 
       return c.json(streamingResult, 200);
     } catch (error) {
-      console.error("Error streaming comic book file:", error);
+      apiLogger.error("Error streaming comic book file:" + error);
       return c.json({ message: "Failed to stream comic book file" }, 500);
     }
   },
@@ -1467,7 +1468,7 @@ app.openapi(
       const result: ComicBookPagesInfo = await getComicPagesInfo(id);
       return c.json(result, 200);
     } catch (error) {
-      console.error("Error fetching comic book pages info:", error);
+      apiLogger.error("Error fetching comic book pages info:" + error);
       return c.json({ message: "Failed to fetch comic book pages info" }, 500);
     }
   },
@@ -1548,7 +1549,7 @@ app.openapi(
         read: hasRead,
       }, 200);
     } catch (error) {
-      console.error("Error checking read status:", error);
+      apiLogger.error("Error checking read status:" + error);
       return c.json({ message: "Failed to check read status" }, 500);
     }
   },
@@ -1854,7 +1855,7 @@ app.openapi(
         return c.json({ message: "Comic book not found" }, 404);
       }
     } catch (error) {
-      console.error("Error updating comic book:", error);
+      apiLogger.error("Error updating comic book:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },
@@ -1946,7 +1947,7 @@ app.openapi(
         return c.json({ message: "Comic book not found" }, 404);
       }
     } catch (error) {
-      console.error("Error deleting comic book:", error);
+      apiLogger.error("Error deleting comic book:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },
@@ -2039,7 +2040,7 @@ app.openapi(
         }, 404);
       }
     } catch (error) {
-      console.error("Error fetching next comic book:", error);
+      apiLogger.error("Error fetching next comic book:" + error);
       return c.json({ message: "Failed to fetch next comic book" }, 500);
     }
   },
@@ -2132,7 +2133,7 @@ app.openapi(
         }, 404);
       }
     } catch (error) {
-      console.error("Error fetching previous comic book:", error);
+      apiLogger.error("Error fetching previous comic book:" + error);
       return c.json({ message: "Failed to fetch previous comic book" }, 500);
     }
   },
@@ -2229,7 +2230,7 @@ app.openapi(
         }, 404);
       }
     } catch (error) {
-      console.error("Error fetching comic book thumbnails:", error);
+      apiLogger.error("Error fetching comic book thumbnails:" + error);
       return c.json({ message: "Failed to fetch comic book thumbnails" }, 500);
     }
   },
@@ -2327,7 +2328,7 @@ app.openapi(
         }, 404);
       }
     } catch (error) {
-      console.error("Error fetching comic book thumbnail:", error);
+      apiLogger.error("Error fetching comic book thumbnail:" + error);
       return c.json({ message: "Failed to fetch comic book thumbnail" }, 500);
     }
   },
@@ -2421,7 +2422,7 @@ app.openapi(
 
       return c.json({ success: true }, 200);
     } catch (error) {
-      console.error("Error deleting comic book thumbnail:", error);
+      apiLogger.error("Error deleting comic book thumbnail:" + error);
       return c.json({ message: "Failed to delete comic book thumbnail" }, 500);
     }
   },
@@ -2566,7 +2567,7 @@ app.openapi(
         thumbnails: thumbnail ? [thumbnail] : [],
       }, 201);
     } catch (error) {
-      console.error("Error creating custom thumbnail:", error);
+      apiLogger.error("Error creating custom thumbnail:" + error);
 
       if (error instanceof Error) {
         if (error.message.includes("not found")) {
@@ -2655,7 +2656,7 @@ app.openapi(
         readLists: comicStoryArcs,
       }, 200);
     } catch (error) {
-      console.error("Error fetching comic book readlists:", error);
+      apiLogger.error("Error fetching comic book readlists:" + error);
       return c.json({ message: "Failed to fetch comic book readlists" }, 501);
     }
   },

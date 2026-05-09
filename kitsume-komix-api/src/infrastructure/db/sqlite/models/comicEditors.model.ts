@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 
 import { ComicEditor } from "#types/index.ts";
 import { comicBookEditorsTable, comicEditorsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
@@ -33,7 +34,7 @@ export const insertComicEditor = async (name: string): Promise<number> => {
         .where(eq(comicEditorsTable.name, name));
 
       if (existingEditor.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic editor already exists with name: ${name}, returning existing ID: ${
             existingEditor[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicEditor = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic editor:", error);
+    dbLogger.error("Error inserting comic editor:" + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkEditorToComicBook = async (
       .values({ comicEditorId: editorId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking editor to comic book:", error);
+    dbLogger.error("Error linking editor to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkEditorsToComicBook = async (
       .delete(comicBookEditorsTable)
       .where(eq(comicBookEditorsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking editors from comic book:", error);
+    dbLogger.error("Error unlinking editors from comic book:" + error);
     throw error;
   }
 };
@@ -132,7 +133,7 @@ export const getEditorsByComicBookId = async (
 
     return result.map((row) => row.comicEditor);
   } catch (error) {
-    console.error("Error fetching editors by comic book ID:", error);
+    dbLogger.error("Error fetching editors by comic book ID:" + error);
     throw error;
   }
 };
@@ -159,7 +160,7 @@ export const getEditorIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching comic editor IDs by filter:", error);
+    dbLogger.error("Error fetching comic editor IDs by filter:" + error);
     throw error;
   }
 };

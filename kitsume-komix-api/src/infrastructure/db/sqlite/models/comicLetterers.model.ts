@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookLetterersTable, comicLetterersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicLetterer } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicLetterer = async (name: string): Promise<number> => {
         .where(eq(comicLetterersTable.name, name));
 
       if (existingLetterer.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic letterer already exists with name: ${name}, returning existing ID: ${
             existingLetterer[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicLetterer = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic letterer:", error);
+    dbLogger.error("Error inserting comic letterer:" + error);
     throw error;
   }
 };
@@ -78,7 +79,7 @@ export const linkLettererToComicBook = async (
       })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking letterer to comic book:", error);
+    dbLogger.error("Error linking letterer to comic book:" + error);
     throw error;
   }
 };
@@ -102,7 +103,7 @@ export const unlinkLetterersToComicBook = async (
       .delete(comicBookLetterersTable)
       .where(eq(comicBookLetterersTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking letterers from comic book:", error);
+    dbLogger.error("Error unlinking letterers from comic book:" + error);
     throw error;
   }
 };
@@ -135,7 +136,7 @@ export const getLetterersByComicBookId = async (
 
     return result.map((row) => row.comicLetterer);
   } catch (error) {
-    console.error("Error fetching letterers by comic book ID:", error);
+    dbLogger.error("Error fetching letterers by comic book ID:" + error);
     throw error;
   }
 };
@@ -162,7 +163,7 @@ export const getLettererIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching letterer IDs by filter:", error);
+    dbLogger.error("Error fetching letterer IDs by filter:" + error);
     throw error;
   }
 };

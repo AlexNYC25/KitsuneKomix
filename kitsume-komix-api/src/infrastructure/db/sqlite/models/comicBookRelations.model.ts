@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import {
   comicBookCharactersTable,
   comicBookColoristsTable,
@@ -52,7 +53,7 @@ export const addComicBookWriter = async (
 
     return result.length > 0 ? result[0].id : 0;
   } catch (error) {
-    console.error("Error adding comic book writer relation:", error);
+    dbLogger.error("Error adding comic book writer relation:" + error);
     throw error;
   }
 };
@@ -84,7 +85,7 @@ export const removeComicBookWriter = async (
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error removing comic book writer relation:", error);
+    dbLogger.error("Error removing comic book writer relation:" + error);
     throw error;
   }
 };
@@ -114,7 +115,7 @@ export const addComicBookPenciller = async (
 
     return result.length > 0 ? result[0].id : 0;
   } catch (error) {
-    console.error("Error adding comic book penciller relation:", error);
+    dbLogger.error("Error adding comic book penciller relation:" + error);
     throw error;
   }
 };
@@ -144,7 +145,7 @@ export const addComicBookCharacter = async (
 
     return result.length > 0 ? result[0].id : 0;
   } catch (error) {
-    console.error("Error adding comic book character relation:", error);
+    dbLogger.error("Error adding comic book character relation:" + error);
     throw error;
   }
 };
@@ -174,7 +175,7 @@ export const addComicBookPublisher = async (
 
     return result.length > 0 ? result[0].id : 0;
   } catch (error) {
-    console.error("Error adding comic book publisher relation:", error);
+    dbLogger.error("Error adding comic book publisher relation:" + error);
     throw error;
   }
 };
@@ -204,7 +205,7 @@ export const addComicBookGenre = async (
 
     return result.length > 0 ? result[0].id : 0;
   } catch (error) {
-    console.error("Error adding comic book genre relation:", error);
+    dbLogger.error("Error adding comic book genre relation:" + error);
     throw error;
   }
 };
@@ -272,7 +273,7 @@ export const removeAllComicBookRelations = async (
       ),
     ]);
   } catch (error) {
-    console.error("Error removing comic book relations:", error);
+    dbLogger.error("Error removing comic book relations:" + error);
     throw error;
   }
 };

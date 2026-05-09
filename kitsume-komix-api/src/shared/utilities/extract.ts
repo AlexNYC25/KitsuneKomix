@@ -1,5 +1,6 @@
 import { basename, extname, join } from "@std/path";
 
+import { apiLogger } from "#logger/loggers.ts";
 import { env } from "#config/env.ts";
 
 import { ComicExtractionResult } from "#types/index.ts";
@@ -137,12 +138,12 @@ async function extractZipArchive(
     if (success) {
       return true;
     } else {
-      console.error(`External unzip command failed for file: ${archivePath}`);
+      apiLogger.error(`External unzip command failed for file: ${archivePath}`);
       return false;
     }
   } catch (error) {
-    console.error(`ZIP extraction error: ${error}`);
-    console.error("External unzip command is not available or failed");
+    apiLogger.error(`ZIP extraction error: ${error}`);
+    apiLogger.error("External unzip command is not available or failed");
     return false;
   }
 }
@@ -173,8 +174,8 @@ async function extractRarArchive(
       return false;
     }
   } catch (error) {
-    console.error(`RAR extraction error: ${error}`);
-    console.error(
+    apiLogger.error(`RAR extraction error: ${error}`);
+    apiLogger.error(
       `Note: Full RAR support requires additional packages not available in this container.`,
     );
     return false;
@@ -198,7 +199,7 @@ async function extract7zArchive(
     const { success } = await process.output();
     return success;
   } catch (error) {
-    console.error(`7Z extraction error: ${error}`);
+    apiLogger.error(`7Z extraction error: ${error}`);
     return false;
   }
 }
@@ -220,7 +221,7 @@ async function extractTarArchive(
     const { success } = await process.output();
     return success;
   } catch (error) {
-    console.error(`TAR extraction error: ${error}`);
+    apiLogger.error(`TAR extraction error: ${error}`);
     return false;
   }
 }
@@ -250,7 +251,7 @@ export async function findImageFiles(directoryPath: string): Promise<string[]> {
       });
     });
   } catch (error) {
-    console.error(`Error finding image files: ${error}`);
+    apiLogger.error(`Error finding image files: ${error}`);
   }
 
   return imageFiles;
@@ -277,7 +278,7 @@ export async function extractComicPage(
 
     return result.pages[pageNumber];
   } catch (error) {
-    console.error(`Error extracting comic page: ${error}`);
+    apiLogger.error(`Error extracting comic page: ${error}`);
     return null;
   }
 }
@@ -454,7 +455,7 @@ async function extractZipArchiveByRange(
 
     return extractedPaths;
   } catch (error) {
-    console.error(`ZIP streaming extraction error: ${error}`);
+    apiLogger.error(`ZIP streaming extraction error: ${error}`);
     return [];
   }
 }
@@ -509,7 +510,7 @@ async function extractRarArchiveByRange(
 
     return extractedPaths;
   } catch (error) {
-    console.error(`RAR streaming extraction error: ${error}`);
+    apiLogger.error(`RAR streaming extraction error: ${error}`);
     return [];
   }
 }
@@ -564,7 +565,7 @@ async function extract7zArchiveByRange(
 
     return extractedPaths;
   } catch (error) {
-    console.error(`7Z streaming extraction error: ${error}`);
+    apiLogger.error(`7Z streaming extraction error: ${error}`);
     return [];
   }
 }
@@ -619,7 +620,7 @@ async function extractTarArchiveByRange(
 
     return extractedPaths;
   } catch (error) {
-    console.error(`TAR streaming extraction error: ${error}`);
+    apiLogger.error(`TAR streaming extraction error: ${error}`);
     return [];
   }
 }

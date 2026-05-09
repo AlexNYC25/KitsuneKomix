@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import {
   CoMet,
   ComicInfo,
@@ -30,7 +31,7 @@ const getMetadata = async (filePath: string) => {
     const metadata = await readComicFileMetadata(filePath);
     return metadata;
   } catch (error) {
-    console.error("Error fetching metadata for file", filePath, ":", error);
+    apiLogger.error("Error fetching metadata for file " + filePath + ":" + error);
     return null;
   }
 };

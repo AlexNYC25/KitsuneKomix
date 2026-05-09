@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 
 import { ComicColorist } from "#types/index.ts";
 import { comicBookColoristsTable, comicColoristsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
@@ -33,7 +34,7 @@ export const insertComicColorist = async (name: string): Promise<number> => {
         .where(eq(comicColoristsTable.name, name));
 
       if (existingColorist.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic colorist already exists with name: ${name}, returning existing ID: ${
             existingColorist[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicColorist = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic colorist:", error);
+    dbLogger.error("Error inserting comic colorist:" + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkColoristToComicBook = async (
       .values({ comicColoristId: coloristId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking colorist to comic book:", error);
+    dbLogger.error("Error linking colorist to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkColoristsToComicBook = async (
       .delete(comicBookColoristsTable)
       .where(eq(comicBookColoristsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking colorists from comic book:", error);
+    dbLogger.error("Error unlinking colorists from comic book:" + error);
     throw error;
   }
 };
@@ -135,7 +136,7 @@ export const getColoristByComicBookId = async (
 
     return result.map((row) => row.comicColorist);
   } catch (error) {
-    console.error("Error fetching colorists by comic book ID:", error);
+    dbLogger.error("Error fetching colorists by comic book ID:" + error);
     throw error;
   }
 };
@@ -162,7 +163,7 @@ export const getColoristIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching colorist IDs by filter:", error);
+    dbLogger.error("Error fetching colorist IDs by filter:" + error);
     throw error;
   }
 };

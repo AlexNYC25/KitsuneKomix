@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 
 import type { ComicGenre } from "#types/index.ts";
 import { comicBookGenresTable, comicGenresTable } from "#infrastructure/db/sqlite/schemas/index.ts";
@@ -33,7 +34,7 @@ export const insertComicGenre = async (genreName: string): Promise<number> => {
         .where(eq(comicGenresTable.name, genreName));
 
       if (existingGenre.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic genre already exists with name: ${genreName}, returning existing ID: ${
             existingGenre[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicGenre = async (genreName: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic genre:", error);
+    dbLogger.error("Error inserting comic genre:" + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkGenreToComicBook = async (
       .values({ comicGenreId: genreId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking genre to comic book:", error);
+    dbLogger.error("Error linking genre to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkGenresToComicBook = async (
       .delete(comicBookGenresTable)
       .where(eq(comicBookGenresTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking genres from comic book:", error);
+    dbLogger.error("Error unlinking genres from comic book:" + error);
     throw error;
   }
 };
@@ -132,7 +133,7 @@ export const getGenresForComicBook = async (
 
     return result.map((row) => row.comicGenre);
   } catch (error) {
-    console.error("Error fetching genres for comic book:", error);
+    dbLogger.error("Error fetching genres for comic book:" + error);
     throw error;
   }
 };
@@ -159,7 +160,7 @@ export const getGenreIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching comic genre IDs by filter:", error);
+    dbLogger.error("Error fetching comic genre IDs by filter:" + error);
     throw error;
   }
 };

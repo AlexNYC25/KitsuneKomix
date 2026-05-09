@@ -1,5 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
+import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import { fetchComicSeries } from "#modules/series/comicSeries.service.ts";
 
@@ -153,7 +154,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching comic series:", error);
+      apiLogger.error("Error fetching comic series:" + error);
       return c.json({ message: "Internal Server Error" }, 500);
     }
   },
@@ -260,7 +261,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching latest comic series:", error);
+      apiLogger.error("Error fetching latest comic series:" + error);
       return c.json({ message: "Internal Server Error" }, 500);
     }
   },
@@ -363,7 +364,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching updated comic series:", error);
+      apiLogger.error("Error fetching updated comic series:" + error);
       return c.json({ message: "Internal Server Error" }, 500);
     }
   },
@@ -477,7 +478,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching comic series:", error);
+      apiLogger.error("Error fetching comic series:" + error);
       return c.json({ message: "Internal Server Error" }, 500);
     }
   },
@@ -581,7 +582,7 @@ app.openapi(
 
       return c.json(returnObj, 200);
     } catch (error) {
-      console.error("Error fetching comic series:", error);
+      apiLogger.error("Error fetching comic series:" + error);
       return c.json({ message: "Internal Server Error" }, 500);
     }
   },

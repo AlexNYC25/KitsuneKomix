@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 import { getComicPagesByComicBookId } from "#infrastructure/db/sqlite/models/comicPages.model.ts";
 
@@ -387,7 +388,7 @@ const convertImageForBrowser = async (
 
     return true;
   } catch (error) {
-    console.error(`Error converting image format: ${error}`);
+    apiLogger.error(`Error converting image format: ${error}`);
     return false;
   }
 };

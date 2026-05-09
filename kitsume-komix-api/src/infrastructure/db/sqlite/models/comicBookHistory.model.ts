@@ -1,7 +1,10 @@
 import { and, eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+
 import { comicBookHistoryTable } from "#infrastructure/db/sqlite/schemas/index.ts";
+
+import { dbLogger } from "#logger/loggers.ts";
 
 import type { ComicBookHistory, NewComicBookHistory } from "#types/index.ts";
 
@@ -27,7 +30,7 @@ export const insertComicBookHistory = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic book history:", error);
+    dbLogger.error("Error inserting comic book history:" + error);
     throw error;
   }
 };
@@ -61,7 +64,7 @@ export const getComicBookHistoryByUserAndComic = async (
 
     return result[0] || null;
   } catch (error) {
-    console.error("Error fetching comic book history:", error);
+    dbLogger.error("Error fetching comic book history:" + error);
     throw error;
   }
 };
@@ -91,7 +94,7 @@ export const updateComicBookHistory = async (
 
     return id;
   } catch (error) {
-    console.error("Error updating comic book history:", error);
+    dbLogger.error("Error updating comic book history:" + error);
     throw error;
   }
 };

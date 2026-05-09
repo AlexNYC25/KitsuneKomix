@@ -3,6 +3,7 @@ import { dirname, extname } from "@std/path";
 import { ensureDir } from "@std/fs";
 import { calculateFileHash } from "./hash.ts";
 
+import { apiLogger } from "#logger/loggers.ts";
 import { env } from "#config/env.ts"; 
 
 import { ThumbnailConfig, ThumbnailResult } from "#types/index.ts";
@@ -208,7 +209,7 @@ export async function getImageDimensions(
 
     return null;
   } catch (error) {
-    console.error(`Error getting image dimensions for ${imagePath}:`, error);
+    apiLogger.error(`Error getting image dimensions for ${imagePath}:` + error);
     return null;
   }
 }

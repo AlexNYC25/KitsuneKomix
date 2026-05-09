@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import { getClient } from "#infrastructure/db/sqlite/client.ts";
 import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 import {
@@ -113,7 +114,7 @@ export const deleteComicsThumbnailById = async (
     await deleteComicBookThumbnail(thumbnailId);
     return true;
   } catch (error) {
-    console.error("Error deleting comic book thumbnail:", error);
+    apiLogger.error("Error deleting comic book thumbnail:" + error);
     throw new Error("Failed to delete comic book thumbnail.");
   }
 };
@@ -177,7 +178,7 @@ export const createCustomThumbnail = async (
 
     return { thumbnailId, filePath };
   } catch (error) {
-    console.error("Error creating custom thumbnail:", error);
+    apiLogger.error("Error creating custom thumbnail:" + error);
     throw new Error("Failed to create custom thumbnail.");
   }
 };
@@ -212,10 +213,7 @@ export const deleteComicBookThumbnails = async (
     try {
       await deleteComicBookThumbnail(thumbnail.id);
     } catch (error) {
-      console.error(
-        `Error deleting thumbnail ID ${thumbnail.id} for comic ID ${comicId}:`,
-        error,
-      );
+      apiLogger.error(`Error deleting thumbnail ID ${thumbnail.id} for comic ID ${comicId}:` + error);
     }
   }
 

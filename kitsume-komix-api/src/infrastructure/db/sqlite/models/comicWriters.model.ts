@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookWritersTable, comicWritersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicWriter } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicWriter = async (name: string): Promise<number> => {
         .where(eq(comicWritersTable.name, name));
 
       if (existingWriter.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic writer already exists with name: ${name}, returning existing ID: ${
             existingWriter[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicWriter = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic writer:", error);
+    dbLogger.error("Error inserting comic writer:" + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkWriterToComicBook = async (
       .values({ comicWriterId: writerId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking writer to comic book:", error);
+    dbLogger.error("Error linking writer to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkWritersToComicBook = async (
       .delete(comicBookWritersTable)
       .where(eq(comicBookWritersTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking writers from comic book:", error);
+    dbLogger.error("Error unlinking writers from comic book:" + error);
     throw error;
   }
 };
@@ -132,7 +133,7 @@ export const getWritersByComicBookId = async (
 
     return result.map(({ comicWriter }) => comicWriter);
   } catch (error) {
-    console.error("Error fetching writers by comic book ID:", error);
+    dbLogger.error("Error fetching writers by comic book ID:" + error);
     throw error;
   }
 };
@@ -159,7 +160,7 @@ export const getWriterIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching writer IDs by filter:", error);
+    dbLogger.error("Error fetching writer IDs by filter:" + error);
     throw error;
   }
 };

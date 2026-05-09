@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import {
   getAllComicLibraries,
   getUsersAssignedToLibrary,
@@ -73,7 +74,7 @@ export const getComicLibrariesAvailableToUser = async (
 
     return compiledInfoReturnList;
   } catch (error) {
-    console.error("Error fetching comic libraries:", error);
+    apiLogger.error("Error fetching comic libraries:" + error);
     return [];
   }
 };

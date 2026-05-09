@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import {
   deleteComicBook,
   getComicBookById as dbGetComicBookById,
@@ -120,7 +121,7 @@ export const fetchComicBooksWithRelatedMetadata = async (
 
     return comicsWithMetadata;
   } catch (error) {
-    console.error("Error fetching comic books with related metadata:", error);
+    apiLogger.error("Error fetching comic books with related metadata:" + error);
     throw error;
   }
 };
@@ -156,7 +157,7 @@ export const fetchComicDuplicatesInTheDb = async (
 
     return duplicates;
   } catch (error) {
-    console.error("Error fetching comic duplicates:", error);
+    apiLogger.error("Error fetching comic duplicates:" + error);
     throw error;
   }
 };
@@ -193,7 +194,7 @@ export const fetchRandomComicBook = async (
     }
     return randomComics;
   } catch (error) {
-    console.error("Error fetching random comic book:", error);
+    apiLogger.error("Error fetching random comic book:" + error);
     throw error;
   }
 };
@@ -217,7 +218,7 @@ export const getComicBookById = async (
     const comic = await dbGetComicBookById(comicId);
     return comic;
   } catch (error) {
-    console.error("Error fetching comic book by ID:", error);
+    apiLogger.error("Error fetching comic book by ID:" + error);
     throw error;
   }
 };
@@ -250,7 +251,7 @@ export const processComicBookDeletion = async (
   try {
     await deleteComicBook(comicId);
   } catch (error) {
-    console.error(`Error deleting comic book ID ${comicId}:`, error);
+    apiLogger.error(`Error deleting comic book ID ${comicId}:` + error);
     throw error;
   }
 

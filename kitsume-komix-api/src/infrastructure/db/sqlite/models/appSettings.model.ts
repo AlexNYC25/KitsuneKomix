@@ -1,6 +1,10 @@
-import { asc, desc, eq, ilike, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+
 import { getClient } from "../client.ts";
+
 import { appSettingsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
+
+import { dbLogger } from "#logger/loggers.ts";
 
 /**
  * Retrieves a single application setting by its key.
@@ -24,7 +28,7 @@ export const getSetting = async (key: string): Promise<string | null> => {
 
   	return result.length > 0 ? result[0].value : null;
 	} catch (error) {
-		console.error("Error fetching setting:", error);
+		dbLogger.error("Error fetching setting:" + error);
 		throw error;
 	}
   
@@ -63,7 +67,7 @@ export const setSetting = async (key: string, value: string): Promise<void> => {
 				.values({ key, value });
 		}
 	} catch (error) {
-		console.error("Error setting value:", error);
+		dbLogger.error("Error setting value:" + error);
 		throw error;
 	}
 };
@@ -90,7 +94,7 @@ export const checkIfSettingExists = async (key: string): Promise<boolean> => {
 
 		return existingSetting.length > 0;
 	} catch (error) {
-		console.error("Error checking setting existence:", error);
+		dbLogger.error("Error checking setting existence:" + error);
 		throw error;
 	}
 };

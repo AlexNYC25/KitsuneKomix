@@ -2,6 +2,8 @@ import IORedis from "ioredis";
 
 import { env } from "#config/env.ts"
 
+import { dbLogger } from "#logger/loggers.ts";
+
 export const redisConnection = {
   host: env.REDIS_HOST,
   port: env.REDIS_PORT,
@@ -34,7 +36,7 @@ export const testRedisConnection: () => Promise<boolean> = async () => {
     await redis.quit();
     return true;
   } catch (error) {
-    console.error("Error connecting to Redis:", error);
+    dbLogger.error("Error connecting to Redis:" + error);
     return false;
 
   }

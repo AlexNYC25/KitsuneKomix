@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicPagesTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicPage } from "#types/index.ts";
@@ -57,7 +58,7 @@ export const insertComicPage = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic page:", error);
+    dbLogger.error("Error inserting comic page:" + error);
     throw error;
   }
 };
@@ -86,7 +87,7 @@ export const getComicPagesByComicBookId = async (
 
     return result;
   } catch (error) {
-    console.error("Error fetching comic pages by comic book ID:", error);
+    dbLogger.error("Error fetching comic pages by comic book ID:" + error);
     throw error;
   }
 };

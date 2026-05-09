@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import { getClient } from "#infrastructure/db/sqlite/client.ts";
 import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 import {
@@ -71,7 +72,7 @@ export const getNextComicBookId = async (
 
     return nextComic ? await dbGetComicBookById(nextComic.id) : null;
   } catch (error) {
-    console.error("Error fetching next comic book ID:", error);
+    apiLogger.error("Error fetching next comic book ID:" + error);
     throw new Error("Failed to fetch next comic book ID");
   }
 };
@@ -138,7 +139,7 @@ export const getPreviousComicBookId = async (
 
     return previousComic ? await dbGetComicBookById(previousComic.id) : null;
   } catch (error) {
-    console.error("Error fetching previous comic book ID:", error);
+    apiLogger.error("Error fetching previous comic book ID:" + error);
     throw new Error("Failed to fetch previous comic book ID");
   }
 };

@@ -2,6 +2,7 @@ import { asc, desc, eq, ilike, sql } from "drizzle-orm";
 import { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 
 import {
   comicBookCharactersTable,
@@ -389,10 +390,7 @@ export const getComicBooksWithMetadataFilteringSorting = async (
 
     return await query;
   } catch (error) {
-    console.error(
-      "Error fetching comic books with metadata filtering and sorting:",
-      error,
-    );
+    dbLogger.error("Error fetching comic books with metadata filtering and sorting:" + error);
     throw error;
   }
 };
@@ -419,7 +417,7 @@ export const getRandomBook = async (): Promise<ComicBook | null> => {
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching random comic book:", error);
+    dbLogger.error("Error fetching random comic book:" + error);
     throw error;
   }
 };
@@ -446,7 +444,7 @@ export const insertComicBook = async (
 
     return insertQuery[0].id;
   } catch (error) {
-    console.error("Error inserting comic book:", error);
+    dbLogger.error("Error inserting comic book:" + error);
     throw error;
   }
 };
@@ -478,7 +476,7 @@ export const getComicBookById = async (
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching comic book by ID:", error);
+    dbLogger.error("Error fetching comic book by ID:" + error);
     throw error;
   }
 };
@@ -507,7 +505,7 @@ export const getComicBookByFilePath = async (
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching comic book by file path:", error);
+    dbLogger.error("Error fetching comic book by file path:" + error);
     throw error;
   }
 };
@@ -604,7 +602,7 @@ export const updateComicBook = async (
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error updating comic book:", error);
+    dbLogger.error("Error updating comic book:" + error);
     throw error;
   }
 };
@@ -629,7 +627,7 @@ export const deleteComicBook = async (id: number): Promise<boolean> => {
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error deleting comic book:", error);
+    dbLogger.error("Error deleting comic book:" + error);
     throw error;
   }
 };
@@ -661,7 +659,7 @@ export const getComicDuplicates = async (
 
     return result;
   } catch (error) {
-    console.error("Error fetching duplicate comic books:", error);
+    dbLogger.error("Error fetching duplicate comic books:" + error);
     throw error;
   }
 };

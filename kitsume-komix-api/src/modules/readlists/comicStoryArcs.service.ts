@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import {
   deleteComicStoryArcById,
   getComicStoryArcById,
@@ -55,7 +56,7 @@ export const fetchComicStoryArcById = async (
     const storyArc = await getComicStoryArcById(storyArcId);
     return storyArc;
   } catch (error) {
-    console.error("Error fetching comic story arc by ID:", error);
+    apiLogger.error("Error fetching comic story arc by ID:" + error);
     return null;
   }
 };
@@ -71,7 +72,7 @@ export const addComicStoryArc = async (
     const newStoryArcRecord = await getComicStoryArcById(newStoryArcId);
     return newStoryArcRecord;
   } catch (error) {
-    console.error("Error adding new comic story arc:", error);
+    apiLogger.error("Error adding new comic story arc:" + error);
     return null;
   }
 };
@@ -82,7 +83,7 @@ export const deleteComicStoryArc = async (
   try {
     await deleteComicStoryArcById(storyArcId);
   } catch (error) {
-    console.error("Error deleting comic story arc:", error);
+    apiLogger.error("Error deleting comic story arc:" + error);
     return false;
   }
 

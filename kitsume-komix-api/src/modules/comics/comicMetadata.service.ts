@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import { getClient } from "#infrastructure/db/sqlite/client.ts";
 import { getThumbnailsByComicBookId } from "#infrastructure/db/sqlite/models/comicBookThumbnails.model.ts";
 import { getFileNameFromPath } from "#utilities/file.ts";
@@ -121,7 +122,7 @@ export const fetchAComicsAssociatedMetadataById = async (
       thumbnailUrl,
     };
   } catch (error) {
-    console.error("Error fetching comic book metadata:", error);
+    apiLogger.error("Error fetching comic book metadata:" + error);
     throw error;
   }
 };
@@ -213,10 +214,7 @@ export const updateComicBookMetadata = async (
               break;
           }
         } catch (error) {
-          console.error(
-            `Error unlinking ${updateType} from comic book:`,
-            error,
-          );
+          apiLogger.error(`Error unlinking ${updateType} from comic book:` + error);
           throw error;
         }
       }
@@ -304,14 +302,14 @@ export const updateComicBookMetadata = async (
           }
         }
       } catch (error) {
-        console.error(`Error updating ${updateType} for comic book:`, error);
+        apiLogger.error(`Error updating ${updateType} for comic book:` + error);
         throw error;
       }
     }
 
     return true;
   } catch (error) {
-    console.error("Error updating comic book metadata:", error);
+    apiLogger.error("Error updating comic book metadata:" + error);
     return false;
   }
 };
@@ -347,7 +345,7 @@ export const updateComicBookMetadataBulk = async (
     for (const comicId of comicIds) {
       const success = await updateComicBookMetadata(comicId, metadataUpdates);
       if (!success) {
-        console.error(`Failed to update metadata for comic ID ${comicId}`);
+        apiLogger.error(`Failed to update metadata for comic ID ${comicId}`);
         return numberOfSuccessfulUpdates;
       } else {
         numberOfSuccessfulUpdates++;
@@ -355,7 +353,7 @@ export const updateComicBookMetadataBulk = async (
     }
     return numberOfSuccessfulUpdates;
   } catch (error) {
-    console.error("Error updating comic book metadata in bulk:", error);
+    apiLogger.error("Error updating comic book metadata in bulk:" + error);
     return 0;
   }
 };

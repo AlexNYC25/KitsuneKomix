@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { usersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { NewUser, User, UserEditInput } from "#types/index.ts";
@@ -25,7 +26,7 @@ export const createUser = async (userData: NewUser): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error creating user:", error);
+    dbLogger.error("Error creating user:" + error);
     throw error;
   }
 };
@@ -52,7 +53,7 @@ export const getUserById = async (id: number): Promise<User | null> => {
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching user by ID:", error);
+    dbLogger.error("Error fetching user by ID:" + error);
     throw error;
   }
 };
@@ -79,7 +80,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching user by email:", error);
+    dbLogger.error("Error fetching user by email:" + error);
     throw error;
   }
 };
@@ -108,7 +109,7 @@ export const getUserByUsername = async (
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching user by username:", error);
+    dbLogger.error("Error fetching user by username:" + error);
     throw error;
   }
 };
@@ -131,7 +132,7 @@ export const getAllUsers = async (): Promise<User[]> => {
 
     return result;
   } catch (error) {
-    console.error("Error fetching all users:", error);
+    dbLogger.error("Error fetching all users:" + error);
     throw error;
   }
 };
@@ -166,7 +167,7 @@ export const updateUser = async (
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error updating user:", error);
+    dbLogger.error("Error updating user:" + error);
     throw error;
   }
 };
@@ -193,7 +194,7 @@ export const deleteUser = async (id: number): Promise<boolean> => {
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error deleting user:", error);
+    dbLogger.error("Error deleting user:" + error);
     throw error;
   }
 };

@@ -1,5 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
+import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 
 import { purgeAllData } from "#infrastructure/db/sqlite/models/admin.model.ts";
@@ -95,7 +96,7 @@ app.openapi(
       await purgeAllData();
       return c.json({ message: "All data purged successfully" }, 200);
     } catch (error) {
-      console.error("Error purging data:", error);
+      apiLogger.error("Error purging data:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },

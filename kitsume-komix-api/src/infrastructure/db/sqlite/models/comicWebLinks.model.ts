@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicWebLinksTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
@@ -47,7 +48,7 @@ export const insertComicWebLink = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic web link:", error);
+    dbLogger.error("Error inserting comic web link:" + error);
     throw new Error("Failed to insert comic web link.");
   }
 };

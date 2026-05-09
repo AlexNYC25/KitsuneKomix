@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookImprintsTable, comicImprintsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicImprint } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicImprint = async (name: string): Promise<number> => {
         .where(eq(comicImprintsTable.name, name));
 
       if (existingImprint.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic imprint already exists with name: ${name}, returning existing ID: ${
             existingImprint[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicImprint = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic imprint:", error);
+    dbLogger.error("Error inserting comic imprint:" + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkImprintToComicBook = async (
       .values({ comicImprintId: imprintId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking imprint to comic book:", error);
+    dbLogger.error("Error linking imprint to comic book:" + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkImprintsToComicBook = async (
       .delete(comicBookImprintsTable)
       .where(eq(comicBookImprintsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking imprints from comic book:", error);
+    dbLogger.error("Error unlinking imprints from comic book:" + error);
     throw error;
   }
 };
@@ -132,7 +133,7 @@ export const getImprintsByComicBookId = async (
 
     return result.map((row) => row.comicImprint);
   } catch (error) {
-    console.error("Error fetching imprints by comic book ID:", error);
+    dbLogger.error("Error fetching imprints by comic book ID:" + error);
     throw error;
   }
 };
@@ -159,7 +160,7 @@ export const getImprintIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching comic imprint IDs by filter:", error);
+    dbLogger.error("Error fetching comic imprint IDs by filter:" + error);
     throw error;
   }
 };

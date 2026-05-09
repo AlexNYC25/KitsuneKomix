@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 
 import { ComicCoverArtist } from "#types/index.ts";
 import {
@@ -36,7 +37,7 @@ export const insertComicCoverArtist = async (name: string): Promise<number> => {
         .where(eq(comicCoverArtistsTable.name, name));
 
       if (existingCoverArtist.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic cover artist already exists with name: ${name}, returning existing ID: ${
             existingCoverArtist[0].id
           }`,
@@ -51,7 +52,7 @@ export const insertComicCoverArtist = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic cover artist:", error);
+    dbLogger.error("Error inserting comic cover artist:" + error);
     throw error;
   }
 };
@@ -81,7 +82,7 @@ export const linkCoverArtistToComicBook = async (
       })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking cover artist to comic book:", error);
+    dbLogger.error("Error linking cover artist to comic book:" + error);
     throw error;
   }
 };
@@ -105,7 +106,7 @@ export const unlinkCoverArtistsToComicBook = async (
       .delete(comicBookCoverArtistsTable)
       .where(eq(comicBookCoverArtistsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking cover artists from comic book:", error);
+    dbLogger.error("Error unlinking cover artists from comic book:" + error);
     throw error;
   }
 };
@@ -141,7 +142,7 @@ export const getCoverArtistsByComicBookId = async (
 
     return result.map((row) => row.comicCoverArtist);
   } catch (error) {
-    console.error("Error fetching cover artists by comic book ID:", error);
+    dbLogger.error("Error fetching cover artists by comic book ID:" + error);
     throw error;
   }
 };
@@ -168,7 +169,7 @@ export const getCoverArtistIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching comic cover artist IDs by filter:", error);
+    dbLogger.error("Error fetching comic cover artist IDs by filter:" + error);
     throw error;
   }
 };

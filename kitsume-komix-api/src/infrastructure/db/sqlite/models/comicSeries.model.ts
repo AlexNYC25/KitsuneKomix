@@ -2,6 +2,7 @@ import { asc, desc, eq, ilike } from "drizzle-orm";
 import { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 
 import {
   comicLibrariesSeriesTable,
@@ -153,10 +154,7 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
 
     return await query;
   } catch (error) {
-    console.error(
-      "Error fetching comic series with metadata filtering and sorting:",
-      error,
-    );
+    dbLogger.error("Error fetching comic series with metadata filtering and sorting:" + error);
     throw error;
   }
 };
@@ -195,7 +193,7 @@ export const insertComicSeries = async (
           .where(eq(comicSeriesTable.folderPath, seriesData.folderPath));
 
         if (existingSeries.length > 0) {
-          console.log(
+          dbLogger.info(
             `Comic series already exists at path: ${seriesData.folderPath}, returning existing ID: ${
               existingSeries[0].id
             }`,
@@ -213,7 +211,7 @@ export const insertComicSeries = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic series:", error);
+    dbLogger.error("Error inserting comic series:" + error);
     throw error;
   }
 };
@@ -249,7 +247,7 @@ export const insertComicSeriesIntoLibrary = async (
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error inserting comic series into library:", error);
+    dbLogger.error("Error inserting comic series into library:" + error);
     throw error;
   }
 };
@@ -281,7 +279,7 @@ export const getComicSeriesByPath = async (
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error("Error fetching comic series by path:", error);
+    dbLogger.error("Error fetching comic series by path:" + error);
     throw error;
   }
 };
@@ -317,7 +315,7 @@ export const addComicBookToSeries = async (
 
     return result.length > 0;
   } catch (error) {
-    console.error("Error adding comic book to series:", error);
+    dbLogger.error("Error adding comic book to series:" + error);
     throw error;
   }
 };
@@ -353,7 +351,7 @@ export const getSeriesIdFromComicBook = async (
 
     return result.length > 0 ? result[0].comicSeriesId : null;
   } catch (error) {
-    console.error("Error fetching series ID from comic book ID:", error);
+    dbLogger.error("Error fetching series ID from comic book ID:" + error);
     throw error;
   }
 };
@@ -389,7 +387,7 @@ export const getComicBooksInSeries = async (
     // Return the comicBookId (the linked comic book) for all association rows
     return result.map((row) => row.comicBookId);
   } catch (error) {
-    console.error("Error fetching comic books in series:", error);
+    dbLogger.error("Error fetching comic books in series:" + error);
     throw error;
   }
 };
@@ -420,7 +418,7 @@ export const deleteComicSeries = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error deleting comic series:", error);
+    dbLogger.error("Error deleting comic series:" + error);
     throw error;
   }
 };

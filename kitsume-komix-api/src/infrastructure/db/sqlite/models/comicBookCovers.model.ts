@@ -1,5 +1,8 @@
 import { getClient } from "../client.ts";
+
 import { comicBookCovers } from "#infrastructure/db/sqlite/schemas/index.ts";
+
+import { dbLogger } from "#logger/loggers.ts";
 
 /**
  * Insertion function for a new comic book cover record
@@ -28,7 +31,7 @@ export const insertComicBookCover = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic book cover:", error);
+    dbLogger.error("Error inserting comic book cover:" + error);
     throw error;
   }
 };

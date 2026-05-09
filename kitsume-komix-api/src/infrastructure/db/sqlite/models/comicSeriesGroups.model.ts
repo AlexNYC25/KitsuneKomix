@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import {
   comicBookSeriesGroupsTable,
   comicSeriesGroupsTable,
@@ -40,7 +41,7 @@ export const insertComicSeriesGroup = async (
         .where(eq(comicSeriesGroupsTable.name, name));
 
       if (existingGroup.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic series group already exists with name: ${name}, returning existing ID: ${
             existingGroup[0].id
           }`,
@@ -55,7 +56,7 @@ export const insertComicSeriesGroup = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error creating comic series group:", error);
+    dbLogger.error("Error creating comic series group:" + error);
     throw error;
   }
 };
@@ -85,7 +86,7 @@ export const linkSeriesGroupToComicBook = async (
       })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking comic series group to comic book:", error);
+    dbLogger.error("Error linking comic series group to comic book:" + error);
     throw new Error("Failed to link comic series group to comic book.");
   }
 };
@@ -109,7 +110,7 @@ export const unlinkSeriesGroupsToComicBook = async (
       .delete(comicBookSeriesGroupsTable)
       .where(eq(comicBookSeriesGroupsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking series groups from comic book:", error);
+    dbLogger.error("Error unlinking series groups from comic book:" + error);
     throw error;
   }
 };
@@ -145,10 +146,7 @@ export const getSeriesGroupsByComicBookId = async (
 
     return result.map((row) => row.comicSeriesGroup);
   } catch (error) {
-    console.error(
-      `Error fetching series groups for comic book ID ${comicBookId}:`,
-      error,
-    );
+    dbLogger.error(`Error fetching series groups for comic book ID ${comicBookId}:` + error);
     throw new Error("Failed to fetch series groups for comic book.");
   }
 };

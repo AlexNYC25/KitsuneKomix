@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookLocationsTable, comicLocationsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicLocation } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicLocation = async (name: string): Promise<number> => {
         .where(eq(comicLocationsTable.name, name));
 
       if (existingLocation.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic location already exists at name: ${name}, returning existing ID: ${
             existingLocation[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicLocation = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic location:", error);
+    dbLogger.error("Error inserting comic location:" + error);
     throw new Error("Failed to insert comic location.");
   }
 };
@@ -75,7 +76,7 @@ export const linkLocationToComicBook = async (
       .values({ comicLocationId: locationId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking comic location to comic book:", error);
+    dbLogger.error("Error linking comic location to comic book:" + error);
     throw new Error("Failed to link comic location to comic book.");
   }
 };
@@ -99,7 +100,7 @@ export const unlinkLocationsToComicBook = async (
       .delete(comicBookLocationsTable)
       .where(eq(comicBookLocationsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking locations from comic book:", error);
+    dbLogger.error("Error unlinking locations from comic book:" + error);
     throw error;
   }
 };
@@ -135,10 +136,7 @@ export const getLocationsByComicBookId = async (
 
     return result.map((row) => row.comicLocation);
   } catch (error) {
-    console.error(
-      "Error fetching comic locations by comic book ID:",
-      error,
-    );
+    dbLogger.error("Error fetching comic locations by comic book ID:" + error);
     throw new Error("Failed to fetch comic locations.");
   }
 };
@@ -165,7 +163,7 @@ export const getLocationIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching comic location IDs by filter:", error);
+    dbLogger.error("Error fetching comic location IDs by filter:" + error);
     throw new Error("Failed to fetch comic location IDs.");
   }
 };

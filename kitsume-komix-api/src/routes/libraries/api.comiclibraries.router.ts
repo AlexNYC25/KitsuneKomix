@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
 
+import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import { getComicLibrariesAvailableToUser } from "#modules/libraries/comicLibraries.service.ts";
 import { listFoldersInDirectoryService } from "#modules/files/files.service.ts";
@@ -115,7 +116,7 @@ app.openapi(
         200,
       );
     } catch (error) {
-      console.error("Error retrieving comic libraries for user:", error);
+      apiLogger.error("Error retrieving comic libraries for user:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },
@@ -193,7 +194,7 @@ app.openapi(
         message: `Library[${id}] for user ${userId} retrieved successfully`,
       }, 200);
     } catch (error) {
-      console.error("Error retrieving comic library for user:", error);
+      apiLogger.error("Error retrieving comic library for user:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },
@@ -273,7 +274,7 @@ app.openapi(
         200,
       );
     } catch (error) {
-      console.error("Error starting analysis for comic library:", error);
+      apiLogger.error("Error starting analysis for comic library:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },
@@ -353,7 +354,7 @@ app.openapi(
         200,
       );
     } catch (error) {
-      console.error("Error emptying trash for comic library:", error);
+      apiLogger.error("Error emptying trash for comic library:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },
@@ -458,7 +459,7 @@ app.openapi(
         "id": newLibraryId,
       }, 201);
     } catch (error) {
-      console.error("Error parsing JSON or registering library:", error);
+      apiLogger.error("Error parsing JSON or registering library:" + error);
       if (error instanceof SyntaxError && error.message.includes("JSON")) {
         return c.json(
           { message: "Invalid JSON format in request body" },
@@ -579,7 +580,7 @@ app.openapi(
         200,
       );
     } catch (error ) {
-      console.error("Error updating comic library:", error);
+      apiLogger.error("Error updating comic library:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   }
@@ -677,7 +678,7 @@ app.openapi(
         200,
       );
     } catch (error) {
-      console.error("Error deleting comic library:", error);
+      apiLogger.error("Error deleting comic library:" + error);
       return c.json({ message: "Internal server error" }, 500);
     }
   },

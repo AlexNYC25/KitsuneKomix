@@ -2,6 +2,7 @@ import { and, asc, desc, eq, ilike } from "drizzle-orm";
 import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import {
   comicBooksTable,
   comicBookStoryArcsTable,
@@ -134,10 +135,7 @@ export const getComicStoryArcsFilteringSorting = async (
 
     return query;
   } catch (error) {
-    console.error(
-      "Error fetching comic books with metadata filtering and sorting:",
-      error,
-    );
+    dbLogger.error("Error fetching comic books with metadata filtering and sorting:" + error);
     throw new Error(
       "Failed to fetch comic books with metadata filtering and sorting.",
     );
@@ -168,7 +166,7 @@ export const unlinkStoryArcsToComicBook = async (
       .delete(comicBookStoryArcsTable)
       .where(eq(comicBookStoryArcsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking story arcs from comic book:", error);
+    dbLogger.error("Error unlinking story arcs from comic book:" + error);
     throw error;
   }
 };
@@ -190,10 +188,7 @@ export const getComicStoryArcById = async (
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error(
-      `Error fetching comic story arc by ID ${storyArcId}:`,
-      error,
-    );
+    dbLogger.error(`Error fetching comic story arc by ID ${storyArcId}:` + error);
     throw new Error("Failed to fetch comic story arc by ID.");
   }
 };
@@ -220,10 +215,7 @@ export const getComicsInStoryArc = async (
 
     return result.map((row) => row.comicBookId);
   } catch (error) {
-    console.error(
-      `Error fetching comics in story arc ID ${storyArcId}:`,
-      error,
-    );
+    dbLogger.error(`Error fetching comics in story arc ID ${storyArcId}:` + error);
     throw new Error("Failed to fetch comics in story arc.");
   }
 };
@@ -250,10 +242,7 @@ export const getComicStoryArcByName = async (
 
     return result.length > 0 ? result[0] : null;
   } catch (error) {
-    console.error(
-      `Error fetching comic story arc by name ${name}:`,
-      error,
-    );
+    dbLogger.error(`Error fetching comic story arc by name ${name}:` + error);
     throw new Error("Failed to fetch comic story arc by name.");
   }
 };
@@ -290,7 +279,7 @@ export const insertComicStoryArc = async (
         .where(eq(comicStoryArcsTable.name, name));
 
       if (existingStoryArc.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic story arc already exists with name: ${name}, returning existing ID: ${
             existingStoryArc[0].id
           }`,
@@ -305,7 +294,7 @@ export const insertComicStoryArc = async (
 
     return result[0].id;
   } catch (error) {
-    console.error("Error inserting comic story arc:", error);
+    dbLogger.error("Error inserting comic story arc:" + error);
     throw new Error("Failed to insert comic story arc.");
   }
 };
@@ -329,7 +318,7 @@ export const deleteComicStoryArcById = async (
       .delete(comicStoryArcsTable)
       .where(eq(comicStoryArcsTable.id, storyArcId));
   } catch (error) {
-    console.error("Error deleting comic story arc by ID:", error);
+    dbLogger.error("Error deleting comic story arc by ID:" + error);
     throw new Error("Failed to delete comic story arc by ID.");
   }
 };
@@ -356,7 +345,7 @@ export const linkStoryArcToComicBook = async (
       .values({ comicStoryArcId: storyArcId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error("Error linking comic story arc to comic book:", error);
+    dbLogger.error("Error linking comic story arc to comic book:" + error);
     throw new Error("Failed to link comic story arc to comic book.");
   }
 };
@@ -389,10 +378,7 @@ export const getStoryArcsByComicBookId = async (
 
     return result.map((row) => row.comicStoryArc);
   } catch (error) {
-    console.error(
-      `Error fetching story arcs for comic book ID ${comicBookId}:`,
-      error,
-    );
+    dbLogger.error(`Error fetching story arcs for comic book ID ${comicBookId}:` + error);
     throw new Error("Failed to fetch story arcs for comic book.");
   }
 };

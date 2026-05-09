@@ -1,3 +1,4 @@
+import { apiLogger } from "#logger/loggers.ts";
 import { basename } from "@std/path";
 
 /**
@@ -16,7 +17,7 @@ export async function deleteFolderRecursive(
       // Folder doesn't exist, consider it a success
       return true;
     }
-    console.error(`Error deleting folder ${folderPath}:`, error);
+    apiLogger.error(`Error deleting folder ${folderPath}:` + error);
     return false;
   }
 }
@@ -47,7 +48,7 @@ export async function getFileSize(filePath: string): Promise<number> {
       throw new Error(`${filePath} is not a file.`);
     }
   } catch (error) {
-    console.error(`Error getting file size for ${filePath}:`, error);
+    apiLogger.error(`Error getting file size for ${filePath}:` + error);
     throw error;
   }
 }

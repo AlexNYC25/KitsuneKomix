@@ -1,6 +1,7 @@
 import { eq, ilike } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
+import { dbLogger } from "#logger/loggers.ts";
 import { comicBookTeamsTable, comicTeamsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type { ComicTeam } from "#types/index.ts";
@@ -33,7 +34,7 @@ export const insertComicTeam = async (name: string): Promise<number> => {
         .where(eq(comicTeamsTable.name, name));
 
       if (existingTeam.length > 0) {
-        console.log(
+        dbLogger.info(
           `Comic team already exists with name: ${name}, returning existing ID: ${
             existingTeam[0].id
           }`,
@@ -48,7 +49,7 @@ export const insertComicTeam = async (name: string): Promise<number> => {
 
     return result[0].id;
   } catch (error) {
-    console.error(`Error inserting comic team`, error);
+    dbLogger.error(`Error inserting comic team` + error);
     throw error;
   }
 };
@@ -75,7 +76,7 @@ export const linkTeamToComicBook = async (
       .values({ comicTeamId: teamId, comicBookId: comicBookId })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
-    console.error(`Error linking comic team to comic book`, error);
+    dbLogger.error(`Error linking comic team to comic book` + error);
     throw error;
   }
 };
@@ -99,7 +100,7 @@ export const unlinkTeamsToComicBook = async (
       .delete(comicBookTeamsTable)
       .where(eq(comicBookTeamsTable.comicBookId, comicBookId));
   } catch (error) {
-    console.error("Error unlinking teams from comic book:", error);
+    dbLogger.error("Error unlinking teams from comic book:" + error);
     throw error;
   }
 };
@@ -132,10 +133,7 @@ export const getTeamsByComicBookId = async (
 
     return result.map((row) => row.comicTeam);
   } catch (error) {
-    console.error(
-      `Error fetching comic teams for comic book ID ${comicBookId}`,
-      error,
-    );
+    dbLogger.error(`Error fetching comic teams for comic book ID ${comicBookId}` + error);
     throw error;
   }
 };
@@ -162,7 +160,7 @@ export const getTeamIdsByFilter = async (
 
     return result.map((row) => row.id);
   } catch (error) {
-    console.error("Error fetching comic team IDs by filter:", error);
+    dbLogger.error("Error fetching comic team IDs by filter:" + error);
     throw error;
   }
 };
