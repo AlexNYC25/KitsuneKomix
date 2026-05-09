@@ -1207,7 +1207,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Invalid user ID */
+                /** @description Invalid request data */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -1223,6 +1223,20 @@ export interface paths {
                 };
                 /** @description Unauthorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                            errors?: {
+                                [key: string]: Record<string, never>;
+                            };
+                        };
+                    };
+                };
+                /** @description Forbidden */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
