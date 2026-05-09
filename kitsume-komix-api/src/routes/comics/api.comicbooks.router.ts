@@ -21,7 +21,7 @@ import {
   startStreamingComicBookFile,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
-} from "#modules/comics/comicbooks.service.ts";
+} from "#modules/comics/index.ts";
 
 import { ComicBookSchema } from "#zod/schemas/data/comicBooks.schema.ts";
 import { MetadataExpandedSchema } from "#zod/schemas/data/comicMetadata.schema.ts";
