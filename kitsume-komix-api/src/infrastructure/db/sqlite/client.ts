@@ -1,24 +1,23 @@
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
-import { join } from "@std/path";
 
 import { dbLogger } from "#logger/loggers.ts";
 
-const DB_PATH = join(Deno.cwd(), "config", "database.sqlite");
+import { env } from "#config/env.ts"
 
 let client: ReturnType<typeof createClient> | null = null;
 let db: ReturnType<typeof drizzle> | null = null;
 
 export const getClient = () => {
   if (!client) {
-    client = createClient({ url: `file:${DB_PATH}` });
+    client = createClient({ url: `file:${env.DB_PATH}` });
     db = drizzle(client, { casing: "snake_case" });
   }
   return { client, db };
 };
 
 export const createNewClient = () => {
-  const newClient = createClient({ url: `file:${DB_PATH}` });
+  const newClient = createClient({ url: `file:${env.DB_PATH}` });
   const newDb = drizzle(newClient, { casing: "snake_case" });
   return { client: newClient, db: newDb };
 };

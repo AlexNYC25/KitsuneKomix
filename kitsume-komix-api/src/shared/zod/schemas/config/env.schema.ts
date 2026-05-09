@@ -15,6 +15,8 @@ export const envSchema = z.object({
 
   COMICS_DIRECTORY: z.string().default("/app/comics"),
 
+  DB_PATH: z.string().default("/app/config/database.sqlite"),
+
   // JWT secrets and settings
   JWT_SECRET: z.string(),
   JWT_REFRESH_SECRET: z.string(),
