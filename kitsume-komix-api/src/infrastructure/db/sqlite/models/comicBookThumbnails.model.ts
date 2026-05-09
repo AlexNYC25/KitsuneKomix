@@ -1,9 +1,9 @@
 import { getClient } from "../client.ts";
 import { comicBookThumbnailsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { ComicBookThumbnail } from "#types/index.ts";
-import { Row } from "@libsql/client";
+import type { Row } from "@libsql/client";
 
 /**
  * Inserts a new comic book thumbnail into the database.
@@ -205,6 +205,51 @@ export const deleteComicBookThumbnail = async (
       .where(eq(comicBookThumbnailsTable.id, thumbnailId));
   } catch (error) {
     console.error("Error deleting comic book thumbnail:", error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch thumbnails for multiple comic books in a single query.
+ * Results are sorted to prefer generated thumbnails over custom ones.
+ *
+ * @param comicBookIds - Array of comic book IDs to fetch thumbnails for
+ * @returns A promise that resolves to an array of ComicBookThumbnail objects for all requested comic books
+ *
+ * @example
+ * ```ts
+ * const thumbnails = await getThumbnailsByComicBookIds([1, 2, 3]);
+ * // Returns all thumbnails for comic books 1, 2, and 3
+ * ```
+ */
+export const getThumbnailsByComicBookIds = async (
+  comicBookIds: number[],
+): Promise<ComicBookThumbnail[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  if (comicBookIds.length === 0) {
+    return [];
+  }
+
+  try {
+    const results: ComicBookThumbnail[] = await db
+      .select()
+      .from(comicBookThumbnailsTable)
+      .where(inArray(comicBookThumbnailsTable.comicBookId, comicBookIds));
+
+    const sorted: ComicBookThumbnail[] = results.sort((a, b) => {
+      const aIsGenerated: number = a.filePath?.includes("_thumb.") ? 0 : 1;
+      const bIsGenerated: number = b.filePath?.includes("_thumb.") ? 0 : 1;
+      return aIsGenerated - bIsGenerated;
+    }) as ComicBookThumbnail[];
+
+    return sorted;
+  } catch (error) {
+    console.error("Error fetching thumbnails by comic book IDs:", error);
     throw error;
   }
 };
