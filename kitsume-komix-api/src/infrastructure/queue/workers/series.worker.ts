@@ -10,7 +10,7 @@ import {
 	processComicSeries, 
 	processAddingANewComicSeries, 
 	processComicLibraryLinkingToSeries 
-} from "../jobs/comicSeries.jobs.ts";
+} from "#infrastructure/queue/jobs/comicSeries.jobs.ts";
 
 import type {
 	WorkerFileJob,

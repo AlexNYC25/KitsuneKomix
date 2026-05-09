@@ -1,4 +1,4 @@
-import {checkIfSettingExists, setSetting} from "../sqlite/models/appSettings.model.ts";
+import {checkIfSettingExists, setSetting} from "#infrastructure/db/sqlite/models/appSettings.model.ts";
 
 /**
  * Initializes application settings in the database if they do not already exist.

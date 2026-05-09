@@ -4,9 +4,9 @@ import { cors } from "hono/cors";
 import { apiLogger } from "#logger/loggers.ts";
 import { env } from "#config/env.ts";
 
-import apiRouter from "../routes/api/api.router.ts";
-import webRouter from "../routes/web/web.router.ts";
-import healthRouter from "../routes/health/health.router.ts";
+import apiRouter from "#routes/api/api.router.ts";
+import webRouter from "#routes/web/web.router.ts";
+import healthRouter from "#routes/health/health.router.ts";
 
 const app = new OpenAPIHono();
 

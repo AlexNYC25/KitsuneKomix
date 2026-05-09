@@ -8,7 +8,7 @@ import {
 	saveComicBook,
 	saveComicBookMetadata,
 	processComicBookImages
-} from "../jobs/comicBook.jobs.ts";
+} from "#infrastructure/queue/jobs/comicBook.jobs.ts";
 
 export const comicBookWorker = new Worker(
 	queueNames.COMIC_BOOK_QUEUE,

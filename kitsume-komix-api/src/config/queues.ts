@@ -1,6 +1,6 @@
 import { QueueOptions } from "bullmq";
 
-import { redisConnection } from "#infrastructure/db/redis/client.ts";
+import { redisConnection } from "#db/redis/client.ts";
 
 export const queueNames = {
   APP_QUEUE: "appQueue",

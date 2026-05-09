@@ -1,6 +1,6 @@
 import { Queue, QueueEvents, QueueOptions } from "bullmq";
 
-import { redisConnection } from "#infrastructure/db/redis/client.ts";
+import { redisConnection } from "#db/redis/client.ts";
 
 import { 
   standardWorkerError, 

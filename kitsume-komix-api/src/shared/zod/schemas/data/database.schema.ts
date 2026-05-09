@@ -1,4 +1,4 @@
-import { createInsertSchema, createSelectSchema } from "../../factory.ts";
+import { createInsertSchema, createSelectSchema } from "#zod/factory.ts";
 import {
   appSettingsTable,
   comicBookCharactersTable,

@@ -4,8 +4,8 @@ import { HealthCheckResponseSchema } from "#zod/schemas/response.schema.ts";
 
 import { appMeta } from "#config/appMeta.ts";
 
-import { testRedisConnection } from "#infrastructure/db/redis/client.ts";
-import { testSQLiteConnection } from "#infrastructure/db/sqlite/client.ts";
+import { testRedisConnection } from "#db/redis/client.ts";
+import { testSQLiteConnection } from "#db/sqlite/client.ts";
 
 const healthRouter = new OpenAPIHono();
 

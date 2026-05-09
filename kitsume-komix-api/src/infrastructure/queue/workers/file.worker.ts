@@ -6,7 +6,7 @@ import { queueLogger } from "#logger/loggers.ts";
 
 import { queueNames } from "#config/queues.ts";
 
-import { prepareMetadataForWorkers } from "../jobs/file.jobs.ts";
+import { prepareMetadataForWorkers } from "#infrastructure/queue/jobs/file.jobs.ts";
 import { WorkerFileJob } from "#types/index.ts";
 
 export const fileWorker = new Worker(

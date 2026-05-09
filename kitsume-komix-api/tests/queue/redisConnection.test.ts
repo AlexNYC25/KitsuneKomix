@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import IORedis from "ioredis";
-import { redisConnection } from "#db/redis/redisConnection.ts";
+import { redisConnection } from "#db/redis/client.ts";
 
 Deno.test({
   name: "Redis connection - should successfully connect to Redis instance",

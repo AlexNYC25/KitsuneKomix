@@ -5,7 +5,7 @@ import {
 deleteComicSeries,
 	getComicSeriesByPath,
   insertComicSeries,
-} from "#sqlite/models/comicSeries.model.ts";
+} from "#db/sqlite/models/comicSeries.model.ts";
 import { loadMetadataIntoCache, retrieveMetadataFromCache, standardizeMetadata } from "#utilities/metadata.ts";
 import { StandardizedComicMetadata } from "#interfaces/index.ts";
 import { NewComicSeries } from "#types/index.ts";

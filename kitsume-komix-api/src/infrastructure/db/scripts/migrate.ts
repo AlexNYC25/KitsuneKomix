@@ -1,8 +1,8 @@
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { join } from "@std/path";
 
-import { dbLogger } from "../../logger/loggers.ts";
-import { createNewClient } from "../sqlite/client.ts";
+import { dbLogger } from "#logger/loggers.ts";
+import { createNewClient } from "#db/sqlite/client.ts";
 
 export async function runMigrations() {
   dbLogger.info("Starting database migrations...");
