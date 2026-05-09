@@ -115,8 +115,10 @@ import {
   extractComicPage,
 } from "#utilities/extract.ts";
 import { getFileNameFromPath } from "#utilities/file.ts";
+import { getMetadataForComicBooksBatch } from "#infrastructure/db/sqlite/models/comicMetadataBatch.model.ts";
+import { getThumbnailsByComicBookIds } from "#infrastructure/db/sqlite/models/comicBookThumbnails.model.ts";
 
-import {
+import type {
   ComicBook,
   ComicBookFilterItem,
   ComicBookHistory,
@@ -175,16 +177,35 @@ export const fetchComicBooksWithRelatedMetadata = async (
         limit: serviceDataPagination.pageSize + 1, // Fetch one extra to check for next page
       });
 
-    const comicsWithMetadata: ComicBookWithMetadata[] = [];
-    for (let i = 0; i < comicsFromDb.length; i++) {
-      const comic = comicsFromDb[i];
-      const metadata = await fetchAComicsAssociatedMetadataById(comic.id);
-      const comicWithMetadata: ComicBookWithMetadata = {
-        ...comic,
-        ...metadata,
-      };
-      comicsWithMetadata.push(comicWithMetadata);
-    }
+    const comicBookIds = comicsFromDb.map((comic) => comic.id);
+
+    const [metadataMap, thumbnails] = await Promise.all([
+      getMetadataForComicBooksBatch(comicBookIds),
+      getThumbnailsByComicBookIds(comicBookIds),
+    ]);
+
+    const thumbnailMap = new Map<string, string | undefined>();
+    thumbnails.forEach((thumb) => {
+      const existing = thumbnailMap.get(thumb.comicBookId.toString());
+      if (!existing) {
+        thumbnailMap.set(
+          thumb.comicBookId.toString(),
+          `/api/image/thumbnails/${getFileNameFromPath(thumb.filePath)}`,
+        );
+      }
+    });
+
+    const comicsWithMetadata: ComicBookWithMetadata[] = comicsFromDb.map(
+      (comic) => {
+        const metadata = metadataMap[comic.id] || {};
+        const thumbnailUrl = thumbnailMap.get(comic.id.toString());
+        return {
+          ...comic,
+          ...metadata,
+          thumbnailUrl,
+        };
+      },
+    );
 
     return comicsWithMetadata;
   } catch (error) {
