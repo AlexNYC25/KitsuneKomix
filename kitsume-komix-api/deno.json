@@ -45,6 +45,8 @@
   "tasks": {
     "dev": "deno run --allow-run=unzip,7z,7za --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-sys --watch ./main.ts",
     "start": "deno run --allow-run=unzip,7z,7za --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-sys ./main.ts",
+    "worker:dev": "deno run --allow-run=unzip,7z,7za --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-sys --watch ./worker.ts",
+    "worker:start": "deno run --allow-run=unzip,7z,7za --allow-net --allow-read --allow-write --allow-env --allow-ffi --allow-sys ./worker.ts",
     "db:generate": "deno run drizzle-kit generate"
   },
   "compilerOptions": {
