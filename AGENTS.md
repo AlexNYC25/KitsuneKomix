@@ -1,22 +1,79 @@
-# KitsuneKomix Agent Guide
+# PROJECT KNOWLEDGE BASE
 
-This guide outlines high-signal architectural and workflow constraints for working within KitsuneKomix.
+**Generated:** 2026-05-10
+**Stack:** Deno/Hono/SQLite (API) + Vue3/Vite/Pinia (Client) + BullMQ/Redis (Workers)
 
-## ⚙️ Environment & Setup
-*   **Local Setup:** The entire ecosystem (API and Client) requires `docker-compose up --build` to start the necessary services.
-*   **Tech Stack:** The project is a full-stack architecture:
-    *   **API (Backend):** Deno, TypeScript, Hono, SQLite.
-    *   **Client (Frontend):** Vue.js, TypeScript, Pinia.
-    *   **Workers:** Background comic scanning/processing runs via a separate worker service using BullMQ and Redis.
+## STRUCTURE
+```
+./
+├── kitsume-komix-api/          # Deno backend — Hono REST API, SQLite (Drizzle ORM), BullMQ queue
+├── kitsume-komix-client/       # Vue 3 frontend — Pinia stores, Vite build, Vitest tests
+├── docker-compose.yml          # Orchestrates Redis + API + Worker + Client
+└── AGENTS.md                   # ← You are here
+```
 
-## 🚀 Development Workflow (Client)
-*   **API Type Generation:** When running the client's `dev` script, be aware that it *polls* the API's OpenAPI documentation endpoint (`http://localhost:8001/api/doc`) for up to 30 seconds to dynamically generate required API types before starting the development server. This API must be running for type generation to succeed.
-*   **Execution:** Use `pnpm dev` for starting the client in development mode.
+## WHERE TO LOOK
 
-## 🛠️ Commands & Tooling
-*   **Client Linting/Formatting:** Run `pnpm lint` and `pnpm format` to ensure code adheres to style guidelines (Airbnb/TypeScript best practices).
-*   **Client Testing:** Use `pnpm test:unit` (Vitest) to run unit tests.
+| Task | Go To | Notes |
+|------|-------|-------|
+| API entry | `kitsume-komix-api/main.ts` | Hono app bootstrap, middleware, routes |
+| Worker entry | `kitsume-komix-api/worker.ts` | BullMQ background processor |
+| API routes | `kitsume-komix-api/src/routes/*/` | 13 route modules (comics, auth, users, etc.) |
+| Business logic | `kitsume-komix-api/src/modules/*/` | 7 service modules |
+| DB models | `kitsume-komix-api/src/infrastructure/db/sqlite/models/` | 30 Drizzle model files |
+| DB schemas | `kitsume-komix-api/src/infrastructure/db/sqlite/schemas/` | Table definitions + mappings |
+| Queue jobs | `kitsume-komix-api/src/infrastructure/queue/jobs/` | BullMQ job definitions |
+| Queue workers | `kitsume-komix-api/src/infrastructure/queue/workers/` | BullMQ worker processors |
+| Client entry | `kitsume-komix-client/src/main.ts` | Vue app init (Pinia, Router, PrimeVue) |
+| Vue components | `kitsume-komix-client/src/components/` | 12+ components (reader, nav, forms) |
+| Pinia stores | `kitsume-komix-client/src/stores/` | 6 stores (auth, comics, libraries, etc.) |
+| Pages/routes | `kitsume-komix-client/src/pages/` | 5 page components |
+| Client utilities | `kitsume-komix-client/src/utilities/` | 7 helpers (apiClient, formatting, etc.) |
+| Shared types | `kitsume-komix-api/src/shared/types/` | 18 type definitions |
+| Zod schemas | `kitsume-komix-api/src/shared/zod/` | API request validation + OpenAPI docs |
 
-## 📜 Conventions
-*   **Styling/Linting:** All code generally follows AirBnb JavaScript and TypeScript best practices.
-*   **API Documentation:** API schemas are defined using Zod and exposed via OpenAPI for client consumption.
+## CONVENTIONS
+
+- **API:** Deno runtime (not Node). Uses `deno.json` for imports/tasks. Avoid Node APIs (`node:path`) — Deno has its own std lib.
+- **Client:** Vue 3 Composition API + `<script setup>`. TypeScript everywhere. Pinia for state.
+- **Zod → OpenAPI:** All API schemas defined via Zod; auto-exposed at `/api/doc` for client type generation.
+- **Routes:** Organised by domain in `src/routes/<domain>/api.<domain>.router.ts`. Pattern: one route file per domain.
+- **Modules:** Business logic in `src/modules/<domain>/<domain>.service.ts`. Thin routers delegate to services.
+- **DB:** Drizzle ORM with SQLite. Models in `src/infrastructure/db/sqlite/models/`. Schema migrations in `drizzle/`.
+- **Tests:** Client uses Vitest (`pnpm test:unit`). API tests in `kitsume-komix-api/tests/`. No CI pipeline yet.
+
+## ANTI-PATTERNS (THIS PROJECT)
+- **Node API imports in Deno code** — files.service.ts uses `node:path`. Use Deno's `@std/path` instead.
+- **Stub routes** — Several route files (collections, pages) have 404 stubs for unimplemented endpoints. Don't add more without real implementation.
+- **Deprecated functions (client)** — `csvDownload`, `filterBy`, `publish` in utilities are marked deprecated. Prefer current alternatives.
+- **Missing JWT secret defaults** — `env.schema.ts` has no default for `JWT_SECRET`. Always set it in `.env`.
+- **No CI/CD** — No GitHub Actions workflows. Build/test is entirely manual via Docker Compose.
+
+## UNIQUE STYLES
+
+- **Dual entry points (API):** Separate `main.ts` (API server) and `worker.ts` (background queue processor) — same codebase, different roles.
+- **Dynamic OpenAPI type generation (Client):** Dev server polls `/api/doc` for up to 30s on startup, generating `openapi-schema.ts` with typed API client.
+- **Docker Compose dev workflow:** All 4 services (Redis, API, Worker, Client) start together. Hot-reload for both API (Deno) and Client (Vite HMR).
+
+## COMMANDS
+```bash
+# Full stack (development)
+docker-compose up --build
+
+# Client only
+cd kitsume-komix-client && pnpm dev      # Dev server on :5173
+cd kitsume-komix-client && pnpm lint      # ESLint
+cd kitsume-komix-client && pnpm format    # Prettier
+cd kitsume-komix-client && pnpm test:unit # Vitest
+
+# API only
+cd kitsume-komix-api && deno task start   # Dev on :8001
+```
+
+## NOTES / GOTCHAS
+
+- **Client type gen blocks dev:** `pnpm dev` blocks for 30s waiting for API to respond at `localhost:8001/api/doc`. Start API first.
+- **Dual config roots:** API uses `deno.json`. Client uses `package.json` + `tsconfig*.json` + `vite.config.ts` — different toolchains under one roof.
+- **No production Docker Compose:** Current compose targets dev mode with hot-reload. Prod needs separate build configs.
+- **Large types dir:** `src/shared/types` has 18 files — these are shared across routes, modules, and the worker. Central source of truth.
+- **Workers are Deno processes, not Node:** Don't use npm packages in worker code. Same rules as API.
