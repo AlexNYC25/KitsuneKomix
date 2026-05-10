@@ -52,7 +52,6 @@ import {
 } from "#zod/schemas/request.schema.ts";
 
 import type {
-  AccessRefreshTokenCombinedPayload,
   AppEnv,
   ComicBook,
   ComicBookMetadataOnly,
@@ -147,16 +146,7 @@ app.openapi(
   async (c) => {
     const queryData: QueryData = c.req.valid("query");
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSortField,
@@ -266,16 +256,7 @@ app.openapi(
     const queryData: QueryData = c.req.valid("query");
     queryData.sort = "createdAt";
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSortField,
@@ -384,16 +365,7 @@ app.openapi(
     const queryData: QueryData = c.req.valid("query");
     queryData.sort = "date";
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSortField,
@@ -498,16 +470,7 @@ app.openapi(
   async (c) => {
     const queryData: QueryData = c.req.valid("query");
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const paginationData: RequestPaginationParametersValidated =
       validatePagination(queryData.page, queryData.pageSize);
@@ -624,16 +587,7 @@ app.openapi(
   async (c) => {
     const queryData: QueryData = c.req.valid("query");
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const paginationData: RequestPaginationParametersValidated =
       validatePagination(queryData.page, queryData.pageSize);
@@ -735,16 +689,7 @@ app.openapi(
     queryData.filter = queryData.letter;
     queryData.filterProperty = "listLetter";
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSortField,
@@ -848,16 +793,7 @@ app.openapi(
   async (c) => {
     const data: ComicMetadataBulkUpdateData = await c.req.json();
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const comicBookIds: number[] = data.comicBookIds.map((item: { id: string }) =>
       Number(item.id)
@@ -964,16 +900,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const comicWithMetadataSearchResults: ComicBookWithMetadata[] =
@@ -1064,16 +991,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const comicBookMetadataOnly: ComicBookMetadataOnly =
@@ -1150,16 +1068,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const comicWithMetadataSearchResults =
@@ -1270,16 +1179,7 @@ app.openapi(
     const comicBookId: number = parseInt(c.req.param("id"), 10);
     const requestImageHeader: string = c.req.header("Accept") || "";
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const streamingDataOptions: ComicBookStreamingServiceData = {
       comicId: comicBookId,
@@ -1362,16 +1262,7 @@ app.openapi(
     const page: number = parseInt(c.req.param("page"), 10);
     const requestImageHeader: string = c.req.header("Accept") || "";
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const streamingDataOptions: ComicBookStreamingServiceData = {
       comicId: id,
@@ -1453,16 +1344,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const result: ComicBookPagesInfo = await getComicPagesInfo(id);
@@ -1531,16 +1413,7 @@ app.openapi(
   async (c) => {
     const id = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const hasRead: boolean = await checkComicReadByUser(userId, id);
@@ -1619,16 +1492,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const setComicToReadSuccess: boolean = await setComicReadByUser(
@@ -1720,16 +1584,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const setComicToReadSuccess: boolean = await setComicReadByUser(
@@ -1829,16 +1684,7 @@ app.openapi(
     const id: number = parseInt(c.req.param("id"));
     const updateRequestBody: ComicMetadataSingleUpdateData = await c.req.json();
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const metadataUpdates = updateRequestBody.metadataUpdates;
@@ -1925,16 +1771,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"));
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const success: boolean = await processComicBookDeletion(id);
@@ -2018,16 +1855,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const nextComic: ComicBook | null = await getNextComicBookId(id);
@@ -2111,16 +1939,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const previousComic: ComicBook | null = await getPreviousComicBookId(id);
@@ -2203,16 +2022,7 @@ app.openapi(
   async (c) => {
     const id: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const thumbnails: ComicBookThumbnail[] | null = await getComicThumbnails(
@@ -2301,16 +2111,7 @@ app.openapi(
     const id: number = parseInt(c.req.param("id"), 10);
     const thumbId: number = parseInt(c.req.param("thumbnailId") || "", 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const thumbnail: ComicBookThumbnailItem | null =
@@ -2400,16 +2201,7 @@ app.openapi(
     const id: number = parseInt(c.req.param("id"), 10);
     const thumbId: number = parseInt(c.req.param("thumbnailId") || "", 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const deletionResult = await deleteComicsThumbnailById(id, thumbId);
@@ -2506,16 +2298,7 @@ app.openapi(
       return c.json({ message: "Invalid comic book ID" }, 400);
     }
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       // Parse the multipart form data
@@ -2636,16 +2419,7 @@ app.openapi(
   async (c) => {
     const comicId: number = parseInt(c.req.param("id"), 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const comicStoryArcs: ComicStoryArc[] =

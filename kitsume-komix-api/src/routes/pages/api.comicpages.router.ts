@@ -5,10 +5,7 @@ import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import { ErrorResponseSchema } from "#zod/schemas/response.schema.ts";
 import { ParamIdSchema } from "#zod/schemas/request.schema.ts";
 
-import type {
-  AccessRefreshTokenCombinedPayload,
-  AppEnv,
-} from "#types/index.ts";
+import type { AppEnv } from "#types/index.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -37,16 +34,7 @@ app.openapi(
     },
   }),
   (_c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = _c.get("user");
-
-    if (!user || !user.sub) {
-      return _c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return _c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = _c.get("userId")!;
 
     //TODO: implement duplicate detection logic
     return _c.json({ message: "Duplicate detection not implemented yet" }, 501);
@@ -78,16 +66,7 @@ app.openapi(
     },
   }),
   (_c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = _c.get("user");
-
-    if (!user || !user.sub) {
-      return _c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return _c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = _c.get("userId")!;
 
     //TODO: implement duplicate detection logic for specific comic page
     return _c.json({
@@ -121,16 +100,7 @@ app.openapi(
     },
   }),
   (_c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = _c.get("user");
-
-    if (!user || !user.sub) {
-      return _c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return _c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = _c.get("userId")!;
 
     //TODO: implement duplicate deletion logic
     return _c.json({ message: "Duplicate deletion not implemented yet" }, 501);

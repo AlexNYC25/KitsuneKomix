@@ -23,7 +23,6 @@ import {
 } from "#utilities/parameters.ts";
 
 import type {
-  AccessRefreshTokenCombinedPayload,
   AppEnv,
   ComicSeriesFilterField,
   ComicSeriesMultipleResponse,
@@ -100,16 +99,7 @@ app.openapi(
   async (c) => {
     const queryData: QueryData = c.req.valid("query");
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSeriesSortField,
@@ -202,15 +192,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const queryData: QueryData = c.req.valid("query");
 
@@ -305,15 +287,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const queryData: QueryData = c.req.valid("query");
 
@@ -414,15 +388,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const { id } = c.req.valid("param");
     if (!id) {
@@ -540,16 +506,7 @@ app.openapi(
     queryData.filter = queryData.letter;
     queryData.filterProperty = "listLetter";
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSeriesSortField,

@@ -17,7 +17,6 @@ import {
 } from "#zod/schemas/request.schema.ts";
 
 import type {
-  AccessRefreshTokenCombinedPayload,
   AppEnv,
   QueryData,
 } from "#types/index.ts";
@@ -81,16 +80,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     // Extract and construct pagination parameters
     const query = c.req.valid("query");
@@ -179,16 +169,7 @@ app.openapi(
   (c) => {
     const { id } = c.req.valid("param");
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     //TODO: implement readlist retrieval logic
     const readlist = { id, name: "Default Readlist" };
@@ -263,16 +244,7 @@ app.openapi(
     },
   }),
   (_c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = _c.get("user");
-
-    if (!user || !user.sub) {
-      return _c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return _c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = _c.get("userId")!;
 
     //TODO: implement readlist download logic
     return _c.json({ message: "Readlist download not implemented yet" }, 501);
@@ -330,16 +302,7 @@ app.openapi(
   (c) => {
     const body = c.req.valid("json");
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     const result = AddReadlistSchema.safeParse(body);
     if (!result.success) {
@@ -400,16 +363,7 @@ app.openapi(
   (c) => {
     const { comicBookId } = c.req.valid("param");
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     return c.json(
       {

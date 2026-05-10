@@ -7,7 +7,7 @@ import { purgeAllData } from "#infrastructure/db/sqlite/models/admin.model.ts";
 
 import { MessageResponseSchema } from "#zod/schemas/response.schema.ts";
 
-import type { AccessRefreshTokenCombinedPayload, AppEnv } from "#types/index.ts";
+import type { AppEnv } from "#types/index.ts";
 
 import { env } from "#config/env.ts"
 
@@ -71,18 +71,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    // TODO: Add additional check to verify that the user has admin privileges before allowing data purge
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     if (env.MODE !== "development") {
       return c.json({ message: "Data purge is only available in development" }, 403)

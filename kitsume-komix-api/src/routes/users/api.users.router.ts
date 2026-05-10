@@ -33,7 +33,6 @@ import {
 } from "#zod/schemas/data/comicLibraries.schema.ts";
 
 import type {
-  AccessRefreshTokenCombinedPayload,
   AppEnv,
   UserRegistrationInput,
   UserEditInput,
@@ -97,11 +96,7 @@ apiUsersRouter.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
+    const user = c.get("user")!;
 
     try {
       const users = await getUsersRegistered();
@@ -181,16 +176,7 @@ apiUsersRouter.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const userData: UserRegistrationInput = await c.req.json();
@@ -292,11 +278,7 @@ apiUsersRouter.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
+    const user = c.get("user")!;
 
 
     try {
@@ -481,16 +463,7 @@ apiUsersRouter.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
 
     try {
@@ -582,16 +555,8 @@ apiUsersRouter.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
+    const user = c.get("user")!;
 
     if(!user.isAdmin) {
       return c.json({ message: "Forbidden" }, 403);
@@ -672,16 +637,8 @@ apiUsersRouter.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
+    const user = c.get("user")!;
 
     if (user.isAdmin) {
       return c.json({
@@ -777,16 +734,8 @@ apiUsersRouter.openapi(
   }),
   async (c) => {
     const paramId = c.req.param("id");
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
+    const user = c.get("user")!;
 
     const deleteUserId = parseInt(paramId, 10);
 

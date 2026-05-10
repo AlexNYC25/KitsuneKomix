@@ -6,7 +6,6 @@ import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 
 import type {
-  AccessRefreshTokenCombinedPayload,
   AppEnv,
 } from "#types/index.ts";
 import {
@@ -91,16 +90,7 @@ imageRouter.openapi(
     },
   ),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const { imagePath }: { imagePath: string } = c.req.valid("param");
@@ -212,16 +202,7 @@ imageRouter.openapi(
     },
   ),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const { comicId, imagePath }: { comicId: string; imagePath: string } = c

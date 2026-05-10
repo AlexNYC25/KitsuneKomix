@@ -35,6 +35,13 @@ export const requireAuth = async (c: Context, next: Next) => {
       token,
     );
     c.set("user", payload);
+
+    const userId = parseInt(payload.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+    c.set("userId", userId);
+
     return next();
   } catch (error) {
     apiLogger.error(
@@ -69,6 +76,13 @@ export const requireCookieAuth = async (c: Context, next: Next) => {
   try {
     const payload: AccessRefreshTokenCombinedPayload = await verifyAccessToken(token);
     c.set("user", payload);
+
+    const userId = parseInt(payload.sub, 10);
+    if (isNaN(userId)) {
+      return c.json({ message: "Invalid user ID" }, 400);
+    }
+    c.set("userId", userId);
+
     return next();
   } catch (error) {
     apiLogger.error(

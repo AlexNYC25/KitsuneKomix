@@ -21,7 +21,6 @@ import {
 import { ComicLibraryCreateSchema, ComicLibraryUpdateSchema } from "#zod/schemas/data/comicLibraries.schema.ts";
 
 import type {
-  AccessRefreshTokenCombinedPayload,
   AppEnv,
   ComicLibrary,
   LibraryRegistrationInput,
@@ -92,16 +91,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       // TODO: Updated the validation function to handle comic libraries
@@ -177,19 +167,10 @@ app.openapi(
   async (c) => {
     const id = parseInt(c.req.valid("param").id, 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
-      // TODO: use user.id and id to get the library from the database
+      // TODO: use userId and id to get the library from the database
       return c.json({
         message: `Library[${id}] for user ${userId} retrieved successfully`,
       }, 200);
@@ -256,21 +237,12 @@ app.openapi(
   async (c) => {
     const id = parseInt(c.req.valid("param").id, 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
-      // TODO: use user.id and id to analyze the library
+      // TODO: use userId and id to analyze the library
       return c.json(
-        { message: `Library[${id}] analysis started for user ${user.id}` },
+        { message: `Library[${id}] analysis started for user ${userId}` },
         200,
       );
     } catch (error) {
@@ -336,21 +308,12 @@ app.openapi(
   async (c) => {
     const id = parseInt(c.req.valid("param").id, 10);
 
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
-      // TODO: use user.id and id to empty the trash for the library
+      // TODO: use userId and id to empty the trash for the library
       return c.json(
-        { message: `Library[${id}] trash emptied for user ${user.id}` },
+        { message: `Library[${id}] trash emptied for user ${userId}` },
         200,
       );
     } catch (error) {
@@ -426,16 +389,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const requestData = c.req.valid("json");
@@ -534,16 +488,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const id = parseInt(c.req.valid("param").id, 10);
@@ -638,16 +583,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const id = parseInt(c.req.valid("param").id, 10);
@@ -737,16 +673,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const user: AccessRefreshTokenCombinedPayload | undefined = c.get("user");
-
-    if (!user || !user.sub) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-
-    const userId: number = parseInt(user.sub, 10);
-    if (isNaN(userId)) {
-      return c.json({ message: "Invalid user ID" }, 400);
-    }
+    const userId = c.get("userId")!;
 
     try {
       const listedDirectories = await listFoldersInDirectoryService(c.req.valid("json").path);

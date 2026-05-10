@@ -34,6 +34,7 @@ export type AccessRefreshTokenCombinedPayload = AccessClaims & JWTPayload & Admi
 export type AppEnv = {
   Variables: {
     user?: AccessRefreshTokenCombinedPayload;
+    userId: number;
   };
 };
 
