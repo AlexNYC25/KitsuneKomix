@@ -2,15 +2,22 @@
 	import { ref } from 'vue';
 	import { useUsersStore } from '@/stores/users';
 
+	import FormModal from '@/components/ui/FormModal.vue';
+
 	const props = defineProps<{
 		onCancel?: () => void;
 		userId: number;
 	}>();
 
+	const emit = defineEmits<{
+		'update:modelValue': [value: boolean]
+	}>()
+
 	const usersStore = useUsersStore();
 	const isSubmitting = ref(false);
 
 	const handleCancel = (): void => {
+		emit('update:modelValue', false);
 		props.onCancel?.();
 	};
 
@@ -18,6 +25,7 @@
 		isSubmitting.value = true;
 		try {
 			await usersStore.deleteUser(props.userId);
+			emit('update:modelValue', false);
 			props.onCancel?.();
 		} finally {
 			isSubmitting.value = false;
@@ -26,11 +34,14 @@
 </script>
 
 <template>
-	<div
-		class="lg:w-[520px] lg:h-[220px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-red-200 dark:border-red-900 rounded-lg p-6 space-y-6 bg-surface-elevated"
+	<FormModal
+		title="Delete User"
+		sizeClass="lg:w-[520px]"
+		borderColor="border-red-200 dark:border-red-900"
+		padding="lg"
+		:modelValue="true"
+		@update:modelValue="handleCancel"
 	>
-		<h3 class="text-lg font-semibold">Delete User</h3>
-
 		<p class="text-sm text-text-primary">
 			Are you sure you want to delete this user?
 		</p>
@@ -53,5 +64,5 @@
 				Cancel
 			</button>
 		</div>
-	</div>
+	</FormModal>
 </template>

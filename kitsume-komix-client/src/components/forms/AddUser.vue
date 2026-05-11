@@ -5,9 +5,15 @@
 
 	import { userSignUpSchema }	from '@/zod/users.schema';
 
+	import FormModal from '@/components/ui/FormModal.vue';
+
 	const props = defineProps<{
 		onCancel?: () => void;
 	}>();
+
+	const emit = defineEmits<{
+		'update:modelValue': [value: boolean]
+	}>()
 
 	const usersStore = useUsersStore();
 
@@ -26,6 +32,7 @@
 
 	const handleCancel = (): void => {
 		resetForm();
+		emit('update:modelValue', false);
 		props.onCancel?.();
 	};
 
@@ -38,85 +45,87 @@
 			admin: values.userRole === "admin"
 		});
 		resetForm();
+		emit('update:modelValue', false);
 		props.onCancel?.();
-
 	});
 
 
 </script>
 
 <template>
-	<form
-		class="lg:w-lg lg:h-lg flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-surface-overlay rounded-lg p-4 space-y-4 bg-surface-elevated"
-		@submit="handleAddUser"
+	<FormModal
+		title="Add User"
+		sizeClass="lg:w-lg lg:h-lg"
+		:modelValue="true"
+		@update:modelValue="handleCancel"
 	>
-		<h3 class="text-lg font-semibold">Add User</h3>
+		<form @submit="handleAddUser">
+			<!-- New User's Email -->
+			<div>
+				<label for="new-user-email" class="block text-sm font-medium mb-1">Email</label>
+				<input
+					id="new-user-email"
+					v-model="newUserEmail"
+					type="email"
+					placeholder="e.g. user@example.com"
+					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+				/>
+			</div>
 
-		<!-- New User's Email -->
-		<div>
-			<label for="new-user-email" class="block text-sm font-medium mb-1">Email</label>
-			<input
-				id="new-user-email"
-				v-model="newUserEmail"
-				type="email"
-				placeholder="e.g. user@example.com"
-				class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
-			/>
-		</div>
+			<!-- New User's Role i.e. admin or not -->
+			<div>
+				<label for="new-user-role" class="block text-sm font-medium mb-1">Role</label>
+				<select
+					id="new-user-role"
+					v-model="newUserRole"
+					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+				>
+					<option value="user">User</option>
+					<option value="admin">Admin</option>
+				</select>
+			</div>
 
-		<!-- New User's Role i.e. admin or not -->
-		<div>
-			<label for="new-user-role" class="block text-sm font-medium mb-1">Role</label>
-			<select
-				id="new-user-role"
-				v-model="newUserRole"
-				class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+			<!-- New User's Password -->
+			<div>
+				<label for="new-user-password" class="block text-sm font-medium mb-1">Password</label>
+				<input
+					id="new-user-password"
+					v-model="newUserPassword"
+					type="password"
+					placeholder="Enter a password"
+					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+				/>
+			</div>
+
+			<!-- Form's Buttons -->
+			<div
+				class="flex justify-center"
 			>
-				<option value="user">User</option>
-				<option value="admin">Admin</option>
-			</select>
-		</div>
+				<button
+					type="submit"
+					class="px-4 py-2 mx-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+				>
+					Add User
+				</button>
 
-		<!-- New User's Password -->
-		<div>
-			<label for="new-user-password" class="block text-sm font-medium mb-1">Password</label>
-			<input
-				id="new-user-password"
-				v-model="newUserPassword"
-				type="password"
-				placeholder="Enter a password"
-				class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
-			/>
-		</div>
+				<button
+					type="button"
+					class="px-4 py-2 mx-4 bg-surface-overlay hover:bg-surface-elevated text-text-primary rounded-md"
+					@click="handleCancel"
+				>
+					Cancel
+				</button>
 
-		<!-- Form's Buttons -->
-		<div
-			class="flex justify-center"
-		>
-			<button
-				type="submit"
-				class="px-4 py-2 mx-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+			</div>
+
+			<!-- Display form errors -->
+			<div
+				v-if="errors"
 			>
-				Add User
-			</button>
-
-			<button
-				type="button"
-				class="px-4 py-2 mx-4 bg-surface-overlay hover:bg-surface-elevated text-text-primary rounded-md"
-				@click="handleCancel"
-			>
-				Cancel
-			</button>
-
-		</div>
-
-		<!-- Display form errors -->
-		<div
-			v-if="errors"
-		>
-			<ul>
-				<li v-for="(error, field) in errors" :key="field">{{ error }}</li>
-			</ul>
-		</div>
-	</form>
+				<ul>
+					<li v-for="(error, field) in errors" :key="field">{{ error }}</li>
+				</ul>
+			</div>
+		</form>
+	</FormModal>
 </template>

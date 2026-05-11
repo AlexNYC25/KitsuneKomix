@@ -3,6 +3,7 @@
 	import Button from 'primevue/button';
 
 	import LibraryPathNavigation from '@/components/Settings/LibraryPathNavigation.vue';
+	import FormModal from '@/components/ui/FormModal.vue';
 	import { useAuthStore } from '@/stores/auth';
 	import { useLibrariesStore } from '@/stores/libraries';
 	import { numberToDataSize } from '@/utilities/formatting';
@@ -173,127 +174,127 @@
 		</div>
 
 		<!-- Add Library Form -->
-		<form
-			v-if="showAddLibraryForm && isAdmin"
-			class="lg:w-[520px] lg:h-[475px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-surface-overlay rounded-lg p-4 space-y-4 bg-surface-elevated"
-			@submit.prevent="submitAddLibraryForm"
+		<FormModal
+			v-model="showAddLibraryForm"
+			title="Add New Library"
+			sizeClass="lg:w-[520px] lg:h-[475px]"
 		>
-			<h3 class="text-lg font-semibold">Add New Library</h3>
+			<form @submit.prevent="submitAddLibraryForm">
+				<div>
+					<label for="library-name" class="block text-sm font-medium mb-1">Library Name</label>
+					<input
+						id="library-name"
+						v-model="newLibraryName"
+						type="text"
+						placeholder="e.g. My Comics"
+						class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+					/>
+				</div>
 
-			<div>
-				<label for="library-name" class="block text-sm font-medium mb-1">Library Name</label>
-				<input
-					id="library-name"
-					v-model="newLibraryName"
-					type="text"
-					placeholder="e.g. My Comics"
-					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
-				/>
-			</div>
+				<div>
+					<label for="library-description" class="block text-sm font-medium mb-1">Library Description</label>
+					<input
+						id="library-description"
+						v-model="newLibraryDescription"
+						type="text"
+						placeholder="e.g. My Comics Description"
+						class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+					/>
 
-			<div>
-				<label for="library-description" class="block text-sm font-medium mb-1">Library Description</label>
-				<input
-					id="library-description"
-					v-model="newLibraryDescription"
-					type="text"
-					placeholder="e.g. My Comics Description"
-					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
-				/>
+				</div>
 
-			</div>
+				<div>
+					<LibraryPathNavigation v-model="selectedLibraryPath" />
+				</div>
 
-			<div>
-				<LibraryPathNavigation v-model="selectedLibraryPath" />
-			</div>
+				<p v-if="addLibraryError" class="text-sm text-red-500">{{ addLibraryError }}</p>
 
-			<p v-if="addLibraryError" class="text-sm text-red-500">{{ addLibraryError }}</p>
-
-			<div class="flex items-center gap-2">
-				<Button
-					type="submit"
-					label="Save Library"
-					icon="pi pi-check"
-					severity="info"
-					:loading="isSavingLibrary"
-				/>
-				<Button
-					type="button"
-					label="Cancel"
-					icon="pi pi-times"
-					severity="secondary"
-					text
-					@click="resetAddLibraryForm"
-					:disabled="isSavingLibrary"
-				/>
-			</div>
-		</form>
+				<div class="flex items-center gap-2">
+					<Button
+						type="submit"
+						label="Save Library"
+						icon="pi pi-check"
+						severity="info"
+						:loading="isSavingLibrary"
+					/>
+					<Button
+						type="button"
+						label="Cancel"
+						icon="pi pi-times"
+						severity="secondary"
+						text
+						@click="resetAddLibraryForm"
+						:disabled="isSavingLibrary"
+					/>
+				</div>
+			</form>
+		</FormModal>
 
 		<!-- Edit Library Form -->
-		<form
-			v-if="showEditLibraryForm && isAdmin"
-			class="lg:w-[520px] lg:h-[520px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-surface-overlay rounded-lg p-4 space-y-4 bg-surface-elevated"
-			@submit.prevent="submitEditLibraryForm"
+		<FormModal
+			v-model="showEditLibraryForm"
+			title="Edit Library"
+			sizeClass="lg:w-[520px] lg:h-[520px]"
 		>
-			<h3 class="text-lg font-semibold">Edit Library</h3>
+			<form @submit.prevent="submitEditLibraryForm">
+				<div>
+					<label for="library-name-edit" class="block text-sm font-medium mb-1">Library Name</label>
+					<input
+						id="library-name-edit"
+						v-model="editLibraryName"
+						type="text"
+						placeholder="e.g. My Comics"
+						class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+					/>
+				</div>
 
-			<div>
-				<label for="library-name-edit" class="block text-sm font-medium mb-1">Library Name</label>
-				<input
-					id="library-name-edit"
-					v-model="editLibraryName"
-					type="text"
-					placeholder="e.g. My Comics"
-					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
-				/>
-			</div>
+				<div>
+					<label for="library-description-edit" class="block text-sm font-medium mb-1">Library Description</label>
+					<input
+						id="library-description-edit"
+						v-model="editLibraryDescription"
+						type="text"
+						placeholder="e.g. My Comics Description"
+						class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+					/>
+				</div>
 
-			<div>
-				<label for="library-description-edit" class="block text-sm font-medium mb-1">Library Description</label>
-				<input
-					id="library-description-edit"
-					v-model="editLibraryDescription"
-					type="text"
-					placeholder="e.g. My Comics Description"
-					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
-				/>
-			</div>
+				<div class="flex items-left gap-2">
+					<label for="library-enabled-edit" class="block text-sm font-medium">Library Enabled</label>
+					<input
+						id="library-enabled-edit"
+						v-model="editLibraryEnabled"
+						type="checkbox"
+						class="px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
+					/>
+				</div>
 
-			<div class="flex items-left gap-2">
-				<label for="library-enabled-edit" class="block text-sm font-medium">Library Enabled</label>
-				<input
-					id="library-enabled-edit"
-					v-model="editLibraryEnabled"
-					type="checkbox"
-					class="px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
-				/>
-			</div>
+				<div>
+					<LibraryPathNavigation v-model="editLibraryPath" />
+				</div>
 
-			<div>
-				<LibraryPathNavigation v-model="editLibraryPath" />
-			</div>
+				<p v-if="editLibraryError" class="text-sm text-red-500">{{ editLibraryError }}</p>
 
-			<p v-if="editLibraryError" class="text-sm text-red-500">{{ editLibraryError }}</p>
-
-			<div class="flex items-center gap-2">
-				<Button
-					type="submit"
-					label="Save Library"
-					icon="pi pi-check"
-					severity="info"
-					:loading="isEditingLibrary"
-				/>
-				<Button
-					type="button"
-					label="Cancel"
-					icon="pi pi-times"
-					severity="secondary"
-					text
-					@click="resetEditLibraryForm"
-					:disabled="isEditingLibrary"
-				/>
-			</div>
-		</form>
+				<div class="flex items-center gap-2">
+					<Button
+						type="submit"
+						label="Save Library"
+						icon="pi pi-check"
+						severity="info"
+						:loading="isEditingLibrary"
+					/>
+					<Button
+						type="button"
+						label="Cancel"
+						icon="pi pi-times"
+						severity="secondary"
+						text
+						@click="resetEditLibraryForm"
+						:disabled="isEditingLibrary"
+					/>
+				</div>
+			</form>
+		</FormModal>
 
 		<!-- Libraries List -->
 		<div v-if="libraries.length === 0" class="text-text-muted">

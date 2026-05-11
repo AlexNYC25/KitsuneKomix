@@ -3,12 +3,18 @@
 
 	import type { ComicLibrary } from '@/types/comic-libraries.types';
 
+	import FormModal from '@/components/ui/FormModal.vue';
+
 	const props = defineProps<{
 		libraries: Array<ComicLibrary>;
 		initialAccessibleLibraryIds?: Array<number>;
 		onCancel?: () => void;
 		onSave?: (accessibleLibraryIds: Array<number>) => void | Promise<void>;
 	}>();
+
+	const emit = defineEmits<{
+		'update:modelValue': [value: boolean]
+	}>()
 
 	const accessByLibraryId = reactive<Record<number, boolean>>({});
 
@@ -31,6 +37,7 @@
 	);
 
 	const handleCancel = (): void => {
+		emit('update:modelValue', false);
 		props.onCancel?.();
 	};
 
@@ -46,60 +53,62 @@
 </script>
 
 <template>
-	<form
-		class="lg:w-[640px] lg:max-h-[520px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-surface-overlay rounded-lg p-4 space-y-4 bg-surface-elevated"
-		@submit="handleSaveLibraries"
+	<FormModal
+		title="Edit User Libraries"
+		sizeClass="lg:w-[640px] lg:max-h-[520px]"
+		:modelValue="true"
+		@update:modelValue="handleCancel"
 	>
-		<h3 class="text-lg font-semibold">Edit User Libraries</h3>
+		<form @submit="handleSaveLibraries">
+			<div class="border rounded-md border-surface-overlay overflow-hidden">
+				<div class="grid grid-cols-2 px-4 py-2 font-semibold bg-surface-base">
+					<span>Library Name</span>
+					<span class="text-center">Can Access</span>
+				</div>
 
-		<div class="border rounded-md border-surface-overlay overflow-hidden">
-			<div class="grid grid-cols-2 px-4 py-2 font-semibold bg-surface-base">
-				<span>Library Name</span>
-				<span class="text-center">Can Access</span>
-			</div>
+				<div class="max-h-[280px] overflow-y-auto">
+					<div
+						v-for="library in libraries"
+						:key="library.id"
+						class="grid grid-cols-2 px-4 py-3 border-t border-surface-overlay"
+					>
+						<span>{{ library.name }}</span>
+						<div class="flex justify-center">
+							<input
+								v-if="library.id !== undefined"
+								:id="`user-library-access-${library.id}`"
+								v-model="accessByLibraryId[library.id]"
+								type="checkbox"
+								class="h-5 w-5 cursor-pointer"
+							/>
+						</div>
+					</div>
 
-			<div class="max-h-[280px] overflow-y-auto">
-				<div
-					v-for="library in libraries"
-					:key="library.id"
-					class="grid grid-cols-2 px-4 py-3 border-t border-surface-overlay"
-				>
-					<span>{{ library.name }}</span>
-					<div class="flex justify-center">
-						<input
-							v-if="library.id !== undefined"
-							:id="`user-library-access-${library.id}`"
-							v-model="accessByLibraryId[library.id]"
-							type="checkbox"
-							class="h-5 w-5 cursor-pointer"
-						/>
+					<div
+						v-if="libraries.length === 0"
+						class="px-4 py-6 text-sm text-text-muted"
+					>
+						No libraries available.
 					</div>
 				</div>
-
-				<div
-					v-if="libraries.length === 0"
-					class="px-4 py-6 text-sm text-text-muted"
-				>
-					No libraries available.
-				</div>
 			</div>
-		</div>
 
-		<div class="flex justify-center">
-			<button
-				type="submit"
-				class="px-4 py-2 mx-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-			>
-				Save Changes
-			</button>
+			<div class="flex justify-center">
+				<button
+					type="submit"
+					class="px-4 py-2 mx-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+				>
+					Save Changes
+				</button>
 
-			<button
-				type="button"
-				class="px-4 py-2 mx-4 bg-surface-overlay hover:bg-surface-elevated text-text-primary rounded-md"
-				@click="handleCancel"
-			>
-				Cancel
-			</button>
-		</div>
-	</form>
+				<button
+					type="button"
+					class="px-4 py-2 mx-4 bg-surface-overlay hover:bg-surface-elevated text-text-primary rounded-md"
+					@click="handleCancel"
+				>
+					Cancel
+				</button>
+			</div>
+		</form>
+	</FormModal>
 </template>
