@@ -3,10 +3,14 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useComicSeriesStore } from '@/stores/comic-series'
 import { useBreadcrumbStore } from '@/stores/breadcrumb'
+import { useTheme } from '@/composables/useTheme'
 import Breadcrumb from 'primevue/breadcrumb'
 import InputGroup from 'primevue/inputgroup'
 import InputText from 'primevue/inputtext'
 import InputGroupAddon from 'primevue/inputgroupaddon'
+import Button from 'primevue/button'
+
+const { isDark, toggle: toggleTheme } = useTheme()
 
 const route = useRoute()
 const comicSeriesStore = useComicSeriesStore()
@@ -78,19 +82,26 @@ watch([() => route.path, () => breadcrumbStore.comicBookSeriesId, () => breadcru
 </script>
 
 <template>
-	<header class="bg-gray-800 border-b border-gray-700">
-		<!-- Breadcrumb Navigation with Search Bar -->
+	<header class="bg-surface-elevated border-b border-surface-overlay">
 		<div class="flex justify-between items-center gap-4 p-4">
 			<div id="top-bar-left" class="flex-grow">
 				<Breadcrumb :model="breadcrumbItems" class="bg-transparent" />
 			</div>
-			<div id="top-bar-right" class="flex-shrink-0">
-				<InputGroup class="bg-gray-700">
-					<InputText placeholder="Keyword" class="bg-gray-700 text-white placeholder-gray-400" />
-					<InputGroupAddon class="bg-gray-700">
-						<i class="pi pi-search text-gray-400" />
+			<div id="top-bar-right" class="flex items-center gap-2 flex-shrink-0">
+				<InputGroup class="bg-surface-base">
+					<InputText placeholder="Keyword" class="bg-surface-base text-text-primary placeholder-text-muted" />
+					<InputGroupAddon class="bg-surface-base">
+						<i class="pi pi-search text-text-muted" />
 					</InputGroupAddon>
 				</InputGroup>
+				<Button
+					:icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+					severity="info"
+					text
+					rounded
+					class="!p-2 !min-w-0"
+					@click="toggleTheme"
+				/>
 			</div>
 		</div>
 	</header>

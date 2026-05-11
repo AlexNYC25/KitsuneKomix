@@ -71,7 +71,7 @@
 <template>
 	<div class="bg-slate-900 shadow-lg p-8 rounded-lg">
 		<div class="flex justify-center mb-6">
-			<h1 class="text-2xl font-bold text-white">
+			<h1 class="text-2xl font-bold font-display text-white">
 				Kitsune Komix Login
 			</h1>
 		</div>
