@@ -15,8 +15,7 @@ export const useUsersStore = defineStore('users', {
 			const { data, error } = await apiClient.GET('/users');
 
 			if (error) {
-				console.error('Error fetching users:', error);
-				return;
+				throw new Error(error?.message || 'Failed to fetch users');
 			}
 			this.setUsers(data.users);
 		},
@@ -30,12 +29,7 @@ export const useUsersStore = defineStore('users', {
 			});
 
 			if (error) {
-				console.error('Error registering new user:', error);
-				return; // Todo: now  show error message
-			} 
-
-			if (!error) {
-				
+				throw new Error(error?.message || 'Failed to register user');
 			}
 
 			if(data && data.userId) {
@@ -53,8 +47,7 @@ export const useUsersStore = defineStore('users', {
 			});
 
 			if (error) {
-				console.error('Error updating user:', error);
-				return;
+				throw new Error(error?.message || 'Failed to update user');
 			}
 
 			if(data && data.success) {
@@ -71,8 +64,7 @@ export const useUsersStore = defineStore('users', {
 			});
 
 			if (error) {
-				console.error('Error deleting user:', error);
-				return;
+				throw new Error(error?.message || 'Failed to delete user');
 			}
 
 			if(data && data.success) {

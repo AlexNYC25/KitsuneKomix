@@ -47,15 +47,19 @@
 			return;
 		}
 
-		await usersStore.updateExistingUser({
-			id: props.userId,
-			email: targetUser.email,
-			admin: Boolean(targetUser.admin),
-			password: values.newPassword,
-		});
-		resetForm();
-		emit('update:modelValue', false);
-		props.onCancel?.();
+		try {
+			await usersStore.updateExistingUser({
+				id: props.userId,
+				email: targetUser.email,
+				admin: Boolean(targetUser.admin),
+				password: values.newPassword,
+			});
+			resetForm();
+			emit('update:modelValue', false);
+			props.onCancel?.();
+		} catch (error) {
+			console.error('Failed to update password:', error);
+		}
 	});
 </script>
 

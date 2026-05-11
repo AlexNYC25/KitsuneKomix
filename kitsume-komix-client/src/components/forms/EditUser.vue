@@ -43,15 +43,18 @@
 	};
 
 	const handleUpdateUser = handleSubmit(async (values) => {
-		console.log('Form submitted with values:', values);
-		await usersStore.updateExistingUser({
-			id: props.userId,
-			email: values.userEmail,
-			admin: values.userRole === 'admin'
-		});
-		resetForm();
-		emit('update:modelValue', false);
-		props.onCancel?.();
+		try {
+			await usersStore.updateExistingUser({
+				id: props.userId,
+				email: values.userEmail,
+				admin: values.userRole === 'admin'
+			});
+			resetForm();
+			emit('update:modelValue', false);
+			props.onCancel?.();
+		} catch (error) {
+			console.error('Failed to update user:', error);
+		}
 	});
 
 </script>

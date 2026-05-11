@@ -137,9 +137,13 @@ export const useAuthStore = defineStore('auth', {
 			}
 		},
 		async postLoginActions() {
-			const librariesStore = useLibrariesStore();
-			await librariesStore.requestUsersLibraries();
-			// Add other store calls here as needed
+			try {
+				const librariesStore = useLibrariesStore();
+				await librariesStore.requestUsersLibraries();
+				// Add other store calls here as needed
+			} catch (error) {
+				console.error('Failed to load libraries after login:', error);
+			}
 		},
 		async refresh() {
 			if (!this.refreshToken) {

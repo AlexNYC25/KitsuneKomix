@@ -37,16 +37,19 @@
 	};
 
 	const handleAddUser = handleSubmit(async (values) => {
-		console.log('Form submitted with values:', values);
-		await usersStore.registerNewUser({
-			username: values.userEmail, // Using email as username for simplicity
-			email: values.userEmail,
-			password: values.userPassword,
-			admin: values.userRole === "admin"
-		});
-		resetForm();
-		emit('update:modelValue', false);
-		props.onCancel?.();
+		try {
+			await usersStore.registerNewUser({
+				username: values.userEmail, // Using email as username for simplicity
+				email: values.userEmail,
+				password: values.userPassword,
+				admin: values.userRole === "admin"
+			});
+			resetForm();
+			emit('update:modelValue', false);
+			props.onCancel?.();
+		} catch (error) {
+			console.error('Failed to register user:', error);
+		}
 	});
 
 

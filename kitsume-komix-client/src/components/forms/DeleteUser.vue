@@ -27,6 +27,8 @@
 			await usersStore.deleteUser(props.userId);
 			emit('update:modelValue', false);
 			props.onCancel?.();
+		} catch (error) {
+			console.error('Failed to delete user:', error);
 		} finally {
 			isSubmitting.value = false;
 		}

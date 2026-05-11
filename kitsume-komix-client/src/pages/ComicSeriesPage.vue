@@ -43,9 +43,13 @@ onMounted(async () => {
 
 	if (isNaN(idNum)) return;
 
-	const lookupResult = await comicSeriesStore.lookupComicSeriesById(idNum);
-	if (lookupResult) {
-		comicSeriesData.value = lookupResult;
+	try {
+		const lookupResult = await comicSeriesStore.lookupComicSeriesById(idNum);
+		if (lookupResult) {
+			comicSeriesData.value = lookupResult;
+		}
+	} catch (error) {
+		console.error('Error fetching comic series:', error);
 	}
 
 	try {
