@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 import { loadFromStorage, saveToStorage } from '@/utilities/storage';
-import { apiClient, setAuthToken, setRefreshToken, setTokenRefreshCallback } from '@/utilities/apiClient';
+import { apiClient, setAuthToken, setRefreshToken } from '@/utilities/apiClient';
 import { useLibrariesStore } from '@/stores/libraries';
 import type { PersistedAuth } from '@/types/index';
 
@@ -24,16 +24,6 @@ export const useAuthStore = defineStore('auth', {
 		}
 		if (state.refreshToken) {
 			setRefreshToken(state.refreshToken);
-		}
-
-		// TODO: Refactor to avoid circular dependency, update docs
-		if (state.token && state.user) {
-			// Trigger post-login actions if user data exists
-			setTimeout(async () => {
-				const authStore = useAuthStore();
-				setTokenRefreshCallback(() => authStore.refresh());
-					await authStore.postLoginActions();
-			}, 0);
 		}
 
 		return state;
@@ -132,11 +122,6 @@ export const useAuthStore = defineStore('auth', {
 				}
 				
 				this.persist();
-
-				// Set up the token refresh callback after successful login
-				setTokenRefreshCallback(() => this.refresh());
-
-				await this.postLoginActions();
 
 				return true;
 			} catch (error) {

@@ -4,6 +4,7 @@
 	import { useRouter, useRoute } from 'vue-router';
 
 	import { useAuthStore } from '@/stores/auth';
+	import { setTokenRefreshCallback } from '@/utilities/apiClient';
 	import { REMEMBERED_USERNAME_STORAGE_KEY, loadFromStorage, saveToStorage } from '@/utilities/storage';
 
 	import { validateEmailPassword } from '@/zod/login.schema';
@@ -55,6 +56,8 @@
 			});
 
 			if (success) {
+				setTokenRefreshCallback(() => authStore.refresh());
+				await authStore.postLoginActions();
 				loginFormMessage.value = null;
 				const redirect = (route.query.redirect as string) || '/';
 				router.push(redirect);

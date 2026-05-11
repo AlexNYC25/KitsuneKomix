@@ -4,6 +4,8 @@ import { RouterView, useRoute } from 'vue-router';
 import SideBar from '@/components/SideBar.vue';
 import TopBar from '@/components/TopBar.vue';
 import Toast from 'primevue/toast';
+import { useAuthStore } from '@/stores/auth';
+import { setTokenRefreshCallback } from '@/utilities/apiClient';
 
 const $route = useRoute();
 const sidebarOpen = ref(false);
@@ -22,6 +24,12 @@ onMounted(() => {
   };
   mql.addEventListener('change', handler);
   onBeforeUnmount(() => mql.removeEventListener('change', handler));
+
+  const authStore = useAuthStore();
+  if (authStore.isAuthenticated) {
+    setTokenRefreshCallback(() => authStore.refresh());
+    authStore.postLoginActions();
+  }
 });
 </script>
 
