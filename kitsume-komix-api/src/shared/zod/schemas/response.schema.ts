@@ -1,4 +1,4 @@
-import { z } from "@hono/zod-openapi";
+import { z } from "zod";
 
 import { AuthAccessToken, AuthRefreshToken } from "./data/auth.schema.ts";
 import {

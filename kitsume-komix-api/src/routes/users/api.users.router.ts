@@ -1,4 +1,5 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { z } from "zod"; 
 
 import { apiLogger } from "#logger/loggers.ts";
 import { requireAdmin, requireAuth } from "#modules/auth/middleware/authChecks.ts";

@@ -1,4 +1,4 @@
-import { z } from "@hono/zod-openapi";
+import { z } from "zod";
 import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 import { AuthRefreshToken } from "./data/auth.schema.ts";
