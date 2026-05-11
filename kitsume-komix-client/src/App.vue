@@ -2,6 +2,7 @@
 import { RouterView, useRoute } from 'vue-router';
 import SideBar from '@/components/SideBar.vue';
 import TopBar from '@/components/TopBar.vue';
+import Toast from 'primevue/toast';
 
 const $route = useRoute();
 </script>
@@ -10,7 +11,7 @@ const $route = useRoute();
   <main class="h-screen w-full overflow-hidden">
     <template v-if="$route.meta.layout !== 'auth'">
       <div class="flex flex-row h-full">
-        <SideBar class="w-64 bg-sky-950 text-white flex-shrink-0" />
+        <SideBar class="w-64 bg-surface-overlay text-white flex-shrink-0" />
         <div class="flex-1 flex flex-col min-w-0">
           <TopBar />
           <RouterView class="flex-1 overflow-auto" />
@@ -20,6 +21,7 @@ const $route = useRoute();
     <template v-else>
       <RouterView class="h-full w-full" />
     </template>
+    <Toast position="bottom-right" />
   </main>
 </template>
 
