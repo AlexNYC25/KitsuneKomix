@@ -42,7 +42,7 @@ const userDisplayName = computed(() => {
   <div id="sidebar" class="flex flex-col h-full">
     <div id="sidebar-header">
       <h2 class="text-2xl font-bold mx-2" style="color: var(--p-secondary-color)">
-			Kitsume Komix
+			Kitsune Komix
 		</h2>
     </div>
 
@@ -106,7 +106,7 @@ const userDisplayName = computed(() => {
 		</div>
 
 		<div id="sidebar-footer" class="mt-auto">
-			<p>&copy; 2024 Kitsume Komix</p>
+			<p>&copy; {{ new Date().getFullYear() }} Kitsune Komix</p>
 		</div>
   </div>
 </template>
