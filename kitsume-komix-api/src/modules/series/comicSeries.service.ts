@@ -145,7 +145,7 @@ const fetchAComicSeriesAssociatedMetadataById = async (
     thumbnailUrl = firstComicWithThumbnail?.thumbnailUrl;
   }
   const credits: ComicBookMetadataOnly =
-    complileTheCompleteComicSeriesCreditsMetadata(comicBooksBelongingToSeries);
+    compileTheCompleteComicSeriesCreditsMetadata(comicBooksBelongingToSeries);
 
   // This function would involve fetching the credits for each comic book in the series and then deduplicating them to get a complete list of unique credits for the series as a whole. This is a non-trivial amount of additional work so I'm leaving it as a placeholder for now and we can implement it later if we have time or if it's needed by the frontend.
   return {
@@ -164,7 +164,7 @@ const fetchAComicSeriesAssociatedMetadataById = async (
  * @param comicBooks An array of data objects that are of the type ComicBookWithMetadata
  * @returns A ComicBookMetadataOnly object containing the deduplicated credits for the entire series.
  */
-export const complileTheCompleteComicSeriesCreditsMetadata = (
+export const compileTheCompleteComicSeriesCreditsMetadata = (
   comicBooks: ComicBookWithMetadata[],
 ): ComicBookMetadataOnly => {
   const completeCredits: ComicBookMetadataOnly = {};
