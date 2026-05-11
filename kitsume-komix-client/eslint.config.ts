@@ -25,4 +25,15 @@ export default defineConfigWithVueTs(
     files: ['src/**/__tests__/*'],
   },
   skipFormatting,
+  {
+    name: 'app/no-ts-extension-imports',
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@/**/*.ts', './**/*.ts', '../**/*.ts'],
+          message: 'Do not use .ts extension in imports. Let the bundler resolve it.',
+        }],
+      }],
+    },
+  },
 )

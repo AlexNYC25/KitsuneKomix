@@ -4,7 +4,7 @@
 
 	import { useAuthStore } from '@/stores/auth';
 
-	import { validateSignup } from '@/zod/signup.schema.ts';
+	import { validateSignup } from '@/zod/signup.schema';
 
 	const authStore = useAuthStore();
 

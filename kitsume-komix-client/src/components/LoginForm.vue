@@ -6,7 +6,7 @@
 	import { useAuthStore } from '@/stores/auth';
 	import { REMEMBERED_USERNAME_STORAGE_KEY, loadFromStorage, saveToStorage } from '@/utilities/storage';
 
-	import { validateEmailPassword } from '@/zod/login.schema.ts';
+	import { validateEmailPassword } from '@/zod/login.schema';
 
 	const router = useRouter();
 	const route = useRoute();	
