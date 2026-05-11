@@ -53,4 +53,8 @@ export const envSchema = z.object({
 
   // cache settings
   METADATA_CACHE_TTL_MS: z.string().transform((val) => parseInt(val, 10)).default(60 * 60 * 1000), // 1 hour
+
+  CACHE_PAGES_DIR: z.string().default("./cache/pages"),
+  CACHE_THUMBNAILS_DIR: z.string().default("./cache/thumbnails/custom"),
+  LARGE_FILE_THRESHOLD_BYTES: z.coerce.number().default(104857600), // 100MB
 });

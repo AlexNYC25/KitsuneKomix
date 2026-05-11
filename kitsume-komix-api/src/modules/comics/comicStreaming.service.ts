@@ -1,4 +1,5 @@
 import { apiLogger } from "#logger/loggers.ts";
+import { env } from "#config/env.ts";
 import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 import { getComicPagesByComicBookId } from "#infrastructure/db/sqlite/models/comicPages.model.ts";
 
@@ -77,7 +78,7 @@ export const startStreamingComicBookFile = async (
   );
   const formatExtension = targetFormat.split("/")[1];
 
-  const cacheDir = "./cache/pages";
+  const cacheDir = env.CACHE_PAGES_DIR;
   const comicCacheDir = `${cacheDir}/${data.comicId}`;
   const cachedPagePath =
     `${comicCacheDir}/${data.pageNumber}.${formatExtension}`;
@@ -96,7 +97,7 @@ export const startStreamingComicBookFile = async (
     console.log(`Page ${data.pageNumber} not in cache, extracting...`);
 
     const fileSize = (await Deno.stat(filePath)).size;
-    const isLargeFile = fileSize > 100 * 1024 * 1024;
+    const isLargeFile = fileSize > env.LARGE_FILE_THRESHOLD_BYTES;
 
     if (isLargeFile) {
       const pageRange = Math.min(
@@ -252,7 +253,7 @@ const checkIfPageInCache = async (
   page: number,
   formatExtension: string = "jpg",
 ): Promise<boolean> => {
-  const cacheDir = "./cache/pages";
+  const cacheDir = env.CACHE_PAGES_DIR;
   const pagePath = `${cacheDir}/${comicId}/${page}.${formatExtension}`;
 
   try {
@@ -287,7 +288,7 @@ const preloadAdjacentPages = async (
   totalPages: number,
 ): Promise<void> => {
   const formatExtension = targetFormat.split("/")[1];
-  const cacheDir = `./cache/pages/${comicId}`;
+  const cacheDir = `${env.CACHE_PAGES_DIR}/${comicId}`;
 
   const pagesToPreload: number[] = [];
   for (let i = 1; i <= preloadCount; i++) {

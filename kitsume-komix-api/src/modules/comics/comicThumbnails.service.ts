@@ -1,4 +1,5 @@
 import { apiLogger } from "#logger/loggers.ts";
+import { env } from "#config/env.ts";
 import { getClient } from "#infrastructure/db/sqlite/client.ts";
 import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 import {
@@ -160,7 +161,7 @@ export const createCustomThumbnail = async (
 
   const timestamp = Date.now();
   const filename = `custom_thumbnail_${comicId}_${timestamp}.jpg`;
-  const thumbnailDir = `/app/cache/thumbnails/custom`;
+  const thumbnailDir = env.CACHE_THUMBNAILS_DIR;
   const filePath = `${thumbnailDir}/${filename}`;
 
   try {
