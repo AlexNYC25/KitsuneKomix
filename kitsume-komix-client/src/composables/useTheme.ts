@@ -1,13 +1,27 @@
 import { ref, watch } from 'vue'
 
 const THEME_KEY = 'kk-theme'
-const isDark = ref(true)
 
-const stored = localStorage.getItem(THEME_KEY)
-isDark.value = stored !== 'light'
-if (stored === 'light') {
-  document.documentElement.setAttribute('data-theme', 'light')
+function getInitialDark(): boolean {
+  const stored = localStorage.getItem(THEME_KEY)
+  if (stored === 'light') return false
+  if (stored === 'dark') return true
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
 }
+
+const isDark = ref(getInitialDark())
+
+function applyTheme(val: boolean) {
+  if (val) {
+    document.documentElement.setAttribute('data-theme', 'dark')
+    localStorage.setItem(THEME_KEY, 'dark')
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light')
+    localStorage.setItem(THEME_KEY, 'light')
+  }
+}
+
+applyTheme(isDark.value)
 
 export function useTheme() {
   const toggle = () => {
@@ -15,13 +29,7 @@ export function useTheme() {
   }
 
   watch(isDark, (val) => {
-    if (val) {
-      document.documentElement.removeAttribute('data-theme')
-      localStorage.setItem(THEME_KEY, 'dark')
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light')
-      localStorage.setItem(THEME_KEY, 'light')
-    }
+    applyTheme(val)
   })
 
   return { isDark, toggle }

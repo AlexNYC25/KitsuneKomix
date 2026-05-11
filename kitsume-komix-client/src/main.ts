@@ -67,7 +67,7 @@ app.use(PrimeVue, {
     preset: KitsunePreset,
     options: {
       prefix: 'p',
-      darkModeSelector: 'system',
+      darkModeSelector: '[data-theme="dark"]',
       cssLayer: false
     }
   }

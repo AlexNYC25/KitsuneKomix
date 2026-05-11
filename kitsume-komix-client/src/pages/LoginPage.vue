@@ -22,7 +22,7 @@
 </script>
 
 <template>
-  <div id="login-page" class="flex justify-center items-center h-screen bg-gray-600">
+  <div id="login-page" class="flex justify-center items-center h-screen bg-surface-base">
     
     <!-- Loading state while checking setup -->
     <div v-if="checkingSetup" class="w-full max-w-md">

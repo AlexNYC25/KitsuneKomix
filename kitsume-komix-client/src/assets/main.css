@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "./design-tokens.css";
 
+@custom-variant dark (&:where([data-theme="dark"] *));
+
 @theme {
   --color-brand: var(--color-brand-primary);
   --color-brand-secondary: var(--color-brand-secondary);
@@ -24,6 +26,8 @@
 
 html {
   font-family: var(--font-body);
+  background-color: var(--color-surface-base);
+  color: var(--color-text-primary);
 }
 
 @keyframes fade-in-up {

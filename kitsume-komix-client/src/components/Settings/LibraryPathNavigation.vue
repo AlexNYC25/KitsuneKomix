@@ -131,9 +131,9 @@
 	<div>
 		<label class="block text-sm font-medium mb-2">Library Path</label>
 
-		<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-3">
+		<div class="border border-surface-overlay rounded-lg p-3 space-y-3">
 			<div class="flex items-center justify-between gap-2">
-				<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
+				<p class="text-xs text-text-muted break-all">
 					Current: {{ currentBrowsePath || 'App Comic Directory Base' }}
 				</p>
 				<Button
@@ -152,11 +152,11 @@
 				{{ directoryError }}
 			</div>
 
-			<div v-else-if="loadingDirectories" class="text-sm text-gray-600 dark:text-gray-400">
+			<div v-else-if="loadingDirectories" class="text-sm text-text-muted">
 				Loading directories...
 			</div>
 
-			<div v-else-if="availableDirectories.length === 0" class="text-sm text-gray-600 dark:text-gray-400">
+			<div v-else-if="availableDirectories.length === 0" class="text-sm text-text-muted">
 				No subdirectories found.
 			</div>
 
@@ -165,14 +165,14 @@
 					v-for="directoryPath in availableDirectories"
 					:key="directoryPath"
 					type="button"
-					class="w-full text-left px-3 py-2 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+					class="w-full text-left px-3 py-2 rounded border border-surface-overlay hover:bg-surface-base"
 					@click="openDirectory(directoryPath)"
 				>
 					{{ getDirectoryName(directoryPath) }}
 				</button>
 			</div>
 
-			<p class="text-xs text-gray-600 dark:text-gray-400 break-all">
+			<p class="text-xs text-text-muted break-all">
 				Selected: {{ selectedPath || 'None' }}
 			</p>
 		</div>

@@ -159,7 +159,7 @@
 </script>
 
 <template>
-  <div v-if="isAdmin" id="libraries-section" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+  <div v-if="isAdmin" id="libraries-section" class="bg-surface-elevated rounded-lg shadow-md p-6">
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="text-2xl font-semibold">Libraries</h2>
 
@@ -175,7 +175,7 @@
 		<!-- Add Library Form -->
 		<form
 			v-if="showAddLibraryForm && isAdmin"
-			class="lg:w-[520px] lg:h-[475px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
+			class="lg:w-[520px] lg:h-[475px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-surface-overlay rounded-lg p-4 space-y-4 bg-surface-elevated"
 			@submit.prevent="submitAddLibraryForm"
 		>
 			<h3 class="text-lg font-semibold">Add New Library</h3>
@@ -187,7 +187,7 @@
 					v-model="newLibraryName"
 					type="text"
 					placeholder="e.g. My Comics"
-					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 				/>
 			</div>
 
@@ -198,7 +198,7 @@
 					v-model="newLibraryDescription"
 					type="text"
 					placeholder="e.g. My Comics Description"
-					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 				/>
 
 			</div>
@@ -232,7 +232,7 @@
 		<!-- Edit Library Form -->
 		<form
 			v-if="showEditLibraryForm && isAdmin"
-			class="lg:w-[520px] lg:h-[520px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
+			class="lg:w-[520px] lg:h-[520px] flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-surface-overlay rounded-lg p-4 space-y-4 bg-surface-elevated"
 			@submit.prevent="submitEditLibraryForm"
 		>
 			<h3 class="text-lg font-semibold">Edit Library</h3>
@@ -244,7 +244,7 @@
 					v-model="editLibraryName"
 					type="text"
 					placeholder="e.g. My Comics"
-					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 				/>
 			</div>
 
@@ -255,7 +255,7 @@
 					v-model="editLibraryDescription"
 					type="text"
 					placeholder="e.g. My Comics Description"
-					class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+					class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 				/>
 			</div>
 
@@ -265,7 +265,7 @@
 					id="library-enabled-edit"
 					v-model="editLibraryEnabled"
 					type="checkbox"
-					class="px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+					class="px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 				/>
 			</div>
 
@@ -296,7 +296,7 @@
 		</form>
 
 		<!-- Libraries List -->
-		<div v-if="libraries.length === 0" class="text-gray-600 dark:text-gray-400">
+		<div v-if="libraries.length === 0" class="text-text-muted">
 			<p>No libraries found.</p>
 		</div>
 
@@ -311,19 +311,19 @@
 				:class="{'border-blue-500': library.enabled, 'border-red-500': !library.enabled}"
 			>
 				<h3 class="text-lg font-semibold mb-1">{{ library.name }} {{ library.description ? `- ${library.description}` : '' }}</h3>
-				<p class="text-sm text-gray-600 dark:text-gray-400 break-all">
+				<p class="text-sm text-text-muted break-all">
 					Library Path: {{ library.path }}
 				</p> 
 
 				<div class="grid grid-cols-5 gap-2 mt-6">
 					<div class="col-span-2 grid grid-rows-2 gap-2">
-						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Series: {{ library.totalNumberOfSeries}}</p></div>
-						<div><p class="text-gray-500 dark:text-gray-300">Number of Comic Books: {{ library.totalNumberOfBooks }}</p></div>
+						<div><p class="text-text-secondary">Number of Comic Series: {{ library.totalNumberOfSeries}}</p></div>
+						<div><p class="text-text-secondary">Number of Comic Books: {{ library.totalNumberOfBooks }}</p></div>
 					</div>
 
 					<div class="col-span-2 grid grid-rows-2 gap-2">
-						<div><p class="text-gray-500 dark:text-gray-300">Total Library Size: {{ numberToDataSize(library.totalSize) }}</p></div>
-						<div><p class="text-gray-500 dark:text-gray-300">Number of Users: {{ library.totalNumberOfUsers }}</p></div>
+						<div><p class="text-text-secondary">Total Library Size: {{ numberToDataSize(library.totalSize) }}</p></div>
+						<div><p class="text-text-secondary">Number of Users: {{ library.totalNumberOfUsers }}</p></div>
 					</div>
 
 					<!-- Library Actions -->

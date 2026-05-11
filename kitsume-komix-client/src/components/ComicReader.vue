@@ -422,7 +422,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			class="bg-black/60 backdrop-blur-sm border-b border-white/10 px-4 py-3 flex items-center justify-between transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
-			<span class="text-gray-300 font-semibold truncate mr-4">{{ (comicBookData && 'title' in comicBookData) ? comicBookData.title : 'Comic Reader' }}</span>
+			<span class="text-text-secondary font-semibold truncate mr-4">{{ (comicBookData && 'title' in comicBookData) ? comicBookData.title : 'Comic Reader' }}</span>
 
 			<!-- Top Bar Buttons -->
 			<div class="flex items-center gap-2">
@@ -618,7 +618,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 					class="max-w-full max-h-full object-contain"
 					:key="currentPage"
 				/>
-				<div v-else-if="!isLoading" class="text-gray-500 flex items-center justify-center w-full h-full">
+				<div v-else-if="!isLoading" class="text-text-muted flex items-center justify-center w-full h-full">
 					<p>No page loaded</p>
 				</div>
 			</div>
@@ -630,7 +630,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 				data-comic-content
 			>
 				<div v-if="isLoadingWebtoon" class="flex items-center justify-center w-full h-full">
-					<p class="text-gray-400">Loading webtoon mode...</p>
+					<p class="text-text-muted">Loading webtoon mode...</p>
 				</div>
 				<template v-else>
 					<motion.img
@@ -644,7 +644,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 						:style="{ width: `${webtoonImageWidth}%` }"
 						class="mb-4 object-contain"
 					/>
-					<div v-if="webtoonPages.length === 0" class="text-gray-500 flex items-center justify-center w-full h-full">
+					<div v-if="webtoonPages.length === 0" class="text-text-muted flex items-center justify-center w-full h-full">
 						<p>No pages loaded</p>
 					</div>
 				</template>
@@ -664,16 +664,16 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			<div class="flex items-center gap-2 md:gap-4">
 				<!-- Webtoon Width Slider -->
 				<div v-if="readingMode === 'webtoon'" class="flex-1 flex items-center gap-2 md:gap-3">
-					<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">W:</span>
+					<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">W:</span>
 					<input 
 						type="range" 
 						:min="20" 
 						:max="100" 
 						:value="webtoonImageWidth"
 						@input="(e) => webtoonImageWidth = parseInt((e.target as HTMLInputElement).value)"
-						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+						class="flex-1 h-2 bg-surface-overlay rounded-lg appearance-none cursor-pointer"
 					/>
-					<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">{{ webtoonImageWidth }}%</span>
+					<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">{{ webtoonImageWidth }}%</span>
 				</div>
 			</div>
 		</div>
@@ -710,7 +710,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 
 				<!-- Page Slider -->
 				<div class="flex-1 flex items-center gap-2">
-					<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">{{ pageInfo }}</span>
+					<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">{{ pageInfo }}</span>
 					<input 
 						type="range" 
 						:min="1" 
@@ -718,7 +718,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 						:value="currentPage"
 						@input="(e) => goToPage(parseInt((e.target as HTMLInputElement).value))"
 						:disabled="isLoading"
-						class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+						class="flex-1 h-2 bg-surface-overlay rounded-lg appearance-none cursor-pointer"
 					/>
 				</div>
 
@@ -757,7 +757,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			class="p-dialog-header-light"
 			:closable="false"
 		>
-			<p class="text-gray-300 mb-4">
+			<p class="text-text-secondary mb-4">
 				You were on page {{ savedProgressPage }} of {{ totalPages }}. Continue where you left off?
 			</p>
 			<div class="flex justify-end gap-2">
@@ -787,7 +787,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			<div class="flex flex-col gap-4">
 				<!-- Scroll Direction Section (Single Mode Only) -->
 				<div v-if="readingMode === 'single'" class="flex flex-col gap-2">
-					<h3 class="text-sm font-semibold text-gray-300">Scroll Direction</h3>
+					<h3 class="text-sm font-semibold text-text-secondary">Scroll Direction</h3>
 					<div class="flex gap-2">
 						<Button
 							:pressed="scrollDirection === 'vertical'"
@@ -823,8 +823,8 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 				</div>
 
 				<!-- Reading Mode Section -->
-				<div class="flex flex-col gap-2 border-t border-gray-600 pt-4">
-					<h3 class="text-sm font-semibold text-gray-300">Reading Mode</h3>
+				<div class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
+					<h3 class="text-sm font-semibold text-text-secondary">Reading Mode</h3>
 					<div class="flex gap-2">
 						<Button
 							:pressed="readingMode === 'single'"
@@ -850,9 +850,9 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 				</div>
 
 				<!-- Display Mode Section (Single Mode Only) -->
-				<div v-if="readingMode === 'single'" class="flex flex-col gap-2 border-t border-gray-600 pt-4">
-					<h3 class="text-sm font-semibold text-gray-300">Display Mode</h3>
-					<p class="text-xs text-gray-400 mb-2">
+				<div v-if="readingMode === 'single'" class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
+					<h3 class="text-sm font-semibold text-text-secondary">Display Mode</h3>
+					<p class="text-xs text-text-muted mb-2">
 						{{ fitMode === 'height' ? 'Fit Height: Entire image visible in viewport' : 'Fit Width: Image fills width, scroll vertically' }}
 					</p>
 					<div class="flex gap-2">
@@ -880,19 +880,19 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 				</div>
 
 				<!-- Zoom Slider Section (Single Mode Only) -->
-				<div v-if="readingMode === 'single' && fitMode === 'width'" class="flex flex-col gap-2 border-t border-gray-600 pt-4">
-					<h3 class="text-sm font-semibold text-gray-300">Zoom Level</h3>
+				<div v-if="readingMode === 'single' && fitMode === 'width'" class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
+					<h3 class="text-sm font-semibold text-text-secondary">Zoom Level</h3>
 					<div class="flex items-center gap-3">
-						<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">30%</span>
+						<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">30%</span>
 						<input 
 							type="range" 
 							:min="30" 
 							:max="100" 
 							:value="singlePageImageWidth"
 							@input="(e) => singlePageImageWidth = parseInt((e.target as HTMLInputElement).value)"
-							class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+							class="flex-1 h-2 bg-surface-overlay rounded-lg appearance-none cursor-pointer"
 						/>
-						<span class="text-gray-400 text-xs md:text-sm whitespace-nowrap">{{ singlePageImageWidth }}%</span>
+						<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">{{ singlePageImageWidth }}%</span>
 					</div>
 				</div>
 			</div>

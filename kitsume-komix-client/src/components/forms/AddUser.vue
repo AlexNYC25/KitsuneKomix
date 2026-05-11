@@ -47,7 +47,7 @@
 
 <template>
 	<form
-		class="lg:w-lg lg:h-lg flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4 bg-white dark:bg-gray-900"
+		class="lg:w-lg lg:h-lg flex flex-col fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 mb-6 shadow-2xl border border-surface-overlay rounded-lg p-4 space-y-4 bg-surface-elevated"
 		@submit="handleAddUser"
 	>
 		<h3 class="text-lg font-semibold">Add User</h3>
@@ -60,7 +60,7 @@
 				v-model="newUserEmail"
 				type="email"
 				placeholder="e.g. user@example.com"
-				class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 			/>
 		</div>
 
@@ -70,7 +70,7 @@
 			<select
 				id="new-user-role"
 				v-model="newUserRole"
-				class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 			>
 				<option value="user">User</option>
 				<option value="admin">Admin</option>
@@ -85,7 +85,7 @@
 				v-model="newUserPassword"
 				type="password"
 				placeholder="Enter a password"
-				class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+				class="w-full px-3 py-2 border rounded-md bg-surface-elevated border-surface-overlay"
 			/>
 		</div>
 
@@ -102,7 +102,7 @@
 
 			<button
 				type="button"
-				class="px-4 py-2 mx-4 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+				class="px-4 py-2 mx-4 bg-surface-overlay hover:bg-surface-elevated text-text-primary rounded-md"
 				@click="handleCancel"
 			>
 				Cancel

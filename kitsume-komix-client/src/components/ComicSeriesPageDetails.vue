@@ -43,7 +43,7 @@
 				@click="isExpanded = !isExpanded"
 				text
 				size="small"
-				class="text-cyan-400 hover:text-cyan-300"
+				class="text-brand hover:brightness-110"
 			/>
 		</div>
 	</div>

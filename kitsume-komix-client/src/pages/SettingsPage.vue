@@ -24,7 +24,7 @@
   <div id="settings-page" class="p-6">
     <div class="mb-6 flex items-center gap-4">
       <button
-				class="p-2 rounded bg-cyan-700 hover:bg-blue-200 dark:hover:bg-blue-200"
+				class="p-2 rounded bg-brand hover:bg-blue-200 dark:hover:bg-blue-200"
         @click="goBack"
         v-tooltip.top="'Go back'"
       >

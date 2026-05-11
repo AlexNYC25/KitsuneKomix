@@ -71,12 +71,12 @@
 <template>
 	<div class="bg-slate-900 shadow-lg p-8 rounded-lg">
 		<div class="flex justify-center mb-6">
-			<h1 class="text-2xl font-bold font-display text-white">
+			<h1 class="text-2xl font-bold font-display text-text-primary">
 				Kitsune Komix Login
 			</h1>
 		</div>
 
-		<div id="login-message" class="text-gray-300 text-sm mb-6 text-center">
+		<div id="login-message" class="text-text-secondary text-sm mb-6 text-center">
 			Please enter your credentials to log in.
 			<p v-if="loginFormMessage" class="mt-1 text-sm text-red-500">{{ loginFormMessage }}</p>
 		</div>
@@ -84,28 +84,28 @@
 		<form @submit="loginFormSubmit" class="space-y-4">
 			<!-- Email Field -->
 			<div>
-				<label for="email" class="block text-sm font-medium text-white mb-1">Email</label>
+				<label for="email" class="block text-sm font-medium text-text-primary mb-1">Email</label>
 				<input
 					id="email"
 					v-model="email"
 					type="email"
 					placeholder="Enter your email"
-					class="w-full px-3 py-2 bg-gray-700 border rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-1 transition-colors duration-200"
-					:class="emailAttrs.error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-600 focus:border-blue-500 focus:ring-blue-500'"
+					class="w-full px-3 py-2 bg-surface-overlay border rounded-md text-text-primary placeholder-text-muted focus:outline-none focus:ring-1 transition-colors duration-200"
+					:class="emailAttrs.error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-surface-overlay focus:border-brand focus:ring-brand'"
 				/>
 				<p v-if="emailAttrs.error" class="mt-1 text-sm text-red-500">{{ emailAttrs.error }}</p>
 			</div>
 
 			<!-- Password Field -->
 			<div>
-				<label for="password" class="block text-sm font-medium text-white mb-1">Password</label>
+				<label for="password" class="block text-sm font-medium text-text-primary mb-1">Password</label>
 				<input
 					id="password"
 					v-model="password"
 					type="password"
 					placeholder="Enter your password"
-					class="w-full px-3 py-2 bg-gray-700 border rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-1 transition-colors duration-200"
-					:class="passwordAttrs.error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-600 focus:border-blue-500 focus:ring-blue-500'"
+					class="w-full px-3 py-2 bg-surface-overlay border rounded-md text-text-primary placeholder-text-muted focus:outline-none focus:ring-1 transition-colors duration-200"
+					:class="passwordAttrs.error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-surface-overlay focus:border-brand focus:ring-brand'"
 				/>
 				<p v-if="passwordAttrs.error" class="mt-1 text-sm text-red-500">{{ passwordAttrs.error }}</p>
 			</div>
@@ -116,9 +116,9 @@
 					id="rememberMe"
 					v-model="rememberMe"
 					type="checkbox"
-					class="w-4 h-4 accent-blue-500 bg-gray-700 border-gray-600 rounded cursor-pointer"
+					class="w-4 h-4 accent-brand bg-surface-overlay border-surface-overlay rounded cursor-pointer"
 				/>
-				<label for="rememberMe" class="ml-2 text-sm text-white cursor-pointer">
+				<label for="rememberMe" class="ml-2 text-sm text-text-primary cursor-pointer">
 					Remember Me
 				</label>
 			</div>
@@ -127,7 +127,7 @@
 			<button
 				type="submit"
 				:disabled="isLoginSubmitting"
-				class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-medium rounded-md transition-colors duration-200"
+				class="w-full px-4 py-2 bg-brand hover:brightness-110 disabled:opacity-50 text-text-primary font-medium rounded-md transition-colors duration-200"
 			>
 				{{ isLoginSubmitting ? 'Logging in...' : 'Login' }}
 			</button>

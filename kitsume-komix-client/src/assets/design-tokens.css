@@ -42,9 +42,13 @@
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.4);
 
-  /* ---- Reading ---- */
+    /* ---- Reading ---- */
   --color-reading-bg: #000000;
   --color-page-edge: #1a1a2e;
+}
+
+[data-theme="dark"] {
+  /* Dark mode explicitly — inherits from :root */
 }
 
 /* ---- Light Mode ---- */

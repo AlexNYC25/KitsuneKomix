@@ -71,7 +71,7 @@
 </script>
 
 <template>
-	<div v-if="isAdmin" id="libraries-section" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-12">
+	<div v-if="isAdmin" id="libraries-section" class="bg-surface-elevated rounded-lg shadow-md p-6 mt-12">
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="text-2xl font-semibold">Users</h2>
 
@@ -85,7 +85,7 @@
 		</div>
 
 		<!-- Users List -->
-		<div v-if="users.length === 0" class="text-gray-600 dark:text-gray-400">
+		<div v-if="users.length === 0" class="text-text-muted">
 			<p>No users found.</p>
 		</div>
 
