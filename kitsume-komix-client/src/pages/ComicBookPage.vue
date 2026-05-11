@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import Button from 'primevue/button';
 import TabView from 'primevue/tabview';
@@ -8,11 +8,12 @@ import TabPanel from 'primevue/tabpanel';
 
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
 import { useAuthStore } from '@/stores/auth';
+import { useComicSeriesStore } from '@/stores/comic-series';
 
 import { apiClient } from '@/utilities/apiClient';
 import { convertArrayOfCreditsToString } from '@/utilities/metadata';
 
-import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist } from '@/types/comic-books.types';
+import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist, ComicBook } from '@/types/comic-books.types';
 
 import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
 import ComicReader from '@/components/ComicReader.vue';
@@ -24,9 +25,11 @@ import SkeletonPage from '@/components/states/SkeletonPage.vue';
 import { getThumbnailPathFromFilePath, buildComicDownloadUrl } from "@/utilities/urls";
 
 const route = useRoute();
+const router = useRouter();
 
 const breadcrumbStore = useBreadcrumbStore();
 const authStore = useAuthStore();
+const comicSeriesStore = useComicSeriesStore();
 
 const comicBookId = ref<number | null>(null);
 const comicBookData = ref<ComicBookById | null>(null);
@@ -41,6 +44,10 @@ const isDownloading = ref(false);
 const showAddListDialog = ref(false);
 const listNameInput = ref('');
 
+// Series comics for prev/next navigation
+const seriesComics = ref<ComicBook[]>([]);
+const seriesComicsLoading = ref(false);
+
 onMounted(async () => {
 	const id: string | string[] | undefined = route.params.id;
 	const idStr: string | undefined = Array.isArray(id) ? id[0] : id;
@@ -54,7 +61,6 @@ onMounted(async () => {
 
 	comicBookId.value = idNum;
 
-	// Fetch comic book details
 	try {
 		const { data: comicBookDetails, error: comicBookDetailsError } = await apiClient.GET('/comic-books/{id}', {
 			params: {
@@ -68,10 +74,8 @@ onMounted(async () => {
 			comicBookData.value = comicBookDetails as ComicBookById;
 			comicBookMetadata.value = comicBookDetails as ComicBookMetadata;
 
-			// Get series ID from query params (passed from ComicSeries page)
 			const seriesId: number | undefined = route.query.seriesId ? parseInt(route.query.seriesId as string) : undefined;
 
-			// TODO: Migrat this to breadcrumb store action
 			if (comicBookData.value) {
 				breadcrumbStore.setComicBookData(
 					seriesId,
@@ -97,6 +101,11 @@ onMounted(async () => {
 			} catch (error) {
 				console.error('Error fetching thumbnail:', error);
 			}
+
+			// Fetch series comics for prev/next navigation
+			if (seriesId) {
+				void loadSeriesComics(seriesId, idNum);
+			}
 		}
 	} catch (error) {
 		console.error('Error fetching comic book:', error);
@@ -105,6 +114,52 @@ onMounted(async () => {
 	}
 });
 
+const loadSeriesComics = async (seriesId: number, currentComicId: number) => {
+	seriesComicsLoading.value = true;
+	try {
+		const cached = comicSeriesStore.getComicsInSeries(seriesId);
+		if (cached?.data?.length) {
+			seriesComics.value = cached.data;
+			return;
+		}
+		const response = await comicSeriesStore.fetchComicsInSeries(seriesId, 1, 100);
+		seriesComics.value = response?.data ?? [];
+	} catch (error) {
+		console.error('Error fetching series comics for navigation:', error);
+	} finally {
+		seriesComicsLoading.value = false;
+	}
+};
+
+const comicIssueNumberSorter = (a: ComicBook, b: ComicBook) => {
+	if (!a.issueNumber || !b.issueNumber) return 0;
+	return parseFloat(a.issueNumber) - parseFloat(b.issueNumber);
+};
+
+const sortedSeriesComics = computed(() => {
+	return [...seriesComics.value].sort(comicIssueNumberSorter);
+});
+
+const currentIssueIndex = computed(() => {
+	if (!comicBookId.value || !sortedSeriesComics.value.length) return -1;
+	return sortedSeriesComics.value.findIndex(c => c.id === comicBookId.value);
+});
+
+const prevComic = computed(() => {
+	if (currentIssueIndex.value <= 0) return null;
+	return sortedSeriesComics.value[currentIssueIndex.value - 1] ?? null;
+});
+
+const nextComic = computed(() => {
+	if (currentIssueIndex.value < 0 || currentIssueIndex.value >= sortedSeriesComics.value.length - 1) return null;
+	return sortedSeriesComics.value[currentIssueIndex.value + 1] ?? null;
+});
+
+const navigateToComic = (comicId: number) => {
+	const seriesId = route.query.seriesId as string | undefined;
+	router.push(`/comic-book/${comicId}${seriesId ? `?seriesId=${seriesId}` : ''}`);
+};
+
 const openComicReader = () => {
 	comicReaderRef.value?.openReader();
 };
@@ -112,14 +167,16 @@ const openComicReader = () => {
 const comicBookHeading = computed(() => {
 	if (comicBookData.value) {
 		if (comicBookData.value.issueNumber && comicBookData.value.title) {
-			return `Issue Number #${comicBookData.value.issueNumber} - ${comicBookData.value.title}`;
+			return `Issue #${comicBookData.value.issueNumber} - ${comicBookData.value.title}`;
 		}
-		return `Issue Number #${comicBookData.value.issueNumber}`;
+		if (comicBookData.value.issueNumber) {
+			return `Issue #${comicBookData.value.issueNumber}`;
+		}
+		return comicBookData.value.title || 'Comic Book';
 	}
 	return 'Comic Book';
 });
 
-// Computed properties for metadata arrays with proper typing
 const metadataDetailsSource = computed<Record<string, unknown> | null>(() => {
 	const metadataValue = comicBookMetadata.value as (ComicBookMetadata & { credits?: Record<string, unknown> }) | null;
 	if (metadataValue?.credits) {
@@ -160,67 +217,24 @@ const metadataFieldToString = (field: string): string => {
 	return '';
 };
 
-const writersString = computed(() => {
-	return metadataFieldToString('writers');
-});
+const writersString = computed(() => metadataFieldToString('writers'));
+const pencillersString = computed(() => metadataFieldToString('pencillers'));
+const inkersString = computed(() => metadataFieldToString('inkers'));
+const letterersString = computed(() => metadataFieldToString('letterers'));
+const coloristsString = computed(() => metadataFieldToString('colorists'));
+const editorsString = computed(() => metadataFieldToString('editors'));
+const coverArtistsString = computed(() => metadataFieldToString('coverArtists'));
+const publishersString = computed(() => metadataFieldToString('publishers'));
+const imprintsString = computed(() => metadataFieldToString('imprints'));
+const genresString = computed(() => metadataFieldToString('genres'));
+const charactersString = computed(() => metadataFieldToString('characters'));
+const teamsString = computed(() => metadataFieldToString('teams'));
+const locationsString = computed(() => metadataFieldToString('locations'));
+const storyArcsString = computed(() => metadataFieldToString('storyArcs'));
+const seriesGroupsString = computed(() => metadataFieldToString('seriesGroups'));
 
-const pencillersString = computed(() => {
-	return metadataFieldToString('pencillers');
-});
+const hasMetadataSection = (...fields: string[]) => fields.some(f => f.trim().length > 0);
 
-const inkersString = computed(() => {
-	return metadataFieldToString('inkers');
-});
-
-const letterersString = computed(() => {
-	return metadataFieldToString('letterers');
-});
-
-const coloristsString = computed(() => {
-	return metadataFieldToString('colorists');
-});
-
-const editorsString = computed(() => {
-	return metadataFieldToString('editors');
-});
-
-const coverArtistsString = computed(() => {
-	return metadataFieldToString('coverArtists');
-});
-
-const publishersString = computed(() => {
-	return metadataFieldToString('publishers');
-});
-
-const imprintsString = computed(() => {
-	return metadataFieldToString('imprints');
-});
-
-const genresString = computed(() => {
-	return metadataFieldToString('genres');
-});
-
-const charactersString = computed(() => {
-	return metadataFieldToString('characters');
-});
-
-const teamsString = computed(() => {
-	return metadataFieldToString('teams');
-});
-
-const locationsString = computed(() => {
-	return metadataFieldToString('locations');
-});
-
-const storyArcsString = computed(() => {
-	return metadataFieldToString('storyArcs');
-});
-
-const seriesGroupsString = computed(() => {
-	return metadataFieldToString('seriesGroups');
-});
-
-// Function to mark comic as read
 const setComicToRead = async (comicBookId: number) => {
 	try {
 		const { error } = await apiClient.POST('/comic-books/{id}/read', {
@@ -238,7 +252,7 @@ const setComicToRead = async (comicBookId: number) => {
 };
 
 const downloadComic = async (comicBookId: number) => {
-	if (isDownloading.value) return; // Prevent duplicate downloads
+	if (isDownloading.value) return;
 	
 	isDownloading.value = true;
 	try {
@@ -253,14 +267,10 @@ const downloadComic = async (comicBookId: number) => {
 			throw new Error(`Download failed: ${response.statusText}`);
 		}
 
-		// Get the filename from Content-Disposition header
-		// Format: attachment; filename="filename.ext"
 		const contentDisposition: string | null = response.headers.get('content-disposition');
-		// TODO: Replace fallback name with generated name from metadata
 		let filename: string = `comic-book-${comicBookId}`;
 		
 		if (contentDisposition) {
-			// Normalize whitespace (replace newlines and tabs with spaces)
 			const normalizedHeader: string = contentDisposition.replace(/[\n\r\t]+/g, ' ');
 			
 			let match: RegExpMatchArray | null = normalizedHeader.match(/filename="([^"]+)"/);
@@ -274,12 +284,9 @@ const downloadComic = async (comicBookId: number) => {
 			}
 		}
 
-		// Get the blob from the response
 		const blob: Blob = await response.blob();
-
 		const url: string = window.URL.createObjectURL(blob);
 
-		// Create a temporary anchor element and trigger download
 		const link: HTMLAnchorElement = document.createElement('a');
 		link.href = url;
 		link.download = filename;
@@ -287,7 +294,6 @@ const downloadComic = async (comicBookId: number) => {
 		link.click();
 		document.body.removeChild(link);
 
-		// Clean up the URL object
 		window.URL.revokeObjectURL(url);
 	} catch (error) {
 		console.error('Error downloading comic:', error);
@@ -295,16 +301,20 @@ const downloadComic = async (comicBookId: number) => {
 		isDownloading.value = false;
 	}
 };
+
+const formatFileSize = (bytes: number | null | undefined): string => {
+	if (!bytes) return 'N/A';
+	const mb = bytes / (1024 * 1024);
+	return mb >= 1 ? `${mb.toFixed(2)} MB` : `${(bytes / 1024).toFixed(1)} KB`;
+};
 </script>
 
 <template>
 	<div class="comic-book-page flex flex-col w-full h-full p-4 overflow-auto">
-		<!-- Loading state -->
 		<div v-if="isLoading">
 			<SkeletonPage layout="book" />
 		</div>
 
-		<!-- Empty State -->
 		<div v-else-if="!comicBookData">
 			<EmptyState
 				icon="md-menubook-sharp"
@@ -313,164 +323,208 @@ const downloadComic = async (comicBookId: number) => {
 			/>
 		</div>
 
-		<!-- Comic Book Content -->
 		<ErrorBoundary v-else>
 		<div class="space-y-6">
-			<!-- Header -->
+			<!-- Header with Back and Issue Navigation -->
 			<div class="flex items-center justify-between">
-				<h1 class="text-4xl font-bold font-display">{{ comicBookHeading }}</h1>
-				<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" class="active:scale-95 transition-transform duration-100" />
+				<Button @click="$router.back()" class="active:scale-95 transition-transform duration-100">
+					<v-icon name="io-arrow-back"/>
+					Back
+				</Button>
+				<div class="flex items-center gap-2">
+					<Button
+						:disabled="!prevComic"
+						@click="prevComic && navigateToComic(prevComic.id)"
+						severity="secondary"
+						size="small"
+						class="active:scale-95 transition-transform"
+					>
+						<v-icon name="io-play-skip-back"/> Previous Issue
+					</Button>
+					<Button
+						:disabled="!nextComic"
+						@click="nextComic && navigateToComic(nextComic.id)"
+						severity="secondary"
+						size="small"
+						class="active:scale-95 transition-transform"
+					>
+						Next Issue <v-icon name="io-play-skip-forward"/>
+					</Button>
+				</div>
 			</div>
 
-			<!-- Comic Book Details with Thumbnail -->
-			<div class="bg-gray-800 rounded-lg p-6 space-y-4">
-				<div class="flex gap-6">
-					<!-- Thumbnail -->
-					<ComicThumbnail :thumbnailUrl="thumbnailUrl || undefined"
-						:comicName="comicBookData.title || `Comic Book #${comicBookId}`" />
+			<!-- Heading -->
+			<h1 class="text-4xl font-bold font-display text-text-primary">{{ comicBookHeading }}</h1>
 
-					<!-- Details -->
-					<div class="flex-1">
-						<!-- Series Info -->
-						<div v-if="comicBookData.series" class="border-b border-gray-700 mb-4 pb-4">
-							<p class="text-gray-400 text-sm mb-2">Series</p>
-							<p class="text-lg font-semibold text-cyan-400">{{ comicBookData.series }}</p>
+			<!-- Main Info Area: Thumbnail + Details -->
+			<div class="flex gap-8">
+				<!-- Left: Thumbnail -->
+				<div class="flex-shrink-0">
+					<div class="w-72">
+						<ComicThumbnail :thumbnailUrl="thumbnailUrl || undefined"
+							:comicName="comicBookData.title || `Comic Book #${comicBookId}`" />
+					</div>
+				</div>
+
+				<!-- Right: Key Info Cards + Actions -->
+				<div class="flex-1 space-y-4">
+					<!-- Series -->
+					<div v-if="comicBookData.series" class="flex items-center gap-2 text-lg">
+						<v-icon name="io-library-sharp" class="text-brand text-xl"/>
+						<span class="font-semibold text-text-primary">{{ comicBookData.series }}</span>
+					</div>
+
+					<!-- Key Info Cards Grid -->
+					<div class="grid grid-cols-2 gap-3">
+						<div class="bg-surface-elevated rounded-lg p-3 flex items-center gap-3">
+							<div class="w-10 h-10 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
+								<v-icon name="io-book" class="text-brand"/>
+							</div>
+							<div>
+								<p class="text-xs text-text-muted">Issue Number</p>
+								<p class="font-semibold text-text-primary">#{{ comicBookData.issueNumber || 'N/A' }}</p>
+							</div>
 						</div>
-
-						<!-- Basic Metadata -->
-						<div class="grid grid-cols-2 gap-4">
-							<div>
-								<p class="text-gray-400 text-sm">Issue Number</p>
-								<p class="text-lg font-semibold">{{ comicBookData.issueNumber || 'N/A' }}</p>
+						<div class="bg-surface-elevated rounded-lg p-3 flex items-center gap-3">
+							<div class="w-10 h-10 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
+								<v-icon name="io-document" class="text-brand"/>
 							</div>
 							<div>
-								<p class="text-gray-400 text-sm">Publication Date</p>
-								<p class="text-lg font-semibold">{{ comicBookData.publicationDate || 'TBD' }}</p>
+								<p class="text-xs text-text-muted">Pages</p>
+								<p class="font-semibold text-text-primary">{{ comicBookData.pageCount || 'N/A' }}</p>
 							</div>
-							<div>
-								<p class="text-gray-400 text-sm">Page Count</p>
-								<p class="text-lg font-semibold">{{ comicBookData.pageCount || 'N/A' }} pages</p>
-							</div>
-							<div>
-								<p class="text-gray-400 text-sm">File Size</p>
-								<p class="text-lg font-semibold">{{ comicBookData.fileSize ? (comicBookData.fileSize / (1024 * 1024)).toFixed(2) + ' MB' : 'N/A' }}</p>
-							</div>
-							<div>
-								<p class="text-gray-400 text-sm">File Path</p>
-								<p class="text-sm text-gray-300 truncate">{{ comicBookData.filePath || 'N/A' }}</p>
-							</div>
-							
 						</div>
-
-						<div v-if="comicBookData.summary" class="border-t border-gray-700 mt-4 pt-4">
-							<p class="text-gray-400 text-sm mb-2">Description</p>
-							<p class="text-gray-300">{{ comicBookData.summary }}</p>
+						<div class="bg-surface-elevated rounded-lg p-3 flex items-center gap-3">
+							<div class="w-10 h-10 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
+								<v-icon name="io-document" class="text-brand"/>
+							</div>
+							<div>
+								<p class="text-xs text-text-muted">File Size</p>
+								<p class="font-semibold text-text-primary">{{ formatFileSize(comicBookData.fileSize) }}</p>
+							</div>
 						</div>
-
-						
-
-						<!-- Actions -->
-						<div class="flex gap-2 mt-6 border-t border-gray-700 pt-4">
-							<Button label="Read Comic" icon="pi pi-book" severity="success" class="flex-1" @click="openComicReader" />
-							<Button label="Mark as Read" icon="pi pi-check" severity="info" class="flex-1" @click="setComicToRead(comicBookData.id)" />
-							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)" />
+						<div class="bg-surface-elevated rounded-lg p-3 flex items-center gap-3">
+							<div class="w-10 h-10 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
+								<v-icon name="io-library-sharp" class="text-brand"/>
+							</div>
+							<div>
+								<p class="text-xs text-text-muted">Publisher</p>
+								<p class="font-semibold text-text-primary">{{ comicBookData.publisher || 'N/A' }}</p>
+							</div>
 						</div>
+						<div v-if="comicBookData.publicationDate" class="bg-surface-elevated rounded-lg p-3 flex items-center gap-3">
+							<div class="w-10 h-10 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
+								<v-icon name="io-book" class="text-brand"/>
+							</div>
+							<div>
+								<p class="text-xs text-text-muted">Release Date</p>
+								<p class="font-semibold text-text-primary">{{ comicBookData.publicationDate }}</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Description -->
+					<div v-if="comicBookData.summary" class="bg-surface-elevated rounded-lg p-4">
+						<p class="text-xs text-text-muted mb-1">Description</p>
+						<p class="text-text-primary text-sm leading-relaxed">{{ comicBookData.summary }}</p>
+					</div>
+
+					<!-- Actions -->
+					<div class="flex gap-3 pt-2">
+						<Button label="Read Comic" icon="pi pi-book" class="flex-1 bg-brand border-brand text-white hover:brightness-110 active:scale-95 transition-all font-bold text-lg py-3" @click="openComicReader" />
+						<Button label="Mark Read" icon="pi pi-check" severity="info" @click="setComicToRead(comicBookData.id)" />
+						<Button label="Download" icon="pi pi-download" severity="secondary" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)" />
 					</div>
 				</div>
 			</div>
 
-			<!-- Tabbed Metadata Sections -->
-			<TabView v-model:activeIndex="activeTab">
-				<!-- Metadata Tab -->
-				<TabPanel header="Metadata" value="metadata">
-					<div class="space-y-4">
-						<!-- Credits Section -->
-						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
-							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Credits</h2>
-						<ComicSeriesPageDetails v-if="writersString"
-							comicMetadataDetailsLabel="Writers"
-							:comicMetadataDetails="writersString" />
-						<ComicSeriesPageDetails v-if="pencillersString"
-							comicMetadataDetailsLabel="Pencillers"
-							:comicMetadataDetails="pencillersString" />
-						<ComicSeriesPageDetails v-if="inkersString"
-							comicMetadataDetailsLabel="Inkers"
-							:comicMetadataDetails="inkersString" />
-						<ComicSeriesPageDetails v-if="letterersString"
-							comicMetadataDetailsLabel="Letterers"
-							:comicMetadataDetails="letterersString" />
-						<ComicSeriesPageDetails v-if="coloristsString"
-							comicMetadataDetailsLabel="Colorists"
-							:comicMetadataDetails="coloristsString" />
-						<ComicSeriesPageDetails v-if="editorsString"
-							comicMetadataDetailsLabel="Editors"
-							:comicMetadataDetails="editorsString" />
-						<ComicSeriesPageDetails v-if="coverArtistsString"
-							comicMetadataDetailsLabel="Cover Artists"
-							:comicMetadataDetails="coverArtistsString" />
-						</div>
-
-						<!-- Publishing Section -->
-						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
-							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Publishing</h2>
-						<ComicSeriesPageDetails v-if="publishersString"
-							comicMetadataDetailsLabel="Publishers"
-							:comicMetadataDetails="publishersString" />
-						<ComicSeriesPageDetails v-if="imprintsString"
-							comicMetadataDetailsLabel="Imprints"
-							:comicMetadataDetails="imprintsString" />
-						</div>
-
-						<!-- Content Section -->
-						<div class="bg-gray-800 rounded-lg p-6 space-y-4">
-							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Content</h2>
-						<ComicSeriesPageDetails v-if="genresString"
-							comicMetadataDetailsLabel="Genres"
-							:comicMetadataDetails="genresString" />
-						<ComicSeriesPageDetails v-if="charactersString"
-							comicMetadataDetailsLabel="Characters"
-							:comicMetadataDetails="charactersString"
-							:maxVisible="8" />
-						<ComicSeriesPageDetails v-if="teamsString"
-							comicMetadataDetailsLabel="Teams"
-							:comicMetadataDetails="teamsString" />
-						<ComicSeriesPageDetails v-if="locationsString"
-							comicMetadataDetailsLabel="Locations"
-							:comicMetadataDetails="locationsString" />
-						<ComicSeriesPageDetails v-if="storyArcsString"
-							comicMetadataDetailsLabel="Story Arcs"
-							:comicMetadataDetails="storyArcsString" />
-						</div>
-
-						<!-- Series Groups Section -->
-						<div v-if="seriesGroupsString"
-							class="bg-gray-800 rounded-lg p-6 space-y-4">
-							<h2 class="text-2xl font-bold border-b border-gray-700 pb-4">Series Groups</h2>
-						<ComicSeriesPageDetails comicMetadataDetailsLabel="Groups"
-							:comicMetadataDetails="seriesGroupsString" />
-						</div>
+			<!-- Sectioned Metadata -->
+			<div class="space-y-6">
+				<!-- Credits Section -->
+				<div v-if="hasMetadataSection(writersString, pencillersString, inkersString, letterersString, coloristsString, editorsString, coverArtistsString)" class="border-l-4 border-brand pl-4 space-y-3">
+					<h2 class="text-xl font-bold font-display text-text-primary">Credits</h2>
+					<div class="space-y-2">
+						<ComicSeriesPageDetails v-if="writersString" comicMetadataDetailsLabel="Writers" :comicMetadataDetails="writersString" />
+						<ComicSeriesPageDetails v-if="pencillersString" comicMetadataDetailsLabel="Pencillers" :comicMetadataDetails="pencillersString" />
+						<ComicSeriesPageDetails v-if="inkersString" comicMetadataDetailsLabel="Inkers" :comicMetadataDetails="inkersString" />
+						<ComicSeriesPageDetails v-if="letterersString" comicMetadataDetailsLabel="Letterers" :comicMetadataDetails="letterersString" />
+						<ComicSeriesPageDetails v-if="coloristsString" comicMetadataDetailsLabel="Colorists" :comicMetadataDetails="coloristsString" />
+						<ComicSeriesPageDetails v-if="editorsString" comicMetadataDetailsLabel="Editors" :comicMetadataDetails="editorsString" />
+						<ComicSeriesPageDetails v-if="coverArtistsString" comicMetadataDetailsLabel="Cover Artists" :comicMetadataDetails="coverArtistsString" />
 					</div>
-				</TabPanel>
+				</div>
 
-				<!-- Comic Pages Tab -->
+				<!-- Publishing Section -->
+				<div v-if="hasMetadataSection(publishersString, imprintsString)" class="border-l-4 border-brand pl-4 space-y-3">
+					<h2 class="text-xl font-bold font-display text-text-primary">Publishing</h2>
+					<div class="space-y-2">
+						<ComicSeriesPageDetails v-if="publishersString" comicMetadataDetailsLabel="Publishers" :comicMetadataDetails="publishersString" />
+						<ComicSeriesPageDetails v-if="imprintsString" comicMetadataDetailsLabel="Imprints" :comicMetadataDetails="imprintsString" />
+					</div>
+				</div>
+
+				<!-- Content Section -->
+				<div v-if="hasMetadataSection(genresString, charactersString, teamsString, locationsString, storyArcsString)" class="border-l-4 border-brand pl-4 space-y-3">
+					<h2 class="text-xl font-bold font-display text-text-primary">Content</h2>
+					<div class="space-y-2">
+						<ComicSeriesPageDetails v-if="genresString" comicMetadataDetailsLabel="Genres" :comicMetadataDetails="genresString" />
+						<ComicSeriesPageDetails v-if="charactersString" comicMetadataDetailsLabel="Characters" :comicMetadataDetails="charactersString" :maxVisible="8" />
+						<ComicSeriesPageDetails v-if="teamsString" comicMetadataDetailsLabel="Teams" :comicMetadataDetails="teamsString" />
+						<ComicSeriesPageDetails v-if="locationsString" comicMetadataDetailsLabel="Locations" :comicMetadataDetails="locationsString" />
+						<ComicSeriesPageDetails v-if="storyArcsString" comicMetadataDetailsLabel="Story Arcs" :comicMetadataDetails="storyArcsString" />
+					</div>
+				</div>
+
+				<!-- Series Groups Section -->
+				<div v-if="seriesGroupsString" class="border-l-4 border-brand pl-4 space-y-3">
+					<h2 class="text-xl font-bold font-display text-text-primary">Series Groups</h2>
+					<div class="space-y-2">
+						<ComicSeriesPageDetails comicMetadataDetailsLabel="Groups" :comicMetadataDetails="seriesGroupsString" />
+					</div>
+				</div>
+			</div>
+
+			<!-- Tabbed Sections: Comic Pages + Lists -->
+			<TabView v-model:activeIndex="activeTab">
 				<TabPanel header="Comic Pages" value="pages">
 					<div class="text-center py-8">
-						<p class="text-gray-400">Comic pages will be displayed here</p>
+						<p class="text-text-muted">Comic pages will be displayed here</p>
 					</div>
 				</TabPanel>
 
-				<!-- Lists Tab -->
 				<TabPanel header="Lists" value="lists">
 					<div v-if="comicBookListsData.length === 0" class="text-center py-8">
-						<p class="text-gray-400 mb-4">Comic is not part of any lists</p>
+						<p class="text-text-muted mb-4">Comic is not part of any lists</p>
 						<Button label="Add Comic To List" icon="pi pi-plus" severity="success" @click="showAddListDialog = true" />
 					</div>
 					<div v-else>
-						<!-- Lists content will go here -->
-						<p class="text-gray-400">Lists will be displayed here</p>
+						<p class="text-text-muted">Lists will be displayed here</p>
 					</div>
 				</TabPanel>
 			</TabView>
+
+			<!-- Bottom Issue Navigation -->
+			<div class="flex items-center justify-between pt-4 border-t border-surface-overlay">
+				<Button
+					:disabled="!prevComic"
+					@click="prevComic && navigateToComic(prevComic.id)"
+					severity="secondary"
+					class="active:scale-95 transition-transform"
+				>
+					<v-icon name="io-play-skip-back"/> Previous Issue
+				</Button>
+				<span class="text-sm text-text-muted">
+					Issue {{ comicBookData.issueNumber || '?' }} of {{ sortedSeriesComics.length || '?' }}
+				</span>
+				<Button
+					:disabled="!nextComic"
+					@click="nextComic && navigateToComic(nextComic.id)"
+					severity="secondary"
+					class="active:scale-95 transition-transform"
+				>
+					Next Issue <v-icon name="io-play-skip-forward"/>
+				</Button>
+			</div>
 
 			<!-- Comic Reader Modal -->
 			<ComicReader v-if="comicBookId && comicBookData" ref="comicReaderRef" :comicBookId="comicBookId"
@@ -478,15 +532,15 @@ const downloadComic = async (comicBookId: number) => {
 
 			<!-- Add Comic To List Dialog -->
 			<div v-if="showAddListDialog" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm">
-				<div class="bg-gray-900 rounded-lg p-6 w-full max-w-sm">
-					<h2 class="text-2xl font-bold text-white mb-4">Add Comic To List</h2>
+				<div class="bg-surface-elevated rounded-lg p-6 w-full max-w-sm">
+					<h2 class="text-2xl font-bold text-text-primary mb-4">Add Comic To List</h2>
 					
 					<div class="flex gap-2 mb-4">
 						<input
 							v-model="listNameInput"
 							type="text"
 							placeholder="Enter list name"
-							class="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+							class="flex-1 px-3 py-2 bg-surface-base border border-surface-overlay rounded-md text-text-primary placeholder-text-muted focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
 						/>
 						<Button icon="pi pi-plus" @click="() => {}" />
 					</div>
@@ -502,5 +556,3 @@ const downloadComic = async (comicBookId: number) => {
 </template>
 
 <style scoped></style>
-
-
