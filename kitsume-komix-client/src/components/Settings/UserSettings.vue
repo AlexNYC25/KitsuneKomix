@@ -8,10 +8,10 @@
 	const authStore = useAuthStore();
 	const usersStore = useUsersStore();
 
-	import AddUser from '../forms/AddUser.vue';
-	import EditUser from '../forms/EditUser.vue';
-	import EditPassword from '../forms/EditPassword.vue';
-	import DeleteUser from '../forms/DeleteUser.vue';
+	import AddUser from '@/components/forms/AddUser.vue';
+	import EditUser from '@/components/forms/EditUser.vue';
+	import EditPassword from '@/components/forms/EditPassword.vue';
+	import DeleteUser from '@/components/forms/DeleteUser.vue';
 
 	const users = computed(() => usersStore.getUsers);
 	const isAdmin = computed(() => Boolean(authStore.user?.admin));

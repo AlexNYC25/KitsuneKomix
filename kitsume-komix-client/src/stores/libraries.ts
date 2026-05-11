@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { apiClient } from '../utilities/apiClient'
+import { apiClient } from '@/utilities/apiClient'
 
-import type { ComicLibrary, CreateLibraryPayload, UpdateLibraryPayload } from '../types/comic-libraries.types'
+import type { ComicLibrary, CreateLibraryPayload, UpdateLibraryPayload } from '@/types/comic-libraries.types'
 
 
 // Convert ComicLibrary to objects compatible with MenuItem

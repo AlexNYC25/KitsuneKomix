@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterView, useRoute } from 'vue-router';
-import SideBar from './components/SideBar.vue';
-import TopBar from './components/TopBar.vue';
+import SideBar from '@/components/SideBar.vue';
+import TopBar from '@/components/TopBar.vue';
 
 const $route = useRoute();
 </script>

@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { apiClient } from '../utilities/apiClient'
-import type { LatestComicSeriesSingle, UpdatedComicSeriesSingle } from '../types/comic-series.types'
+import { apiClient } from '@/utilities/apiClient'
+import type { LatestComicSeriesSingle, UpdatedComicSeriesSingle } from '@/types/comic-series.types'
 
-import { DEFAULT_HEADER_AUTHORIZATION } from '../utilities/constants';
+import { DEFAULT_HEADER_AUTHORIZATION } from '@/utilities/constants';
 
 import { buildComicThumbnailUrl } from "@/utilities/urls"
 

@@ -14,9 +14,9 @@ import { convertArrayOfCreditsToString } from '@/utilities/metadata';
 
 import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist } from '@/types/comic-books.types';
 
-import ComicSeriesPageDetails from '../components/ComicSeriesPageDetails.vue';
-import ComicReader from '../components/ComicReader.vue';
-import ComicThumbnail from '../components/ComicThumbnail.vue';
+import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
+import ComicReader from '@/components/ComicReader.vue';
+import ComicThumbnail from '@/components/ComicThumbnail.vue';
 
 import { getThumbnailPathFromFilePath, buildComicDownloadUrl } from "@/utilities/urls";
 
