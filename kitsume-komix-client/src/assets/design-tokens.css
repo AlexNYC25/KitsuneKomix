@@ -1,0 +1,66 @@
+/* ===========================
+   Design Tokens — Kitsune Komix
+   =========================== */
+
+:root {
+  /* ---- Brand ---- */
+  --color-brand-primary: #3B82F6;
+  --color-brand-secondary: #88E9FD;
+  --color-brand-accent: #A788FA;
+  --color-brand-danger: #FF5D73;
+  --color-brand-light: #E3FEFF;
+
+  /* ---- Surfaces (Dark mode default) ---- */
+  --color-surface-base: #0F172A;
+  --color-surface-elevated: #1E293B;
+  --color-surface-overlay: #334155;
+
+  /* ---- Text ---- */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* ---- Typography ---- */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Rubik', sans-serif;
+
+  /* ---- Spacing ---- */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* ---- Borders ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* ---- Shadows ---- */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  /* ---- Reading ---- */
+  --color-reading-bg: #000000;
+  --color-page-edge: #1a1a2e;
+}
+
+/* ---- Light Mode ---- */
+[data-theme="light"] {
+  --color-surface-base: #F8FAFC;
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-overlay: #E2E8F0;
+
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+
+  --color-brand-primary: #3B82F6;
+  --color-brand-accent: #A788FA;
+  --color-brand-danger: #FF5D73;
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.15);
+}

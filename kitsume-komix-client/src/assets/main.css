@@ -1,2 +1,28 @@
 @import "tailwindcss";
+@import "./design-tokens.css";
+
+@theme {
+  --color-brand: var(--color-brand-primary);
+  --color-brand-secondary: var(--color-brand-secondary);
+  --color-brand-accent: var(--color-brand-accent);
+  --color-brand-danger: var(--color-brand-danger);
+  --color-brand-light: var(--color-brand-light);
+  --color-surface-base: var(--color-surface-base);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-surface-overlay: var(--color-surface-overlay);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-reading-bg: var(--color-reading-bg);
+  --color-page-edge: var(--color-page-edge);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --radius-card: var(--radius-md);
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+}
+
+html {
+  font-family: var(--font-body);
+}
 
