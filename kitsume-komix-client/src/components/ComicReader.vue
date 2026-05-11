@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue';
+import { ref, computed, onBeforeUnmount, watch } from 'vue';
 import { motion } from 'motion-v';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -46,15 +46,51 @@ const readingMode = ref<'single' | 'webtoon'>('single');
 const showControls = ref(true);
 const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
+// continue reading prompt state
+const showContinuePrompt = ref(false);
+const savedProgressPage = ref(1);
+
 // computed properties
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
 const isFirstPage = computed(() => currentPage.value === 1);
 const isLastPage = computed(() => currentPage.value === totalPages.value);
 
+watch(currentPage, (newPage) => {
+	if (isVisible.value && totalPages.value > 0) {
+		const key = `kitsune-read-progress-${props.comicBookId}`;
+		localStorage.setItem(key, JSON.stringify({
+			page: newPage,
+			timestamp: Date.now(),
+			totalPages: totalPages.value
+		}));
+	}
+});
+
 const openReader = async () => {
 	isVisible.value = true;
 	await loadPageInfo();
-	await loadPage(1);
+	
+	const key = `kitsune-read-progress-${props.comicBookId}`;
+	const savedProgress = localStorage.getItem(key);
+	
+	if (savedProgress) {
+		try {
+			const parsed = JSON.parse(savedProgress);
+			if (parsed.page > 1 && parsed.page <= totalPages.value) {
+				savedProgressPage.value = parsed.page;
+				showContinuePrompt.value = true;
+			} else {
+				localStorage.removeItem(key);
+				await loadPage(1);
+			}
+		} catch (e) {
+			localStorage.removeItem(key);
+			await loadPage(1);
+		}
+	} else {
+		await loadPage(1);
+	}
+
 	// Focus the container after page loads
 	setTimeout(() => {
 		const container = document.querySelector('[data-comic-reader]') as HTMLElement;
@@ -62,8 +98,24 @@ const openReader = async () => {
 	}, 0);
 };
 
+const startOver = () => {
+	showContinuePrompt.value = false;
+	localStorage.removeItem(`kitsune-read-progress-${props.comicBookId}`);
+	loadPage(1);
+};
+
+const continueReading = () => {
+	showContinuePrompt.value = false;
+	loadPage(savedProgressPage.value);
+};
+
 const closeReader = () => {
+	if (currentPage.value === totalPages.value && totalPages.value > 0) {
+		localStorage.removeItem(`kitsune-read-progress-${props.comicBookId}`);
+	}
+	
 	isVisible.value = false;
+	showContinuePrompt.value = false;
 	currentPage.value = 1;
 	revokeBlobUrl(currentImageUrl.value || '');
 	revokeBlobUrls(webtoonPages.value.map((page) => page.imageUrl));
@@ -353,6 +405,13 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 		autofocus
 		data-comic-reader
 	>
+		<!-- Reading Progress Bar -->
+		<div 
+			class="absolute top-0 left-0 h-[3px] bg-brand z-50 transition-all duration-300"
+			:class="showControls ? 'opacity-100' : 'opacity-0'"
+			:style="{ width: (totalPages > 0 ? (currentPage / totalPages) * 100 : 0) + '%' }"
+		></div>
+
 		<!-- Error Message -->
 		<div v-if="error" class="bg-red-900 border-b border-red-700 text-red-100 px-4 py-3">
 			{{ error }}
@@ -360,13 +419,100 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 
 		<!-- Top Bar -->
 		<div 
-			class="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between transition-all duration-200 flex-shrink-0"
+			class="bg-black/60 backdrop-blur-sm border-b border-white/10 px-4 py-3 flex items-center justify-between transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
-			<span class="text-gray-300 font-semibold">{{ (comicBookData && 'title' in comicBookData) ? comicBookData.title : 'Comic Reader' }}</span>
+			<span class="text-gray-300 font-semibold truncate mr-4">{{ (comicBookData && 'title' in comicBookData) ? comicBookData.title : 'Comic Reader' }}</span>
 
 			<!-- Top Bar Buttons -->
-			<div class="flex gap-2">
+			<div class="flex items-center gap-2">
+				<!-- Inline Mode Buttons -->
+				<div class="hidden md:flex items-center gap-1">
+					<!-- Reading Mode -->
+					<Button
+						:pressed="readingMode === 'single'"
+						@click="readingMode = 'single'"
+						v-tooltip.bottom="generateTooltipDelay('Single Page Mode', 'medium')"
+						:severity="readingMode === 'single' ? 'info' : 'secondary'"
+						size="small"
+						rounded
+					>
+						<v-icon name="io-book" />
+					</Button>
+					<Button
+						:pressed="readingMode === 'webtoon'"
+						@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
+						v-tooltip.bottom="generateTooltipDelay('Webtoon Mode', 'medium')"
+						:severity="readingMode === 'webtoon' ? 'info' : 'secondary'"
+						size="small"
+						rounded
+					>
+						<v-icon name="io-document" />
+					</Button>
+
+					<div class="w-px h-6 bg-white/10 mx-1"></div>
+
+					<!-- Scroll Direction (Single Mode Only) -->
+					<template v-if="readingMode === 'single'">
+						<Button
+							:pressed="scrollDirection === 'ltr'"
+							@click="scrollDirection = 'ltr'"
+							v-tooltip.bottom="generateTooltipDelay('LTR', 'medium')"
+							:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
+							size="small"
+							rounded
+						>
+							<v-icon name="io-caret-forward-circle" />
+						</Button>
+						<Button
+							:pressed="scrollDirection === 'rtl'"
+							@click="scrollDirection = 'rtl'"
+							v-tooltip.bottom="generateTooltipDelay('RTL', 'medium')"
+							:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
+							size="small"
+							rounded
+						>
+							<v-icon name="io-caret-back-circle" />
+						</Button>
+						<Button
+							:pressed="scrollDirection === 'vertical'"
+							@click="scrollDirection = 'vertical'"
+							v-tooltip.bottom="generateTooltipDelay('Vertical', 'medium')"
+							:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
+							size="small"
+							rounded
+						>
+							<v-icon name="io-caret-down-circle" />
+						</Button>
+
+						<div class="w-px h-6 bg-white/10 mx-1"></div>
+
+						<!-- Fit Mode -->
+						<Button
+							:pressed="fitMode === 'height'"
+							@click="fitMode = 'height'"
+							v-tooltip.bottom="'Fit Height'"
+							:severity="fitMode === 'height' ? 'info' : 'secondary'"
+							size="small"
+							rounded
+						>
+							<v-icon name="bi-arrows-expand" />
+						</Button>
+						<Button
+							:pressed="fitMode === 'width'"
+							@click="fitMode = 'width'"
+							v-tooltip.bottom="'Fit Width'"
+							:severity="fitMode === 'width' ? 'info' : 'secondary'"
+							size="small"
+							rounded
+						>
+							<v-icon name="bi-arrows-collapse" />
+						</Button>
+
+						<div class="w-px h-6 bg-white/10 mx-1"></div>
+					</template>
+				</div>
+
 				<Button
 					@click="showSettings = true"
 					v-tooltip.left="generateTooltipDelay('Reader Settings', 'medium')"
@@ -396,34 +542,50 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			<template v-if="readingMode === 'single' && scrollDirection !== 'vertical'">
 				<!-- Left Click Zone (Previous Page) -->
 				<div
-					class="absolute left-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10"
+					class="absolute left-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="previousPage"
 					:class="isFirstPage ? 'cursor-not-allowed' : ''"
-				/>
+				>
+					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+						<v-icon name="io-play-skip-back" class="text-white/60 text-3xl" />
+					</div>
+				</div>
 
 				<!-- Right Click Zone (Next Page) -->
 				<div
-					class="absolute right-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10"
+					class="absolute right-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="nextPage"
 					:class="isLastPage ? 'cursor-not-allowed' : ''"
-				/>
+				>
+					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+						<v-icon name="io-play-skip-forward" class="text-white/60 text-3xl" />
+					</div>
+				</div>
 			</template>
 
 			<!-- Vertical Scroll Direction: Top/Bottom Zones -->
 			<template v-if="readingMode === 'single' && scrollDirection === 'vertical'">
 				<!-- Top Click Zone (Previous Page) -->
 				<div
-					class="absolute top-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10"
+					class="absolute top-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="previousPage"
 					:class="isFirstPage ? 'cursor-not-allowed' : ''"
-				/>
+				>
+					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+						<v-icon name="io-caret-back-circle" class="text-white/60 text-3xl rotate-90" />
+					</div>
+				</div>
 
 				<!-- Bottom Click Zone (Next Page) -->
 				<div
-					class="absolute bottom-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10"
+					class="absolute bottom-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="nextPage"
 					:class="isLastPage ? 'cursor-not-allowed' : ''"
-				/>
+				>
+					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+						<v-icon name="io-caret-down-circle" class="text-white/60 text-3xl" />
+					</div>
+				</div>
 			</template>
 
 			<!-- Single Page Mode -->
@@ -496,7 +658,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 
 		<!-- Width Slider Bar (Appears when only in webtoon mode) -->
 		<div 
-			class="bg-gray-800 border-t border-gray-700 px-3 py-2 transition-all duration-200 flex-shrink-0"
+			class="bg-black/60 backdrop-blur-sm border-t border-white/10 px-3 py-2 transition-all duration-200 flex-shrink-0"
 			:class="showControls && readingMode === 'webtoon' ? 'opacity-100 h-auto' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
 			<div class="flex items-center gap-2 md:gap-4">
@@ -518,7 +680,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 
 		<!-- Bottom Bar -->
 		<div 
-			class="bg-gray-800 border-t border-gray-700 px-3 py-2 transition-all duration-200 flex-shrink-0"
+			class="bg-black/60 backdrop-blur-sm border-t border-white/10 px-3 py-2 transition-all duration-200 flex-shrink-0"
 			:class="showControls ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden p-0'"
 		>
 			<div v-if="readingMode === 'single'" class="flex items-center gap-2 md:gap-3">
@@ -529,7 +691,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 					v-tooltip.top="generateTooltipDelay('First Page', 'high')"
 					severity="secondary"
 					size="small"
-					class="flex-shrink-0"
+					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
 				>
 					<v-icon name="io-play-skip-back" />
 				</Button>
@@ -541,7 +703,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 					v-tooltip.top="generateTooltipDelay('Previous Page', 'high')"
 					severity="secondary"
 					size="small"
-					class="flex-shrink-0"
+					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
 				>
 					<v-icon name="io-play-back" />
 				</Button>
@@ -567,7 +729,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 					v-tooltip.top="generateTooltipDelay('Next Page', 'high')"
 					severity="secondary"
 					size="small"
-					class="flex-shrink-0"
+					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
 				>
 					<v-icon name="io-play-forward" />
 				</Button>
@@ -579,12 +741,40 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 					v-tooltip.top="generateTooltipDelay('Last Page', 'high')"
 					severity="secondary"
 					size="small"
-					class="flex-shrink-0"
+					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
 				>
 					<v-icon name="io-play-skip-forward" />
 				</Button>
 			</div>
 		</div>
+
+		<!-- Continue Reading Prompt -->
+		<Dialog
+			v-model:visible="showContinuePrompt"
+			:modal="false"
+			header="Continue Reading?"
+			:style="{ width: '90vw', maxWidth: '400px' }"
+			class="p-dialog-header-light"
+			:closable="false"
+		>
+			<p class="text-gray-300 mb-4">
+				You were on page {{ savedProgressPage }} of {{ totalPages }}. Continue where you left off?
+			</p>
+			<div class="flex justify-end gap-2">
+				<Button
+					label="Start Over"
+					severity="secondary"
+					size="small"
+					@click="startOver"
+				/>
+				<Button
+					label="Continue"
+					severity="primary"
+					size="small"
+					@click="continueReading"
+				/>
+			</div>
+		</Dialog>
 
 		<!-- Settings Dialog -->
 		<Dialog

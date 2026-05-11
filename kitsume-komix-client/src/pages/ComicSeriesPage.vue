@@ -229,7 +229,7 @@ onBeforeUnmount(() => {
 	<div class="comic-series-page flex flex-col w-full h-full p-4 overflow-auto">
 		<!-- Header -->
 		<div class="flex items-center justify-between mb-6">
-			<Button @click="$router.back()">
+			<Button @click="$router.back()" class="active:scale-95 transition-transform duration-100">
         <v-icon name="io-arrow-back"/>
         Back
       </Button>
@@ -347,9 +347,13 @@ onBeforeUnmount(() => {
 					<div v-else-if="viewMode === 'grid'">
 						<div class="grid grid-cols-5 gap-4">
 							<div 
-								v-for="(comic) in paginatedComics" 
+								v-for="(comic, index) in paginatedComics" 
 								:key="comic.id"
-								class="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+								:class="[
+									'flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity',
+									index < 12 ? 'animate-fade-in-up' : ''
+								]"
+								:style="index < 12 ? { animationDelay: index * 50 + 'ms' } : {}"
 								@click="navigateToComicBook(comic.id)"
 							>
 								<div class="w-full aspect-square bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
@@ -438,3 +442,10 @@ onBeforeUnmount(() => {
 		</ErrorBoundary>
 	</div>
 </template>
+
+<style scoped>
+:deep(.p-paginator .p-paginator-page-selected) {
+  background: var(--color-brand) !important;
+  border-color: var(--color-brand) !important;
+}
+</style>

@@ -319,7 +319,7 @@ const downloadComic = async (comicBookId: number) => {
 			<!-- Header -->
 			<div class="flex items-center justify-between">
 				<h1 class="text-4xl font-bold font-display">{{ comicBookHeading }}</h1>
-				<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" />
+				<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" class="active:scale-95 transition-transform duration-100" />
 			</div>
 
 			<!-- Comic Book Details with Thumbnail -->
