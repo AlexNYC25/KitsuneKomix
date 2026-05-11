@@ -34,6 +34,13 @@ export default defineConfigWithVueTs(
           message: 'Do not use .ts extension in imports. Let the bundler resolve it.',
         }],
       }],
+      'no-relative-imports': ['error', {
+          patterns: [{
+            group: ['../*', '../**'],
+            message: 'Use @/ alias instead of relative parent imports. All src/ imports should use the @/ path alias.',
+          }]
+        }
+      ]
     },
   },
 )
