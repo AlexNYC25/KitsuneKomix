@@ -217,23 +217,73 @@ const metadataFieldToString = (field: string): string => {
 	return '';
 };
 
-const writersString = computed(() => metadataFieldToString('writers'));
-const pencillersString = computed(() => metadataFieldToString('pencillers'));
-const inkersString = computed(() => metadataFieldToString('inkers'));
-const letterersString = computed(() => metadataFieldToString('letterers'));
-const coloristsString = computed(() => metadataFieldToString('colorists'));
-const editorsString = computed(() => metadataFieldToString('editors'));
-const coverArtistsString = computed(() => metadataFieldToString('coverArtists'));
-const publishersString = computed(() => metadataFieldToString('publishers'));
-const imprintsString = computed(() => metadataFieldToString('imprints'));
-const genresString = computed(() => metadataFieldToString('genres'));
-const charactersString = computed(() => metadataFieldToString('characters'));
-const teamsString = computed(() => metadataFieldToString('teams'));
-const locationsString = computed(() => metadataFieldToString('locations'));
-const storyArcsString = computed(() => metadataFieldToString('storyArcs'));
-const seriesGroupsString = computed(() => metadataFieldToString('seriesGroups'));
+interface MetadataSectionField {
+  key: string
+  label: string
+  maxVisible?: number
+}
 
-const hasMetadataSection = (...fields: string[]) => fields.some(f => f.trim().length > 0);
+interface MetadataSection {
+  title: string
+  fields: MetadataSectionField[]
+}
+
+const METADATA_SECTIONS: MetadataSection[] = [
+  {
+    title: 'Credits',
+    fields: [
+      { key: 'writers', label: 'Writers' },
+      { key: 'pencillers', label: 'Pencillers' },
+      { key: 'inkers', label: 'Inkers' },
+      { key: 'letterers', label: 'Letterers' },
+      { key: 'colorists', label: 'Colorists' },
+      { key: 'editors', label: 'Editors' },
+      { key: 'coverArtists', label: 'Cover Artists' },
+    ],
+  },
+  {
+    title: 'Publishing',
+    fields: [
+      { key: 'publishers', label: 'Publishers' },
+      { key: 'imprints', label: 'Imprints' },
+    ],
+  },
+  {
+    title: 'Content',
+    fields: [
+      { key: 'genres', label: 'Genres' },
+      { key: 'characters', label: 'Characters', maxVisible: 8 },
+      { key: 'teams', label: 'Teams' },
+      { key: 'locations', label: 'Locations' },
+      { key: 'storyArcs', label: 'Story Arcs' },
+    ],
+  },
+  {
+    title: 'Series Groups',
+    fields: [
+      { key: 'seriesGroups', label: 'Groups' },
+    ],
+  },
+];
+
+const metadataStrings = computed(() => {
+  const result: Record<string, string> = {};
+  for (const section of METADATA_SECTIONS) {
+    for (const field of section.fields) {
+      result[field.key] = metadataFieldToString(field.key);
+    }
+  }
+  return result;
+});
+
+const visibleSections = computed(() => {
+  return METADATA_SECTIONS
+    .map(section => ({
+      title: section.title,
+      fields: section.fields.filter(f => metadataStrings.value[f.key].length > 0),
+    }))
+    .filter(section => section.fields.length > 0);
+});
 
 const setComicToRead = async (comicBookId: number) => {
 	try {
@@ -442,48 +492,20 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 
 			<!-- Sectioned Metadata -->
 			<div class="space-y-6">
-				<!-- Credits Section -->
-				<div v-if="hasMetadataSection(writersString, pencillersString, inkersString, letterersString, coloristsString, editorsString, coverArtistsString)" class="border-l-4 border-brand pl-4 space-y-3">
-					<h2 class="text-xl font-bold font-display text-text-primary">Credits</h2>
-					<div class="space-y-2">
-						<ComicSeriesPageDetails v-if="writersString" comicMetadataDetailsLabel="Writers" :comicMetadataDetails="writersString" />
-						<ComicSeriesPageDetails v-if="pencillersString" comicMetadataDetailsLabel="Pencillers" :comicMetadataDetails="pencillersString" />
-						<ComicSeriesPageDetails v-if="inkersString" comicMetadataDetailsLabel="Inkers" :comicMetadataDetails="inkersString" />
-						<ComicSeriesPageDetails v-if="letterersString" comicMetadataDetailsLabel="Letterers" :comicMetadataDetails="letterersString" />
-						<ComicSeriesPageDetails v-if="coloristsString" comicMetadataDetailsLabel="Colorists" :comicMetadataDetails="coloristsString" />
-						<ComicSeriesPageDetails v-if="editorsString" comicMetadataDetailsLabel="Editors" :comicMetadataDetails="editorsString" />
-						<ComicSeriesPageDetails v-if="coverArtistsString" comicMetadataDetailsLabel="Cover Artists" :comicMetadataDetails="coverArtistsString" />
+				<template v-for="section in visibleSections" :key="section.title">
+					<div class="border-l-4 border-brand pl-4 space-y-3">
+						<h2 class="text-xl font-bold font-display text-text-primary">{{ section.title }}</h2>
+						<div class="space-y-2">
+							<ComicSeriesPageDetails
+								v-for="field in section.fields"
+								:key="field.key"
+								:comicMetadataDetailsLabel="field.label"
+								:comicMetadataDetails="metadataStrings[field.key]"
+								:maxVisible="field.maxVisible"
+							/>
+						</div>
 					</div>
-				</div>
-
-				<!-- Publishing Section -->
-				<div v-if="hasMetadataSection(publishersString, imprintsString)" class="border-l-4 border-brand pl-4 space-y-3">
-					<h2 class="text-xl font-bold font-display text-text-primary">Publishing</h2>
-					<div class="space-y-2">
-						<ComicSeriesPageDetails v-if="publishersString" comicMetadataDetailsLabel="Publishers" :comicMetadataDetails="publishersString" />
-						<ComicSeriesPageDetails v-if="imprintsString" comicMetadataDetailsLabel="Imprints" :comicMetadataDetails="imprintsString" />
-					</div>
-				</div>
-
-				<!-- Content Section -->
-				<div v-if="hasMetadataSection(genresString, charactersString, teamsString, locationsString, storyArcsString)" class="border-l-4 border-brand pl-4 space-y-3">
-					<h2 class="text-xl font-bold font-display text-text-primary">Content</h2>
-					<div class="space-y-2">
-						<ComicSeriesPageDetails v-if="genresString" comicMetadataDetailsLabel="Genres" :comicMetadataDetails="genresString" />
-						<ComicSeriesPageDetails v-if="charactersString" comicMetadataDetailsLabel="Characters" :comicMetadataDetails="charactersString" :maxVisible="8" />
-						<ComicSeriesPageDetails v-if="teamsString" comicMetadataDetailsLabel="Teams" :comicMetadataDetails="teamsString" />
-						<ComicSeriesPageDetails v-if="locationsString" comicMetadataDetailsLabel="Locations" :comicMetadataDetails="locationsString" />
-						<ComicSeriesPageDetails v-if="storyArcsString" comicMetadataDetailsLabel="Story Arcs" :comicMetadataDetails="storyArcsString" />
-					</div>
-				</div>
-
-				<!-- Series Groups Section -->
-				<div v-if="seriesGroupsString" class="border-l-4 border-brand pl-4 space-y-3">
-					<h2 class="text-xl font-bold font-display text-text-primary">Series Groups</h2>
-					<div class="space-y-2">
-						<ComicSeriesPageDetails comicMetadataDetailsLabel="Groups" :comicMetadataDetails="seriesGroupsString" />
-					</div>
-				</div>
+				</template>
 			</div>
 
 			<!-- Tabbed Sections: Comic Pages + Lists -->
