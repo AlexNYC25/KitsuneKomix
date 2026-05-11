@@ -11,6 +11,7 @@ import InputGroupAddon from 'primevue/inputgroupaddon'
 import Button from 'primevue/button'
 
 const { isDark, toggle: toggleTheme } = useTheme()
+const emit = defineEmits<{ toggleSidebar: [] }>()
 
 const route = useRoute()
 const comicSeriesStore = useComicSeriesStore()
@@ -84,8 +85,16 @@ watch([() => route.path, () => breadcrumbStore.comicBookSeriesId, () => breadcru
 <template>
 	<header class="bg-surface-elevated border-b border-surface-overlay">
 		<div class="flex justify-between items-center gap-4 p-4">
-			<div id="top-bar-left" class="flex-grow">
-				<Breadcrumb :model="breadcrumbItems" class="bg-transparent" />
+			<div id="top-bar-left" class="flex items-center gap-2 flex-grow min-w-0">
+				<Button
+					icon="pi pi-bars"
+					severity="info"
+					text
+					rounded
+					class="md:!hidden !p-2 !min-w-0 flex-shrink-0"
+					@click="emit('toggleSidebar')"
+				/>
+				<Breadcrumb :model="breadcrumbItems" class="bg-transparent min-w-0 overflow-hidden" />
 			</div>
 			<div id="top-bar-right" class="flex items-center gap-2 flex-shrink-0">
 				<InputGroup class="bg-surface-base">

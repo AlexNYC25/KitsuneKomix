@@ -288,6 +288,9 @@ const loadWebtoonPages = async () => {
 	}
 };
 
+const isMobile = () => window.innerWidth < 768;
+const controlsTimeoutDuration = () => isMobile() ? 1500 : 3000;
+
 const resetControlsTimeout = () => {
 	showControls.value = true;
 	if (controlsTimeout.value) {
@@ -295,7 +298,12 @@ const resetControlsTimeout = () => {
 	}
 	controlsTimeout.value = setTimeout(() => {
 		showControls.value = false;
-	}, 3000);
+	}, controlsTimeoutDuration());
+};
+
+const toggleControls = () => {
+	showControls.value = !showControls.value;
+	resetControlsTimeout();
 };
 
 const handleMouseMove = () => {
@@ -542,23 +550,29 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			<template v-if="readingMode === 'single' && scrollDirection !== 'vertical'">
 				<!-- Left Click Zone (Previous Page) -->
 				<div
-					class="absolute left-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
+					class="absolute left-0 top-0 w-1/4 md:w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="previousPage"
 					:class="isFirstPage ? 'cursor-not-allowed' : ''"
 				>
 					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-						<v-icon name="io-play-skip-back" class="text-white/60 text-3xl" />
+						<v-icon name="io-play-skip-back" class="text-white/60 text-2xl md:text-3xl" />
 					</div>
 				</div>
 
+				<!-- Center Zone (Toggle Controls) -->
+				<div
+					class="absolute left-1/4 md:left-1/12 right-1/4 md:right-1/12 top-0 h-full z-10"
+					@click="toggleControls"
+				></div>
+
 				<!-- Right Click Zone (Next Page) -->
 				<div
-					class="absolute right-0 top-0 w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
+					class="absolute right-0 top-0 w-1/4 md:w-1/12 h-full cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="nextPage"
 					:class="isLastPage ? 'cursor-not-allowed' : ''"
 				>
 					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-						<v-icon name="io-play-skip-forward" class="text-white/60 text-3xl" />
+						<v-icon name="io-play-skip-forward" class="text-white/60 text-2xl md:text-3xl" />
 					</div>
 				</div>
 			</template>
@@ -567,23 +581,29 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			<template v-if="readingMode === 'single' && scrollDirection === 'vertical'">
 				<!-- Top Click Zone (Previous Page) -->
 				<div
-					class="absolute top-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
+					class="absolute top-0 left-0 w-full h-1/4 md:h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="previousPage"
 					:class="isFirstPage ? 'cursor-not-allowed' : ''"
 				>
 					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-						<v-icon name="io-caret-back-circle" class="text-white/60 text-3xl rotate-90" />
+						<v-icon name="io-caret-back-circle" class="text-white/60 text-2xl md:text-3xl rotate-90" />
 					</div>
 				</div>
 
+				<!-- Center Zone (Toggle Controls) -->
+				<div
+					class="absolute top-1/4 md:top-1/12 bottom-1/4 md:bottom-1/12 left-0 w-full z-10"
+					@click="toggleControls"
+				></div>
+
 				<!-- Bottom Click Zone (Next Page) -->
 				<div
-					class="absolute bottom-0 left-0 w-full h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
+					class="absolute bottom-0 left-0 w-full h-1/4 md:h-1/12 cursor-pointer hover:bg-white/5 transition-colors z-10 group flex items-center justify-center"
 					@click="nextPage"
 					:class="isLastPage ? 'cursor-not-allowed' : ''"
 				>
 					<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-						<v-icon name="io-caret-down-circle" class="text-white/60 text-3xl" />
+						<v-icon name="io-caret-down-circle" class="text-white/60 text-2xl md:text-3xl" />
 					</div>
 				</div>
 			</template>
@@ -781,8 +801,8 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 			v-model:visible="showSettings"
 			modal
 			header="Reader Settings"
-			:style="{ width: '90vw', maxWidth: '500px' }"
-			class="p-dialog-header-light"
+			:style="isMobile() ? { width: '100vw', height: '100vh', maxHeight: '100vh', maxWidth: '100vw' } : { width: '90vw', maxWidth: '500px' }"
+			:class="isMobile() ? 'm-0 p-0 rounded-none' : 'p-dialog-header-light'"
 		>
 			<div class="flex flex-col gap-4">
 				<!-- Scroll Direction Section (Single Mode Only) -->
@@ -910,10 +930,10 @@ div[tabindex]:focus {
 input[type="range"] {
 	width: 100%;
 	height: 0.5rem;
-	background: #374151;
+	background: var(--color-surface-overlay);
 	border-radius: 0.5rem;
 	cursor: pointer;
-	accent-color: #3b82f6;
+	accent-color: var(--color-brand);
 	-webkit-appearance: none;
 	appearance: none;
 }
@@ -923,34 +943,32 @@ input[type="range"]:disabled {
 	cursor: not-allowed;
 }
 
-/* Webkit browsers (Chrome, Safari, Edge) */
 input[type="range"]::-webkit-slider-thumb {
 	-webkit-appearance: none;
 	appearance: none;
 	width: 1.25rem;
 	height: 1.25rem;
 	border-radius: 50%;
-	background: #3b82f6;
+	background: var(--color-brand);
 	cursor: pointer;
 	transition: background 0.2s;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-	background: #2563eb;
+	background: var(--color-brand-primary);
 }
 
-/* Firefox */
 input[type="range"]::-moz-range-thumb {
 	width: 1.25rem;
 	height: 1.25rem;
 	border-radius: 50%;
-	background: #3b82f6;
+	background: var(--color-brand);
 	cursor: pointer;
 	border: none;
 	transition: background 0.2s;
 }
 
 input[type="range"]::-moz-range-thumb:hover {
-	background: #2563eb;
+	background: var(--color-brand-primary);
 }
 </style>

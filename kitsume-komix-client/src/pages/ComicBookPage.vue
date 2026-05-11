@@ -357,10 +357,10 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 			<h1 class="text-4xl font-bold font-display text-text-primary">{{ comicBookHeading }}</h1>
 
 			<!-- Main Info Area: Thumbnail + Details -->
-			<div class="flex gap-8">
+			<div class="flex flex-col md:flex-row gap-6 md:gap-8">
 				<!-- Left: Thumbnail -->
-				<div class="flex-shrink-0">
-					<div class="w-72">
+				<div class="flex-shrink-0 flex justify-center md:block">
+					<div class="w-48 sm:w-56 md:w-72">
 						<ComicThumbnail :thumbnailUrl="thumbnailUrl || undefined"
 							:comicName="comicBookData.title || `Comic Book #${comicBookId}`" />
 					</div>
@@ -375,7 +375,7 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 					</div>
 
 					<!-- Key Info Cards Grid -->
-					<div class="grid grid-cols-2 gap-3">
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						<div class="bg-surface-elevated rounded-lg p-3 flex items-center gap-3">
 							<div class="w-10 h-10 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
 								<v-icon name="io-book" class="text-brand"/>
@@ -430,10 +430,12 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 					</div>
 
 					<!-- Actions -->
-					<div class="flex gap-3 pt-2">
-						<Button label="Read Comic" icon="pi pi-book" class="flex-1 bg-brand border-brand text-white hover:brightness-110 active:scale-95 transition-all font-bold text-lg py-3" @click="openComicReader" />
-						<Button label="Mark Read" icon="pi pi-check" severity="info" @click="setComicToRead(comicBookData.id)" />
-						<Button label="Download" icon="pi pi-download" severity="secondary" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)" />
+					<div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+						<Button label="Read Comic" icon="pi pi-book" class="w-full sm:flex-1 bg-brand border-brand text-white hover:brightness-110 active:scale-95 transition-all font-bold text-lg py-3" @click="openComicReader" />
+						<div class="flex gap-2 sm:gap-3 w-full sm:w-auto">
+							<Button label="Mark Read" icon="pi pi-check" severity="info" class="flex-1 sm:flex-none" @click="setComicToRead(comicBookData.id)" />
+							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1 sm:flex-none" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)" />
+						</div>
 					</div>
 				</div>
 			</div>

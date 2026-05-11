@@ -357,7 +357,7 @@ onBeforeUnmount(() => {
 								<span class="text-lg font-bold font-display text-brand tracking-wide">{{ year }}</span>
 								<div class="flex-1 h-px bg-surface-overlay"></div>
 							</div>
-							<div class="grid grid-cols-5 gap-4">
+							<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
 								<div 
 									v-for="(comic, index) in comics" 
 									:key="comic.id"
