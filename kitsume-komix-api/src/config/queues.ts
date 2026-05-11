@@ -4,10 +4,9 @@ import { redisConnection } from "#db/redis/client.ts";
 
 export const queueNames = {
   APP_QUEUE: "appQueue",
-	FILE_ORCHESTRATION_QUEUE: "fileOrchestrationQueue",
-	FILE_QUEUE: "files",
-	COMIC_SERIES_QUEUE: "comicSeries",
-	COMIC_BOOK_QUEUE: "comicBooks",
+  FILE_QUEUE: "files",
+  COMIC_SERIES_QUEUE: "comicSeries",
+  COMIC_BOOK_QUEUE: "comicBooks",
 }
 
 export const defaultQueueOptions: QueueOptions = {

@@ -27,13 +27,3 @@ export const queueLogger = pino({
   level: logLevel,
 }, pino.destination(join(logsDir, "queue.log")));
 
-// Fallback simple loggers if pino-pretty fails
-export const simpleApiLogger = pino({
-  level: logLevel,
-  timestamp: pino.stdTimeFunctions.isoTime,
-});
-
-export const simpleDbLogger = pino({
-  level: logLevel,
-  timestamp: pino.stdTimeFunctions.isoTime,
-});
