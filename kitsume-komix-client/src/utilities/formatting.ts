@@ -16,3 +16,9 @@ export const numberToDataSize = (num: number | null | undefined): string => {
     return `${size.toFixed(2)} ${units[unitIndex]}`;
 
 };
+
+export const convertArrayOfCreditsToString = (
+  credits: Array<{ name: string }> | undefined
+): string => {
+  return credits?.map((credit: { name: string }) => credit.name).join(', ') ?? '';
+};

@@ -11,7 +11,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useComicSeriesStore } from '@/stores/comic-series';
 
 import { apiClient } from '@/utilities/apiClient';
-import { convertArrayOfCreditsToString } from '@/utilities/metadata';
+import { convertArrayOfCreditsToString } from '@/utilities/formatting';
 
 import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist, ComicBook } from '@/types/comic-books.types';
 
