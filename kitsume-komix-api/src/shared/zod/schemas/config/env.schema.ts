@@ -9,6 +9,9 @@ export const envSchema = z.object({
   REDIS_HOST: z.string().default("redis"),
   REDIS_PORT: z.string().transform((val) => parseInt(val, 10)).default(6379),
 
+  // Logger level
+  LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
+
   // folder paths
   APP_CONFIG_PATH: z.string().default("/app/config"),
   APP_CACHE_PATH: z.string().default("/app/cache"),

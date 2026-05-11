@@ -13,25 +13,27 @@ try {
   // Directory might already exist, ignore error
 }
 
+const logLevel = env.LOG_LEVEL;
+
 export const apiLogger = pino({
-  level: "debug",
+  level: logLevel,
 }, pino.destination(join(logsDir, "api.log")));
 
 export const dbLogger = pino({
-  level: "debug",
+  level: logLevel,
 }, pino.destination(join(logsDir, "db.log")));
 
 export const queueLogger = pino({
-  level: "debug",
+  level: logLevel,
 }, pino.destination(join(logsDir, "queue.log")));
 
 // Fallback simple loggers if pino-pretty fails
 export const simpleApiLogger = pino({
-  level: "debug",
+  level: logLevel,
   timestamp: pino.stdTimeFunctions.isoTime,
 });
 
 export const simpleDbLogger = pino({
-  level: "debug",
+  level: logLevel,
   timestamp: pino.stdTimeFunctions.isoTime,
 });

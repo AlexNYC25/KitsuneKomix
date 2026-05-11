@@ -28,6 +28,7 @@ import {
 } from "#zod/schemas/response.schema.ts";
 
 import { env } from "#config/env.ts";
+import { apiLogger } from "#infrastructure/logger/loggers.ts";
 
 import type { AdminSetUp, AppEnv } from "#types/index.ts";
 
@@ -382,11 +383,8 @@ app.openapi(
       const isSetup: AdminSetUp = {isSetup: await checkIfAppSetupComplete()};
       return c.json(isSetup, 200);
     } catch (error) {
-      return c.json({
-        message: `Failed to check setup status: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      }, 500);
+      apiLogger.error({ error }, "Setup status check failed");
+      return c.json({ message: "Failed to check setup status" }, 500);
     }
   },
 );
