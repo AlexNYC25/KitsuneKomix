@@ -17,6 +17,9 @@ import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, 
 import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
 import ComicReader from '@/components/ComicReader.vue';
 import ComicThumbnail from '@/components/ComicThumbnail.vue';
+import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
+import EmptyState from '@/components/states/EmptyState.vue';
+import SkeletonPage from '@/components/states/SkeletonPage.vue';
 
 import { getThumbnailPathFromFilePath, buildComicDownloadUrl } from "@/utilities/urls";
 
@@ -297,15 +300,25 @@ const downloadComic = async (comicBookId: number) => {
 <template>
 	<div class="comic-book-page flex flex-col w-full h-full p-4 overflow-auto">
 		<!-- Loading state -->
-		<div v-if="isLoading" class="text-center py-8">
-			<p class="text-gray-500">Loading comic book...</p>
+		<div v-if="isLoading">
+			<SkeletonPage layout="book" />
+		</div>
+
+		<!-- Empty State -->
+		<div v-else-if="!comicBookData">
+			<EmptyState
+				icon="md-menubook-sharp"
+				title="Comic Book Not Found"
+				message="This comic book could not be loaded. It may have been removed or there was an error fetching the data."
+			/>
 		</div>
 
 		<!-- Comic Book Content -->
-		<div v-else-if="comicBookData" class="space-y-6">
+		<ErrorBoundary v-else>
+		<div class="space-y-6">
 			<!-- Header -->
 			<div class="flex items-center justify-between">
-				<h1 class="text-4xl font-bold">{{ comicBookHeading }}</h1>
+				<h1 class="text-4xl font-bold font-display">{{ comicBookHeading }}</h1>
 				<Button label="Back" icon="pi pi-arrow-left" @click="$router.back()" />
 			</div>
 
@@ -484,11 +497,7 @@ const downloadComic = async (comicBookId: number) => {
 				</div>
 			</div>
 		</div>
-
-		<!-- Error state -->
-		<div v-else class="text-center py-8">
-			<p class="text-red-500">Failed to load comic book</p>
-		</div>
+		</ErrorBoundary>
 	</div>
 </template>
 

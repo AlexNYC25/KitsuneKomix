@@ -3,6 +3,7 @@
 
   import LibrarySettings from '@/components/Settings/LibrarySettings.vue';
   import UserSettings from '@/components/Settings/UserSettings.vue';
+  import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
 
   const router = useRouter();
 
@@ -29,12 +30,16 @@
       >
 				<v-icon name="io-arrow-back"/>
 			</button>
-      <h1 class="text-3xl font-bold">Settings</h1>
+      <h1 class="text-3xl font-bold font-display">Settings</h1>
     </div>
 
-    <LibrarySettings />
-    
-    <UserSettings />
+    <ErrorBoundary>
+      <LibrarySettings />
+    </ErrorBoundary>
+
+    <ErrorBoundary>
+      <UserSettings />
+    </ErrorBoundary>
   </div>
 </template>
 

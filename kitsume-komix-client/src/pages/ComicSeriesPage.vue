@@ -14,6 +14,9 @@ import Button from 'primevue/button';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import ComicThumbnail from '@/components/ComicThumbnail.vue';
+import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
+import EmptyState from '@/components/states/EmptyState.vue';
+import SkeletonPage from '@/components/states/SkeletonPage.vue';
 
 import { getThumbnailPathFromFilePath } from "@/utilities/urls";
 
@@ -232,6 +235,7 @@ onBeforeUnmount(() => {
       </Button>
 		</div>
 
+		<ErrorBoundary>
 		<!-- Series Details with Thumbnail -->
 		<div class="bg-gray-800 rounded-lg p-6 space-y-4 mb-6">
 			<div class="flex gap-6">
@@ -294,7 +298,9 @@ onBeforeUnmount(() => {
 				</div>
 			</div>
 		</div>
+		</ErrorBoundary>
 
+		<ErrorBoundary>
 		<!-- Tabbed Comics Sections -->
 		<TabView v-model:activeIndex="activeTab">
 			<!-- Issues Tab -->
@@ -302,7 +308,7 @@ onBeforeUnmount(() => {
 				<div class="comic-series-page-contents">
 					<!-- Header with view toggle buttons -->
 					<div class="flex items-center justify-between mb-6">
-						<h2 class="text-2xl font-bold">Comic Issues</h2>
+						<h2 class="text-2xl font-bold font-display">Comic Issues</h2>
 						<div class="flex gap-2">
 							<Button
 								:severity="viewMode === 'grid' ? 'info' : 'secondary'"
@@ -324,12 +330,21 @@ onBeforeUnmount(() => {
 					</div>
 
 					<!-- Loading State -->
-					<div v-if="isLoading" class="text-center py-8">
-						<p class="text-gray-500">Loading comics...</p>
+					<div v-if="isLoading">
+						<SkeletonPage layout="series" />
 					</div>
-					
+
+					<!-- Empty State -->
+					<div v-else-if="paginatedComics.length === 0">
+						<EmptyState
+							icon="md-menubook-sharp"
+							title="No Comics in This Series"
+							message="No comic issues were found for this series. They may still be loading or the library may need to be re-scanned."
+						/>
+					</div>
+
 					<!-- Grid View -->
-					<div v-else-if="viewMode === 'grid' && paginatedComics.length > 0">
+					<div v-else-if="viewMode === 'grid'">
 						<div class="grid grid-cols-5 gap-4">
 							<div 
 								v-for="(comic) in paginatedComics" 
@@ -420,5 +435,6 @@ onBeforeUnmount(() => {
 				</div>
 			</TabPanel>
 		</TabView>
+		</ErrorBoundary>
 	</div>
 </template>
