@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
+import { ref, watch, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import Galleria from 'primevue/galleria';
+import { useAuthStore } from '@/stores/auth';
+import { resolveImageSrc, toAbsoluteImageUrl, isProtectedImageUrl, revokeBlobUrls } from '@/utilities/image';
+import type { LatestComicSeriesSingle } from '@/types/comic-series.types';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const props = defineProps<{
+  comicSeriesData: LatestComicSeriesSingle[];
+}>();
 
 const responsiveOptions = ref([
 	{
@@ -18,64 +28,104 @@ const responsiveOptions = ref([
 	}
 ]);
 
-const images = ref(
-	[
-		{
-			itemImageSrc: 'https://placehold.co/1600x400/blue/white',
-			thumbnailImageSrc: 'https://placehold.co/600x400/blue/white',
-			alt: 'Description for Image 1',
-			title: 'Title 1'
-		},
-		{
-			itemImageSrc: 'https://placehold.co/1600x400/orange/white',
-			thumbnailImageSrc: 'https://placehold.co/600x400/orange/white',
-			alt: 'Description for Image 2',
-			title: 'Title 2'
-		},
-		{
-			itemImageSrc: 'https://placehold.co/1600x400/yellow/white',
-			thumbnailImageSrc: 'https://placehold.co/600x400/yellow/white',
-			alt: 'Description for Image 3',
-			title: 'Title 3'
-		},
-		{
-			itemImageSrc: 'https://placehold.co/1600x400/green/white',
-			thumbnailImageSrc: 'https://placehold.co/600x400/green/white',
-			alt: 'Description for Image 4',
-			title: 'Title 4'
-		},
-		{
-			itemImageSrc: 'https://placehold.co/1600x400/black/white',
-			thumbnailImageSrc: 'https://placehold.co/600x400/black/white',
-			alt: 'Description for Image 5',
-			title: 'Title 5'
-		},
-		{
-			itemImageSrc: 'https://placehold.co/1600x400/purple/white',
-			thumbnailImageSrc: 'https://placehold.co/600x400/purple/white',
-			alt: 'Description for Image 6',
-			title: 'Title 6'
-		}
-	]
+const thumbnailBlobUrls = ref<Record<string, string>>({});
+
+const revokeAllThumbnailUrls = () => {
+  revokeBlobUrls(Object.values(thumbnailBlobUrls.value));
+  thumbnailBlobUrls.value = {};
+};
+
+const loadThumbnails = async () => {
+  revokeAllThumbnailUrls();
+
+  const nextBlobUrls: Record<string, string> = {};
+
+  await Promise.all(
+    (props.comicSeriesData ?? []).map(async (item) => {
+      if (!item.thumbnailUrl) {
+        return;
+      }
+
+      const resolvedSrc = await resolveImageSrc(item.thumbnailUrl);
+      if (resolvedSrc) {
+        nextBlobUrls[String(item.id)] = resolvedSrc;
+      }
+    })
+  );
+
+  thumbnailBlobUrls.value = nextBlobUrls;
+};
+
+const getThumbnailSrc = (item: LatestComicSeriesSingle): string => {
+  const itemId = String(item.id);
+  if (thumbnailBlobUrls.value[itemId]) {
+    return thumbnailBlobUrls.value[itemId];
+  }
+
+  if (!item.thumbnailUrl) {
+    return '';
+  }
+
+  const requestUrl = toAbsoluteImageUrl(item.thumbnailUrl);
+  if (isProtectedImageUrl(requestUrl)) {
+    return '';
+  }
+
+  return requestUrl;
+};
+
+watch(
+  () => [props.comicSeriesData, authStore.token],
+  () => {
+    void loadThumbnails();
+  },
+  { immediate: true }
 );
 
+onBeforeUnmount(() => {
+  revokeAllThumbnailUrls();
+});
+
+const goToComicSeries = (id: string | number) => {
+  router.push(`/comic-series/${String(id)}`);
+};
 </script>
 
 <template>
   <div class="card w-full">
 		<Galleria
-			:value="images"
+			:value="comicSeriesData"
 			:responsiveOptions="responsiveOptions"
 			:numVisible="5"
 			:circular="false"
 			:showItemNavigatorsOnHover="true"
 			:showIndicators="true"
 		>
-			<template #item="slotProps" class="flex justify-center">
-				<img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" />
+			<template #item="slotProps">
+				<div 
+          class="relative w-full h-[400px] cursor-pointer overflow-hidden"
+          @click="goToComicSeries(slotProps.item.id)"
+        >
+          <img 
+            :src="getThumbnailSrc(slotProps.item)" 
+            :alt="slotProps.item.name" 
+            class="w-full h-full object-cover"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 p-6 w-full flex justify-between items-end">
+            <h2 class="text-3xl font-bold text-white drop-shadow-md">{{ slotProps.item.name }}</h2>
+            <span class="bg-black/60 text-brand px-3 py-1 rounded-full font-semibold backdrop-blur-sm border border-white/10">
+              {{ slotProps.item.totalComicBooks }} Issues
+            </span>
+          </div>
+        </div>
 			</template>
 			<template #thumbnail="slotProps">
-				<img :src="slotProps.item.thumbnailImageSrc" :alt="slotProps.item.alt" />
+				<img 
+          :src="getThumbnailSrc(slotProps.item)" 
+          :alt="slotProps.item.name" 
+          class="w-full h-[80px] object-cover"
+        />
 			</template>
 		</Galleria>
 	</div>

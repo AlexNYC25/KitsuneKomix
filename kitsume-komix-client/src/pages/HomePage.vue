@@ -55,7 +55,7 @@ const hasData = computed(() =>
 		<template v-else>
 			<ErrorBoundary>
 				<div class="card w-full">
-					<HomePageGalleria />
+					<HomePageGalleria :comicSeriesData="latestSeries" />
 				</div>
 			</ErrorBoundary>
 
