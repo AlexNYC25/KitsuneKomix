@@ -3,10 +3,12 @@
 	import Chip from 'primevue/chip';
 	import Button from 'primevue/button';
 
-	const props = defineProps({
-		comicMetadataDetailsLabel: String,
-		comicMetadataDetails: String,
-		maxVisible: { type: Number, default: 5 }
+	const props = withDefaults(defineProps<{
+		comicMetadataDetailsLabel?: string;
+		comicMetadataDetails?: string;
+		maxVisible?: number;
+	}>(), {
+		maxVisible: 5,
 	});
 
 	const isExpanded = ref(false);
