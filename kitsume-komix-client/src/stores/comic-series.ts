@@ -9,9 +9,6 @@ export const useComicSeriesStore = defineStore('comicSeries', {
     comicsInSeriesData: new Map<number, ComicBooksSeriesResponse>(),
   }),
 	getters: {
-		getComicSeriesData(state): Array<ComicSeriesResponseItem> {
-			return state.comicSeriesData;
-		},
 		getComicsInSeries: (state) => (seriesId: number): ComicBooksSeriesResponse | undefined => {
 			return state.comicsInSeriesData.get(seriesId);
 		}

@@ -13,7 +13,7 @@
 	import EditPassword from '@/components/forms/EditPassword.vue';
 	import DeleteUser from '@/components/forms/DeleteUser.vue';
 
-	const users = computed(() => usersStore.getUsers);
+	const users = computed(() => usersStore.users);
 	const isAdmin = computed(() => Boolean(authStore.user?.admin));
 
 	const showAddUserForm = ref(false);
@@ -60,7 +60,7 @@
 	};
 
 	onMounted(async () => {
-		if (usersStore.getUsers.length === 0 && isAdmin.value) {
+		if (usersStore.users.length === 0 && isAdmin.value) {
 			try {
 				await usersStore.requestUsers();
 			} catch (error) {

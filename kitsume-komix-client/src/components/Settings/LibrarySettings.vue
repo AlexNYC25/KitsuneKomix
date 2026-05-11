@@ -11,7 +11,7 @@
 	const authStore = useAuthStore();
 	const librariesStore = useLibrariesStore();
 
-	const libraries = computed(() => librariesStore.getLibraries);
+	const libraries = computed(() => librariesStore.libraries);
 	const isAdmin = computed(() => Boolean(authStore.user?.admin));
 
 	const showAddLibraryForm = ref(false);
@@ -126,7 +126,7 @@
 		showEditLibraryForm.value = true;
 
 		// fill in the form values
-		const library = librariesStore.getLibraries.find(library => library.id === libraryId);
+		const library = librariesStore.libraries.find(library => library.id === libraryId);
 
 		if (library) {
 			editLibraryName.value = library.name;
@@ -149,7 +149,7 @@
 
 
 	onMounted(async () => {
-		if (librariesStore.getLibraries.length === 0 && isAdmin.value) {
+		if (librariesStore.libraries.length === 0 && isAdmin.value) {
 			try {
 				await librariesStore.requestUsersLibraries();
 			} catch (error) {

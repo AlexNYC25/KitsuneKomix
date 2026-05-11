@@ -24,7 +24,6 @@ export const useLibrariesStore = defineStore('libraries', {
 		libraries: [] as Array<ComicLibrary>,
 	}),
 	getters: {
-		getLibraries: (state) => state.libraries,
 		sidePanelLibraries: (state) => transformToMenuItems(state.libraries), // Dynamically generate side panel data
 	},
 	actions: {

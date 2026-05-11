@@ -29,8 +29,8 @@ onMounted(async () => {
 	}
 });
 
-const latestSeries = computed(() => homeStore.getLatestSeries);
-const updatedSeries = computed(() => homeStore.getUpdatedSeries);
+const latestSeries = computed(() => homeStore.latestSeries);
+const updatedSeries = computed(() => homeStore.updatedSeries);
 
 const hasData = computed(() =>
 	latestSeries.value.length > 0 || updatedSeries.value.length > 0
@@ -73,6 +73,3 @@ const hasData = computed(() =>
 		</template>
 	</div>
 </template>
-
-<style scoped>
-</style>

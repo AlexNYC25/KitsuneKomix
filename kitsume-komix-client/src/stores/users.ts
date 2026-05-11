@@ -7,9 +7,6 @@ export const useUsersStore = defineStore('users', {
 	state: () => ({
 		users: [] as User[]
 	}),
-	getters: {
-		getUsers: (state) => state.users
-	},
 	actions: {
 		setUsers(users: User[]) {
 			this.users = users;

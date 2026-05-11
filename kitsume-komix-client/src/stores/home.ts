@@ -11,10 +11,6 @@ export const useHomeStore = defineStore('home', {
     latestSeries: [] as LatestComicSeriesSingle[],
     updatedSeries: [] as UpdatedComicSeriesSingle[],
   }),
-  getters: {
-    getLatestSeries: (state) => state.latestSeries,
-    getUpdatedSeries: (state) => state.updatedSeries,
-  },
   actions: {
     async fetchLatestSeries() {
       try {

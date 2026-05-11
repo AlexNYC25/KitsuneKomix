@@ -32,8 +32,8 @@
 	const [editedUserRole] = defineField('userRole');
 
 	onMounted(() => {
-		editedUserEmail.value = usersStore.getUsers.find(user => user.id === props.userId)?.email || '';
-		editedUserRole.value = usersStore.getUsers.find(user => user.id === props.userId)?.admin ? 'admin' : 'user';
+		editedUserEmail.value = usersStore.users.find(user => user.id === props.userId)?.email || '';
+		editedUserRole.value = usersStore.users.find(user => user.id === props.userId)?.admin ? 'admin' : 'user';
 	});
 
 	const handleCancel = (): void => {

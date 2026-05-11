@@ -120,6 +120,3 @@ const userDisplayName = computed(() => {
 		</div>
   </div>
 </template>
-
-<style scoped>
-</style>

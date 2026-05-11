@@ -40,7 +40,7 @@
 	};
 
 	const handleUpdatePassword = handleSubmit(async (values) => {
-		const targetUser = usersStore.getUsers.find((user) => user.id === props.userId);
+		const targetUser = usersStore.users.find((user) => user.id === props.userId);
 
 		if (!targetUser?.email) {
 			console.error('Unable to update user password: user not found.');
