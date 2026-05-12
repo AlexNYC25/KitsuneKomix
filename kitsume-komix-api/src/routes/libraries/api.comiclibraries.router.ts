@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { apiLogger } from "#logger/loggers.ts";
 import { requireAdmin, requireAuth } from "#modules/auth/middleware/authChecks.ts";
-import { getComicLibrariesAvailableToUser } from "#modules/libraries/comicLibraries.service.ts";
+import { getComicLibrariesAvailableToUser } from "#modules/libraries/comic-libraries.service.ts";
 import { listFoldersInDirectoryService } from "#modules/files/files.service.ts";
 
 import { createComicLibrary, deleteComicLibrary, updateComicLibrary } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";

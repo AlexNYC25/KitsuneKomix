@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
 import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
-import { fetchComicSeries } from "#modules/series/comicSeries.service.ts";
+import { fetchComicSeries } from "#modules/series/comic-series.service.ts";
 
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {

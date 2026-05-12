@@ -18,35 +18,35 @@ export {
   fetchRandomComicBook,
   getComicBookById,
   processComicBookDeletion,
-} from "./comicbooks.service.ts";
+} from "./comic-books.service.ts";
 
 export {
   fetchAComicsAssociatedMetadataById,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
-} from "./comicMetadata.service.ts";
+} from "./comic-metadata.service.ts";
 
 export {
   startStreamingComicBookFile,
   getComicPagesInfo,
-} from "./comicStreaming.service.ts";
+} from "./comic-streaming.service.ts";
 
 export {
   checkComicReadByUser,
   setComicReadByUser,
-} from "./comicReading.service.ts";
+} from "./comic-reading.service.ts";
 
 export {
   getComicThumbnails,
   getComicThumbnailByComicIdThumbnailId,
   deleteComicsThumbnailById,
   createCustomThumbnail,
-} from "./comicThumbnails.service.ts";
+} from "./comic-thumbnails.service.ts";
 
 export {
   getNextComicBookId,
   getPreviousComicBookId,
   getTheReadlistsContainingComicBook,
-} from "./comicNavigation.service.ts";
+} from "./comic-navigation.service.ts";
 
-export { attachThumbnailToComicBook } from "./comicbooks.service.ts";
+export { attachThumbnailToComicBook } from "./comic-books.service.ts";
