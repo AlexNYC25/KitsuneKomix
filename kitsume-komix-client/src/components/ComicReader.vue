@@ -19,7 +19,6 @@
  * @example
  * ```vue
  * <ComicReader ref="readerRef" :comic-book-id="42" comic-title="My Comic" />
- * <Button @click="readerRef.openReader()">Read</Button>
  * ```
  */
 import { motion } from 'motion-v';

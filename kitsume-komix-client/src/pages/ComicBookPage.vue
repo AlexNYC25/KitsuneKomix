@@ -604,5 +604,3 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 		</ErrorBoundary>
 	</div>
 </template>
-
-<style scoped></style>

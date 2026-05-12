@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Paginator from 'primevue/paginator';
-import type { PageState } from 'primevue/paginator';
 import { onMounted, ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -65,6 +63,7 @@ const allComicsInSeries = computed<ComicBook[]>(() => {
 });
 
 const totalComics = computed(() => allComicsInSeries.value.length);
+const totalPages = computed(() => Math.ceil(totalComics.value / itemsPerPage));
 
 const comicIssueNumberSorter = (a: ComicBook, b: ComicBook) => {
 	if (!a.issueNumber || !b.issueNumber) return 0;
@@ -160,9 +159,36 @@ const getComicThumbnailUrl = (comic: ComicBook): string | null => {
 	return comicThumbnailUrls.value[comic.id] ?? null;
 };
 
-const onPageChange = (event: PageState) => {
-	currentPage.value = event.page;
+const onPageChange = (page: number) => {
+	currentPage.value = page;
 };
+
+const pageNumbers = computed(() => {
+	const total = totalPages.value;
+	const current = currentPage.value;
+	if (total <= 7) {
+		return Array.from({ length: total }, (_, i) => i);
+	}
+
+	const pages: number[] = [];
+	pages.push(0);
+
+	let start = Math.max(1, current - 2);
+	let end = Math.min(total - 2, current + 2);
+
+	if (current < 4) {
+		end = Math.min(4, total - 2);
+	} else if (current > total - 5) {
+		start = Math.max(total - 5, 1);
+	}
+
+	if (start > 1) pages.push(-1);
+	for (let i = start; i <= end; i++) pages.push(i);
+	if (end < total - 2) pages.push(-1);
+
+	pages.push(total - 1);
+	return pages;
+});
 
 const toggleViewMode = (mode: 'grid' | 'list') => {
 	viewMode.value = mode;
@@ -453,15 +479,53 @@ onBeforeUnmount(() => {
 				</div>
 
 				<div class="mt-6">
-					<Paginator 
-						v-if="totalComics > itemsPerPage"
-						:first="currentPage * itemsPerPage"
-						:rows="itemsPerPage"
-						:totalRecords="totalComics"
-						@page="onPageChange"
-						:rowsPerPageOptions="[itemsPerPage]"
-						template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
-					/>
+					<div v-if="totalComics > itemsPerPage" class="flex items-center justify-center gap-1 mt-6">
+						<button
+							:disabled="currentPage === 0"
+							@click="onPageChange(0)"
+							class="w-8 h-8 flex items-center justify-center rounded text-sm text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+						>
+							<v-icon name="io-play-skip-back" />
+						</button>
+						<button
+							:disabled="currentPage === 0"
+							@click="onPageChange(currentPage - 1)"
+							class="w-8 h-8 flex items-center justify-center rounded text-sm text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+						>
+							<v-icon name="io-play-back" />
+						</button>
+
+						<template v-for="page in pageNumbers" :key="page">
+							<span v-if="page === -1" class="w-8 h-8 flex items-center justify-center text-text-muted">…</span>
+							<button
+								v-else
+								@click="onPageChange(page)"
+								:class="[
+									'w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors',
+									page === currentPage
+										? 'bg-brand text-white'
+										: 'text-text-muted hover:text-text-primary hover:bg-surface-overlay'
+								]"
+							>
+								{{ page + 1 }}
+							</button>
+						</template>
+
+						<button
+							:disabled="currentPage >= totalPages - 1"
+							@click="onPageChange(currentPage + 1)"
+							class="w-8 h-8 flex items-center justify-center rounded text-sm text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+						>
+							<v-icon name="io-play-forward" />
+						</button>
+						<button
+							:disabled="currentPage >= totalPages - 1"
+							@click="onPageChange(totalPages - 1)"
+							class="w-8 h-8 flex items-center justify-center rounded text-sm text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+						>
+							<v-icon name="io-play-skip-forward" />
+						</button>
+					</div>
 					<div v-else-if="totalComics > 0 && !isLoading" class="text-center text-text-muted mt-4">
 						Showing all {{ totalComics }} comic issue(s)
 					</div>
@@ -478,8 +542,4 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-:deep(.p-paginator .p-paginator-page-selected) {
-  background: var(--color-brand) !important;
-  border-color: var(--color-brand) !important;
-}
 </style>
