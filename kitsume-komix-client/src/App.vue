@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Toast from 'primevue/toast';
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 
 import SideBar from '@/components/SideBar.vue';
+import ToastContainer from '@/components/ToastContainer.vue';
 import TopBar from '@/components/TopBar.vue';
 import { useAuthStore } from '@/stores/auth';
 import { setTokenRefreshCallback } from '@/utilities/apiClient';
@@ -64,7 +64,7 @@ onMounted(() => {
         </Transition>
       </RouterView>
     </template>
-    <Toast position="bottom-right" />
+    <ToastContainer />
   </main>
 </template>
 
