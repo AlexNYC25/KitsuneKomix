@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -508,25 +506,50 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 			</div>
 
 			<!-- Tabbed Sections: Comic Pages + Lists -->
-			<TabView v-model:activeIndex="activeTab">
-				<TabPanel header="Comic Pages" value="pages">
-					<div class="text-center py-8">
-						<p class="text-text-muted">Comic pages will be displayed here</p>
-					</div>
-				</TabPanel>
+			<div class="border-b border-surface-overlay">
+				<div class="flex gap-0 -mb-px">
+					<button
+						@click="activeTab = 0"
+						:class="[
+							'px-4 py-3 text-sm font-medium transition-colors border-b-2',
+							activeTab === 0
+								? 'text-brand border-brand'
+								: 'text-text-muted border-transparent hover:text-text-primary hover:border-surface-overlay'
+						]"
+					>
+						Comic Pages
+					</button>
+					<button
+						@click="activeTab = 1"
+						:class="[
+							'px-4 py-3 text-sm font-medium transition-colors border-b-2',
+							activeTab === 1
+								? 'text-brand border-brand'
+								: 'text-text-muted border-transparent hover:text-text-primary hover:border-surface-overlay'
+						]"
+					>
+						Lists
+					</button>
+				</div>
+			</div>
 
-				<TabPanel header="Lists" value="lists">
-					<div v-if="comicBookListsData.length === 0" class="text-center py-8">
-						<p class="text-text-muted mb-4">Comic is not part of any lists</p>
-						<button :class="getButtonClasses({ severity: 'success' })" @click="showAddListDialog = true">
-							<AppIcon name="plus" /> Add Comic To List
-						</button>
-					</div>
-					<div v-else>
-						<p class="text-text-muted">Lists will be displayed here</p>
-					</div>
-				</TabPanel>
-			</TabView>
+			<div v-if="activeTab === 0" class="mt-6">
+				<div class="text-center py-8">
+					<p class="text-text-muted">Comic pages will be displayed here</p>
+				</div>
+			</div>
+
+			<div v-if="activeTab === 1" class="mt-6">
+				<div v-if="comicBookListsData.length === 0" class="text-center py-8">
+					<p class="text-text-muted mb-4">Comic is not part of any lists</p>
+					<button :class="getButtonClasses({ severity: 'success' })" @click="showAddListDialog = true">
+						<AppIcon name="plus" /> Add Comic To List
+					</button>
+				</div>
+				<div v-else>
+					<p class="text-text-muted">Lists will be displayed here</p>
+				</div>
+			</div>
 
 			<!-- Bottom Issue Navigation -->
 			<div class="flex items-center justify-between pt-4 border-t border-surface-overlay">

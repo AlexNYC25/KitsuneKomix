@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import Paginator from 'primevue/paginator';
 import type { PageState } from 'primevue/paginator';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
 import { onMounted, ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -318,140 +316,163 @@ onBeforeUnmount(() => {
 		</ErrorBoundary>
 
 		<ErrorBoundary>
-		<TabView v-model:activeIndex="activeTab">
-			<TabPanel header="Issues" value="issues">
-				<div class="comic-series-page-contents">
-					<div class="flex items-center justify-between mb-6">
-						<h2 class="text-2xl font-bold font-display text-text-primary">Comic Issues</h2>
-						<div class="flex gap-2">
-							<button
-								@click="toggleViewMode('grid')"
-								v-tooltip="'Grid View'"
-								:class="getButtonClasses({ severity: viewMode === 'grid' ? 'info' : 'secondary', size: 'small' })"
-							>
-                <v-icon name="io-grid-outline"/>
-              </button>
-							<button
-								@click="toggleViewMode('list')"
-								v-tooltip="'List View'"
-								:class="getButtonClasses({ severity: viewMode === 'list' ? 'info' : 'secondary', size: 'small' })"
-							>
-								<v-icon name="io-list"/>
-							</button>
-						</div>
-					</div>
+			<div class="border-b border-surface-overlay">
+				<div class="flex gap-0 -mb-px">
+					<button
+						@click="activeTab = 0"
+						:class="[
+							'px-4 py-3 text-sm font-medium transition-colors border-b-2',
+							activeTab === 0
+								? 'text-brand border-brand'
+								: 'text-text-muted border-transparent hover:text-text-primary hover:border-surface-overlay'
+						]"
+					>
+						Issues
+					</button>
+					<button
+						@click="activeTab = 1"
+						:class="[
+							'px-4 py-3 text-sm font-medium transition-colors border-b-2',
+							activeTab === 1
+								? 'text-brand border-brand'
+								: 'text-text-muted border-transparent hover:text-text-primary hover:border-surface-overlay'
+						]"
+					>
+						Collections
+					</button>
+				</div>
+			</div>
 
-					<div v-if="isLoading">
-						<SkeletonPage layout="series" />
-					</div>
-
-					<div v-else-if="paginatedComics.length === 0">
-						<EmptyState
-							icon="md-menubook-sharp"
-							title="No Comics in This Series"
-							message="No comic issues were found for this series. They may still be loading or the library may need to be re-scanned."
-						/>
-					</div>
-
-					<div v-else-if="viewMode === 'grid'">
-						<div v-for="[year, comics] in comicsByYear" :key="year">
-							<div v-if="year > 0" class="flex items-center gap-3 mb-3 mt-6 first:mt-0">
-								<span class="text-lg font-bold font-display text-brand tracking-wide">{{ year }}</span>
-								<div class="flex-1 h-px bg-surface-overlay"></div>
-							</div>
-							<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-								<div 
-									v-for="(comic, index) in comics" 
-									:key="comic.id"
-									:class="[
-										'flex flex-col items-center gap-2 cursor-pointer group',
-										index < 12 ? 'animate-fade-in-up' : ''
-									]"
-									:style="index < 12 ? { animationDelay: index * 50 + 'ms' } : {}"
-									@click="navigateToComicBook(comic.id)"
-								>
-									<div class="w-full aspect-[3/4] bg-surface-base rounded-lg overflow-hidden flex items-center justify-center shadow-card transition-all duration-200 group-hover:scale-[1.03] group-hover:shadow-elevated relative">
-										<img
-											v-if="getComicThumbnailUrl(comic)"
-											:src="getComicThumbnailUrl(comic) || undefined"
-											:alt="`Issue ${comic.issueNumber}`"
-											class="w-full h-full object-contain"
-										/>
-										<div v-else class="w-full h-full bg-surface-overlay flex items-center justify-center">
-											<span class="text-text-muted">No Image</span>
-										</div>
-										<div class="absolute top-1 right-1 w-3 h-3 rounded-full border-2 border-surface-base bg-text-muted" title="Unread"></div>
-									</div>
-									<p class="text-sm font-semibold text-center text-text-primary">Issue {{ comic.issueNumber || 'Unknown' }}</p>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div v-else-if="viewMode === 'list' && paginatedComics.length > 0" class="space-y-2">
-						<div class="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
-							<div class="col-span-1"></div>
-							<div class="col-span-2">Issue</div>
-							<div class="col-span-4">Title</div>
-							<div class="col-span-2">Year</div>
-							<div class="col-span-2">Pages</div>
-							<div class="col-span-1">Status</div>
-						</div>
-						<div 
-							v-for="(comic, i) in paginatedComics" 
-							:key="comic.id" 
-							class="grid grid-cols-12 gap-4 items-center p-4 bg-surface-elevated rounded-lg hover:bg-surface-overlay transition-colors cursor-pointer border-l-4 border-brand/40 hover:border-brand"
-							:class="{ 'bg-surface-base': i % 2 === 0 }"
-							@click="navigateToComicBook(comic.id)"
+			<div v-if="activeTab === 0" class="comic-series-page-contents mt-6">
+				<div class="flex items-center justify-between mb-6">
+					<h2 class="text-2xl font-bold font-display text-text-primary">Comic Issues</h2>
+					<div class="flex gap-2">
+						<button
+							@click="toggleViewMode('grid')"
+							v-tooltip="'Grid View'"
+							:class="getButtonClasses({ severity: viewMode === 'grid' ? 'info' : 'secondary', size: 'small' })"
 						>
-							<div class="col-span-1 w-10 h-14 bg-surface-base rounded overflow-hidden flex items-center justify-center">
-								<img
-									v-if="getComicThumbnailUrl(comic)"
-									:src="getComicThumbnailUrl(comic) || undefined"
-									:alt="`Issue ${comic.issueNumber}`"
-									class="w-full h-full object-contain"
-								/>
-								<div v-else class="w-full h-full bg-surface-overlay flex items-center justify-center">
-									<span class="text-xs text-text-muted">N/A</span>
-								</div>
-							</div>
-							<div class="col-span-2 font-semibold text-text-primary">#{{ comic.issueNumber || 'Unknown' }}</div>
-							<div class="col-span-4 text-text-secondary truncate">{{ comic.title || 'Untitled' }}</div>
-							<div class="col-span-2 text-text-secondary">{{ comic.year || '—' }}</div>
-							<div class="col-span-2 text-text-secondary">{{ comic.pageCount || '—' }}</div>
-							<div class="col-span-1">
-								<span class="inline-block w-2.5 h-2.5 rounded-full bg-text-muted" title="Unread"></span>
-							</div>
+							<v-icon name="io-grid-outline"/>
+						</button>
+						<button
+							@click="toggleViewMode('list')"
+							v-tooltip="'List View'"
+							:class="getButtonClasses({ severity: viewMode === 'list' ? 'info' : 'secondary', size: 'small' })"
+						>
+							<v-icon name="io-list"/>
+						</button>
+					</div>
+				</div>
+
+				<div v-if="isLoading">
+					<SkeletonPage layout="series" />
+				</div>
+
+				<div v-else-if="paginatedComics.length === 0">
+					<EmptyState
+						icon="md-menubook-sharp"
+						title="No Comics in This Series"
+						message="No comic issues were found for this series. They may still be loading or the library may need to be re-scanned."
+					/>
+				</div>
+
+				<div v-else-if="viewMode === 'grid'">
+					<div v-for="[year, comics] in comicsByYear" :key="year">
+						<div v-if="year > 0" class="flex items-center gap-3 mb-3 mt-6 first:mt-0">
+							<span class="text-lg font-bold font-display text-brand tracking-wide">{{ year }}</span>
+							<div class="flex-1 h-px bg-surface-overlay"></div>
 						</div>
-					</div>
-
-					<div v-else-if="!isLoading && paginatedComics.length === 0" class="text-center py-8">
-						<p class="text-text-muted">No comics available for this series</p>
-					</div>
-
-					<div class="mt-6">
-						<Paginator 
-							v-if="totalComics > itemsPerPage"
-							:first="currentPage * itemsPerPage"
-							:rows="itemsPerPage"
-							:totalRecords="totalComics"
-							@page="onPageChange"
-							:rowsPerPageOptions="[itemsPerPage]"
-							template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
-						/>
-						<div v-else-if="totalComics > 0 && !isLoading" class="text-center text-text-muted mt-4">
-							Showing all {{ totalComics }} comic issue(s)
+						<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+							<div 
+								v-for="(comic, index) in comics" 
+								:key="comic.id"
+								:class="[
+									'flex flex-col items-center gap-2 cursor-pointer group',
+									index < 12 ? 'animate-fade-in-up' : ''
+								]"
+								:style="index < 12 ? { animationDelay: index * 50 + 'ms' } : {}"
+								@click="navigateToComicBook(comic.id)"
+							>
+								<div class="w-full aspect-[3/4] bg-surface-base rounded-lg overflow-hidden flex items-center justify-center shadow-card transition-all duration-200 group-hover:scale-[1.03] group-hover:shadow-elevated relative">
+									<img
+										v-if="getComicThumbnailUrl(comic)"
+										:src="getComicThumbnailUrl(comic) || undefined"
+										:alt="`Issue ${comic.issueNumber}`"
+										class="w-full h-full object-contain"
+									/>
+									<div v-else class="w-full h-full bg-surface-overlay flex items-center justify-center">
+										<span class="text-text-muted">No Image</span>
+									</div>
+									<div class="absolute top-1 right-1 w-3 h-3 rounded-full border-2 border-surface-base bg-text-muted" title="Unread"></div>
+								</div>
+								<p class="text-sm font-semibold text-center text-text-primary">Issue {{ comic.issueNumber || 'Unknown' }}</p>
+							</div>
 						</div>
 					</div>
 				</div>
-			</TabPanel>
 
-			<TabPanel header="Collections" value="collections">
+				<div v-else-if="viewMode === 'list' && paginatedComics.length > 0" class="space-y-2">
+					<div class="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
+						<div class="col-span-1"></div>
+						<div class="col-span-2">Issue</div>
+						<div class="col-span-4">Title</div>
+						<div class="col-span-2">Year</div>
+						<div class="col-span-2">Pages</div>
+						<div class="col-span-1">Status</div>
+					</div>
+					<div 
+						v-for="(comic, i) in paginatedComics" 
+						:key="comic.id" 
+						class="grid grid-cols-12 gap-4 items-center p-4 bg-surface-elevated rounded-lg hover:bg-surface-overlay transition-colors cursor-pointer border-l-4 border-brand/40 hover:border-brand"
+						:class="{ 'bg-surface-base': i % 2 === 0 }"
+						@click="navigateToComicBook(comic.id)"
+					>
+						<div class="col-span-1 w-10 h-14 bg-surface-base rounded overflow-hidden flex items-center justify-center">
+							<img
+								v-if="getComicThumbnailUrl(comic)"
+								:src="getComicThumbnailUrl(comic) || undefined"
+								:alt="`Issue ${comic.issueNumber}`"
+								class="w-full h-full object-contain"
+							/>
+							<div v-else class="w-full h-full bg-surface-overlay flex items-center justify-center">
+								<span class="text-xs text-text-muted">N/A</span>
+							</div>
+						</div>
+						<div class="col-span-2 font-semibold text-text-primary">#{{ comic.issueNumber || 'Unknown' }}</div>
+						<div class="col-span-4 text-text-secondary truncate">{{ comic.title || 'Untitled' }}</div>
+						<div class="col-span-2 text-text-secondary">{{ comic.year || '—' }}</div>
+						<div class="col-span-2 text-text-secondary">{{ comic.pageCount || '—' }}</div>
+						<div class="col-span-1">
+							<span class="inline-block w-2.5 h-2.5 rounded-full bg-text-muted" title="Unread"></span>
+						</div>
+					</div>
+				</div>
+
+				<div v-else-if="!isLoading && paginatedComics.length === 0" class="text-center py-8">
+					<p class="text-text-muted">No comics available for this series</p>
+				</div>
+
+				<div class="mt-6">
+					<Paginator 
+						v-if="totalComics > itemsPerPage"
+						:first="currentPage * itemsPerPage"
+						:rows="itemsPerPage"
+						:totalRecords="totalComics"
+						@page="onPageChange"
+						:rowsPerPageOptions="[itemsPerPage]"
+						template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+					/>
+					<div v-else-if="totalComics > 0 && !isLoading" class="text-center text-text-muted mt-4">
+						Showing all {{ totalComics }} comic issue(s)
+					</div>
+				</div>
+			</div>
+
+			<div v-if="activeTab === 1" class="mt-6">
 				<div class="text-center py-8">
 					<p class="text-text-muted">Collections will be displayed here</p>
 				</div>
-			</TabPanel>
-		</TabView>
+			</div>
 		</ErrorBoundary>
 	</div>
 </template>
@@ -460,9 +481,5 @@ onBeforeUnmount(() => {
 :deep(.p-paginator .p-paginator-page-selected) {
   background: var(--color-brand) !important;
   border-color: var(--color-brand) !important;
-}
-:deep(.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link) {
-  border-color: var(--color-brand) !important;
-  color: var(--color-brand) !important;
 }
 </style>
