@@ -9,8 +9,8 @@ import {
   createUserService,
   deleteUserService,
   getUsersRegistered,
-  updateUserService
-} from "#modules/users/users.service.ts";
+  updateUserService,
+} from "#modules/users/index.ts";
 
 import {
   UserInsertSchema,

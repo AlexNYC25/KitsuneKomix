@@ -5,8 +5,7 @@ import { apiLogger } from "#logger/loggers.ts";
 import { getValidRefreshToken } from "#infrastructure/db/sqlite/models/refreshTokens.model.ts";
 
 
-import { getTokenFromCookie } from "#modules/auth/auth.service.ts";
-import { verifyAccessToken, verifyRefreshToken } from "#modules/auth/jwt.service.ts";
+import { getTokenFromCookie, verifyAccessToken, verifyRefreshToken } from "#modules/auth/index.ts";
 
 import {
   env

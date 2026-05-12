@@ -3,15 +3,15 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import {
   authenticateUser,
   clearAuthCookies,
-  getTokenFromCookie,
-  setAuthCookies,
   createRefreshTokenPair,
+  getTokenFromCookie,
   refreshAccessTokenWithUserData,
   revokeAllUserTokens,
   revokeToken,
-} from "#modules/auth/auth.service.ts";
-import { verifyAccessToken } from "#modules/auth/jwt.service.ts";
-import { checkIfAppSetupComplete } from "#modules/users/users.service.ts";
+  setAuthCookies,
+  verifyAccessToken,
+} from "#modules/auth/index.ts";
+import { checkIfAppSetupComplete } from "#modules/users/index.ts";
 
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
