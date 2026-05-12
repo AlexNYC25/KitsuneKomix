@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { HTTPException } from "hono/http-exception";
 import { cors } from "hono/cors";
 
 import { apiLogger } from "#logger/loggers.ts";
@@ -43,8 +44,12 @@ app.notFound((c) => {
 });
 
 app.onError((err, c) => {
-  const requestId = c.get("requestId") || "unknown";
-  apiLogger.error({ requestId, err }, `Unhandled error: ${err.message}`);
+  const requestId = c.get("requestId") ?? "unknown";
+  if (err instanceof HTTPException) {
+    apiLogger.warn({ requestId, status: err.status }, err.message);
+    return c.json({ error: err.message }, err.status);
+  }
+  apiLogger.error({ requestId, stack: err.stack }, "Unhandled error");
   return c.json({ error: "Internal Server Error", requestId }, 500);
 });
 
