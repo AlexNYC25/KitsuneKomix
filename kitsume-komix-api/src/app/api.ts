@@ -8,7 +8,7 @@ import apiRouter from "#routes/api/api.router.ts";
 import webRouter from "#routes/web/web.router.ts";
 import healthRouter from "#routes/health/health.router.ts";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono<{ Variables: { requestId: string } }>();
 
 // CORS middleware must be registered BEFORE routes
 app.use(
@@ -21,6 +21,13 @@ app.use(
     exposeHeaders: ["Content-Disposition", "Content-Length", "Content-Type"],
   }),
 );
+
+// Request ID middleware — generates a UUID for each request for log correlation
+app.use("*", async (c, next) => {
+  const requestId = crypto.randomUUID();
+  c.set("requestId", requestId);
+  await next();
+});
 
 // API routes (highest priority)
 app.route("/api", apiRouter);
@@ -36,8 +43,9 @@ app.notFound((c) => {
 });
 
 app.onError((err, c) => {
-  apiLogger.error("Unhandled error: " + err.message);
-  return c.json({ error: "Internal Server Error" }, 500);
+  const requestId = c.get("requestId") || "unknown";
+  apiLogger.error({ requestId, err }, `Unhandled error: ${err.message}`);
+  return c.json({ error: "Internal Server Error", requestId }, 500);
 });
 
 export default app;
