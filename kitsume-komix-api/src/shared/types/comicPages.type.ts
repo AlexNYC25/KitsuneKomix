@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { StandardizedComicMetadata } from "#types/index.ts";
 
 import { ComicBookPagesInfoResponseSchema } from "#zod/schemas/response.schema.ts";
 

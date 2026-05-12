@@ -15,7 +15,7 @@ import type {
   ComicStoryArcFilterItem,
   ComicStoryArcsFilteringAndSortingParams,
 } from "#types/index.ts";
-import type { ComicStoryArcQueryParams } from "#interfaces/index.ts";
+import type { ComicStoryArcQueryParams } from "#types/index.ts";
 import type {
   ComicReadlistsFilterField,
   ComicReadlistsSortField,

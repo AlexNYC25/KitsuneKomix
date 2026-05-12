@@ -10,7 +10,6 @@
     "#app/": "./src/app/",
     "#zod/": "./src/shared/zod/",
     "#types/": "./src/shared/types/",
-    "#interfaces/": "./src/shared/interfaces/",
     "#utilities/": "./src/shared/utilities/",
     "#config/": "./src/config/",
     "#modules/": "./src/modules/",

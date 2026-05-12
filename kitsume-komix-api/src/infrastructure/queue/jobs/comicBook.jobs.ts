@@ -92,7 +92,7 @@ import type {
   CoverPageRecord,
   ComicBook,	
 } from "#types/index.ts";
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { StandardizedComicMetadata } from "#types/index.ts";
 import { calculateFileHash } from "#utilities/hash.ts";
 import { getComicBookByFilePath, insertComicBook, updateComicBook } from "#db/sqlite/models/comicBooks.model.ts";
 

@@ -10,7 +10,7 @@ import { getFileSize } from "#utilities/file.ts";
 
 import { getLibraryContainingPath } from "#db/sqlite/models/comicLibraries.model.ts";
 
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { StandardizedComicMetadata } from "#types/index.ts";
 import { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
 
 import { env } from "#config/env.ts";

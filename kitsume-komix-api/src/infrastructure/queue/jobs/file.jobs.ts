@@ -4,7 +4,7 @@ import { queueLogger } from "#logger/loggers.ts";
 
 import { loadMetadataIntoCache, standardizeMetadata } from "#utilities/metadata.ts";
 
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { StandardizedComicMetadata } from "#types/index.ts";
 import type {
   WorkerFileJob
 } from "#types/index.ts";

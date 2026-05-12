@@ -29,3 +29,9 @@ export * from "./auth.type.ts";
 export * from "./parameters.type.ts";
 
 export * from "./utilities.type.ts";
+
+// Re-export interfaces merged from #interfaces/
+export * from "./authenticationToken.type.ts";
+export * from "./comicMetadata.type.ts";
+export * from "./requestParams.type.ts";
+export * from "./standardizedComicMetadata.type.ts";

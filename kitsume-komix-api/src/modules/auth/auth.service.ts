@@ -19,7 +19,7 @@ import {
 } from "#config/env.ts";
 
 import { User } from "#types/index.ts";
-import { RefreshTokenResponse, TokenPair } from "#interfaces/index.ts";
+import { RefreshTokenResponse, TokenPair } from "#types/index.ts";
 
 /**
  * Authenticates a user by email and password.

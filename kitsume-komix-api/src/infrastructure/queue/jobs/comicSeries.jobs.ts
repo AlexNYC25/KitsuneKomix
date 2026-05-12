@@ -16,7 +16,7 @@ import {
 	WorkerFileJob, 
 	WorkerLibrarySeriesJob 
 } from "#types/index.ts";
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { StandardizedComicMetadata } from "#types/index.ts";
 
 
 
