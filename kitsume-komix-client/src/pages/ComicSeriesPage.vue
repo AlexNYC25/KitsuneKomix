@@ -1,23 +1,23 @@
 <script setup lang="ts">
+import Button from 'primevue/button';
+import Paginator from 'primevue/paginator';
+import type { PageState } from 'primevue/paginator';
+import TabPanel from 'primevue/tabpanel';
+import TabView from 'primevue/tabview';
 import { onMounted, ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
+import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
+import ComicThumbnail from '@/components/ComicThumbnail.vue';
+import EmptyState from '@/components/states/EmptyState.vue';
+import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
+import SkeletonPage from '@/components/states/SkeletonPage.vue';
 import { useAuthStore } from '@/stores/auth';
-import { resolveImageSrc, revokeBlobUrls } from '@/utilities/image';
-import { apiClient } from '@/utilities/apiClient';
 import { useComicSeriesStore } from '@/stores/comic-series';
 import type { ComicBook, ComicBooksSeriesResponse } from '@/types/comic-books.types';
 import type { ComicSeriesResponseItem } from '@/types/comic-series.types';
-import type { PageState } from 'primevue/paginator';
-import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
-import Paginator from 'primevue/paginator';
-import Button from 'primevue/button';
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
-import ComicThumbnail from '@/components/ComicThumbnail.vue';
-import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
-import EmptyState from '@/components/states/EmptyState.vue';
-import SkeletonPage from '@/components/states/SkeletonPage.vue';
-
+import { apiClient } from '@/utilities/apiClient';
+import { resolveImageSrc, revokeBlobUrls } from '@/utilities/image';
 import { getThumbnailPathFromFilePath } from "@/utilities/urls";
 
 const router = useRouter();

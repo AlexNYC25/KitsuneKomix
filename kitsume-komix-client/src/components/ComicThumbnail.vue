@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount } from 'vue';
+
 import { resolveImageSrc, revokeBlobUrl } from '@/utilities/image';
 
 const props = defineProps<{

@@ -1,13 +1,9 @@
-import { globalIgnores } from 'eslint/config'
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import pluginVue from 'eslint-plugin-vue'
 import pluginVitest from '@vitest/eslint-plugin'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
-
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
+import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
+import { globalIgnores } from 'eslint/config'
+import importX from 'eslint-plugin-import-x'
+import pluginVue from 'eslint-plugin-vue'
 
 export default defineConfigWithVueTs(
   {
@@ -19,28 +15,49 @@ export default defineConfigWithVueTs(
 
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
-  
+
   {
     ...pluginVitest.configs.recommended,
     files: ['src/**/__tests__/*'],
   },
   skipFormatting,
   {
-    name: 'app/no-ts-extension-imports',
+    name: 'app/import-x',
+    plugins: { 'import-x': importX },
     rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['@/**/*.ts', './**/*.ts', '../**/*.ts'],
-          message: 'Do not use .ts extension in imports. Let the bundler resolve it.',
-        }],
-      }],
-      'no-relative-imports': ['error', {
-          patterns: [{
-            group: ['../*', '../**'],
-            message: 'Use @/ alias instead of relative parent imports. All src/ imports should use the @/ path alias.',
-          }]
-        }
-      ]
+      'import-x/order': [
+        'warn',
+        {
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc' },
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        },
+      ],
+      'import-x/no-duplicates': 'warn',
+      'import-x/newline-after-import': 'warn',
+      'import-x/first': 'warn',
+    },
+  },
+  {
+    name: 'app/vue-script-setup',
+    rules: {
+      'vue/component-name-in-template-casing': ['error', 'PascalCase'],
+      'vue/define-macros-order': ['warn', { order: ['defineProps', 'defineEmits', 'defineExpose'] }],
+      'vue/no-setup-props-reactivity-loss': 'warn',
+    },
+  },
+  {
+    name: 'app/alias-imports',
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['@/**/*.ts', './**/*.ts', '../**/*.ts'], message: 'Do not use .ts extension in imports.' },
+            { group: ['../*', '../**'], message: 'Use @/ alias instead of relative parent imports.' },
+          ],
+        },
+      ],
     },
   },
 )

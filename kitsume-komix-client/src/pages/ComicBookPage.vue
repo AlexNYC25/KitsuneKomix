@@ -1,27 +1,23 @@
 <script setup lang="ts">
+import Button from 'primevue/button';
+import TabPanel from 'primevue/tabpanel';
+import TabView from 'primevue/tabview';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import Button from 'primevue/button';
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
 
-import { useBreadcrumbStore } from '@/stores/breadcrumb';
+import ComicReader from '@/components/ComicReader.vue';
+import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
+import ComicThumbnail from '@/components/ComicThumbnail.vue';
+import EmptyState from '@/components/states/EmptyState.vue';
+import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
+import SkeletonPage from '@/components/states/SkeletonPage.vue';
 import { useAuthStore } from '@/stores/auth';
+import { useBreadcrumbStore } from '@/stores/breadcrumb';
 import { useComicSeriesStore } from '@/stores/comic-series';
-
+import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist, ComicBook } from '@/types/comic-books.types';
 import { apiClient } from '@/utilities/apiClient';
 import { convertArrayOfCreditsToString } from '@/utilities/formatting';
-
-import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist, ComicBook } from '@/types/comic-books.types';
-
-import ComicSeriesPageDetails from '@/components/ComicSeriesPageDetails.vue';
-import ComicReader from '@/components/ComicReader.vue';
-import ComicThumbnail from '@/components/ComicThumbnail.vue';
-import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
-import EmptyState from '@/components/states/EmptyState.vue';
-import SkeletonPage from '@/components/states/SkeletonPage.vue';
-
 import { getThumbnailPathFromFilePath, buildComicDownloadUrl } from "@/utilities/urls";
 
 const route = useRoute();

@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { useAuthStore } from '@/stores/auth'
 
+import ComicBook from '@/pages/ComicBookPage.vue'
+import ComicSeries from '@/pages/ComicSeriesPage.vue'
 import Home from '@/pages/HomePage.vue'
 import Login from '@/pages/LoginPage.vue'
-import ComicSeries from '@/pages/ComicSeriesPage.vue'
-import ComicBook from '@/pages/ComicBookPage.vue'
-import Settings from '@/pages/SettingsPage.vue'
 import NotFound from '@/pages/NotFoundPage.vue'
+import Settings from '@/pages/SettingsPage.vue'
+import { useAuthStore } from '@/stores/auth'
 
 declare module 'vue-router' {
   interface RouteMeta {

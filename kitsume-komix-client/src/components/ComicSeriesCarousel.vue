@@ -1,14 +1,12 @@
 <script setup lang="ts">
+import Button from 'primevue/button';
 import { ref, watch, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { resolveImageSrc, toAbsoluteImageUrl, isProtectedImageUrl, revokeBlobUrls } from '@/utilities/image';
-import type { ComicSeriesCarouselItem } from '@/types/comic-series.types';
-import Button from 'primevue/button';
-import SkeletonCard from '@/components/states/SkeletonCard.vue';
 
-const router = useRouter();
-const authStore = useAuthStore();
+import SkeletonCard from '@/components/states/SkeletonCard.vue';
+import { useAuthStore } from '@/stores/auth';
+import type { ComicSeriesCarouselItem } from '@/types/comic-series.types';
+import { resolveImageSrc, toAbsoluteImageUrl, isProtectedImageUrl, revokeBlobUrls } from '@/utilities/image';
 
 const props = withDefaults(defineProps<{
   comicSeriesData: ComicSeriesCarouselItem[];
@@ -17,6 +15,8 @@ const props = withDefaults(defineProps<{
 }>(), {
   isLoading: false
 });
+const router = useRouter();
+const authStore = useAuthStore();
 
 const carousel = ref<HTMLElement | null>(null)
 const thumbnailBlobUrls = ref<Record<string, string>>({})

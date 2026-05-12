@@ -1,11 +1,10 @@
 <script setup lang="ts">
 	import { useForm } from 'vee-validate';
 
+	import FormModal from '@/components/ui/FormModal.vue';
 	import { useUsersStore } from '@/stores/users';
-
 	import { userSignUpSchema }	from '@/zod/users.schema';
 
-	import FormModal from '@/components/ui/FormModal.vue';
 
 	const props = defineProps<{
 		onCancel?: () => void;

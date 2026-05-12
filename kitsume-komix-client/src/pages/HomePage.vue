@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
-import { useDashboardStore } from '@/stores/dashboard';
-import { useAuthStore } from '@/stores/auth';
+
 
 import ComicSeriesCarousel from '@/components/ComicSeriesCarousel.vue';
 import HomePageGalleria from '@/components/HomePageGalleria.vue';
-import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
 import EmptyState from '@/components/states/EmptyState.vue';
+import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
 import SkeletonPage from '@/components/states/SkeletonPage.vue';
+import { useAuthStore } from '@/stores/auth';
+import { useDashboardStore } from '@/stores/dashboard';
 
 const dashboardStore = useDashboardStore();
 const authStore = useAuthStore();

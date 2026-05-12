@@ -1,7 +1,7 @@
 <script setup lang="ts">
-	import { ref, computed } from 'vue';
-	import Chip from 'primevue/chip';
 	import Button from 'primevue/button';
+	import Chip from 'primevue/chip';
+	import { ref, computed } from 'vue';
 
 	const props = withDefaults(defineProps<{
 		comicMetadataDetailsLabel?: string;

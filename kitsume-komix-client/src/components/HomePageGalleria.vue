@@ -1,17 +1,17 @@
 <script setup lang="ts">
+import Galleria from 'primevue/galleria';
 import { ref, watch, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import Galleria from 'primevue/galleria';
-import { useAuthStore } from '@/stores/auth';
-import { resolveImageSrc, toAbsoluteImageUrl, isProtectedImageUrl, revokeBlobUrls } from '@/utilities/image';
-import type { LatestComicSeriesSingle } from '@/types/comic-series.types';
 
-const router = useRouter();
-const authStore = useAuthStore();
+import { useAuthStore } from '@/stores/auth';
+import type { LatestComicSeriesSingle } from '@/types/comic-series.types';
+import { resolveImageSrc, toAbsoluteImageUrl, isProtectedImageUrl, revokeBlobUrls } from '@/utilities/image';
 
 const props = defineProps<{
   comicSeriesData: LatestComicSeriesSingle[];
 }>();
+const router = useRouter();
+const authStore = useAuthStore();
 
 const responsiveOptions = ref([
 	{

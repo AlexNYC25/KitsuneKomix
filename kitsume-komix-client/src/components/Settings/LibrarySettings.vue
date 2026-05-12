@@ -1,6 +1,6 @@
 <script setup lang="ts">
-	import { computed, ref, onMounted } from 'vue';
 	import Button from 'primevue/button';
+	import { computed, ref, onMounted } from 'vue';
 
 	import LibraryPathNavigation from '@/components/Settings/LibraryPathNavigation.vue';
 	import FormModal from '@/components/ui/FormModal.vue';

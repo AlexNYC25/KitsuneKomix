@@ -1,17 +1,17 @@
 <script setup lang="ts">
-	import { computed, ref, onMounted } from 'vue';
 	import Button from 'primevue/button';
+	import { computed, ref, onMounted } from 'vue';
 
+	import AddUser from '@/components/forms/AddUser.vue';
+	import DeleteUser from '@/components/forms/DeleteUser.vue';
+	import EditPassword from '@/components/forms/EditPassword.vue';
+	import EditUser from '@/components/forms/EditUser.vue';
 	import { useAuthStore } from '@/stores/auth';
 	import { useUsersStore } from '@/stores/users';
 
+
 	const authStore = useAuthStore();
 	const usersStore = useUsersStore();
-
-	import AddUser from '@/components/forms/AddUser.vue';
-	import EditUser from '@/components/forms/EditUser.vue';
-	import EditPassword from '@/components/forms/EditPassword.vue';
-	import DeleteUser from '@/components/forms/DeleteUser.vue';
 
 	const users = computed(() => usersStore.users);
 	const isAdmin = computed(() => Boolean(authStore.user?.admin));

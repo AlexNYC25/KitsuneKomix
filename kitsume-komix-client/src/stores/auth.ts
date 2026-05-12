@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 
-import { loadFromStorage, saveToStorage } from '@/utilities/storage';
-import { apiClient, setAuthToken, setRefreshToken } from '@/utilities/apiClient';
 import { useLibrariesStore } from '@/stores/libraries';
 import type { PersistedAuth } from '@/types/index';
+import { apiClient, setAuthToken, setRefreshToken } from '@/utilities/apiClient';
+import { loadFromStorage, saveToStorage } from '@/utilities/storage';
 
 const AUTH_STORAGE_KEY = 'kitsune_auth';
 

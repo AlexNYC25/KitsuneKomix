@@ -1,13 +1,12 @@
 <script setup lang="ts">
+	import { useForm } from 'vee-validate';
 	import { onMounted } from 'vue';
 
-	import { useForm } from 'vee-validate';
-
-	import { useUsersStore } from '@/stores/users';
-
-	import { userInfoEditSchema } from '@/zod/users.schema';
 
 	import FormModal from '@/components/ui/FormModal.vue';
+	import { useUsersStore } from '@/stores/users';
+	import { userInfoEditSchema } from '@/zod/users.schema';
+
 
 	const props = defineProps<{
 		onCancel?: () => void;

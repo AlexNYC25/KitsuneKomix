@@ -1,18 +1,18 @@
 <script setup lang="ts">
+import Breadcrumb from 'primevue/breadcrumb'
+import Button from 'primevue/button'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+import InputText from 'primevue/inputtext'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useComicSeriesStore } from '@/stores/comic-series'
-import { useBreadcrumbStore } from '@/stores/breadcrumb'
+
 import { useTheme } from '@/composables/useTheme'
-import Breadcrumb from 'primevue/breadcrumb'
-import InputGroup from 'primevue/inputgroup'
-import InputText from 'primevue/inputtext'
-import InputGroupAddon from 'primevue/inputgroupaddon'
-import Button from 'primevue/button'
+import { useBreadcrumbStore } from '@/stores/breadcrumb'
+import { useComicSeriesStore } from '@/stores/comic-series'
 
-const { isDark, toggle: toggleTheme } = useTheme()
 const emit = defineEmits<{ toggleSidebar: [] }>()
-
+const { isDark, toggle: toggleTheme } = useTheme()
 const route = useRoute()
 const comicSeriesStore = useComicSeriesStore()
 const breadcrumbStore = useBreadcrumbStore()

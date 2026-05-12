@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { apiClient } from '@/utilities/apiClient'
-import type { ComicSeriesResponseItem } from '@/types/comic-series.types'
+
 import type { ComicBooksSeriesResponse } from '@/types/comic-books.types'
+import type { ComicSeriesResponseItem } from '@/types/comic-series.types'
+import { apiClient } from '@/utilities/apiClient'
 
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({

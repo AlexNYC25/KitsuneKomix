@@ -22,14 +22,15 @@
  * <Button @click="readerRef.openReader()">Read</Button>
  * ```
  */
-import { ref, computed, onBeforeUnmount, watch } from 'vue';
 import { motion } from 'motion-v';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Skeleton from 'primevue/skeleton';
+import { ref, computed, onBeforeUnmount, watch } from 'vue';
+
+import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
 import { apiClient, composeStaticUrl } from '@/utilities/apiClient';
 import { resolveImageSrc, revokeBlobUrl, revokeBlobUrls } from '@/utilities/image';
-import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
 
 interface ComicReaderProps {
 	/** ID of the comic book to read */

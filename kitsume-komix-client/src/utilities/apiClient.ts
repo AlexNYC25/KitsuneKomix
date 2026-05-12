@@ -1,7 +1,8 @@
 import createClient, { type Middleware } from "openapi-fetch";
-import type { paths } from "@/openapi/openapi-schema";
 
 import { env } from "@/config/env";
+import type { paths } from "@/openapi/openapi-schema";
+
 
 const apiClientBaseURL = env.API_URL + "/api";
 const apiRootBaseURL = env.API_URL;

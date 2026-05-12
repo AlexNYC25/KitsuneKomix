@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
-import { apiClient } from '@/utilities/apiClient'
 import type { User, UserRegistrationPayload, UserEditPayload } from '@/types/users.types'
+import { apiClient } from '@/utilities/apiClient'
 
 export const useUsersStore = defineStore('users', {
 	state: () => ({

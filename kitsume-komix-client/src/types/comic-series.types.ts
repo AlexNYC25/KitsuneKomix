@@ -1,4 +1,4 @@
-import type { paths } from '../openapi/openapi-schema';
+import type { paths } from '@/openapi/openapi-schema';
 
 // /comic-series/{id} endpoint types
 export type GetComicSeriesByIdResponse = paths['/comic-series/{id}']['get']['responses']['200']['content']['application/json'];

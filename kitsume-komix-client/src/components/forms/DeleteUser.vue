@@ -1,8 +1,9 @@
 <script setup lang="ts">
 	import { ref } from 'vue';
-	import { useUsersStore } from '@/stores/users';
 
 	import FormModal from '@/components/ui/FormModal.vue';
+	import { useUsersStore } from '@/stores/users';
+
 
 	const props = defineProps<{
 		onCancel?: () => void;

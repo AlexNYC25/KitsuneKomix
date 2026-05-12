@@ -1,9 +1,9 @@
 <script setup lang="ts">
 	import { reactive, watch } from 'vue';
 
+	import FormModal from '@/components/ui/FormModal.vue';
 	import type { ComicLibrary } from '@/types/comic-libraries.types';
 
-	import FormModal from '@/components/ui/FormModal.vue';
 
 	const props = defineProps<{
 		libraries: Array<ComicLibrary>;

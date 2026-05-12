@@ -1,12 +1,11 @@
 <script setup lang="ts">
-	import { ref, onMounted } from 'vue';
 	import { useForm } from 'vee-validate';
+	import { ref, onMounted } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 
 	import { useAuthStore } from '@/stores/auth';
 	import { setTokenRefreshCallback } from '@/utilities/apiClient';
 	import { REMEMBERED_USERNAME_STORAGE_KEY, loadFromStorage, saveToStorage } from '@/utilities/storage';
-
 	import { validateEmailPassword } from '@/zod/login.schema';
 
 	const router = useRouter();

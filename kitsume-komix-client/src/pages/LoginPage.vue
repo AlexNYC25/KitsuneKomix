@@ -1,11 +1,11 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
 
-  import { useAuthStore } from '@/stores/auth';
 
   import LoadingLoginForm from '@/components/LoadingLoginForm.vue';
-  import SetupSignUpForm from '@/components/SetupSignUpForm.vue';
   import LoginForm from '@/components/LoginForm.vue';
+  import SetupSignUpForm from '@/components/SetupSignUpForm.vue';
+  import { useAuthStore } from '@/stores/auth';
 
   const authStore = useAuthStore();
 

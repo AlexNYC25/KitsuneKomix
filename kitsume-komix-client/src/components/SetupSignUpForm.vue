@@ -1,12 +1,9 @@
 <script setup lang="ts">
-	import { ref } from 'vue';
 	import { useForm } from 'vee-validate';
+	import { ref } from 'vue';
 
 	import { useAuthStore } from '@/stores/auth';
-
 	import { validateSignup } from '@/zod/signup.schema';
-
-	const authStore = useAuthStore();
 
 	defineProps<{
 		showSetupForm: boolean;
@@ -15,6 +12,8 @@
 	const emit = defineEmits<{
 		'update:showSetupForm': [value: boolean];
 	}>();
+
+	const authStore = useAuthStore();
 
 	const setupError = ref<string | null>(null);
 
