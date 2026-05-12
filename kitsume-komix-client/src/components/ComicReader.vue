@@ -25,9 +25,9 @@
 import { motion } from 'motion-v';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
-import Skeleton from 'primevue/skeleton';
 import { ref, computed, onBeforeUnmount, watch } from 'vue';
 
+import SkeletonBase from '@/components/states/SkeletonBase.vue';
 import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
 import { apiClient, composeStaticUrl } from '@/utilities/apiClient';
 import { resolveImageSrc, revokeBlobUrl, revokeBlobUrls } from '@/utilities/image';
@@ -724,7 +724,7 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 
 		<!-- Loading Indicator (Overlay) -->
 		<div v-if="isLoading && !currentImageUrl" class="fixed inset-0 flex items-center justify-center pointer-events-none z-40">
-			<Skeleton width="60vh" height="90vh" />
+			<SkeletonBase width="60vh" height="90vh" />
 		</div>
 
 		<!-- Width Slider Bar (Appears when only in webtoon mode) -->

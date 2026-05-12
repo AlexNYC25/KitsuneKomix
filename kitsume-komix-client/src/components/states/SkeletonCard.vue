@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Skeleton from 'primevue/skeleton'
+import SkeletonBase from './SkeletonBase.vue'
 
 withDefaults(defineProps<{
   width?: string
@@ -14,6 +14,6 @@ withDefaults(defineProps<{
 
 <template>
   <div v-for="i in count" :key="i" class="skeleton-card-item">
-    <Skeleton :width="width" :height="height" />
+    <SkeletonBase :width="width" :height="height" />
   </div>
 </template>
