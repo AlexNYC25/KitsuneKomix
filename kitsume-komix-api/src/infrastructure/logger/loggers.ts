@@ -6,14 +6,11 @@ import { env } from "#config/env.ts";
 const configLocation = env.APP_CONFIG_PATH;
 const logsDir = join(configLocation, "logs");
 
-// Ensure logs directory exists
-try {
-  Deno.mkdirSync(logsDir, { recursive: true });
-} catch (_error) {
-  // Directory might already exist, ignore error
-}
-
 const logLevel = env.LOG_LEVEL;
+
+export const initLogger = async (): Promise<void> => {
+  await Deno.mkdir(logsDir, { recursive: true });
+};
 
 export const apiLogger = pino({
   level: logLevel,
