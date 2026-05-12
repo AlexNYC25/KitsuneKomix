@@ -6,7 +6,7 @@ import { DEFAULT_HEADER_AUTHORIZATION } from '@/utilities/constants';
 
 import { buildComicThumbnailUrl } from "@/utilities/urls"
 
-export const useHomeStore = defineStore('home', {
+export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
     latestSeries: [] as LatestComicSeriesSingle[],
     updatedSeries: [] as UpdatedComicSeriesSingle[],

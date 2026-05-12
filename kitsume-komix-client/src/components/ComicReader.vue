@@ -1,4 +1,27 @@
 <script setup lang="ts">
+/**
+ * Full-screen comic book reader supporting single-page and webtoon modes.
+ *
+ * ## Features
+ * - **Single-page mode** with LTR, RTL, and vertical scroll direction
+ * - **Webtoon mode** — continuous vertical scroll of all pages
+ * - **Keyboard navigation** — arrow keys, escape to close
+ * - **Mouse navigation** — click zones on left/right/top/bottom edges
+ * - **Progress persistence** — saves/restores reading position via localStorage
+ * - **Continue prompt** — asks user to resume or start over
+ * - **Motion animations** — page transitions via `motion-v`
+ * - **Auto-hiding controls** — top/bottom bars hide after idle timeout
+ * - **Fit modes** — fit-height (fit to viewport) and fit-width (scrollable)
+ * - **Responsive** — adjusted click zones and layout on mobile
+ *
+ * @usage Expose `openReader()` via template ref to trigger from parent.
+ *
+ * @example
+ * ```vue
+ * <ComicReader ref="readerRef" :comic-book-id="42" comic-title="My Comic" />
+ * <Button @click="readerRef.openReader()">Read</Button>
+ * ```
+ */
 import { ref, computed, onBeforeUnmount, watch } from 'vue';
 import { motion } from 'motion-v';
 import Button from 'primevue/button';
@@ -9,50 +32,77 @@ import { resolveImageSrc, revokeBlobUrl, revokeBlobUrls } from '@/utilities/imag
 import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
 
 interface ComicReaderProps {
+	/** ID of the comic book to read */
 	comicBookId: number;
+	/** Display title shown in the top bar */
 	comicTitle: string;
+	/** Optional comic data for title extraction in the reader header */
 	comicBookData?: ComicBookById | ComicBookMetadata;
 }
 
 const props = defineProps<ComicReaderProps>();
 
-// Comic Reader top boolean, used to show/hide the reader
+/** Whether the reader overlay is currently open */
 const isVisible = ref(false);
 
+/** Current error message to display, or null */
 const error = ref<string | null>(null);
 
-// single page mode state
+// ---- Single-page mode state ----
+
+/** Whether a page is currently being fetched */
 const isLoading = ref(false);
+/** The currently displayed page number (1-indexed) */
 const currentPage = ref(1);
+/** Total number of pages in the comic book */
 const totalPages = ref(0);
+/** Blob URL for the current page image */
 const currentImageUrl = ref<string | null>(null);
+/** Width percentage for fit-width mode (30-100) */
 const singlePageImageWidth = ref(100);
 
-// webtoon mode state
-const isLoadingWebtoon = ref(false);
-const webtoonPages = ref<{ pageNumber: number; imageUrl: string }[]>([]);
-const webtoonImageWidth = ref(100); // Width percentage for webtoon mode images
+// ---- Webtoon mode state ----
 
-// show settings dialog
+/** Whether webtoon pages are being loaded */
+const isLoadingWebtoon = ref(false);
+/** Array of all pages with their blob URLs for webtoon mode */
+const webtoonPages = ref<{ pageNumber: number; imageUrl: string }[]>([]);
+/** Width percentage for webtoon mode images */
+const webtoonImageWidth = ref(100);
+
+/** Whether the settings dialog is open */
 const showSettings = ref(false);
 
-// actual reader settings
+// ---- Reader settings ----
+
+/** How the image fits in the viewport: 'height' (fit) or 'width' (scrollable) */
 const fitMode = ref<'height' | 'width'>('height');
+/** Direction of the last page transition, used for animation */
 const transitionDirection = ref<'left' | 'right' | null>(null);
+/** Scroll direction for single-page navigation */
 const scrollDirection = ref<'vertical' | 'ltr' | 'rtl'>('ltr');
+/** Reading mode: single page at a time or continuous webtoon scroll */
 const readingMode = ref<'single' | 'webtoon'>('single');
 
-// used to show/hide controls displayed as the top and bottom bars
+/** Whether the top/bottom control bars are visible */
 const showControls = ref(true);
+/** Timeout reference for auto-hiding controls */
 const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
-// continue reading prompt state
+// ---- Continue-reading prompt ----
+
+/** Whether the "continue reading?" dialog is shown */
 const showContinuePrompt = ref(false);
+/** The page number where the user left off */
 const savedProgressPage = ref(1);
 
-// computed properties
+// ---- Computed properties ----
+
+/** Formatted page info string e.g. "Page 3 of 25" */
 const pageInfo = computed(() => `Page ${currentPage.value} of ${totalPages.value}`);
+/** Whether the reader is on the first page */
 const isFirstPage = computed(() => currentPage.value === 1);
+/** Whether the reader is on the last page */
 const isLastPage = computed(() => currentPage.value === totalPages.value);
 
 watch(currentPage, (newPage) => {

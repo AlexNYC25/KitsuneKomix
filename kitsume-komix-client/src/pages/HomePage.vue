@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
-import { useHomeStore } from '@/stores/home';
+import { useDashboardStore } from '@/stores/dashboard';
 import { useAuthStore } from '@/stores/auth';
 
 import ComicSeriesCarousel from '@/components/ComicSeriesCarousel.vue';
@@ -9,7 +9,7 @@ import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
 import EmptyState from '@/components/states/EmptyState.vue';
 import SkeletonPage from '@/components/states/SkeletonPage.vue';
 
-const homeStore = useHomeStore();
+const dashboardStore = useDashboardStore();
 const authStore = useAuthStore();
 
 const isLoading = ref(false);
@@ -19,8 +19,8 @@ onMounted(async () => {
 	if (authStore.isAuthenticated) {
 		isLoading.value = true;
 		try {
-			await homeStore.fetchLatestSeries();
-			await homeStore.fetchUpdatedSeries();
+			await dashboardStore.fetchLatestSeries();
+			await dashboardStore.fetchUpdatedSeries();
 		} catch (error) {
 			console.error('Failed to fetch latest series on home page:', error);
 		} finally {
@@ -28,9 +28,9 @@ onMounted(async () => {
 		}
 	}
 });
+const latestSeries = computed(() => dashboardStore.latestSeries);
 
-const latestSeries = computed(() => homeStore.latestSeries);
-const updatedSeries = computed(() => homeStore.updatedSeries);
+const updatedSeries = computed(() => dashboardStore.updatedSeries);
 
 const hasData = computed(() =>
 	latestSeries.value.length > 0 || updatedSeries.value.length > 0
