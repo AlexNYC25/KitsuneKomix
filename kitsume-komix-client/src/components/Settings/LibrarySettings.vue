@@ -166,11 +166,11 @@
 
 			<Button
 				v-if="isAdmin"
-				label="Add Library"
-				icon="pi pi-plus"
 				severity="info"
 				@click="handleAddLibrary"
-			/>
+			>
+				<AppIcon name="plus" /> Add Library
+			</Button>
 		</div>
 
 		<!-- Add Library Form -->
@@ -210,22 +210,22 @@
 				<p v-if="addLibraryError" class="text-sm text-red-500">{{ addLibraryError }}</p>
 
 				<div class="flex items-center gap-2">
-					<Button
-						type="submit"
-						label="Save Library"
-						icon="pi pi-check"
-						severity="info"
-						:loading="isSavingLibrary"
-					/>
-					<Button
-						type="button"
-						label="Cancel"
-						icon="pi pi-times"
-						severity="secondary"
-						text
-						@click="resetAddLibraryForm"
-						:disabled="isSavingLibrary"
-					/>
+				<Button
+					type="submit"
+					severity="info"
+					:loading="isSavingLibrary"
+				>
+					<AppIcon name="check" /> Save Library
+				</Button>
+				<Button
+					type="button"
+					severity="secondary"
+					text
+					@click="resetAddLibraryForm"
+					:disabled="isSavingLibrary"
+				>
+					<AppIcon name="times" /> Cancel
+				</Button>
 				</div>
 			</form>
 		</FormModal>
@@ -276,22 +276,22 @@
 				<p v-if="editLibraryError" class="text-sm text-red-500">{{ editLibraryError }}</p>
 
 				<div class="flex items-center gap-2">
-					<Button
-						type="submit"
-						label="Save Library"
-						icon="pi pi-check"
-						severity="info"
-						:loading="isEditingLibrary"
-					/>
-					<Button
-						type="button"
-						label="Cancel"
-						icon="pi pi-times"
-						severity="secondary"
-						text
-						@click="resetEditLibraryForm"
-						:disabled="isEditingLibrary"
-					/>
+				<Button
+					type="submit"
+					severity="info"
+					:loading="isEditingLibrary"
+				>
+					<AppIcon name="check" /> Save Library
+				</Button>
+				<Button
+					type="button"
+					severity="secondary"
+					text
+					@click="resetEditLibraryForm"
+					:disabled="isEditingLibrary"
+				>
+					<AppIcon name="times" /> Cancel
+				</Button>
 				</div>
 			</form>
 		</FormModal>
@@ -331,22 +331,22 @@
 					<div class="col-span-1 grid grid-rows-2 gap-2">
 						<Button
 							type="button"
-							label="Edit"
-							icon="pi pi-pencil"
 							severity="secondary"
 							text
 							size="small"
 							@click="library.id !== undefined && handleEditLibrary(library.id)"
-						/>
+						>
+							<AppIcon name="pencil" /> Edit
+						</Button>
 						<Button
 							type="button"
-							label="Delete"
-							icon="pi pi-trash"
 							severity="danger"
 							text
 							size="small"
 							@click="library.id !== undefined && handleDeleteLibrary(library.id)"
-						/>
+						>
+							<AppIcon name="trash" /> Delete
+						</Button>
 					</div>
 				</div>
 			</div>

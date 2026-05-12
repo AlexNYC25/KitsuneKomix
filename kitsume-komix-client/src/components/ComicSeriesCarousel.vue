@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button';
 import { ref, watch, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -103,12 +102,12 @@ const goToComicSeries = (id: string | number) => {
 
     <div class="relative w-full overflow-hidden">
       <!-- Scroll buttons -->
-      <Button
+      <button
         @click="scrollLeft"
-        unstyled
-        class="left-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-20 hover:bg-slate-600/50 text-brand border border-white/10 hover:border-brand/30 hover:text-brand transition-colors duration-200"
-        icon="pi pi-chevron-left"
-      ></Button>
+        class="left-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-20 hover:bg-slate-600/50 text-brand border border-white/10 hover:border-brand/30 hover:text-brand transition-colors duration-200 flex items-center justify-center"
+      >
+        <AppIcon name="chevron-left" />
+      </button>
 
       <div
         ref="carousel"
@@ -160,12 +159,12 @@ const goToComicSeries = (id: string | number) => {
         </template>
       </div>
 
-      <Button
+      <button
         @click="scrollRight"
-        unstyled
-        class="right-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-10 hover:bg-slate-600/50 text-brand border border-white/10 hover:border-brand/30 hover:text-brand transition-colors duration-200"
-        icon="pi pi-chevron-right"
-      ></Button>
+        class="right-0 w-12 h-12 rounded-full absolute top-1/2 -translate-y-1/2 shadow px-2 py-1 z-10 hover:bg-slate-600/50 text-brand border border-white/10 hover:border-brand/30 hover:text-brand transition-colors duration-200 flex items-center justify-center"
+      >
+        <AppIcon name="chevron-right" />
+      </button>
     </div>
   </div>
 </template>

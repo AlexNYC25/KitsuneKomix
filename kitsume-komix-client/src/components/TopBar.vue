@@ -87,30 +87,32 @@ watch([() => route.path, () => breadcrumbStore.comicBookSeriesId, () => breadcru
 		<div class="flex justify-between items-center gap-4 p-4">
 			<div id="top-bar-left" class="flex items-center gap-2 flex-grow min-w-0">
 				<Button
-					icon="pi pi-bars"
 					severity="info"
 					text
 					rounded
 					class="md:!hidden !p-2 !min-w-0 flex-shrink-0"
 					@click="emit('toggleSidebar')"
-				/>
+				>
+					<AppIcon name="bars" />
+				</Button>
 				<Breadcrumb :model="breadcrumbItems" class="bg-transparent min-w-0 overflow-hidden" />
 			</div>
 			<div id="top-bar-right" class="flex items-center gap-2 flex-shrink-0">
 				<InputGroup class="bg-surface-base">
 					<InputText placeholder="Keyword" class="bg-surface-base text-text-primary placeholder-text-muted" />
 					<InputGroupAddon class="bg-surface-base">
-						<i class="pi pi-search text-text-muted" />
+						<AppIcon name="search" class="text-text-muted" />
 					</InputGroupAddon>
 				</InputGroup>
 				<Button
-					:icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
 					severity="info"
 					text
 					rounded
 					class="!p-2 !min-w-0"
 					@click="toggleTheme"
-				/>
+				>
+					<AppIcon :name="isDark ? 'sun' : 'moon'" />
+				</Button>
 			</div>
 		</div>
 	</header>

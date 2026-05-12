@@ -77,11 +77,11 @@
 
 			<Button
 				v-if="isAdmin"
-				label="Add User"
-				icon="pi pi-plus"
 				severity="info"
 				@click="handleAddUser"
-			/>
+			>
+				<AppIcon name="plus" /> Add User
+			</Button>
 		</div>
 
 		<!-- Users List -->

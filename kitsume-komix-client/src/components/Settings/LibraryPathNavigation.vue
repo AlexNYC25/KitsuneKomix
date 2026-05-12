@@ -138,14 +138,14 @@
 				</p>
 				<Button
 					type="button"
-					label="Up"
-					icon="pi pi-arrow-up"
 					severity="secondary"
 					text
 					size="small"
 					@click="navigateUpDirectory"
 					:disabled="!canNavigateUp"
-				/>
+				>
+					<AppIcon name="arrow-up" /> Up
+				</Button>
 			</div>
 
 			<div v-if="directoryError" class="text-sm text-red-500">

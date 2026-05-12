@@ -477,10 +477,16 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 
 					<!-- Actions -->
 					<div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-						<Button label="Read Comic" icon="pi pi-book" class="w-full sm:flex-1 bg-brand border-brand text-white hover:brightness-110 active:scale-95 transition-all font-bold text-lg py-3" @click="openComicReader" />
+						<Button class="w-full sm:flex-1 bg-brand border-brand text-white hover:brightness-110 active:scale-95 transition-all font-bold text-lg py-3" @click="openComicReader">
+							<AppIcon name="book" /> Read Comic
+						</Button>
 						<div class="flex gap-2 sm:gap-3 w-full sm:w-auto">
-							<Button label="Mark Read" icon="pi pi-check" severity="info" class="flex-1 sm:flex-none" @click="setComicToRead(comicBookData.id)" />
-							<Button label="Download" icon="pi pi-download" severity="secondary" class="flex-1 sm:flex-none" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)" />
+							<Button severity="info" class="flex-1 sm:flex-none" @click="setComicToRead(comicBookData.id)">
+								<AppIcon name="check" /> Mark Read
+							</Button>
+							<Button severity="secondary" class="flex-1 sm:flex-none" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)">
+								<AppIcon name="download" /> Download
+							</Button>
 						</div>
 					</div>
 				</div>
@@ -515,7 +521,9 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 				<TabPanel header="Lists" value="lists">
 					<div v-if="comicBookListsData.length === 0" class="text-center py-8">
 						<p class="text-text-muted mb-4">Comic is not part of any lists</p>
-						<Button label="Add Comic To List" icon="pi pi-plus" severity="success" @click="showAddListDialog = true" />
+						<Button severity="success" @click="showAddListDialog = true">
+							<AppIcon name="plus" /> Add Comic To List
+						</Button>
 					</div>
 					<div v-else>
 						<p class="text-text-muted">Lists will be displayed here</p>
@@ -562,7 +570,9 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 							placeholder="Enter list name"
 							class="flex-1 px-3 py-2 bg-surface-base border border-surface-overlay rounded-md text-text-primary placeholder-text-muted focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
 						/>
-						<Button icon="pi pi-plus" @click="() => {}" />
+						<Button @click="() => {}">
+							<AppIcon name="plus" />
+						</Button>
 					</div>
 					
 					<div class="flex gap-2 justify-end">

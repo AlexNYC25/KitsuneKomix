@@ -3,21 +3,24 @@ import './assets/main.css'
 import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import { OhVueIcon, addIcons } from "oh-vue-icons";
-import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound } from "oh-vue-icons/icons";
+import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound, IoMenu, IoSearch, IoSunny, IoMoon, IoChevronBack, IoChevronForward, IoCheckmark, IoDownload, IoImage, IoArrowUp } from "oh-vue-icons/icons";
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config';
 import Tooltip from 'primevue/tooltip';
 import { createApp } from 'vue'
 
 import App from '@/App.vue';
+import AppIcon from '@/components/icons/AppIcon.vue';
 import router from '@/router'
+
 
 const app = createApp(App)
 
 app.use(createPinia())
 
-addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound);
+addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound, IoMenu, IoSearch, IoSunny, IoMoon, IoChevronBack, IoChevronForward, IoCheckmark, IoDownload, IoImage, IoArrowUp);
 app.component("v-icon", OhVueIcon);
+app.component("AppIcon", AppIcon);
 
 app.directive('tooltip', Tooltip);
 
