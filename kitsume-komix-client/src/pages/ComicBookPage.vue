@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import { onMounted, ref, computed } from 'vue';
@@ -12,6 +11,7 @@ import ComicThumbnail from '@/components/ComicThumbnail.vue';
 import EmptyState from '@/components/states/EmptyState.vue';
 import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
 import SkeletonPage from '@/components/states/SkeletonPage.vue';
+import { getButtonClasses } from '@/composables/useButton';
 import { useAuthStore } from '@/stores/auth';
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
 import { useComicSeriesStore } from '@/stores/comic-series';
@@ -373,29 +373,25 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 		<div class="space-y-6">
 			<!-- Header with Back and Issue Navigation -->
 			<div class="flex items-center justify-between">
-				<Button @click="$router.back()" class="active:scale-95 transition-transform duration-100">
+				<button :class="[getButtonClasses({}), 'active:scale-95 transition-transform duration-100']" @click="$router.back()">
 					<v-icon name="io-arrow-back"/>
 					Back
-				</Button>
+				</button>
 				<div class="flex items-center gap-2">
-					<Button
+					<button
 						:disabled="!prevComic"
 						@click="prevComic && navigateToComic(prevComic.id)"
-						severity="secondary"
-						size="small"
-						class="active:scale-95 transition-transform"
+						:class="[getButtonClasses({ severity: 'secondary', size: 'small', disabled: !prevComic }), 'active:scale-95 transition-transform']"
 					>
 						<v-icon name="io-play-skip-back"/> Previous Issue
-					</Button>
-					<Button
+					</button>
+					<button
 						:disabled="!nextComic"
 						@click="nextComic && navigateToComic(nextComic.id)"
-						severity="secondary"
-						size="small"
-						class="active:scale-95 transition-transform"
+						:class="[getButtonClasses({ severity: 'secondary', size: 'small', disabled: !nextComic }), 'active:scale-95 transition-transform']"
 					>
 						Next Issue <v-icon name="io-play-skip-forward"/>
-					</Button>
+					</button>
 				</div>
 			</div>
 
@@ -477,16 +473,17 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 
 					<!-- Actions -->
 					<div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-						<Button class="w-full sm:flex-1 bg-brand border-brand text-white hover:brightness-110 active:scale-95 transition-all font-bold text-lg py-3" @click="openComicReader">
+						<button :class="['w-full sm:flex-1 bg-brand border-brand text-white hover:brightness-110 active:scale-95 transition-all font-bold text-lg py-3 inline-flex items-center justify-center gap-2 rounded-lg']" @click="openComicReader">
 							<AppIcon name="book" /> Read Comic
-						</Button>
+						</button>
 						<div class="flex gap-2 sm:gap-3 w-full sm:w-auto">
-							<Button severity="info" class="flex-1 sm:flex-none" @click="setComicToRead(comicBookData.id)">
+							<button :class="[getButtonClasses({ severity: 'info' }), 'flex-1 sm:flex-none']" @click="setComicToRead(comicBookData.id)">
 								<AppIcon name="check" /> Mark Read
-							</Button>
-							<Button severity="secondary" class="flex-1 sm:flex-none" :disabled="isDownloading" :loading="isDownloading" @click="downloadComic(comicBookData.id)">
-								<AppIcon name="download" /> Download
-							</Button>
+							</button>
+							<button :class="[getButtonClasses({ severity: 'secondary', disabled: isDownloading, loading: isDownloading }), 'flex-1 sm:flex-none']" :disabled="isDownloading" @click="downloadComic(comicBookData.id)">
+								<span v-if="isDownloading" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-text-primary border-t-transparent" />
+								<AppIcon v-else name="download" /> Download
+							</button>
 						</div>
 					</div>
 				</div>
@@ -521,9 +518,9 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 				<TabPanel header="Lists" value="lists">
 					<div v-if="comicBookListsData.length === 0" class="text-center py-8">
 						<p class="text-text-muted mb-4">Comic is not part of any lists</p>
-						<Button severity="success" @click="showAddListDialog = true">
+						<button :class="getButtonClasses({ severity: 'success' })" @click="showAddListDialog = true">
 							<AppIcon name="plus" /> Add Comic To List
-						</Button>
+						</button>
 					</div>
 					<div v-else>
 						<p class="text-text-muted">Lists will be displayed here</p>
@@ -533,25 +530,23 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 
 			<!-- Bottom Issue Navigation -->
 			<div class="flex items-center justify-between pt-4 border-t border-surface-overlay">
-				<Button
+				<button
 					:disabled="!prevComic"
 					@click="prevComic && navigateToComic(prevComic.id)"
-					severity="secondary"
-					class="active:scale-95 transition-transform"
+					:class="[getButtonClasses({ severity: 'secondary', disabled: !prevComic }), 'active:scale-95 transition-transform']"
 				>
 					<v-icon name="io-play-skip-back"/> Previous Issue
-				</Button>
+				</button>
 				<span class="text-sm text-text-muted">
 					Issue {{ comicBookData.issueNumber || '?' }} of {{ sortedSeriesComics.length || '?' }}
 				</span>
-				<Button
+				<button
 					:disabled="!nextComic"
 					@click="nextComic && navigateToComic(nextComic.id)"
-					severity="secondary"
-					class="active:scale-95 transition-transform"
+					:class="[getButtonClasses({ severity: 'secondary', disabled: !nextComic }), 'active:scale-95 transition-transform']"
 				>
 					Next Issue <v-icon name="io-play-skip-forward"/>
-				</Button>
+				</button>
 			</div>
 
 			<!-- Comic Reader Modal -->
@@ -570,13 +565,15 @@ const formatFileSize = (bytes: number | null | undefined): string => {
 							placeholder="Enter list name"
 							class="flex-1 px-3 py-2 bg-surface-base border border-surface-overlay rounded-md text-text-primary placeholder-text-muted focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
 						/>
-						<Button @click="() => {}">
+						<button :class="getButtonClasses({})" @click="() => {}">
 							<AppIcon name="plus" />
-						</Button>
+						</button>
 					</div>
 					
 					<div class="flex gap-2 justify-end">
-						<Button label="Cancel" severity="secondary" @click="showAddListDialog = false; listNameInput = ''" />
+						<button :class="getButtonClasses({ severity: 'secondary' })" @click="showAddListDialog = false; listNameInput = ''">
+							Cancel
+						</button>
 					</div>
 				</div>
 			</div>

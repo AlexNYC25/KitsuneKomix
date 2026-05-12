@@ -1,9 +1,9 @@
 <script setup lang="ts">
-	import Button from 'primevue/button';
 	import { computed, ref, onMounted } from 'vue';
 
 	import LibraryPathNavigation from '@/components/Settings/LibraryPathNavigation.vue';
 	import FormModal from '@/components/ui/FormModal.vue';
+	import { getButtonClasses } from '@/composables/useButton';
 	import { useAuthStore } from '@/stores/auth';
 	import { useLibrariesStore } from '@/stores/libraries';
 	import { numberToDataSize } from '@/utilities/formatting';
@@ -164,13 +164,13 @@
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="text-2xl font-semibold">Libraries</h2>
 
-			<Button
+			<button
 				v-if="isAdmin"
-				severity="info"
+				:class="getButtonClasses({ severity: 'info' })"
 				@click="handleAddLibrary"
 			>
 				<AppIcon name="plus" /> Add Library
-			</Button>
+			</button>
 		</div>
 
 		<!-- Add Library Form -->
@@ -210,22 +210,22 @@
 				<p v-if="addLibraryError" class="text-sm text-red-500">{{ addLibraryError }}</p>
 
 				<div class="flex items-center gap-2">
-				<Button
+				<button
 					type="submit"
-					severity="info"
-					:loading="isSavingLibrary"
+					:class="getButtonClasses({ severity: 'info', loading: isSavingLibrary })"
+					:disabled="isSavingLibrary"
 				>
-					<AppIcon name="check" /> Save Library
-				</Button>
-				<Button
+					<span v-if="isSavingLibrary" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+					<AppIcon v-else name="check" /> Save Library
+				</button>
+				<button
 					type="button"
-					severity="secondary"
-					text
+					:class="getButtonClasses({ severity: 'secondary', text: true, disabled: isSavingLibrary })"
 					@click="resetAddLibraryForm"
 					:disabled="isSavingLibrary"
 				>
 					<AppIcon name="times" /> Cancel
-				</Button>
+				</button>
 				</div>
 			</form>
 		</FormModal>
@@ -276,22 +276,22 @@
 				<p v-if="editLibraryError" class="text-sm text-red-500">{{ editLibraryError }}</p>
 
 				<div class="flex items-center gap-2">
-				<Button
+				<button
 					type="submit"
-					severity="info"
-					:loading="isEditingLibrary"
+					:class="getButtonClasses({ severity: 'info', loading: isEditingLibrary })"
+					:disabled="isEditingLibrary"
 				>
-					<AppIcon name="check" /> Save Library
-				</Button>
-				<Button
+					<span v-if="isEditingLibrary" class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+					<AppIcon v-else name="check" /> Save Library
+				</button>
+				<button
 					type="button"
-					severity="secondary"
-					text
+					:class="getButtonClasses({ severity: 'secondary', text: true, disabled: isEditingLibrary })"
 					@click="resetEditLibraryForm"
 					:disabled="isEditingLibrary"
 				>
 					<AppIcon name="times" /> Cancel
-				</Button>
+				</button>
 				</div>
 			</form>
 		</FormModal>
@@ -329,24 +329,20 @@
 
 					<!-- Library Actions -->
 					<div class="col-span-1 grid grid-rows-2 gap-2">
-						<Button
+						<button
 							type="button"
-							severity="secondary"
-							text
-							size="small"
+							:class="getButtonClasses({ severity: 'secondary', text: true, size: 'small' })"
 							@click="library.id !== undefined && handleEditLibrary(library.id)"
 						>
 							<AppIcon name="pencil" /> Edit
-						</Button>
-						<Button
+						</button>
+						<button
 							type="button"
-							severity="danger"
-							text
-							size="small"
+							:class="getButtonClasses({ severity: 'danger', text: true, size: 'small' })"
 							@click="library.id !== undefined && handleDeleteLibrary(library.id)"
 						>
 							<AppIcon name="trash" /> Delete
-						</Button>
+						</button>
 					</div>
 				</div>
 			</div>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button';
 import Paginator from 'primevue/paginator';
 import type { PageState } from 'primevue/paginator';
 import TabPanel from 'primevue/tabpanel';
@@ -12,6 +11,7 @@ import ComicThumbnail from '@/components/ComicThumbnail.vue';
 import EmptyState from '@/components/states/EmptyState.vue';
 import ErrorBoundary from '@/components/states/ErrorBoundary.vue';
 import SkeletonPage from '@/components/states/SkeletonPage.vue';
+import { getButtonClasses } from '@/composables/useButton';
 import { useAuthStore } from '@/stores/auth';
 import { useComicSeriesStore } from '@/stores/comic-series';
 import type { ComicBook, ComicBooksSeriesResponse } from '@/types/comic-books.types';
@@ -245,10 +245,10 @@ onBeforeUnmount(() => {
 <template>
 	<div class="comic-series-page flex flex-col w-full h-full p-4 overflow-auto">
 		<div class="flex items-center justify-between mb-6">
-			<Button @click="$router.back()" class="active:scale-95 transition-transform duration-100">
+			<button :class="[getButtonClasses({}), 'active:scale-95 transition-transform duration-100']" @click="$router.back()">
         <v-icon name="io-arrow-back"/>
         Back
-      </Button>
+      </button>
 		</div>
 
 		<ErrorBoundary>
@@ -324,22 +324,20 @@ onBeforeUnmount(() => {
 					<div class="flex items-center justify-between mb-6">
 						<h2 class="text-2xl font-bold font-display text-text-primary">Comic Issues</h2>
 						<div class="flex gap-2">
-							<Button
-								:severity="viewMode === 'grid' ? 'info' : 'secondary'"
+							<button
 								@click="toggleViewMode('grid')"
 								v-tooltip="'Grid View'"
-								size="small"
+								:class="getButtonClasses({ severity: viewMode === 'grid' ? 'info' : 'secondary', size: 'small' })"
 							>
                 <v-icon name="io-grid-outline"/>
-              </Button>
-							<Button
-								:severity="viewMode === 'list' ? 'info' : 'secondary'"
+              </button>
+							<button
 								@click="toggleViewMode('list')"
 								v-tooltip="'List View'"
-								size="small"
+								:class="getButtonClasses({ severity: viewMode === 'list' ? 'info' : 'secondary', size: 'small' })"
 							>
-                <v-icon name="io-list"/>
-              </Button>
+								<v-icon name="io-list"/>
+							</button>
 						</div>
 					</div>
 

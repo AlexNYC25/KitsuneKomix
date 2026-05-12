@@ -1,11 +1,11 @@
 <script setup lang="ts">
-	import Button from 'primevue/button';
 	import { computed, ref, onMounted } from 'vue';
 
 	import AddUser from '@/components/forms/AddUser.vue';
 	import DeleteUser from '@/components/forms/DeleteUser.vue';
 	import EditPassword from '@/components/forms/EditPassword.vue';
 	import EditUser from '@/components/forms/EditUser.vue';
+	import { getButtonClasses } from '@/composables/useButton';
 	import { useAuthStore } from '@/stores/auth';
 	import { useUsersStore } from '@/stores/users';
 
@@ -75,13 +75,13 @@
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="text-2xl font-semibold">Users</h2>
 
-			<Button
+			<button
 				v-if="isAdmin"
-				severity="info"
+				:class="getButtonClasses({ severity: 'info' })"
 				@click="handleAddUser"
 			>
 				<AppIcon name="plus" /> Add User
-			</Button>
+			</button>
 		</div>
 
 		<!-- Users List -->

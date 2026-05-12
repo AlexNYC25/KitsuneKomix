@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
 import { useRouter } from 'vue-router'
+
+import { getButtonClasses } from '@/composables/useButton'
 
 defineProps<{
   icon?: string
@@ -18,11 +19,12 @@ const router = useRouter()
     <v-icon v-if="icon" :name="icon" class="text-5xl text-text-muted mb-4" />
     <h3 class="text-xl font-semibold text-text-primary mb-2">{{ title }}</h3>
     <p class="text-text-secondary max-w-md mb-6">{{ message }}</p>
-    <Button
+    <button
       v-if="actionLabel && actionRoute"
-      :label="actionLabel"
-      severity="info"
+      :class="getButtonClasses({ severity: 'info' })"
       @click="router.push(actionRoute)"
-    />
+    >
+      {{ actionLabel }}
+    </button>
   </div>
 </template>

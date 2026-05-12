@@ -23,11 +23,10 @@
  * ```
  */
 import { motion } from 'motion-v';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
 import { ref, computed, onBeforeUnmount, watch } from 'vue';
 
 import SkeletonBase from '@/components/states/SkeletonBase.vue';
+import { getButtonClasses } from '@/composables/useButton';
 import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
 import { apiClient, composeStaticUrl } from '@/utilities/apiClient';
 import { resolveImageSrc, revokeBlobUrl, revokeBlobUrls } from '@/utilities/image';
@@ -96,6 +95,27 @@ const controlsTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const showContinuePrompt = ref(false);
 /** The page number where the user left off */
 const savedProgressPage = ref(1);
+
+const settingsDialogRef = ref<HTMLDialogElement | null>(null);
+const continueDialogRef = ref<HTMLDialogElement | null>(null);
+
+watch(showSettings, (val) => {
+  const el = settingsDialogRef.value;
+  if (!el) return;
+  if (val) { el.showModal(); }
+  else { el.close(); }
+});
+
+watch(showContinuePrompt, (val) => {
+  const el = continueDialogRef.value;
+  if (!el) return;
+  if (val) { el.showModal(); }
+  else { el.close(); }
+});
+
+const closeSettingsDialog = () => {
+  showSettings.value = false;
+};
 
 // ---- Computed properties ----
 
@@ -488,108 +508,83 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 				<!-- Inline Mode Buttons -->
 				<div class="hidden md:flex items-center gap-1">
 					<!-- Reading Mode -->
-					<Button
-						:pressed="readingMode === 'single'"
+					<button
 						@click="readingMode = 'single'"
 						v-tooltip.bottom="generateTooltipDelay('Single Page Mode', 'medium')"
-						:severity="readingMode === 'single' ? 'info' : 'secondary'"
-						size="small"
-						rounded
+						:class="getButtonClasses({ severity: readingMode === 'single' ? 'info' : 'secondary', size: 'small', rounded: true })"
 					>
 						<v-icon name="io-book" />
-					</Button>
-					<Button
-						:pressed="readingMode === 'webtoon'"
+					</button>
+					<button
 						@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
 						v-tooltip.bottom="generateTooltipDelay('Webtoon Mode', 'medium')"
-						:severity="readingMode === 'webtoon' ? 'info' : 'secondary'"
-						size="small"
-						rounded
+						:class="getButtonClasses({ severity: readingMode === 'webtoon' ? 'info' : 'secondary', size: 'small', rounded: true })"
 					>
 						<v-icon name="io-document" />
-					</Button>
+					</button>
 
 					<div class="w-px h-6 bg-white/10 mx-1"></div>
 
 					<!-- Scroll Direction (Single Mode Only) -->
 					<template v-if="readingMode === 'single'">
-						<Button
-							:pressed="scrollDirection === 'ltr'"
+						<button
 							@click="scrollDirection = 'ltr'"
 							v-tooltip.bottom="generateTooltipDelay('LTR', 'medium')"
-							:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
-							size="small"
-							rounded
+							:class="getButtonClasses({ severity: scrollDirection === 'ltr' ? 'info' : 'secondary', size: 'small', rounded: true })"
 						>
 							<v-icon name="io-caret-forward-circle" />
-						</Button>
-						<Button
-							:pressed="scrollDirection === 'rtl'"
+						</button>
+						<button
 							@click="scrollDirection = 'rtl'"
 							v-tooltip.bottom="generateTooltipDelay('RTL', 'medium')"
-							:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
-							size="small"
-							rounded
+							:class="getButtonClasses({ severity: scrollDirection === 'rtl' ? 'info' : 'secondary', size: 'small', rounded: true })"
 						>
 							<v-icon name="io-caret-back-circle" />
-						</Button>
-						<Button
-							:pressed="scrollDirection === 'vertical'"
+						</button>
+						<button
 							@click="scrollDirection = 'vertical'"
 							v-tooltip.bottom="generateTooltipDelay('Vertical', 'medium')"
-							:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
-							size="small"
-							rounded
+							:class="getButtonClasses({ severity: scrollDirection === 'vertical' ? 'info' : 'secondary', size: 'small', rounded: true })"
 						>
 							<v-icon name="io-caret-down-circle" />
-						</Button>
+						</button>
 
 						<div class="w-px h-6 bg-white/10 mx-1"></div>
 
 						<!-- Fit Mode -->
-						<Button
-							:pressed="fitMode === 'height'"
+						<button
 							@click="fitMode = 'height'"
 							v-tooltip.bottom="'Fit Height'"
-							:severity="fitMode === 'height' ? 'info' : 'secondary'"
-							size="small"
-							rounded
+							:class="getButtonClasses({ severity: fitMode === 'height' ? 'info' : 'secondary', size: 'small', rounded: true })"
 						>
 							<v-icon name="bi-arrows-expand" />
-						</Button>
-						<Button
-							:pressed="fitMode === 'width'"
+						</button>
+						<button
 							@click="fitMode = 'width'"
 							v-tooltip.bottom="'Fit Width'"
-							:severity="fitMode === 'width' ? 'info' : 'secondary'"
-							size="small"
-							rounded
+							:class="getButtonClasses({ severity: fitMode === 'width' ? 'info' : 'secondary', size: 'small', rounded: true })"
 						>
 							<v-icon name="bi-arrows-collapse" />
-						</Button>
+						</button>
 
 						<div class="w-px h-6 bg-white/10 mx-1"></div>
 					</template>
 				</div>
 
-				<Button
+				<button
 					@click="showSettings = true"
 					v-tooltip.left="generateTooltipDelay('Reader Settings', 'medium')"
-					severity="secondary"
-					size="small"
-					rounded
+					:class="getButtonClasses({ severity: 'secondary', size: 'small', rounded: true })"
 				>
 					<v-icon name="io-settings-sharp" />
-				</Button>
-				<Button
+				</button>
+				<button
 					@click="closeReader"
 					v-tooltip.left="generateTooltipDelay('Close Reader', 'medium')"
-					severity="secondary"
-					size="small"
-					rounded
+					:class="getButtonClasses({ severity: 'secondary', size: 'small', rounded: true })"
 				>
 					<v-icon name="io-close" />
-				</Button>
+				</button>
 			</div>
 		</div>
 
@@ -756,28 +751,24 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 		>
 			<div v-if="readingMode === 'single'" class="flex items-center gap-2 md:gap-3">
 				<!-- First Page Button -->
-				<Button
+				<button
 					:disabled="isFirstPage || isLoading"
 					@click="goToPage(1)"
 					v-tooltip.top="generateTooltipDelay('First Page', 'high')"
-					severity="secondary"
-					size="small"
-					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
+					:class="[getButtonClasses({ severity: 'secondary', size: 'small', disabled: isFirstPage || isLoading }), 'flex-shrink-0 active:scale-95 transition-transform duration-100']"
 				>
 					<v-icon name="io-play-skip-back" />
-				</Button>
+				</button>
 
 				<!-- Previous Page Button -->
-				<Button
+				<button
 					:disabled="isFirstPage || isLoading"
 					@click="previousPage"
 					v-tooltip.top="generateTooltipDelay('Previous Page', 'high')"
-					severity="secondary"
-					size="small"
-					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
+					:class="[getButtonClasses({ severity: 'secondary', size: 'small', disabled: isFirstPage || isLoading }), 'flex-shrink-0 active:scale-95 transition-transform duration-100']"
 				>
 					<v-icon name="io-play-back" />
-				</Button>
+				</button>
 
 				<!-- Page Slider -->
 				<div class="flex-1 flex items-center gap-2">
@@ -794,180 +785,165 @@ const generateTooltipDelay = (msg: string, type: 'low' | 'medium' | 'high'): { v
 				</div>
 
 				<!-- Next Page Button -->
-				<Button
+				<button
 					:disabled="isLastPage || isLoading"
 					@click="nextPage"
 					v-tooltip.top="generateTooltipDelay('Next Page', 'high')"
-					severity="secondary"
-					size="small"
-					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
+					:class="[getButtonClasses({ severity: 'secondary', size: 'small', disabled: isLastPage || isLoading }), 'flex-shrink-0 active:scale-95 transition-transform duration-100']"
 				>
 					<v-icon name="io-play-forward" />
-				</Button>
+				</button>
 
 				<!-- Last Page Button -->
-				<Button
+				<button
 					:disabled="isLastPage || isLoading"
 					@click="goToPage(totalPages)"
 					v-tooltip.top="generateTooltipDelay('Last Page', 'high')"
-					severity="secondary"
-					size="small"
-					class="flex-shrink-0 active:scale-95 transition-transform duration-100"
+					:class="[getButtonClasses({ severity: 'secondary', size: 'small', disabled: isLastPage || isLoading }), 'flex-shrink-0 active:scale-95 transition-transform duration-100']"
 				>
 					<v-icon name="io-play-skip-forward" />
-				</Button>
+				</button>
 			</div>
 		</div>
 
 		<!-- Continue Reading Prompt -->
-		<Dialog
-			v-model:visible="showContinuePrompt"
-			:modal="false"
-			header="Continue Reading?"
-			:style="{ width: '90vw', maxWidth: '400px' }"
-			class="p-dialog-header-light"
-			:closable="false"
+		<dialog
+			ref="continueDialogRef"
+			class="fixed inset-0 z-50 m-auto w-[90vw] max-w-[400px] rounded-xl bg-surface-base shadow-elevated border border-surface-overlay backdrop:bg-black/50"
+			@close="showContinuePrompt = false"
 		>
-			<p class="text-text-secondary mb-4">
-				You were on page {{ savedProgressPage }} of {{ totalPages }}. Continue where you left off?
-			</p>
-			<div class="flex justify-end gap-2">
-				<Button
-					label="Start Over"
-					severity="secondary"
-					size="small"
-					@click="startOver"
-				/>
-				<Button
-					label="Continue"
-					severity="primary"
-					size="small"
-					@click="continueReading"
-				/>
+			<div class="p-6">
+				<h2 class="text-lg font-semibold text-text-primary mb-4">Continue Reading?</h2>
+				<p class="text-text-secondary mb-4">
+					You were on page {{ savedProgressPage }} of {{ totalPages }}. Continue where you left off?
+				</p>
+				<div class="flex justify-end gap-2">
+					<button
+						:class="getButtonClasses({ severity: 'secondary', size: 'small' })"
+						@click="startOver"
+					>
+						Start Over
+					</button>
+					<button
+						:class="getButtonClasses({ severity: 'primary', size: 'small' })"
+						@click="continueReading"
+					>
+						Continue
+					</button>
+				</div>
 			</div>
-		</Dialog>
+		</dialog>
 
 		<!-- Settings Dialog -->
-		<Dialog
-			v-model:visible="showSettings"
-			modal
-			header="Reader Settings"
-			:style="isMobile() ? { width: '100vw', height: '100vh', maxHeight: '100vh', maxWidth: '100vw' } : { width: '90vw', maxWidth: '500px' }"
-			:class="isMobile() ? 'm-0 p-0 rounded-none' : 'p-dialog-header-light'"
+		<dialog
+			ref="settingsDialogRef"
+			class="fixed inset-0 z-50 m-auto rounded-xl bg-surface-base shadow-elevated border border-surface-overlay backdrop:bg-black/50 max-h-[90vh] overflow-y-auto"
+			:class="isMobile() ? 'w-full h-full max-w-full max-h-full rounded-none border-0' : 'w-[90vw] max-w-[500px]'"
+			@close="showSettings = false"
 		>
-			<div class="flex flex-col gap-4">
-				<!-- Scroll Direction Section (Single Mode Only) -->
-				<div v-if="readingMode === 'single'" class="flex flex-col gap-2">
-					<h3 class="text-sm font-semibold text-text-secondary">Scroll Direction</h3>
-					<div class="flex gap-2">
-						<Button
-							:pressed="scrollDirection === 'vertical'"
-							@click="scrollDirection = 'vertical'"
-							v-tooltip.top="generateTooltipDelay('Vertical', 'medium')"
-							:severity="scrollDirection === 'vertical' ? 'info' : 'secondary'"
-							size="small"
-							class="flex-1"
-						>
-							<v-icon name="io-caret-down-circle" />
-						</Button>
-						<Button
-							:pressed="scrollDirection === 'ltr'"
-							@click="scrollDirection = 'ltr'"
-							v-tooltip.top="generateTooltipDelay('LTR', 'medium')"
-							:severity="scrollDirection === 'ltr' ? 'info' : 'secondary'"
-							size="small"
-							class="flex-1"
-						>
-							<v-icon name="io-caret-forward-circle" />
-						</Button>
-						<Button
-							:pressed="scrollDirection === 'rtl'"
-							@click="scrollDirection = 'rtl'"
-							v-tooltip.top="generateTooltipDelay('RTL', 'medium')"
-							:severity="scrollDirection === 'rtl' ? 'info' : 'secondary'"
-							size="small"
-							class="flex-1"
-						>
-							<v-icon name="io-caret-back-circle" />
-						</Button>
-					</div>
+			<div class="p-6">
+				<div class="flex items-center justify-between mb-6">
+					<h2 class="text-lg font-semibold text-text-primary">Reader Settings</h2>
+					<button
+						:class="getButtonClasses({ severity: 'secondary', size: 'small', rounded: true })"
+						@click="closeSettingsDialog"
+					>
+						<v-icon name="io-close" />
+					</button>
 				</div>
-
-				<!-- Reading Mode Section -->
-				<div class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
-					<h3 class="text-sm font-semibold text-text-secondary">Reading Mode</h3>
-					<div class="flex gap-2">
-						<Button
-							:pressed="readingMode === 'single'"
-							@click="readingMode = 'single'"
-							v-tooltip.top="generateTooltipDelay('Single Page Mode', 'medium')"
-							:severity="readingMode === 'single' ? 'info' : 'secondary'"
-							size="small"
-							class="flex-1"
-						>
-							<v-icon name="io-book" />
-						</Button>
-						<Button
-							:pressed="readingMode === 'webtoon'"
-							@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
-							v-tooltip.top="generateTooltipDelay('Webtoon Mode', 'medium')"
-							:severity="readingMode === 'webtoon' ? 'info' : 'secondary'"
-							size="small"
-							class="flex-1"
-						>
-							<v-icon name="io-document" />
-						</Button>
+				<div class="flex flex-col gap-4">
+					<!-- Scroll Direction Section (Single Mode Only) -->
+					<div v-if="readingMode === 'single'" class="flex flex-col gap-2">
+						<h3 class="text-sm font-semibold text-text-secondary">Scroll Direction</h3>
+						<div class="flex gap-2">
+							<button
+								@click="scrollDirection = 'vertical'"
+								v-tooltip.top="generateTooltipDelay('Vertical', 'medium')"
+								:class="[getButtonClasses({ severity: scrollDirection === 'vertical' ? 'info' : 'secondary', size: 'small' }), 'flex-1']"
+							>
+								<v-icon name="io-caret-down-circle" />
+							</button>
+							<button
+								@click="scrollDirection = 'ltr'"
+								v-tooltip.top="generateTooltipDelay('LTR', 'medium')"
+								:class="[getButtonClasses({ severity: scrollDirection === 'ltr' ? 'info' : 'secondary', size: 'small' }), 'flex-1']"
+							>
+								<v-icon name="io-caret-forward-circle" />
+							</button>
+							<button
+								@click="scrollDirection = 'rtl'"
+								v-tooltip.top="generateTooltipDelay('RTL', 'medium')"
+								:class="[getButtonClasses({ severity: scrollDirection === 'rtl' ? 'info' : 'secondary', size: 'small' }), 'flex-1']"
+							>
+								<v-icon name="io-caret-back-circle" />
+							</button>
+						</div>
 					</div>
-				</div>
 
-				<!-- Display Mode Section (Single Mode Only) -->
-				<div v-if="readingMode === 'single'" class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
-					<h3 class="text-sm font-semibold text-text-secondary">Display Mode</h3>
-					<p class="text-xs text-text-muted mb-2">
-						{{ fitMode === 'height' ? 'Fit Height: Entire image visible in viewport' : 'Fit Width: Image fills width, scroll vertically' }}
-					</p>
-					<div class="flex gap-2">
-						<Button
-							:pressed="fitMode === 'height'"
-							@click="fitMode = 'height'"
-							v-tooltip.top="'Fit Height - Entire image visible'"
-							:severity="fitMode === 'height' ? 'info' : 'secondary'"
-							size="small"
-							class="flex-1"
-						>
-							<v-icon name="bi-arrows-expand" />
-						</Button>
-						<Button
-							:pressed="fitMode === 'width'"
-							@click="fitMode = 'width'"
-							v-tooltip.top="'Fit Width - Scroll vertically'"
-							:severity="fitMode === 'width' ? 'info' : 'secondary'"
-							size="small"
-							class="flex-1"
-						>
-							<v-icon name="bi-arrows-collapse" />
-						</Button>
+					<!-- Reading Mode Section -->
+					<div class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
+						<h3 class="text-sm font-semibold text-text-secondary">Reading Mode</h3>
+						<div class="flex gap-2">
+							<button
+								@click="readingMode = 'single'"
+								v-tooltip.top="generateTooltipDelay('Single Page Mode', 'medium')"
+								:class="[getButtonClasses({ severity: readingMode === 'single' ? 'info' : 'secondary', size: 'small' }), 'flex-1']"
+							>
+								<v-icon name="io-book" />
+							</button>
+							<button
+								@click="readingMode === 'single' ? (readingMode = 'webtoon', loadWebtoonPages()) : (readingMode = 'single')"
+								v-tooltip.top="generateTooltipDelay('Webtoon Mode', 'medium')"
+								:class="[getButtonClasses({ severity: readingMode === 'webtoon' ? 'info' : 'secondary', size: 'small' }), 'flex-1']"
+							>
+								<v-icon name="io-document" />
+							</button>
+						</div>
 					</div>
-				</div>
 
-				<!-- Zoom Slider Section (Single Mode Only) -->
-				<div v-if="readingMode === 'single' && fitMode === 'width'" class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
-					<h3 class="text-sm font-semibold text-text-secondary">Zoom Level</h3>
-					<div class="flex items-center gap-3">
-						<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">30%</span>
-						<input 
-							type="range" 
-							:min="30" 
-							:max="100" 
-							:value="singlePageImageWidth"
-							@input="(e) => singlePageImageWidth = parseInt((e.target as HTMLInputElement).value)"
-							class="flex-1 h-2 bg-surface-overlay rounded-lg appearance-none cursor-pointer"
-						/>
-						<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">{{ singlePageImageWidth }}%</span>
+					<!-- Display Mode Section (Single Mode Only) -->
+					<div v-if="readingMode === 'single'" class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
+						<h3 class="text-sm font-semibold text-text-secondary">Display Mode</h3>
+						<p class="text-xs text-text-muted mb-2">
+							{{ fitMode === 'height' ? 'Fit Height: Entire image visible in viewport' : 'Fit Width: Image fills width, scroll vertically' }}
+						</p>
+						<div class="flex gap-2">
+							<button
+								@click="fitMode = 'height'"
+								v-tooltip.top="'Fit Height - Entire image visible'"
+								:class="[getButtonClasses({ severity: fitMode === 'height' ? 'info' : 'secondary', size: 'small' }), 'flex-1']"
+							>
+								<v-icon name="bi-arrows-expand" />
+							</button>
+							<button
+								@click="fitMode = 'width'"
+								v-tooltip.top="'Fit Width - Scroll vertically'"
+								:class="[getButtonClasses({ severity: fitMode === 'width' ? 'info' : 'secondary', size: 'small' }), 'flex-1']"
+							>
+								<v-icon name="bi-arrows-collapse" />
+							</button>
+						</div>
+					</div>
+
+					<!-- Zoom Slider Section (Single Mode Only) -->
+					<div v-if="readingMode === 'single' && fitMode === 'width'" class="flex flex-col gap-2 border-t border-surface-overlay pt-4">
+						<h3 class="text-sm font-semibold text-text-secondary">Zoom Level</h3>
+						<div class="flex items-center gap-3">
+							<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">30%</span>
+							<input 
+								type="range" 
+								:min="30" 
+								:max="100" 
+								:value="singlePageImageWidth"
+								@input="(e) => singlePageImageWidth = parseInt((e.target as HTMLInputElement).value)"
+								class="flex-1 h-2 bg-surface-overlay rounded-lg appearance-none cursor-pointer"
+							/>
+							<span class="text-text-muted text-xs md:text-sm whitespace-nowrap">{{ singlePageImageWidth }}%</span>
+						</div>
 					</div>
 				</div>
 			</div>
-		</Dialog>
+		</dialog>
 	</div>
 </template>
 

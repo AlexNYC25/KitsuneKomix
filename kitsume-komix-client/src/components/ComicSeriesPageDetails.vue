@@ -1,6 +1,7 @@
 <script setup lang="ts">
-	import Button from 'primevue/button';
 	import { ref, computed } from 'vue';
+
+	import { getButtonClasses } from '@/composables/useButton';
 
 	const props = withDefaults(defineProps<{
 		comicMetadataDetailsLabel?: string;
@@ -39,13 +40,12 @@
 		
 		<!-- Show More/Less Button -->
 		<div v-if="hasMore" class="flex items-center">
-			<Button 
-				:label="isExpanded ? 'Show Less' : `Show More (+${hiddenCount})`"
+			<button 
 				@click="isExpanded = !isExpanded"
-				text
-				size="small"
-				class="text-brand hover:brightness-110"
-			/>
+				:class="[getButtonClasses({ text: true, size: 'small' }), 'text-brand hover:brightness-110']"
+			>
+				{{ isExpanded ? 'Show Less' : `Show More (+${hiddenCount})` }}
+			</button>
 		</div>
 	</div>
 </template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Button from 'primevue/button';
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
+import { getButtonClasses } from '@/composables/useButton';
 import { useAuthStore } from '@/stores/auth';
 import { useLibrariesStore } from '@/stores/libraries';
 
@@ -107,12 +107,12 @@ const userDisplayName = computed(() => {
 				</div>
 			</div>
 			<div id="sidebar-user-actions" class="flex gap-1 shrink-0">
-				<Button severity="info" class="!p-1.5 !min-w-0" rounded text @click="handleSettingsClick">
+				<button :class="[getButtonClasses({ severity: 'info', text: true, rounded: true }), '!p-1.5 !min-w-0']" @click="handleSettingsClick">
 					<v-icon name="md-manageaccounts" />
-				</Button>
-				<Button severity="info" class="!p-1.5 !min-w-0" rounded text @click="handleLogout">
+				</button>
+				<button :class="[getButtonClasses({ severity: 'info', text: true, rounded: true }), '!p-1.5 !min-w-0']" @click="handleLogout">
 					<v-icon name="md-logout" />
-				</Button>
+				</button>
 			</div>
 		</div>
 

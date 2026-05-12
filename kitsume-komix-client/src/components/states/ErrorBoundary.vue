@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onErrorCaptured } from 'vue'
 
+import { getButtonClasses } from '@/composables/useButton'
+
 withDefaults(defineProps<{
   fallbackMessage?: string
 }>(), {
@@ -25,7 +27,9 @@ const resetError = () => {
     <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
       <v-icon name="io-close" class="text-5xl text-brand-danger mb-4" />
       <h3 class="text-xl font-semibold text-text-primary mb-2">{{ fallbackMessage }}</h3>
-      <Button label="Try Again" severity="info" @click="resetError" />
+      <button :class="getButtonClasses({ severity: 'info' })" @click="resetError">
+        Try Again
+      </button>
     </div>
   </template>
   <template v-else>

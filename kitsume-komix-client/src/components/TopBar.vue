@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { getButtonClasses } from '@/composables/useButton'
 import { useTheme } from '@/composables/useTheme'
 import { useBreadcrumbStore } from '@/stores/breadcrumb'
 import { useComicSeriesStore } from '@/stores/comic-series'
@@ -82,15 +82,12 @@ watch([() => route.path, () => breadcrumbStore.comicBookSeriesId, () => breadcru
 	<header class="bg-surface-elevated border-b border-surface-overlay">
 		<div class="flex justify-between items-center gap-4 p-4">
 			<div id="top-bar-left" class="flex items-center gap-2 flex-grow min-w-0">
-				<Button
-					severity="info"
-					text
-					rounded
-					class="md:!hidden !p-2 !min-w-0 flex-shrink-0"
+				<button
+					:class="[getButtonClasses({ severity: 'info', text: true, rounded: true }), 'md:!hidden !p-2 !min-w-0 flex-shrink-0']"
 					@click="emit('toggleSidebar')"
 				>
 					<AppIcon name="bars" />
-				</Button>
+				</button>
 				<nav aria-label="breadcrumb">
 					<ol class="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
 						<li v-for="(item, i) in breadcrumbItems" :key="i" class="flex items-center gap-1 min-w-0 shrink-0">
@@ -111,15 +108,12 @@ watch([() => route.path, () => breadcrumbStore.comicBookSeriesId, () => breadcru
 						class="w-full pl-10 pr-4 py-2 bg-surface-base text-text-primary placeholder-text-muted border border-surface-overlay rounded-lg focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
 					/>
 				</div>
-				<Button
-					severity="info"
-					text
-					rounded
-					class="!p-2 !min-w-0"
+				<button
+					:class="[getButtonClasses({ severity: 'info', text: true, rounded: true }), '!p-2 !min-w-0']"
 					@click="toggleTheme"
 				>
 					<AppIcon :name="isDark ? 'sun' : 'moon'" />
-				</Button>
+				</button>
 			</div>
 		</div>
 	</header>

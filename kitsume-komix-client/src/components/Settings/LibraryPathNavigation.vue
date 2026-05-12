@@ -1,7 +1,7 @@
 <script setup lang="ts">
-	import Button from 'primevue/button';
 	import { computed, onMounted, ref, watch } from 'vue';
 
+	import { getButtonClasses } from '@/composables/useButton';
 	import { apiClient } from '@/utilities/apiClient';
 
 	const props = withDefaults(defineProps<{
@@ -136,16 +136,14 @@
 				<p class="text-xs text-text-muted break-all">
 					Current: {{ currentBrowsePath || 'App Comic Directory Base' }}
 				</p>
-				<Button
+				<button
 					type="button"
-					severity="secondary"
-					text
-					size="small"
+					:class="getButtonClasses({ severity: 'secondary', text: true, size: 'small', disabled: !canNavigateUp })"
 					@click="navigateUpDirectory"
 					:disabled="!canNavigateUp"
 				>
 					<AppIcon name="arrow-up" /> Up
-				</Button>
+				</button>
 			</div>
 
 			<div v-if="directoryError" class="text-sm text-red-500">
