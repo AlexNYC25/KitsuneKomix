@@ -4,6 +4,11 @@ import { queueLogger } from "#logger/loggers.ts";
 
 import { queueNames } from "#config/queues.ts";
 
+import type {
+	WorkerComicFileJob,
+	WorkerFilePathSeriesJob,
+} from "#types/index.ts";
+
 import {
 	saveComicBook,
 	saveComicBookMetadata,
@@ -15,12 +20,12 @@ export const comicBookWorker = new Worker(
 	async (job) => {
 		switch (job.name) {
 			case "save-comic-book":
-				return await saveComicBook(job.data as unknown as { filePath: string; seriesId: number });
+				return await saveComicBook(job.data as WorkerFilePathSeriesJob);
 			case "save-metadata":
-				await saveComicBookMetadata(job.data as unknown as { comicId: number; filePath: string });
+				await saveComicBookMetadata(job.data as WorkerComicFileJob);
 				break;
 			case "process-comic-book-images":
-				await processComicBookImages(job.data as unknown as { comicId: number; filePath: string });
+				await processComicBookImages(job.data as WorkerComicFileJob);
 				break;
 			default:
 				queueLogger.warn(`No processor defined for job name: ${job.name}`);
