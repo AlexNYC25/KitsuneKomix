@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
-import InputGroup from 'primevue/inputgroup'
-import InputGroupAddon from 'primevue/inputgroupaddon'
-import InputText from 'primevue/inputtext'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -33,7 +29,7 @@ const generateBreadcrumbs = async () => {
 	const items: {label: string, icon: string, to: string}[] = [
 		{
 			label: 'Home',
-			icon: 'pi pi-home',
+			icon: 'home',
 			to: '/'
 		}
 	]
@@ -44,7 +40,7 @@ const generateBreadcrumbs = async () => {
 			const seriesName = await getComicSeriesName(seriesId)
 			items.push({
 				label: seriesName,
-				icon: 'pi pi-book',
+				icon: 'book',
 				to: `/comic-series/${seriesId}`
 			})
 		}
@@ -60,14 +56,14 @@ const generateBreadcrumbs = async () => {
 				const seriesName = await getComicSeriesName(seriesId)
 				items.push({
 					label: seriesName,
-					icon: 'pi pi-book',
+					icon: 'book',
 					to: `/comic-series/${seriesId}`
 				})
 			}
 
 			items.push({
 				label: breadcrumbStore.comicBookTitle || 'Comic Book',
-				icon: 'pi pi-image',
+				icon: 'image',
 				to: `/comic-book/${bookId}`
 			})
 		}
@@ -95,15 +91,26 @@ watch([() => route.path, () => breadcrumbStore.comicBookSeriesId, () => breadcru
 				>
 					<AppIcon name="bars" />
 				</Button>
-				<Breadcrumb :model="breadcrumbItems" class="bg-transparent min-w-0 overflow-hidden" />
+				<nav aria-label="breadcrumb">
+					<ol class="flex items-center gap-1 text-sm min-w-0 overflow-hidden">
+						<li v-for="(item, i) in breadcrumbItems" :key="i" class="flex items-center gap-1 min-w-0 shrink-0">
+							<AppIcon :name="item.icon" class="shrink-0 text-text-muted" />
+							<router-link :to="item.to" class="truncate text-text-muted hover:text-brand transition-colors">
+								{{ item.label }}
+							</router-link>
+							<span v-if="i < breadcrumbItems.length - 1" class="text-text-muted mx-1 shrink-0">/</span>
+						</li>
+					</ol>
+				</nav>
 			</div>
 			<div id="top-bar-right" class="flex items-center gap-2 flex-shrink-0">
-				<InputGroup class="bg-surface-base">
-					<InputText placeholder="Keyword" class="bg-surface-base text-text-primary placeholder-text-muted" />
-					<InputGroupAddon class="bg-surface-base">
-						<AppIcon name="search" class="text-text-muted" />
-					</InputGroupAddon>
-				</InputGroup>
+				<div class="relative bg-surface-base rounded-lg">
+					<AppIcon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+					<input
+						placeholder="Keyword"
+						class="w-full pl-10 pr-4 py-2 bg-surface-base text-text-primary placeholder-text-muted border border-surface-overlay rounded-lg focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+					/>
+				</div>
 				<Button
 					severity="info"
 					text
