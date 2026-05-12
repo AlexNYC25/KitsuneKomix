@@ -1,6 +1,5 @@
 <script setup lang="ts">
 	import Button from 'primevue/button';
-	import Chip from 'primevue/chip';
 	import { ref, computed } from 'vue';
 
 	const props = withDefaults(defineProps<{
@@ -34,7 +33,7 @@
 				:key="index"
 				class="comic-series-page-detail-item"
 			>
-				<Chip :label="value" class="m-1" />
+				<span class="inline-flex items-center rounded-full px-3 py-0.5 text-sm bg-surface-overlay text-text-secondary m-1">{{ value }}</span>
 			</div>
 		</div>
 		
