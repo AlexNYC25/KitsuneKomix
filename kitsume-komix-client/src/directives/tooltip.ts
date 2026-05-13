@@ -1,15 +1,6 @@
 import type { ObjectDirective, DirectiveBinding } from 'vue'
 
-interface TooltipValue {
-  value: string
-  showDelay?: number
-}
-
-type TooltipBindingValue = string | TooltipValue
-
-interface TooltipState {
-  cleanup: () => void
-}
+import type { TooltipBindingValue, TooltipState } from '@/types/tooltip.types'
 
 const tooltipStates = new WeakMap<HTMLElement, TooltipState>()
 

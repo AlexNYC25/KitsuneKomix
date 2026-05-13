@@ -26,18 +26,10 @@ import { ref, computed, onBeforeUnmount, watch } from 'vue';
 
 import SkeletonBase from '@/components/states/SkeletonBase.vue';
 import { getButtonClasses } from '@/composables/useButton';
-import type { ComicBookById, ComicBookMetadata } from '@/types/comic-books.types';
+import type { ComicReaderProps } from '@/types/comic-reader.types';
 import { apiClient, composeStaticUrl } from '@/utilities/apiClient';
 import { resolveImageSrc, revokeBlobUrl, revokeBlobUrls } from '@/utilities/image';
 
-interface ComicReaderProps {
-	/** ID of the comic book to read */
-	comicBookId: number;
-	/** Display title shown in the top bar */
-	comicTitle: string;
-	/** Optional comic data for title extraction in the reader header */
-	comicBookData?: ComicBookById | ComicBookMetadata;
-}
 
 const props = defineProps<ComicReaderProps>();
 

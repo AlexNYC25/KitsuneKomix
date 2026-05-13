@@ -1,11 +1,6 @@
 import { ref, type Ref } from 'vue'
 
-export interface AppToast {
-  id: number
-  message: string
-  type: 'success' | 'error' | 'info'
-  duration: number
-}
+import type { AppToast } from '@/types/toast.types'
 
 const toasts = ref<AppToast[]>([])
 let nextId = 0

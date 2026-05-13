@@ -1,11 +1,4 @@
-export interface ButtonOptions {
-  severity?: 'primary' | 'secondary' | 'info' | 'success' | 'danger'
-  text?: boolean
-  size?: 'small'
-  rounded?: boolean
-  disabled?: boolean
-  loading?: boolean
-}
+import type { ButtonOptions } from '@/types/button.types'
 
 export function getButtonClasses(opts: ButtonOptions): string {
   const classes: string[] = [

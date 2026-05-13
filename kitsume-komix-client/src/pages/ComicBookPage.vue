@@ -13,10 +13,12 @@ import { getButtonClasses } from '@/composables/useButton';
 import { useAuthStore } from '@/stores/auth';
 import { useBreadcrumbStore } from '@/stores/breadcrumb';
 import { useComicSeriesStore } from '@/stores/comic-series';
+import type { MetadataSection } from '@/types/comic-book-page.types';
 import type { ComicBookById, ComicBookMetadata, GetComicBookThumbnailsResponse, ComicBookThumbnailsData, ComicBookThumbnail, ComicBookReadlist, ComicBook } from '@/types/comic-books.types';
 import { apiClient } from '@/utilities/apiClient';
 import { convertArrayOfCreditsToString } from '@/utilities/formatting';
 import { getThumbnailPathFromFilePath, buildComicDownloadUrl } from "@/utilities/urls";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -210,17 +212,6 @@ const metadataFieldToString = (field: string): string => {
 
 	return '';
 };
-
-interface MetadataSectionField {
-  key: string
-  label: string
-  maxVisible?: number
-}
-
-interface MetadataSection {
-  title: string
-  fields: MetadataSectionField[]
-}
 
 const METADATA_SECTIONS: MetadataSection[] = [
   {
