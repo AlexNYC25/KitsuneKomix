@@ -81,7 +81,13 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 			}
 		},
 		async fetchComicSeriesList(page: number = 1, pageSize: number = 20, sort: string = "latest"): Promise<ComicSeriesResponseItem[]> {
-			const cacheKey = createCacheKey(page, pageSize, sort);
+			const mapForCategoryToDbField: Record<string, string> = {
+				latest: 'createdAt',
+				updated: 'updatedAt',
+				name: 'name'
+			};
+
+			const cacheKey = createCacheKey(page, pageSize, mapForCategoryToDbField[sort] || 'createdAt');
 			const cached = this.comicSeriesCache.get(cacheKey);
 			
 			// Return cached data if available and less than 5 minutes old
