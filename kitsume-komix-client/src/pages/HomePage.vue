@@ -62,13 +62,13 @@ const hasData = computed(() =>
 
 			<ErrorBoundary>
 				<div id="home-latest-series" class="card w-full">
-					<ComicSeriesCarousel :comicSeriesData="latestSeries" labelText="Latest Series" />
+					<ComicSeriesCarousel :comicSeriesData="latestSeries" labelText="Latest Series" category="latest"/>
 				</div>
 			</ErrorBoundary>
 
 			<ErrorBoundary>
 				<div id="home-updated-series" class="card w-full">
-					<ComicSeriesCarousel :comicSeriesData="updatedSeries" labelText="Updated Series" />
+					<ComicSeriesCarousel :comicSeriesData="updatedSeries" labelText="Updated Series" category="updated" />
 				</div>
 			</ErrorBoundary>
 		</template>

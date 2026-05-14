@@ -11,6 +11,7 @@ const props = withDefaults(defineProps<{
   comicSeriesData: ComicSeriesCarouselItem[];
   labelText: string;
   isLoading?: boolean;
+  category: string; // e.g., "latest", "updated"
 }>(), {
   isLoading: false
 });
@@ -86,6 +87,16 @@ const scrollRight = () => {
 const goToComicSeries = (id: string | number) => {
   router.push(`/comic-series/${String(id)}`);
 }
+
+const goToSeeAll = () => {
+  if (props.category === 'latest') {
+    router.push('/comic-series/latest');
+  } else if (props.category === 'updated') {
+    router.push('/comic-series/updated');
+  } else {
+    router.push('/');
+  }
+}
 </script>
 
 <template>
@@ -95,7 +106,7 @@ const goToComicSeries = (id: string | number) => {
       <div class="text-lg font-bold">
         {{ labelText }}
       </div>
-      <span class="text-sm text-brand cursor-pointer hover:underline">
+      <span class="text-sm text-brand cursor-pointer hover:underline" @click="goToSeeAll">
         See All
       </span>
     </div>
