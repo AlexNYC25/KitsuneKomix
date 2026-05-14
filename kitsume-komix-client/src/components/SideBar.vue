@@ -29,6 +29,10 @@ const libraries = computed(() => {
   }));
 });
 
+const handleHomeClick = async () => {
+	await router.push('/');
+};
+
 const handleLogout = async () => {
 	authStore.logout();
 	await router.push('/login');
@@ -42,12 +46,14 @@ const userDisplayName = computed(() => {
 	const email = authStore.user?.email;
 	return email ? email.split('@')[0] : 'User';
 });
-</script><template>
+</script>
+<template>
   <div id="sidebar" class="flex flex-col h-full">
-    <div id="sidebar-header" class="px-4 pt-4 pb-3 border-b border-surface-elevated">
+    <div id="sidebar-header" v-on:click="handleHomeClick" class="px-4 pt-4 pb-3 border-b border-surface-elevated flex items-center gap-3">
+			<img src="@/assets/logo.svg" alt="Logo" class="w-10 h-10" />
       <h2 class="text-2xl font-bold font-display text-brand">
-			Kitsune Komix
-		</h2>
+				Kitsune Komix
+			</h2>
     </div>
 
 		<div id="sidebar-content" class="flex-1 overflow-y-auto">
@@ -55,7 +61,7 @@ const userDisplayName = computed(() => {
 				<div
 					class="flex items-center cursor-pointer transition-colors duration-150"
 					:class="isActive('/') ? 'border-l-2 border-brand bg-brand/10 text-white' : 'border-l-2 border-transparent hover:border-brand/50 hover:bg-white/5 text-text-secondary hover:text-white'"
-					@click="router.push('/')"
+					@click="handleHomeClick"
 				>
 					<v-icon name="la-home-solid" class="ml-4 shrink-0"/>
 					<span class="ml-3 py-2 text-sm">Home</span>
