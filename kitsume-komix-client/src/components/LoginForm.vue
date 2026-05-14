@@ -71,8 +71,10 @@
 </script>
 
 <template>
-	<div class="bg-slate-900 shadow-lg p-8 rounded-lg">
-		<div class="flex justify-center mb-6">
+	<div class="shadow-lg p-8 rounded-lg" style="background-color: var(--color-surface-overlay);">
+		
+		<div class=" flex flex-col items-center justify-center mb-6" >
+			<img src="@/assets/logo.svg" alt="Logo" class="w-28 h-28 mb-6" />
 			<h1 class="text-2xl font-bold font-display text-text-primary">
 				Kitsune Komix Login
 			</h1>
