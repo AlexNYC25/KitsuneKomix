@@ -1,5 +1,12 @@
 import type { paths } from '@/openapi/openapi-schema';
 
+// /comic-series/ endpoint types
+export type GetComicSeriesResponse = paths['/comic-series']['get']['responses']['200']['content']['application/json'];
+
+export type ComicSeriesListData = GetComicSeriesResponse['data'];
+
+export type ComicSeriesListItem = ComicSeriesListData[number];
+
 // /comic-series/{id} endpoint types
 export type GetComicSeriesByIdResponse = paths['/comic-series/{id}']['get']['responses']['200']['content']['application/json'];
 
