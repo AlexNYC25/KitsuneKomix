@@ -71,7 +71,7 @@
 </script>
 
 <template>
-	<div class="shadow-lg p-8 rounded-lg" style="background-color: var(--color-surface-overlay);">
+	<div class="shadow-lg p-8 rounded-lg bg-surface-overlay">
 		
 		<div class=" flex flex-col items-center justify-center mb-6" >
 			<img src="@/assets/logo.svg" alt="Logo" class="w-28 h-28 mb-6" />
