@@ -3,7 +3,7 @@ import { existsSync } from "@std/fs";
 import { join } from "@std/path";
 
 import { apiLogger } from "#logger/loggers.ts";
-import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+import { requireAuth, requireCookieAuth } from "#modules/auth/middleware/authChecks.ts";
 
 import type {
   AppEnv,
@@ -38,7 +38,7 @@ imageRouter.openapi(
       summary: "Get thumbnail image",
       description: "Retrieve a thumbnail image from the cache directory.",
       tags: ["Images"],
-      middleware: [requireAuth],
+      middleware: [requireCookieAuth],
       request: {
         params: ParamImagePathSchema,
       },
@@ -90,8 +90,6 @@ imageRouter.openapi(
     },
   ),
   async (c) => {
-    const userId = c.get("userId")!;
-
     try {
       const { imagePath }: { imagePath: string } = c.req.valid("param");
 
