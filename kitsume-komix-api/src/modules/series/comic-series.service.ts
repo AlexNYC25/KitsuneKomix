@@ -125,6 +125,8 @@ const fetchAComicSeriesAssociatedMetadataById = async (
     0,
   );
   let thumbnailUrl: string | undefined;
+  let comicYears: number[] | undefined;
+
   if (comicBooksBelongingToSeries.length > 0) {
     // sort the comic books by their issue number (if they have one) to ensure we get the thumbnail for the first comic book in the series, otherwise we might end up with the thumbnail for a random comic book in the series which would be bad UX. If issue number is not available, we can sort by release date or just take the first comic book in the list.
     const comicBooksBelongingToSeriesSorted: ComicBookWithMetadata[] = [...comicBooksBelongingToSeries];
@@ -143,7 +145,22 @@ const fetchAComicSeriesAssociatedMetadataById = async (
       comicBooksBelongingToSeriesSorted[0].id,
     );
     thumbnailUrl = firstComicWithThumbnail?.thumbnailUrl;
+
+    const comicYearsSet = comicBooksBelongingToSeriesSorted.reduce((years: Set<number>, comic) => {
+      if (comic.publicationDate) {
+        const year = new Date(comic.publicationDate).getFullYear();
+        years.add(year);
+      }
+      return years;
+    }, new Set<number>());
+
+    if (comicYearsSet.size > 0) {
+      comicYears = Array.from(comicYearsSet).sort((a, b) => a - b);
+    } else {
+      comicYears = undefined;
+    }
   }
+
   const credits: ComicBookMetadataOnly =
     compileTheCompleteComicSeriesCreditsMetadata(comicBooksBelongingToSeries);
 
@@ -153,6 +170,7 @@ const fetchAComicSeriesAssociatedMetadataById = async (
     totalSize,
     thumbnailUrl,
     credits,
+    years: comicYears,
   };
 };
 
