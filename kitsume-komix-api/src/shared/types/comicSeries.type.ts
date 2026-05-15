@@ -1,4 +1,4 @@
-import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
 import type { ComicSeries } from "#types/database.types.ts";
 
@@ -32,6 +32,7 @@ export type ComicSeriesMetadata = {
   totalSize: number; // in bytes
   thumbnailUrl?: string;
   credits: ComicBookMetadataOnly;
+  years?: number[] | undefined; // years in which comics in the series were published
 };
 
 export type ComicSeriesWithMetadata = ComicSeries & ComicSeriesMetadata;
