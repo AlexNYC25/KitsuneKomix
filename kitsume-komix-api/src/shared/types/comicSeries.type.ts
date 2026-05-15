@@ -1,10 +1,10 @@
+import type { z } from "zod";
+
 import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
-import type { ComicSeries } from "#types/database.types.ts";
+import type { ComicSeriesSchema, ComicSeriesMetaData } from "#zod/schemas/data/comicSeries.schema.ts";
 
 import type { ComicSeriesSortField } from "#types/parameters.type.ts";
-
-import type { ComicBookMetadataOnly } from "#types/comicBook.type.ts";
 
 export type AllowedComicSeriesSortFilterProperties =
   keyof typeof QueryableColumns["comicSeries"]["filter"];
@@ -27,12 +27,6 @@ export type ComicSeriesFilteringAndSortingParams = {
   limit?: number;
 };
 
-export type ComicSeriesMetadata = {
-  totalComicBooks: number;
-  totalSize: number; // in bytes
-  thumbnailUrl?: string;
-  credits: ComicBookMetadataOnly;
-  years?: number[] | undefined; // years in which comics in the series were published
-};
+export type ComicSeriesMetadata = z.infer<typeof ComicSeriesMetaData>;
 
-export type ComicSeriesWithMetadata = ComicSeries & ComicSeriesMetadata;
+export type ComicSeriesWithMetadata = z.infer<typeof ComicSeriesSchema>;
