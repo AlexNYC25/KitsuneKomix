@@ -46,7 +46,7 @@ const withAuthHeader = (request: Request): Request => {
  * @returns A promise that resolves to the fetch Response object.
  */
 export async function authenticatedImageFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  const baseRequest = new Request(input, init);
+  const baseRequest = new Request(input, { ...init, credentials: 'include' });
   let response = await fetch(withAuthHeader(baseRequest.clone()));
 
   if (response.status === 401 && refreshToken && onTokenRefresh) {
@@ -98,6 +98,7 @@ const authMiddleware: Middleware = {
 
 export const apiClient = createClient<paths>({
   baseUrl: apiClientBaseURL,
+  credentials: 'include',
 });
 
 // Apply the auth middleware
