@@ -99,8 +99,6 @@ app.openapi(
   async (c) => {
     const queryData: QueryData = c.req.valid("query");
 
-    const userId = c.get("userId")!;
-
     const serviceData: RequestParametersValidated<
       ComicSeriesSortField,
       ComicSeriesFilterField
