@@ -21,6 +21,14 @@ import type { ComicSortField } from "./parameters.type.ts";
 
 export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
 
+import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+
+export type AllowedFilterProperties =
+  keyof typeof QueryableColumns["comics"]["filter"];
+
+export type AllowedSortProperties =
+  keyof typeof QueryableColumns["comics"]["sort"];
+
 export type ComicBookMetadataOnly = {
   writers?: ComicWriter[];
   pencillers?: ComicPenciller[];
@@ -37,19 +45,9 @@ export type ComicBookMetadataOnly = {
   locations?: ComicLocation[];
   storyArcs?: ComicStoryArc[];
   seriesGroups?: ComicSeriesGroup[];
-
-  thumbnailUrl?: string;
 };
 
 export type ComicBookWithMetadata = ComicBook & ComicBookMetadataOnly;
-
-import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
-
-export type AllowedFilterProperties =
-  keyof typeof QueryableColumns["comics"]["filter"];
-
-export type AllowedSortProperties =
-  keyof typeof QueryableColumns["comics"]["sort"];
 
 // Filter types for advanced comic book querying
 export type ComicBookFilterItem = {
