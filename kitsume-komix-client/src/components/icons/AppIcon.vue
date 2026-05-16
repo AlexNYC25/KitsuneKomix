@@ -23,6 +23,8 @@ const piToOh: Record<string, string> = {
   pencil: 'io-pencil-sharp',
   trash: 'io-trash',
   'arrow-up': 'io-arrow-up',
+  list: 'md-list',
+  grid: 'md-gridview-sharp',
 }
 
 </script>

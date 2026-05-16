@@ -1,7 +1,7 @@
 import './assets/main.css'
 
 import { OhVueIcon, addIcons } from "oh-vue-icons";
-import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound, IoMenu, IoSearch, IoSunny, IoMoon, IoChevronBack, IoChevronForward, IoCheckmark, IoDownload, IoImage, IoArrowUp } from "oh-vue-icons/icons";
+import { LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound, IoMenu, IoSearch, IoSunny, IoMoon, IoChevronBack, IoChevronForward, IoCheckmark, IoDownload, IoImage, IoArrowUp, MdList, MdGridviewSharp } from "oh-vue-icons/icons";
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
@@ -15,7 +15,7 @@ const app = createApp(App)
 
 app.use(createPinia())
 
-addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound, IoMenu, IoSearch, IoSunny, IoMoon, IoChevronBack, IoChevronForward, IoCheckmark, IoDownload, IoImage, IoArrowUp);
+addIcons(LaHomeSolid, IoLibrarySharp, HiSolidLibrary, MdLibrarybooksSharp, MdManageaccounts, MdLogout, IoArrowBack, IoGridOutline, IoList, IoPlayBack, IoPlayForward, IoPlaySkipBack, IoPlaySkipForward, IoCaretBackCircle, IoCaretForwardCircle, IoCaretDownCircle, BiArrowsExpand, BiArrowsCollapse, IoClose, IoSettingsSharp, IoDocument, IoBook, MdMenubookSharp, MdLocallibrary, IoPerson, IoLockClosed, IoPencilSharp, IoAddCircle, IoTrash, MdListRound, IoMenu, IoSearch, IoSunny, IoMoon, IoChevronBack, IoChevronForward, IoCheckmark, IoDownload, IoImage, IoArrowUp, MdList, MdGridviewSharp );
 app.component("v-icon", OhVueIcon);
 app.component("AppIcon", AppIcon);
 
