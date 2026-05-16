@@ -15,7 +15,7 @@ const isActive = (path: string) => route.path === path;
 
 const bookmarks = ref([
 	{ label: 'Latest Comics', icon: 'md-menubook-sharp' },
-	{ label: 'Latest Series', icon: 'io-library-sharp' },
+	{ label: 'Latest Series', icon: 'io-library-sharp', path: '/comic-series/latest' },
 	{ label: 'All Comics', icon: 'md-menubook-sharp' },
 	{ label: 'All Comic Series', icon: 'io-library-sharp' },
 	{ label: 'All Comic Series Groups', icon: 'hi-solid-library' },
@@ -40,6 +40,12 @@ const handleLogout = async () => {
 
 const handleSettingsClick = async () => {
 	await router.push('/settings');
+};
+
+const handleBookmarkClick = async (path: string | undefined) => {
+	if (path) {
+		await router.push(path);
+	}
 };
 
 const userDisplayName = computed(() => {
@@ -75,7 +81,7 @@ const userDisplayName = computed(() => {
 					Bookmarks
 				</h3>
 				<div v-for="bookmark in bookmarks" :key="bookmark.label">
-				  <div class="flex items-center cursor-pointer transition-colors duration-150 border-l-2 border-transparent hover:border-brand/50 hover:bg-white/5 text-text-secondary hover:text-white">
+				  <div v-on:click="handleBookmarkClick(bookmark?.path)" class="flex items-center cursor-pointer transition-colors duration-150 border-l-2 border-transparent hover:border-brand/50 hover:bg-white/5 text-text-secondary hover:text-white">
 					<v-icon :name="bookmark.icon" class="ml-4 shrink-0" />
 					<span class="ml-3 py-2 text-sm">{{ bookmark.label }}</span>
 				  </div>
