@@ -25,6 +25,8 @@ const piToOh: Record<string, string> = {
   'arrow-up': 'io-arrow-up',
   list: 'md-list',
   grid: 'md-gridview-sharp',
+  filter: 'md-filteralt',
+  filterOff: 'md-filteraltoff',
 }
 
 </script>
