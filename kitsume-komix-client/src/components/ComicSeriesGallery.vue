@@ -12,6 +12,7 @@ import type { ComicSeriesListItem } from '@/types';
 const comics = ref<ComicSeriesListItem[]>([]);
 
 const showFilters = ref(false);
+const filtersAllowed = ref<any>();
 const filtersApplied = ref({
 	genre: [] as string[],
 	status: [] as string[],
@@ -41,6 +42,10 @@ onMounted(async () => {
 	const comicSeriesStore = useComicSeriesStore();
 	const data = await comicSeriesStore.fetchComicSeriesList(1, 20, "latest");
 	comics.value = data || [];
+
+	const filterValues = await comicSeriesStore.fetchComicSeriesFilterValues();
+	filtersAllowed.value = filterValues || null;
+
 })
 </script>
 
@@ -93,7 +98,7 @@ onMounted(async () => {
 
 		<!-- Filters panel -->
 		<div v-if="showFilters" class="w-lwh mx-5 bg-surface-elevated border border-t-0 border-white/10 rounded-b-xl p-4">
-			<div class="grid grid-cols-6 gap-4">
+			<div class="grid grid-cols-4 gap-4">
 				<!-- Filter Column - Genre -->
 				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
 					<label class="text-xs font-semibold text-text-primary uppercase">
@@ -107,38 +112,6 @@ onMounted(async () => {
 						<div><input type="checkbox" id="genre-action" /> <label for="genre-action">Action</label></div>
 						<div><input type="checkbox" id="genre-comedy" /> <label for="genre-comedy">Comedy</label></div>
 						<div><input type="checkbox" id="genre-drama" /> <label for="genre-drama">Drama</label></div>
-					</div>
-				</div>
-
-				<!-- Filter Column - Series Status -->
-				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
-					<label class="text-xs font-semibold text-text-primary uppercase">
-						<AppIcon name="seriesStatus" scale="0.8" class="mr-1" />
-						Status
-					</label>
-					<div class="border border-white/70 rounded p-2 flex items-center justify-center text-sm text-text-secondary">
-						All Status
-					</div>
-					<div class="space-y-2 text-sm text-text-secondary">
-						<div><input type="checkbox" id="status-ongoing" /> <label for="status-ongoing">Ongoing</label></div>
-						<div><input type="checkbox" id="status-completed" /> <label for="status-completed">Completed</label></div>
-						<div><input type="checkbox" id="status-hiatus" /> <label for="status-hiatus">On Hiatus</label></div>
-					</div>
-				</div>
-
-				<!-- Filter Column - Ratings -->
-				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
-					<label class="text-xs font-semibold text-text-primary uppercase">
-						<AppIcon name="star" scale="0.8" class="mr-1" />
-						All Rating
-					</label>
-					<div class="border border-white/70 rounded p-2 flex items-center justify-center text-sm text-text-secondary">
-						All Ratings
-					</div>
-					<div class="space-y-2 text-sm text-text-secondary">
-						<div><input type="checkbox" id="rating-5star" /> <label for="rating-5star">5★+</label></div>
-						<div><input type="checkbox" id="rating-4star" /> <label for="rating-4star">4★+</label></div>
-						<div><input type="checkbox" id="rating-3star" /> <label for="rating-3star">3★+</label></div>
 					</div>
 				</div>
 
