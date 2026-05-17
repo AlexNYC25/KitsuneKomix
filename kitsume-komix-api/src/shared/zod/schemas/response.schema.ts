@@ -9,6 +9,7 @@ import {
 } from "./data/database.schema.ts";
 import { ComicBookSchema } from "./data/comicBooks.schema.ts";
 import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
+import { MetadataExpandedWithSeriesCompiledSchema } from "./data/comicMetadata.schema.ts";
 
 // **** Basic response schemas **** //
 /**
@@ -153,6 +154,17 @@ export const ComicSeriesMultipleResponseSchema = z.object({
 }).openapi({
   title: "ComicSeriesMultipleResponse",
   description: "Response containing paginated comic series data",
+});
+
+/**
+ * Schema for the allowed filted values response
+ */
+export const AllowedFilterValuesResponseSchema = z.object({
+  data: MetadataExpandedWithSeriesCompiledSchema,
+}).openapi({
+  title: "AllowedFilterValuesResponse",
+  description:
+    "Response containing the allowed filter values for comic series, including expanded metadata with compiled series information",
 });
 
 /**
