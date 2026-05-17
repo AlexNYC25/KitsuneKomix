@@ -82,6 +82,8 @@ export const fetchComicSeries = async (
         currentComicSeriesMetadata.thumbnailUrl;
       (series as ComicSeriesWithMetadata).credits =
         currentComicSeriesMetadata.credits;
+      (series as ComicSeriesWithMetadata).years =
+        currentComicSeriesMetadata.years;
 
       comicSeriesWithMetadata.push(series as ComicSeriesWithMetadata);
     }
