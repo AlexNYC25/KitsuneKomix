@@ -8,15 +8,22 @@ import ComicSeriesCard from './ComicSeriesCard.vue';
 import AppIcon from './icons/AppIcon.vue';
 
 import type { ComicSeriesListItem } from '@/types';
+import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
 
 const comics = ref<ComicSeriesListItem[]>([]);
 
 const showFilters = ref(false);
-const filtersAllowed = ref<any>();
+const filtersAllowed = ref<ComicSeriesFilterValuesData | null>(null);
 const filtersApplied = ref({
 	genre: [] as string[],
 	status: [] as string[],
 	rating: [] as string[],
+});
+
+const yearFilterOptions = computed(() => filtersAllowed.value?.years ?? []);
+const genreFilterOptions = computed(() => {
+	const genres = filtersAllowed.value?.genres ?? [];
+	return [...genres].sort((a, b) => a.name.localeCompare(b.name));
 });
 
 const sortCategory = ref("latest");
@@ -109,9 +116,13 @@ onMounted(async () => {
 						All Genres
 					</div>
 					<div class="space-y-2 text-sm text-text-secondary">
-						<div><input type="checkbox" id="genre-action" /> <label for="genre-action">Action</label></div>
-						<div><input type="checkbox" id="genre-comedy" /> <label for="genre-comedy">Comedy</label></div>
-						<div><input type="checkbox" id="genre-drama" /> <label for="genre-drama">Drama</label></div>
+						<div v-for="genre in genreFilterOptions" :key="genre.id">
+							<input type="checkbox" :id="`genre-${genre.id}`" />
+							<label :for="`genre-${genre.id}`">{{ genre.name }}</label>
+						</div>
+						<div v-if="genreFilterOptions.length === 0" class="text-xs text-text-secondary/70">
+							No genres found
+						</div>
 					</div>
 				</div>
 
@@ -125,9 +136,13 @@ onMounted(async () => {
 						All Years
 					</div>
 					<div class="space-y-2 text-sm text-text-secondary">
-						<div><input type="checkbox" id="year-2024" /> <label for="year-2024">2024</label></div>
-						<div><input type="checkbox" id="year-2023" /> <label for="year-2023">2023</label></div>
-						<div><input type="checkbox" id="year-2022" /> <label for="year-2022">2022</label></div>
+						<div v-for="year in yearFilterOptions" :key="year">
+							<input type="checkbox" :id="`year-${year}`" />
+							<label :for="`year-${year}`">{{ year }}</label>
+						</div>
+						<div v-if="yearFilterOptions.length === 0" class="text-xs text-text-secondary/70">
+							No years found
+						</div>
 					</div>
 				</div>
 
