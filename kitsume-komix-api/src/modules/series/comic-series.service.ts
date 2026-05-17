@@ -109,8 +109,8 @@ const fetchAComicSeriesAssociatedMetadataById = async (
   const queryData: QueryData = {
     page: 0,
     pageSize: 100, // Arbitrary large number to fetch all comic books in the series, we can implement proper pagination later if needed, but most comics should have less than 100 comic books in a series so this should be fine for now NOTE: Spawn, savage dragon, and other long-running series might have more than 100 comic books in a series, so we should implement proper pagination for this at some point to ensure we can fetch all comic books in a series if needed
-    filter: "seriesId",
-    filterProperty: seriesId.toString(),
+    filter: seriesId.toString(),
+    filterProperty: "seriesId",
   };
   const serviceData: RequestParametersValidated<
     ComicSortField,
