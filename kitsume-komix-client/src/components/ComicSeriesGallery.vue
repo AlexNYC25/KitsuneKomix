@@ -56,6 +56,76 @@ const selectedLocationNames = computed(() =>
 	locationFilterOptions.value.filter(l => selectedLocations.value.includes(l.id))
 );
 
+const writerFilterOptions = computed(() => {
+	const writers = filtersAllowed.value?.writers ?? [];
+	return [...writers].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedWriters = ref<number[]>([]);
+const showWritersDropdown = ref(false);
+const selectedWriterNames = computed(() =>
+	writerFilterOptions.value.filter(w => selectedWriters.value.includes(w.id))
+);
+
+const artistFilterOptions = computed(() => {
+	const artists = filtersAllowed.value?.pencillers ?? [];
+	return [...artists].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedArtists = ref<number[]>([]);
+const showArtistsDropdown = ref(false);
+const selectedArtistNames = computed(() =>
+	artistFilterOptions.value.filter(a => selectedArtists.value.includes(a.id))
+);
+
+const publisherFilterOptions = computed(() => {
+	const publishers = filtersAllowed.value?.publishers ?? [];
+	return [...publishers].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedPublishers = ref<number[]>([]);
+const showPublishersDropdown = ref(false);
+const selectedPublisherNames = computed(() =>
+	publisherFilterOptions.value.filter(p => selectedPublishers.value.includes(p.id))
+);
+
+const coloristFilterOptions = computed(() => {
+	const colorists = filtersAllowed.value?.colorists ?? [];
+	return [...colorists].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedColorists = ref<number[]>([]);
+const showColoristsDropdown = ref(false);
+const selectedColoristNames = computed(() =>
+	coloristFilterOptions.value.filter(c => selectedColorists.value.includes(c.id))
+);
+
+const lettererFilterOptions = computed(() => {
+	const letterers = filtersAllowed.value?.letterers ?? [];
+	return [...letterers].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedLetterers = ref<number[]>([]);
+const showLetterersDropdown = ref(false);
+const selectedLettererNames = computed(() =>
+	lettererFilterOptions.value.filter(l => selectedLetterers.value.includes(l.id))
+);
+
+const editorFilterOptions = computed(() => {
+	const editors = filtersAllowed.value?.editors ?? [];
+	return [...editors].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedEditors = ref<number[]>([]);
+const showEditorsDropdown = ref(false);
+const selectedEditorNames = computed(() =>
+	editorFilterOptions.value.filter(e => selectedEditors.value.includes(e.id))
+);
+
+const coverArtistFilterOptions = computed(() => {
+	const coverArtists = filtersAllowed.value?.coverArtists ?? [];
+	return [...coverArtists].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedCoverArtists = ref<number[]>([]);
+const showCoverArtistsDropdown = ref(false);
+const selectedCoverArtistNames = computed(() =>
+	coverArtistFilterOptions.value.filter(c => selectedCoverArtists.value.includes(c.id))
+);
+
 const sortCategory = ref("latest");
 const route = useRoute();
 
@@ -196,7 +266,7 @@ onMounted(async () => {
 							<span class="text-text-secondary/70">
 								{{ selectedCharacters.length === 0 ? 'Select characters...' : `${selectedCharacters.length} selected` }}
 							</span>
-							<AppIcon :name="showTeamsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							<AppIcon :name="showCharactersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
 						</button>
 						<!-- Dropdown list -->
 						<div
@@ -297,7 +367,7 @@ onMounted(async () => {
 							<span class="text-text-secondary/70">
 								{{ selectedLocations.length === 0 ? 'Select locations...' : `${selectedLocations.length} selected` }}
 							</span>
-							<AppIcon :name="showTeamsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							<AppIcon :name="showLocationsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
 						</button>
 						<div
 							v-if="showLocationsDropdown"
@@ -343,37 +413,331 @@ onMounted(async () => {
 						<div class="text-sm text-text-secondary">
 							Written by
 						</div>
-						<input type="text" placeholder="Search writers..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+						<div class="relative">
+							<button
+								type="button"
+								@click="showWritersDropdown = !showWritersDropdown"
+								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+							>
+								<span class="text-text-secondary/70">
+									{{ selectedWriters.length === 0 ? 'Select writers...' : `${selectedWriters.length} selected` }}
+								</span>
+								<AppIcon :name="showWritersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							</button>
+							<div
+								v-if="showWritersDropdown"
+								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+							>
+								<div v-if="writerFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+									No writers found
+								</div>
+								<label
+									v-for="writer in writerFilterOptions"
+									:key="writer.id"
+									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+								>
+									<input type="checkbox" :value="writer.id" v-model="selectedWriters" class="accent-primary" />
+									{{ writer.name }}
+								</label>
+							</div>
+						</div>
+						<div v-if="selectedWriterNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+							<span
+								v-for="writer in selectedWriterNames"
+								:key="writer.id"
+								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+							>
+								{{ writer.name }}
+								<button
+									type="button"
+									@click="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
+									class="leading-none hover:text-red-400"
+									aria-label="Remove"
+								>×</button>
+							</span>
+						</div>
 
 						<div class="text-sm text-text-secondary">
-							Illustrated by=
+							Illustrated by
 						</div>
-						<input type="text" placeholder="Search artists..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+						<div class="relative">
+							<button
+								type="button"
+								@click="showArtistsDropdown = !showArtistsDropdown"
+								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+							>
+								<span class="text-text-secondary/70">
+									{{ selectedArtists.length === 0 ? 'Select artists...' : `${selectedArtists.length} selected` }}
+								</span>
+								<AppIcon :name="showArtistsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							</button>
+							<div
+								v-if="showArtistsDropdown"
+								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+							>
+								<div v-if="artistFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+									No artists found
+								</div>
+								<label
+									v-for="artist in artistFilterOptions"
+									:key="artist.id"
+									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+								>
+									<input type="checkbox" :value="artist.id" v-model="selectedArtists" class="accent-primary" />
+									{{ artist.name }}
+								</label>
+							</div>
+						</div>
+						<div v-if="selectedArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+							<span
+								v-for="artist in selectedArtistNames"
+								:key="artist.id"
+								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+							>
+								{{ artist.name }}
+								<button
+									type="button"
+									@click="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
+									class="leading-none hover:text-red-400"
+									aria-label="Remove"
+								>×</button>
+							</span>
+						</div>
 
 						<div class="text-sm text-text-secondary">
 							Published by
 						</div>
-						<input type="text" placeholder="Search publishers..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+						<div class="relative">
+							<button
+								type="button"
+								@click="showPublishersDropdown = !showPublishersDropdown"
+								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+							>
+								<span class="text-text-secondary/70">
+									{{ selectedPublishers.length === 0 ? 'Select publishers...' : `${selectedPublishers.length} selected` }}
+								</span>
+								<AppIcon :name="showPublishersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							</button>
+							<div
+								v-if="showPublishersDropdown"
+								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+							>
+								<div v-if="publisherFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+									No publishers found
+								</div>
+								<label
+									v-for="publisher in publisherFilterOptions"
+									:key="publisher.id"
+									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+								>
+									<input type="checkbox" :value="publisher.id" v-model="selectedPublishers" class="accent-primary" />
+									{{ publisher.name }}
+								</label>
+							</div>
+						</div>
+						<div v-if="selectedPublisherNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+							<span
+								v-for="publisher in selectedPublisherNames"
+								:key="publisher.id"
+								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+							>
+								{{ publisher.name }}
+								<button
+									type="button"
+									@click="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
+									class="leading-none hover:text-red-400"
+									aria-label="Remove"
+								>×</button>
+							</span>
+						</div>
 
 						<div class="text-sm text-text-secondary">
 							Colored by
 						</div>
-						<input type="text" placeholder="Search colorists..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+						<div class="relative">
+							<button
+								type="button"
+								@click="showColoristsDropdown = !showColoristsDropdown"
+								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+							>
+								<span class="text-text-secondary/70">
+									{{ selectedColorists.length === 0 ? 'Select colorists...' : `${selectedColorists.length} selected` }}
+								</span>
+								<AppIcon :name="showColoristsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							</button>
+							<div
+								v-if="showColoristsDropdown"
+								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+							>
+								<div v-if="coloristFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+									No colorists found
+								</div>
+								<label
+									v-for="colorist in coloristFilterOptions"
+									:key="colorist.id"
+									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+								>
+									<input type="checkbox" :value="colorist.id" v-model="selectedColorists" class="accent-primary" />
+									{{ colorist.name }}
+								</label>
+							</div>
+						</div>
+						<div v-if="selectedColoristNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+							<span
+								v-for="colorist in selectedColoristNames"
+								:key="colorist.id"
+								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+							>
+								{{ colorist.name }}
+								<button
+									type="button"
+									@click="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
+									class="leading-none hover:text-red-400"
+									aria-label="Remove"
+								>×</button>
+							</span>
+						</div>
 
 						<div class="text-sm text-text-secondary">
 							Lettered by
 						</div>
-						<input type="text" placeholder="Search letterers..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+						<div class="relative">
+							<button
+								type="button"
+								@click="showLetterersDropdown = !showLetterersDropdown"
+								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+							>
+								<span class="text-text-secondary/70">
+									{{ selectedLetterers.length === 0 ? 'Select letterers...' : `${selectedLetterers.length} selected` }}
+								</span>
+								<AppIcon :name="showLetterersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							</button>
+							<div
+								v-if="showLetterersDropdown"
+								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+							>
+								<div v-if="lettererFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+									No letterers found
+								</div>
+								<label
+									v-for="letterer in lettererFilterOptions"
+									:key="letterer.id"
+									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+								>
+									<input type="checkbox" :value="letterer.id" v-model="selectedLetterers" class="accent-primary" />
+									{{ letterer.name }}
+								</label>
+							</div>
+						</div>
+						<div v-if="selectedLettererNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+							<span
+								v-for="letterer in selectedLettererNames"
+								:key="letterer.id"
+								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+							>
+								{{ letterer.name }}
+								<button
+									type="button"
+									@click="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
+									class="leading-none hover:text-red-400"
+									aria-label="Remove"
+								>×</button>
+							</span>
+						</div>
 
 						<div class="text-sm text-text-secondary">
 							Edited by
 						</div>
-						<input type="text" placeholder="Search editors..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+						<div class="relative">
+							<button
+								type="button"
+								@click="showEditorsDropdown = !showEditorsDropdown"
+								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+							>
+								<span class="text-text-secondary/70">
+									{{ selectedEditors.length === 0 ? 'Select editors...' : `${selectedEditors.length} selected` }}
+								</span>
+								<AppIcon :name="showEditorsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							</button>
+							<div
+								v-if="showEditorsDropdown"
+								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+							>
+								<div v-if="editorFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+									No editors found
+								</div>
+								<label
+									v-for="editor in editorFilterOptions"
+									:key="editor.id"
+									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+								>
+									<input type="checkbox" :value="editor.id" v-model="selectedEditors" class="accent-primary" />
+									{{ editor.name }}
+								</label>
+							</div>
+						</div>
+						<div v-if="selectedEditorNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+							<span
+								v-for="editor in selectedEditorNames"
+								:key="editor.id"
+								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+							>
+								{{ editor.name }}
+								<button
+									type="button"
+									@click="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
+									class="leading-none hover:text-red-400"
+									aria-label="Remove"
+								>×</button>
+							</span>
+						</div>
 
 						<div class="text-sm text-text-secondary">
 							Cover by
 						</div>
-						<input type="text" placeholder="Search cover artists..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+						<div class="relative">
+							<button
+								type="button"
+								@click="showCoverArtistsDropdown = !showCoverArtistsDropdown"
+								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+							>
+								<span class="text-text-secondary/70">
+									{{ selectedCoverArtists.length === 0 ? 'Select cover artists...' : `${selectedCoverArtists.length} selected` }}
+								</span>
+								<AppIcon :name="showCoverArtistsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+							</button>
+							<div
+								v-if="showCoverArtistsDropdown"
+								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+							>
+								<div v-if="coverArtistFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+									No cover artists found
+								</div>
+								<label
+									v-for="coverArtist in coverArtistFilterOptions"
+									:key="coverArtist.id"
+									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+								>
+									<input type="checkbox" :value="coverArtist.id" v-model="selectedCoverArtists" class="accent-primary" />
+									{{ coverArtist.name }}
+								</label>
+							</div>
+						</div>
+						<div v-if="selectedCoverArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+							<span
+								v-for="coverArtist in selectedCoverArtistNames"
+								:key="coverArtist.id"
+								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+							>
+								{{ coverArtist.name }}
+								<button
+									type="button"
+									@click="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
+									class="leading-none hover:text-red-400"
+									aria-label="Remove"
+								>×</button>
+							</span>
+						</div>
 					</div>
 				</div>
 			</div>
