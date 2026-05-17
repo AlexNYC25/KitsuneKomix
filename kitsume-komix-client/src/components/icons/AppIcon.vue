@@ -33,6 +33,8 @@ const piToOh: Record<string, string> = {
   star: 'md-starrate-sharp',
   edit: 'md-modeeditoutline-sharp',
   bookContent: 'md-menubook-round',
+  arrowUp: 'io-caret-up',
+  arrowDown: 'io-caret-down',
 }
 
 </script>
