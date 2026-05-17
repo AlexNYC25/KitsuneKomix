@@ -94,3 +94,6 @@ export type ComicSeriesFilterSeriesGroup = ComicSeriesFilterSeriesGroupsValues[n
 
 export type ComicSeriesFilterYearsValues = NonNullable<ComicSeriesFilterValuesData['years']>;
 export type ComicSeriesFilterYear = ComicSeriesFilterYearsValues[number];
+
+export type ComicSeriesFilterLettersValues = NonNullable<ComicSeriesFilterValuesData['letters']>;
+export type ComicSeriesFilterLetter = ComicSeriesFilterLettersValues[number];

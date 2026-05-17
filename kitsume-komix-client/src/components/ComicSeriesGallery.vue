@@ -35,6 +35,15 @@ const showYearsDropdown = ref(false);
 const selectedYearValues = computed(() =>
 	yearFilterOptions.value.filter(year => selectedYears.value.includes(year))
 );
+const letterFilterOptions = computed(() => {
+	const letters = filtersAllowed.value?.letters ?? [];
+	return [...letters].sort((a, b) => a.localeCompare(b));
+});
+const selectedLetters = ref<string[]>([]);
+const showLettersDropdown = ref(false);
+const selectedLetterValues = computed(() =>
+	letterFilterOptions.value.filter(letter => selectedLetters.value.includes(letter))
+);
 const characterFilterOptions = computed(() => {
 	const characters = filtersAllowed.value?.characters ?? [];
 	return [...characters].sort((a, b) => a.name.localeCompare(b.name));
@@ -311,6 +320,53 @@ onMounted(async () => {
 							<button
 								type="button"
 								@click="selectedYears = selectedYears.filter(selectedYear => selectedYear !== year)"
+								class="leading-none hover:text-red-400"
+								aria-label="Remove"
+							>×</button>
+						</span>
+					</div>
+
+					<div class="text-sm text-text-secondary">
+						Letters
+					</div>
+					<div class="relative">
+						<button
+							type="button"
+							@click="showLettersDropdown = !showLettersDropdown"
+							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+						>
+							<span class="text-text-secondary/70">
+								{{ selectedLetters.length === 0 ? 'Select letters...' : `${selectedLetters.length} selected` }}
+							</span>
+							<AppIcon :name="showLettersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+						</button>
+						<div
+							v-if="showLettersDropdown"
+							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+						>
+							<div v-if="letterFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+								No letters found
+							</div>
+							<label
+								v-for="letter in letterFilterOptions"
+								:key="letter"
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+							>
+								<input type="checkbox" :value="letter" v-model="selectedLetters" class="accent-primary" />
+								{{ letter.toUpperCase() }}
+							</label>
+						</div>
+					</div>
+					<div v-if="selectedLetterValues.length > 0" class="flex flex-wrap gap-1 mt-1">
+						<span
+							v-for="letter in selectedLetterValues"
+							:key="letter"
+							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary uppercase"
+						>
+							{{ letter }}
+							<button
+								type="button"
+								@click="selectedLetters = selectedLetters.filter(selectedLetter => selectedLetter !== letter)"
 								class="leading-none hover:text-red-400"
 								aria-label="Remove"
 							>×</button>
