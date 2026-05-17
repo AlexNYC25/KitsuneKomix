@@ -25,6 +25,36 @@ const genreFilterOptions = computed(() => {
 	const genres = filtersAllowed.value?.genres ?? [];
 	return [...genres].sort((a, b) => a.name.localeCompare(b.name));
 });
+const characterFilterOptions = computed(() => {
+	const characters = filtersAllowed.value?.characters ?? [];
+	return [...characters].sort((a, b) => a.name.localeCompare(b.name));
+});
+
+const selectedCharacters = ref<number[]>([]);
+const showCharactersDropdown = ref(false);
+const selectedCharacterNames = computed(() =>
+	characterFilterOptions.value.filter(c => selectedCharacters.value.includes(c.id))
+);
+
+const teamFilterOptions = computed(() => {
+	const teams = filtersAllowed.value?.teams ?? [];
+	return [...teams].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedTeams = ref<number[]>([]);
+const showTeamsDropdown = ref(false);
+const selectedTeamNames = computed(() =>
+	teamFilterOptions.value.filter(t => selectedTeams.value.includes(t.id))
+);
+
+const locationFilterOptions = computed(() => {
+	const locations = filtersAllowed.value?.locations ?? [];
+	return [...locations].sort((a, b) => a.name.localeCompare(b.name));
+});
+const selectedLocations = ref<number[]>([]);
+const showLocationsDropdown = ref(false);
+const selectedLocationNames = computed(() =>
+	locationFilterOptions.value.filter(l => selectedLocations.value.includes(l.id))
+);
 
 const sortCategory = ref("latest");
 const route = useRoute();
@@ -156,17 +186,151 @@ onMounted(async () => {
 					<div class="text-sm text-text-secondary">
 						Characters
 					</div>
-					<input type="text" placeholder="Search characters..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+					<!-- Dropdown trigger -->
+					<div class="relative">
+						<button
+							type="button"
+							@click="showCharactersDropdown = !showCharactersDropdown"
+							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+						>
+							<span class="text-text-secondary/70">
+								{{ selectedCharacters.length === 0 ? 'Select characters...' : `${selectedCharacters.length} selected` }}
+							</span>
+							<AppIcon :name="showTeamsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+						</button>
+						<!-- Dropdown list -->
+						<div
+							v-if="showCharactersDropdown"
+							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+						>
+							<div v-if="characterFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+								No characters found
+							</div>
+							<label
+								v-for="character in characterFilterOptions"
+								:key="character.id"
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+							>
+								<input
+									type="checkbox"
+									:value="character.id"
+									v-model="selectedCharacters"
+									class="accent-primary"
+								/>
+								{{ character.name }}
+							</label>
+						</div>
+					</div>
+					<!-- Selected chips -->
+					<div v-if="selectedCharacterNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+						<span
+							v-for="character in selectedCharacterNames"
+							:key="character.id"
+							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+						>
+							{{ character.name }}
+							<button
+								type="button"
+								@click="selectedCharacters = selectedCharacters.filter(id => id !== character.id)"
+								class="leading-none hover:text-red-400"
+								aria-label="Remove"
+							>×</button>
+						</span>
+					</div>
 
 					<div class="text-sm text-text-secondary">
 						Teams
 					</div>
-					<input type="text" placeholder="Search teams..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+					<div class="relative">
+						<button
+							type="button"
+							@click="showTeamsDropdown = !showTeamsDropdown"
+							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+						>
+							<span class="text-text-secondary/70">
+								{{ selectedTeams.length === 0 ? 'Select teams...' : `${selectedTeams.length} selected` }}
+							</span>
+							<AppIcon :name="showTeamsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+						</button>
+						<div
+							v-if="showTeamsDropdown"
+							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+						>
+							<div v-if="teamFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+								No teams found
+							</div>
+							<label
+								v-for="team in teamFilterOptions"
+								:key="team.id"
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+							>
+								<input type="checkbox" :value="team.id" v-model="selectedTeams" class="accent-primary" />
+								{{ team.name }}
+							</label>
+						</div>
+					</div>
+					<div v-if="selectedTeamNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+						<span
+							v-for="team in selectedTeamNames"
+							:key="team.id"
+							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+						>
+							{{ team.name }}
+							<button
+								type="button"
+								@click="selectedTeams = selectedTeams.filter(id => id !== team.id)"
+								class="leading-none hover:text-red-400"
+								aria-label="Remove"
+							>×</button>
+						</span>
+					</div>
 
 					<div class="text-sm text-text-secondary">
 						Locations
 					</div>
-					<input type="text" placeholder="Search locations..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+					<div class="relative">
+						<button
+							type="button"
+							@click="showLocationsDropdown = !showLocationsDropdown"
+							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+						>
+							<span class="text-text-secondary/70">
+								{{ selectedLocations.length === 0 ? 'Select locations...' : `${selectedLocations.length} selected` }}
+							</span>
+							<AppIcon :name="showTeamsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+						</button>
+						<div
+							v-if="showLocationsDropdown"
+							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+						>
+							<div v-if="locationFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+								No locations found
+							</div>
+							<label
+								v-for="location in locationFilterOptions"
+								:key="location.id"
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+							>
+								<input type="checkbox" :value="location.id" v-model="selectedLocations" class="accent-primary" />
+								{{ location.name }}
+							</label>
+						</div>
+					</div>
+					<div v-if="selectedLocationNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+						<span
+							v-for="location in selectedLocationNames"
+							:key="location.id"
+							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+						>
+							{{ location.name }}
+							<button
+								type="button"
+								@click="selectedLocations = selectedLocations.filter(id => id !== location.id)"
+								class="leading-none hover:text-red-400"
+								aria-label="Remove"
+							>×</button>
+						</span>
+					</div>
 				</div>
 
 				<!-- Filter Column Creators -->
