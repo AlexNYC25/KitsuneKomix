@@ -3128,6 +3128,7 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
+                                letters?: string[];
                                 years?: number[];
                             };
                         };

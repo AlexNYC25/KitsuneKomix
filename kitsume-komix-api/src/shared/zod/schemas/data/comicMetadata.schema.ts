@@ -88,6 +88,7 @@ export const MetadataExpandedSchema = z.object({
  * 
  */
 export const MetadataExpandedWithSeriesCompiledSchema = MetadataExpandedSchema.extend({
+  letters: z.array(z.string().length(1)).optional(),
   years: z.array(z.number()).optional(),
 }).openapi({
   title: "ComicSeriesMetadataExpandedWithSeriesCompiled",

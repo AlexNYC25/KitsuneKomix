@@ -316,7 +316,7 @@ export const compileTheCompleteComicSeriesCreditsMetadata = (
  * The response shape mirrors MetadataExpandedWithSeriesCompiledSchema, so the route can
  * return it directly under the `data` key.
  */
-export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Promise<ComicBookMetadataOnly & { years?: number[] }> => {
+export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Promise<ComicBookMetadataOnly & { years?: number[]; letters?: string[] }> => {
   // Fetch all comic series with their metadata using a large page size to ensure we get all series in one request.
   // fetchComicSeries handles pagination and metadata enrichment (credits and years) per series.
   const queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = {
@@ -329,12 +329,20 @@ export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Prom
 
   // Initialize aggregation variables for library-wide filter values.
   const allYears = new Set<number>();
+  const allLetters = new Set<string>();
   const completeLibraryCredits: ComicBookMetadataOnly = {};
 
   // Iterate through all series and aggregate their metadata.
   // We only collect the nested credit arrays and years here because those are the values
   // the filter-values endpoint needs to expose to the client.
   for (const series of allSeriesWithMetadata) {
+    const normalizedSeriesName = series.name.trim();
+    const startingLetter = normalizedSeriesName.charAt(0).toLowerCase();
+
+    if (/^[a-z]$/.test(startingLetter)) {
+      allLetters.add(startingLetter);
+    }
+
     // Collect all unique years across all series that have published comics.
     if (series.years) {
       series.years.forEach(year => allYears.add(year));
@@ -452,6 +460,7 @@ export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Prom
   // Return the flattened metadata object expected by the response schema.
   return {
     ...completeLibraryCredits,
+    letters: Array.from(allLetters).sort((a, b) => a.localeCompare(b)),
     years: Array.from(allYears).sort((a, b) => a - b),
   };
 };
