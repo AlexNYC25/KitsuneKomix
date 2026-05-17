@@ -79,7 +79,7 @@ onMounted(async () => {
 
 		<!-- Filters panel -->
 		<div v-if="showFilters" class="w-lwh mx-5 bg-surface-elevated border border-t-0 border-white/10 rounded-b-xl p-4">
-			<div class="grid grid-cols-5 gap-6">
+			<div class="grid grid-cols-6 gap-4">
 				<!-- Filter Column - Genre -->
 				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
 					<label class="text-xs font-semibold text-text-primary uppercase">
@@ -142,18 +142,72 @@ onMounted(async () => {
 						<div><input type="checkbox" id="year-2023" /> <label for="year-2023">2023</label></div>
 						<div><input type="checkbox" id="year-2022" /> <label for="year-2022">2022</label></div>
 					</div>
-				</div>				
+				</div>
+
+				<!-- Filter Column - Content -->
+				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
+					<label class="text-xs font-semibold text-text-primary uppercase">
+						<AppIcon name="calendar" scale="0.8" class="mr-1" />
+						Contents
+					</label>
+
+					<div class="text-sm text-text-secondary">
+						Characters
+					</div>
+					<input type="text" placeholder="Search characters..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+					<div class="text-sm text-text-secondary">
+						Teams
+					</div>
+					<input type="text" placeholder="Search teams..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+					<div class="text-sm text-text-secondary">
+						Locations
+					</div>
+					<input type="text" placeholder="Search locations..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+				</div>
 
 				<!-- Filter Column Creators -->
 				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
 					<label class="text-xs font-semibold text-text-primary uppercase">
 						<AppIcon name="edit" scale="0.8" class="mr-1" />
-						Creator
+						Creators
 					</label>
 					<div class="space-y-2 text-sm text-text-secondary">
-						<div><input type="checkbox" id="rating-5star" /> <label for="rating-5star">5★+</label></div>
-						<div><input type="checkbox" id="rating-4star" /> <label for="rating-4star">4★+</label></div>
-						<div><input type="checkbox" id="rating-3star" /> <label for="rating-3star">3★+</label></div>
+						<div class="text-sm text-text-secondary">
+							Written by
+						</div>
+						<input type="text" placeholder="Search writers..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+						<div class="text-sm text-text-secondary">
+							Illustrated by=
+						</div>
+						<input type="text" placeholder="Search artists..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+						<div class="text-sm text-text-secondary">
+							Published by
+						</div>
+						<input type="text" placeholder="Search publishers..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+						<div class="text-sm text-text-secondary">
+							Colored by
+						</div>
+						<input type="text" placeholder="Search colorists..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+						<div class="text-sm text-text-secondary">
+							Lettered by
+						</div>
+						<input type="text" placeholder="Search letterers..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+						<div class="text-sm text-text-secondary">
+							Edited by
+						</div>
+						<input type="text" placeholder="Search editors..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
+
+						<div class="text-sm text-text-secondary">
+							Cover by
+						</div>
+						<input type="text" placeholder="Search cover artists..." class="w-full px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none" />
 					</div>
 				</div>
 			</div>
@@ -161,7 +215,7 @@ onMounted(async () => {
 
 		<!-- Main content area -->
 		<div class="flex-1 p-4 mx-6">
-			<div class="grid grid-cols-4 gap-4">
+			<div class="grid grid-cols-5 gap-4">
 				<ComicSeriesCard v-for="comic in comics" :key="comic.id" :comicSeriesData="comic" />
 			</div>
 		</div>
