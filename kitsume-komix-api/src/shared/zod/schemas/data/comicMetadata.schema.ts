@@ -80,3 +80,16 @@ export const MetadataExpandedSchema = z.object({
   title: "ComicSeriesMetadata",
   description: "Metadata for a comic series",
 });
+
+/**
+ * Expanded metadata schema with arrays of related entities for each category, as well as additional fields for years and statuses of the comic series. 
+ * This is used for responses where we want to include the full metadata information with related entities, as well as additional information about the comic series
+ * such as the years it was published and its current status (e.g. ongoing, completed, cancelled, etc.).
+ * 
+ */
+export const MetadataExpandedWithSeriesCompiledSchema = MetadataExpandedSchema.extend({
+  years: z.array(z.number()).optional(),
+}).openapi({
+  title: "ComicSeriesMetadataExpandedWithSeriesCompiled",
+  description: "Expanded metadata for a comic series with compiled series information",
+});
