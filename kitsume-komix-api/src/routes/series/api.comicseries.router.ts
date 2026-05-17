@@ -2,7 +2,10 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 
 import { apiLogger } from "#logger/loggers.ts";
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
-import { fetchComicSeries } from "#modules/series/index.ts";
+import {
+  compileEntireSeriesMetadataAndAdditionalSeriesInfo,
+  fetchComicSeries,
+} from "#modules/series/index.ts";
 
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
@@ -12,6 +15,7 @@ import {
   ParamIdThumbnailIdSchema,
 } from "#zod/schemas/request.schema.ts";
 import {
+  AllowedFilterValuesResponseSchema,
   ComicSeriesMultipleResponseSchema,
   ErrorResponseSchema,
   MessageResponseSchema,
@@ -190,8 +194,6 @@ app.openapi(
     },
   }),
   async (c) => {
-    const userId = c.get("userId")!;
-
     const queryData: QueryData = c.req.valid("query");
 
     // Override sort to always be by createdAt in descending order
@@ -285,8 +287,6 @@ app.openapi(
     },
   }),
   async (c) => {
-    const userId = c.get("userId")!;
-
     const queryData: QueryData = c.req.valid("query");
 
     // Override sort to always be by updatedAt in descending order
@@ -343,6 +343,58 @@ app.openapi(
 );
 
 /**
+ * GET /api/comic-series/filter-values
+ * 
+ */
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/filter-values",
+    summary: "Get filter values for comic series",
+    tags: ["Comic Series"],
+    middleware: [requireAuth],
+    request: {
+      headers: AuthHeaderSchema,
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: AllowedFilterValuesResponseSchema,
+          },
+        },
+        description: "Filter values retrieved successfully",
+      },
+      400: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Bad Request",
+      },
+      401: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Unauthorized",
+      },
+      500: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Internal Server Error",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const allowedFilterValues =
+        await compileEntireSeriesMetadataAndAdditionalSeriesInfo();
+
+      return c.json({
+        data: allowedFilterValues,
+      }, 200);
+    } catch (error) {
+      apiLogger.error("Error fetching comic series filter values:" + error);
+      return c.json({ message: "Internal Server Error" }, 500);
+    }
+  },
+);
+
+/**
  * GET /api/comic-series/{id}
  *
  * Get a comic series by ID.
@@ -386,8 +438,6 @@ app.openapi(
     },
   }),
   async (c) => {
-    const userId = c.get("userId")!;
-
     const { id } = c.req.valid("param");
     if (!id) {
       return c.json({ message: "Invalid series ID" }, 400);
@@ -503,8 +553,6 @@ app.openapi(
     queryData.sortDirection = "asc";
     queryData.filter = queryData.letter;
     queryData.filterProperty = "listLetter";
-
-    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSeriesSortField,

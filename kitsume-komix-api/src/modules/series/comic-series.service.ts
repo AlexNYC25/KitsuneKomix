@@ -306,3 +306,150 @@ export const compileTheCompleteComicSeriesCreditsMetadata = (
 
   return completeCredits;
 };
+
+/**
+ * Goes through the entire library of comic books across all series and compiles the
+ * unique metadata values that can be used as filter options in the UI.
+ *
+ * The response shape mirrors MetadataExpandedWithSeriesCompiledSchema, so the route can
+ * return it directly under the `data` key.
+ */
+export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Promise<ComicBookMetadataOnly & { years?: number[] }> => {
+  // Fetch all comic series with their metadata using a large page size to ensure we get all series in one request.
+  // fetchComicSeries handles pagination and metadata enrichment (credits and years) per series.
+  const queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = {
+    pagination: { pageNumber: 1, pageSize: 999999 }, // Large page size to fetch all series at once
+    sort: { sortProperty: 'id' as ComicSeriesSortField, sortOrder: 'asc' },
+    filter: undefined,
+  };
+
+  const allSeriesWithMetadata: ComicSeriesWithMetadata[] = await fetchComicSeries(queryData);
+
+  // Initialize aggregation variables for library-wide filter values.
+  const allYears = new Set<number>();
+  const completeLibraryCredits: ComicBookMetadataOnly = {};
+
+  // Iterate through all series and aggregate their metadata.
+  // We only collect the nested credit arrays and years here because those are the values
+  // the filter-values endpoint needs to expose to the client.
+  for (const series of allSeriesWithMetadata) {
+    // Collect all unique years across all series that have published comics.
+    if (series.years) {
+      series.years.forEach(year => allYears.add(year));
+    }
+
+    // Aggregate credits from each series into library-wide credits.
+    // We deduplicate each category after the collection pass so repeated names only appear once.
+    if (series.credits) {
+      if (series.credits.writers) {
+        completeLibraryCredits.writers = (completeLibraryCredits.writers || []).concat(series.credits.writers);
+      }
+      if (series.credits.pencillers) {
+        completeLibraryCredits.pencillers = (completeLibraryCredits.pencillers || []).concat(series.credits.pencillers);
+      }
+      if (series.credits.inkers) {
+        completeLibraryCredits.inkers = (completeLibraryCredits.inkers || []).concat(series.credits.inkers);
+      }
+      if (series.credits.letterers) {
+        completeLibraryCredits.letterers = (completeLibraryCredits.letterers || []).concat(series.credits.letterers);
+      }
+      if (series.credits.editors) {
+        completeLibraryCredits.editors = (completeLibraryCredits.editors || []).concat(series.credits.editors);
+      }
+      if (series.credits.colorists) {
+        completeLibraryCredits.colorists = (completeLibraryCredits.colorists || []).concat(series.credits.colorists);
+      }
+      if (series.credits.coverArtists) {
+        completeLibraryCredits.coverArtists = (completeLibraryCredits.coverArtists || []).concat(series.credits.coverArtists);
+      }
+      if (series.credits.publishers) {
+        completeLibraryCredits.publishers = (completeLibraryCredits.publishers || []).concat(series.credits.publishers);
+      }
+      if (series.credits.imprints) {
+        completeLibraryCredits.imprints = (completeLibraryCredits.imprints || []).concat(series.credits.imprints);
+      }
+      if (series.credits.genres) {
+        completeLibraryCredits.genres = (completeLibraryCredits.genres || []).concat(series.credits.genres);
+      }
+      if (series.credits.characters) {
+        completeLibraryCredits.characters = (completeLibraryCredits.characters || []).concat(series.credits.characters);
+      }
+      if (series.credits.teams) {
+        completeLibraryCredits.teams = (completeLibraryCredits.teams || []).concat(series.credits.teams);
+      }
+      if (series.credits.locations) {
+        completeLibraryCredits.locations = (completeLibraryCredits.locations || []).concat(series.credits.locations);
+      }
+      if (series.credits.storyArcs) {
+        completeLibraryCredits.storyArcs = (completeLibraryCredits.storyArcs || []).concat(series.credits.storyArcs);
+      }
+      if (series.credits.seriesGroups) {
+        completeLibraryCredits.seriesGroups = (completeLibraryCredits.seriesGroups || []).concat(series.credits.seriesGroups);
+      }
+    }
+  }
+
+  // Helper function to deduplicate credits by their unique ID
+  // This reuses the same deduplication logic as compileTheCompleteComicSeriesCreditsMetadata
+  const dedupeById = <T extends { id: number | string }>(items: T[]): T[] => {
+    const uniqueCredits = new Map<number | string, T>();
+    for (const credit of items) {
+      uniqueCredits.set(credit.id, credit);
+    }
+    return Array.from(uniqueCredits.values());
+  };
+
+  // Deduplicate all aggregated credit types to create a unique library-wide credits list
+  // This ensures that if a creator worked on comics in multiple series, they only appear once in the library metadata
+  if (completeLibraryCredits.writers) {
+    completeLibraryCredits.writers = dedupeById(completeLibraryCredits.writers);
+  }
+  if (completeLibraryCredits.pencillers) {
+    completeLibraryCredits.pencillers = dedupeById(completeLibraryCredits.pencillers);
+  }
+  if (completeLibraryCredits.inkers) {
+    completeLibraryCredits.inkers = dedupeById(completeLibraryCredits.inkers);
+  }
+  if (completeLibraryCredits.letterers) {
+    completeLibraryCredits.letterers = dedupeById(completeLibraryCredits.letterers);
+  }
+  if (completeLibraryCredits.editors) {
+    completeLibraryCredits.editors = dedupeById(completeLibraryCredits.editors);
+  }
+  if (completeLibraryCredits.colorists) {
+    completeLibraryCredits.colorists = dedupeById(completeLibraryCredits.colorists);
+  }
+  if (completeLibraryCredits.coverArtists) {
+    completeLibraryCredits.coverArtists = dedupeById(completeLibraryCredits.coverArtists);
+  }
+  if (completeLibraryCredits.publishers) {
+    completeLibraryCredits.publishers = dedupeById(completeLibraryCredits.publishers);
+  }
+  if (completeLibraryCredits.imprints) {
+    completeLibraryCredits.imprints = dedupeById(completeLibraryCredits.imprints);
+  }
+  if (completeLibraryCredits.genres) {
+    completeLibraryCredits.genres = dedupeById(completeLibraryCredits.genres);
+  }
+  if (completeLibraryCredits.characters) {
+    completeLibraryCredits.characters = dedupeById(completeLibraryCredits.characters);
+  }
+  if (completeLibraryCredits.teams) {
+    completeLibraryCredits.teams = dedupeById(completeLibraryCredits.teams);
+  }
+  if (completeLibraryCredits.locations) {
+    completeLibraryCredits.locations = dedupeById(completeLibraryCredits.locations);
+  }
+  if (completeLibraryCredits.storyArcs) {
+    completeLibraryCredits.storyArcs = dedupeById(completeLibraryCredits.storyArcs);
+  }
+  if (completeLibraryCredits.seriesGroups) {
+    completeLibraryCredits.seriesGroups = dedupeById(completeLibraryCredits.seriesGroups);
+  }
+
+  // Return the flattened metadata object expected by the response schema.
+  return {
+    ...completeLibraryCredits,
+    years: Array.from(allYears).sort((a, b) => a - b),
+  };
+};
