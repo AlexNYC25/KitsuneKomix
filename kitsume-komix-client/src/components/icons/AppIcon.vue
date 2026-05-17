@@ -32,6 +32,7 @@ const piToOh: Record<string, string> = {
   calendar: 'md-calendarmonth',
   star: 'md-starrate-sharp',
   edit: 'md-modeeditoutline-sharp',
+  bookContent: 'md-menubook-round',
 }
 
 </script>

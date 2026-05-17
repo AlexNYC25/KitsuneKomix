@@ -147,7 +147,7 @@ onMounted(async () => {
 				<!-- Filter Column - Content -->
 				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
 					<label class="text-xs font-semibold text-text-primary uppercase">
-						<AppIcon name="calendar" scale="0.8" class="mr-1" />
+						<AppIcon name="bookContent" scale="0.8" class="mr-1" />
 						Contents
 					</label>
 
