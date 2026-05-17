@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { useComicSeriesStore } from '@/stores/comic-series';
 
@@ -18,6 +19,19 @@ const filtersApplied = ref({
 });
 
 const sortCategory = ref("latest");
+const route = useRoute();
+
+const isLatestRoute = computed(() => route.path === '/comic-series/latest');
+
+watch(
+	() => route.path,
+	(newPath) => {
+		if (newPath === '/comic-series/latest') {
+			sortCategory.value = 'latest';
+		}
+	},
+	{ immediate: true },
+);
 
 const areThereActiveFilters = computed(() => {
 	return Object.values(filtersApplied.value).some(filterArray => filterArray.length > 0);
@@ -47,7 +61,9 @@ onMounted(async () => {
 				<label for="sort-by" class="text-sm text-text-secondary">Sort by</label>
 				<select
 					id="sort-by"
-					class="px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+					v-model="sortCategory"
+					:disabled="isLatestRoute"
+					class="px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
 				>
 					<option value="latest">Latest</option>
 					<option value="updated">Recently Updated</option>
