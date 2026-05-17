@@ -79,8 +79,8 @@ onMounted(async () => {
 
 		<!-- Filters panel -->
 		<div v-if="showFilters" class="w-lwh mx-5 bg-surface-elevated border border-t-0 border-white/10 rounded-b-xl p-4">
-			<div class="grid grid-cols-4 gap-6">
-				<!-- Filter Column 1 -->
+			<div class="grid grid-cols-5 gap-6">
+				<!-- Filter Column - Genre -->
 				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
 					<label class="text-xs font-semibold text-text-primary uppercase">
 						<AppIcon name="genreCheck" scale="0.8" class="mr-1" />
@@ -96,9 +96,15 @@ onMounted(async () => {
 					</div>
 				</div>
 
-				<!-- Filter Column 2 -->
+				<!-- Filter Column - Series Status -->
 				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
-					<label class="text-xs font-semibold text-text-primary uppercase">Status</label>
+					<label class="text-xs font-semibold text-text-primary uppercase">
+						<AppIcon name="seriesStatus" scale="0.8" class="mr-1" />
+						Status
+					</label>
+					<div class="border border-white/70 rounded p-2 flex items-center justify-center text-sm text-text-secondary">
+						All Status
+					</div>
 					<div class="space-y-2 text-sm text-text-secondary">
 						<div><input type="checkbox" id="status-ongoing" /> <label for="status-ongoing">Ongoing</label></div>
 						<div><input type="checkbox" id="status-completed" /> <label for="status-completed">Completed</label></div>
@@ -106,19 +112,44 @@ onMounted(async () => {
 					</div>
 				</div>
 
-				<!-- Filter Column 3 -->
-				<div class="flex flex-col gap-2">
-					<label class="text-xs font-semibold text-text-primary uppercase">Year</label>
+				<!-- Filter Column - Ratings -->
+				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
+					<label class="text-xs font-semibold text-text-primary uppercase">
+						<AppIcon name="star" scale="0.8" class="mr-1" />
+						All Rating
+					</label>
+					<div class="border border-white/70 rounded p-2 flex items-center justify-center text-sm text-text-secondary">
+						All Ratings
+					</div>
+					<div class="space-y-2 text-sm text-text-secondary">
+						<div><input type="checkbox" id="rating-5star" /> <label for="rating-5star">5★+</label></div>
+						<div><input type="checkbox" id="rating-4star" /> <label for="rating-4star">4★+</label></div>
+						<div><input type="checkbox" id="rating-3star" /> <label for="rating-3star">3★+</label></div>
+					</div>
+				</div>
+
+				<!-- Filter Column - Years -->
+				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
+					<label class="text-xs font-semibold text-text-primary uppercase">
+						<AppIcon name="calendar" scale="0.8" class="mr-1" />
+						Year
+					</label>
+					<div class="border border-white/70 rounded p-2 flex items-center justify-center text-sm text-text-secondary">
+						All Years
+					</div>
 					<div class="space-y-2 text-sm text-text-secondary">
 						<div><input type="checkbox" id="year-2024" /> <label for="year-2024">2024</label></div>
 						<div><input type="checkbox" id="year-2023" /> <label for="year-2023">2023</label></div>
 						<div><input type="checkbox" id="year-2022" /> <label for="year-2022">2022</label></div>
 					</div>
-				</div>
+				</div>				
 
-				<!-- Filter Column 4 -->
-				<div class="flex flex-col gap-2">
-					<label class="text-xs font-semibold text-text-primary uppercase">Rating</label>
+				<!-- Filter Column Creators -->
+				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
+					<label class="text-xs font-semibold text-text-primary uppercase">
+						<AppIcon name="edit" scale="0.8" class="mr-1" />
+						Creator
+					</label>
 					<div class="space-y-2 text-sm text-text-secondary">
 						<div><input type="checkbox" id="rating-5star" /> <label for="rating-5star">5★+</label></div>
 						<div><input type="checkbox" id="rating-4star" /> <label for="rating-4star">4★+</label></div>
