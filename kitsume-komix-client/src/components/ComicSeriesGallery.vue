@@ -8,10 +8,6 @@ import AppIcon from './icons/AppIcon.vue';
 
 import type { ComicSeriesListItem } from '@/types';
 
-const props = defineProps<{
-	category: string; // e.g., "all", "latest"
-}>();
-
 const comics = ref<ComicSeriesListItem[]>([]);
 
 const showFilters = ref(false);
@@ -20,6 +16,8 @@ const filtersApplied = ref({
 	status: [] as string[],
 	rating: [] as string[],
 });
+
+const sortCategory = ref("latest");
 
 const areThereActiveFilters = computed(() => {
 	return Object.values(filtersApplied.value).some(filterArray => filterArray.length > 0);
