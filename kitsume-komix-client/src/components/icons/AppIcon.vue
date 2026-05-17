@@ -27,6 +27,11 @@ const piToOh: Record<string, string> = {
   grid: 'md-gridview-sharp',
   filter: 'md-filteralt',
   filterOff: 'md-filteraltoff',
+  genreCheck: 'md-taskalt',
+  seriesStatus: 'md-autostories',
+  calendar: 'md-calendarmonth',
+  star: 'md-starrate-sharp',
+  edit: 'md-modeeditoutline-sharp',
 }
 
 </script>
