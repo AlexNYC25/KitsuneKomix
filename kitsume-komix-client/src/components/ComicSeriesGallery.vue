@@ -25,6 +25,16 @@ const genreFilterOptions = computed(() => {
 	const genres = filtersAllowed.value?.genres ?? [];
 	return [...genres].sort((a, b) => a.name.localeCompare(b.name));
 });
+const selectedGenres = ref<number[]>([]);
+const showGenresDropdown = ref(false);
+const selectedGenreNames = computed(() =>
+	genreFilterOptions.value.filter(g => selectedGenres.value.includes(g.id))
+);
+const selectedYears = ref<number[]>([]);
+const showYearsDropdown = ref(false);
+const selectedYearValues = computed(() =>
+	yearFilterOptions.value.filter(year => selectedYears.value.includes(year))
+);
 const characterFilterOptions = computed(() => {
 	const characters = filtersAllowed.value?.characters ?? [];
 	return [...characters].sort((a, b) => a.name.localeCompare(b.name));
@@ -205,44 +215,106 @@ onMounted(async () => {
 
 		<!-- Filters panel -->
 		<div v-if="showFilters" class="w-lwh mx-5 bg-surface-elevated border border-t-0 border-white/10 rounded-b-xl p-4">
-			<div class="grid grid-cols-4 gap-4">
-				<!-- Filter Column - Genre -->
+			<div class="grid grid-cols-3 gap-4">
+				<!-- Filter Column - Browse -->
 				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
 					<label class="text-xs font-semibold text-text-primary uppercase">
 						<AppIcon name="genreCheck" scale="0.8" class="mr-1" />
-						Genre
+						Browse
 					</label>
-					<div class="border border-white/70 rounded p-2 flex items-center justify-center text-sm text-text-secondary">
-						All Genres
-					</div>
-					<div class="space-y-2 text-sm text-text-secondary">
-						<div v-for="genre in genreFilterOptions" :key="genre.id">
-							<input type="checkbox" :id="`genre-${genre.id}`" />
-							<label :for="`genre-${genre.id}`">{{ genre.name }}</label>
-						</div>
-						<div v-if="genreFilterOptions.length === 0" class="text-xs text-text-secondary/70">
-							No genres found
-						</div>
-					</div>
-				</div>
 
-				<!-- Filter Column - Years -->
-				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
-					<label class="text-xs font-semibold text-text-primary uppercase">
-						<AppIcon name="calendar" scale="0.8" class="mr-1" />
-						Year
-					</label>
-					<div class="border border-white/70 rounded p-2 flex items-center justify-center text-sm text-text-secondary">
-						All Years
+					<div class="text-sm text-text-secondary">
+						Genres
 					</div>
-					<div class="space-y-2 text-sm text-text-secondary">
-						<div v-for="year in yearFilterOptions" :key="year">
-							<input type="checkbox" :id="`year-${year}`" />
-							<label :for="`year-${year}`">{{ year }}</label>
+					<div class="relative">
+						<button
+							type="button"
+							@click="showGenresDropdown = !showGenresDropdown"
+							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+						>
+							<span class="text-text-secondary/70">
+								{{ selectedGenres.length === 0 ? 'Select genres...' : `${selectedGenres.length} selected` }}
+							</span>
+							<AppIcon :name="showGenresDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+						</button>
+						<div
+							v-if="showGenresDropdown"
+							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+						>
+							<div v-if="genreFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+								No genres found
+							</div>
+							<label
+								v-for="genre in genreFilterOptions"
+								:key="genre.id"
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+							>
+								<input type="checkbox" :value="genre.id" v-model="selectedGenres" class="accent-primary" />
+								{{ genre.name }}
+							</label>
 						</div>
-						<div v-if="yearFilterOptions.length === 0" class="text-xs text-text-secondary/70">
-							No years found
+					</div>
+					<div v-if="selectedGenreNames.length > 0" class="flex flex-wrap gap-1 mt-1">
+						<span
+							v-for="genre in selectedGenreNames"
+							:key="genre.id"
+							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+						>
+							{{ genre.name }}
+							<button
+								type="button"
+								@click="selectedGenres = selectedGenres.filter(id => id !== genre.id)"
+								class="leading-none hover:text-red-400"
+								aria-label="Remove"
+							>×</button>
+						</span>
+					</div>
+
+					<div class="text-sm text-text-secondary">
+						Years
+					</div>
+					<div class="relative">
+						<button
+							type="button"
+							@click="showYearsDropdown = !showYearsDropdown"
+							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+						>
+							<span class="text-text-secondary/70">
+								{{ selectedYears.length === 0 ? 'Select years...' : `${selectedYears.length} selected` }}
+							</span>
+							<AppIcon :name="showYearsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
+						</button>
+						<div
+							v-if="showYearsDropdown"
+							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
+						>
+							<div v-if="yearFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
+								No years found
+							</div>
+							<label
+								v-for="year in yearFilterOptions"
+								:key="year"
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
+							>
+								<input type="checkbox" :value="year" v-model="selectedYears" class="accent-primary" />
+								{{ year }}
+							</label>
 						</div>
+					</div>
+					<div v-if="selectedYearValues.length > 0" class="flex flex-wrap gap-1 mt-1">
+						<span
+							v-for="year in selectedYearValues"
+							:key="year"
+							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
+						>
+							{{ year }}
+							<button
+								type="button"
+								@click="selectedYears = selectedYears.filter(selectedYear => selectedYear !== year)"
+								class="leading-none hover:text-red-400"
+								aria-label="Remove"
+							>×</button>
+						</span>
 					</div>
 				</div>
 
