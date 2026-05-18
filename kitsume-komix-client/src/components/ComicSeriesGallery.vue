@@ -593,8 +593,8 @@ onMounted(async () => {
 		</div>
 
 		<!-- Main content area -->
-		<div class="flex-1 p-4 mx-6">
-			<div class="grid grid-cols-5 gap-4">
+		<div class="flex-1 p-4 mx-8">
+			<div class="grid grid-cols-5 gap-6">
 				<ComicSeriesCard v-for="comic in comics" :key="comic.id" :comicSeriesData="comic" />
 			</div>
 		</div>

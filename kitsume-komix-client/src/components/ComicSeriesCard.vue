@@ -20,7 +20,7 @@ const imageUrl = props.comicSeriesData.thumbnailUrl ? toAbsoluteImageUrl(props.c
 </script>
 
 <template>
-	<div class="comic-series-card flex flex-col w-64 cursor-pointer" @click="goToComicSeries(comicSeriesData.id)">
+	<div class="comic-series-card flex flex-col w-64 cursor-pointer my-2" @click="goToComicSeries(comicSeriesData.id)">
 		<div class="thumbnail relative w-full h-full bg-gray-200 rounded overflow-hidden">
 			<!-- Thumbnail -->
 			<img 
