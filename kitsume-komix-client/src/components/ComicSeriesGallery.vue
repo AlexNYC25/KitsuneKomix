@@ -9,6 +9,7 @@ import AppIcon from './icons/AppIcon.vue';
 import FilterPill from './gallery/FilterPill.vue';
 import FilterDropdown from './gallery/FilterDropdown.vue';
 import FilterDropdownArea from './gallery/FilterDropdownArea.vue';
+import FilterColumn from './gallery/FilterColumn.vue';
 
 import type { ComicSeriesListItem } from '@/types';
 import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
@@ -230,12 +231,7 @@ onMounted(async () => {
 		<div v-if="showFilters" class="w-lwh mx-5 bg-surface-elevated border border-t-0 border-white/10 rounded-b-xl p-4">
 			<div class="grid grid-cols-3 gap-4">
 				<!-- Filter Column - Browse -->
-				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
-					<label class="text-xs font-semibold text-text-primary uppercase">
-						<AppIcon name="genreCheck" scale="0.8" class="mr-1" />
-						Browse
-					</label>
-
+				<FilterColumn label="Browse" icon-name="genreCheck">
 					<FilterDropdownArea
 						filterName="genres"
 						byLine="Genres"
@@ -316,15 +312,10 @@ onMounted(async () => {
 							/>
 						</template>
 					</FilterDropdownArea>
-				</div>
+				</FilterColumn>
 
 				<!-- Filter Column - Content -->
-				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
-					<label class="text-xs font-semibold text-text-primary uppercase">
-						<AppIcon name="bookContent" scale="0.8" class="mr-1" />
-						Contents
-					</label>
-
+				<FilterColumn label="Contents" icon-name="bookContent">
 					<FilterDropdownArea
 						filterName="characters"
 						byLine="Characters"
@@ -405,205 +396,199 @@ onMounted(async () => {
 							/>
 						</template>
 					</FilterDropdownArea>
-				</div>
+				</FilterColumn>
 
 				<!-- Filter Column Creators -->
-				<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
-					<label class="text-xs font-semibold text-text-primary uppercase">
-						<AppIcon name="edit" scale="0.8" class="mr-1" />
-						Creators
-					</label>
-					<div class="space-y-2">
-						<FilterDropdownArea
-							filterName="writers"
-							byLine="Written by"
-							selectLine="Select writers..."
-							:emptyOptions="writerFilterOptions.length === 0"
-							:selectedCount="selectedWriters.length"
-						>
-							<template #options>
-								<FilterDropdown
-									v-for="writer in writerFilterOptions"
-									:key="writer.id"
-									:property="{id: writer.id, name: writer.name}"
-									:isSelected="selectedWriters.includes(writer.id)"
-									@toggle="selectedWriters.push(writer.id)"
-									@untoggle="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
-								/>
-							</template>
-							<template #pills>
-								<FilterPill
-									v-for="writer in selectedWriterNames"
-									:key="writer.id"
-									:item="{id: writer.id, name: writer.name}"
-									@remove="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
-								/>
-							</template>
-						</FilterDropdownArea>
+				<FilterColumn label="Creators" icon-name="edit">
+					<FilterDropdownArea
+						filterName="writers"
+						byLine="Written by"
+						selectLine="Select writers..."
+						:emptyOptions="writerFilterOptions.length === 0"
+						:selectedCount="selectedWriters.length"
+					>
+						<template #options>
+							<FilterDropdown
+								v-for="writer in writerFilterOptions"
+								:key="writer.id"
+								:property="{id: writer.id, name: writer.name}"
+								:isSelected="selectedWriters.includes(writer.id)"
+								@toggle="selectedWriters.push(writer.id)"
+								@untoggle="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
+							/>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="writer in selectedWriterNames"
+								:key="writer.id"
+								:item="{id: writer.id, name: writer.name}"
+								@remove="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-						<FilterDropdownArea
-							filterName="artists"
-							byLine="Illustrated by"
-							selectLine="Select artists..."
-							:emptyOptions="artistFilterOptions.length === 0"
-							:selectedCount="selectedArtists.length"
-						>
-							<template #options>
-								<FilterDropdown
-									v-for="artist in artistFilterOptions"
-									:key="artist.id"
-									:property="{id: artist.id, name: artist.name}"
-									:isSelected="selectedArtists.includes(artist.id)"
-									@toggle="selectedArtists.push(artist.id)"
-									@untoggle="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
-								/>
-							</template>
-							<template #pills>
-								<FilterPill
-									v-for="artist in selectedArtistNames"
-									:key="artist.id"
-									:item="{id: artist.id, name: artist.name}"
-									@remove="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
-								/>
-							</template>
-						</FilterDropdownArea>
+					<FilterDropdownArea
+						filterName="artists"
+						byLine="Illustrated by"
+						selectLine="Select artists..."
+						:emptyOptions="artistFilterOptions.length === 0"
+						:selectedCount="selectedArtists.length"
+					>
+						<template #options>
+							<FilterDropdown
+								v-for="artist in artistFilterOptions"
+								:key="artist.id"
+								:property="{id: artist.id, name: artist.name}"
+								:isSelected="selectedArtists.includes(artist.id)"
+								@toggle="selectedArtists.push(artist.id)"
+								@untoggle="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
+							/>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="artist in selectedArtistNames"
+								:key="artist.id"
+								:item="{id: artist.id, name: artist.name}"
+								@remove="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-						<FilterDropdownArea
-							filterName="publishers"
-							byLine="Published by"
-							selectLine="Select publishers..."
-							:emptyOptions="publisherFilterOptions.length === 0"
-							:selectedCount="selectedPublishers.length"
-						>
-							<template #options>
-								<FilterDropdown
-									v-for="publisher in publisherFilterOptions"
-									:key="publisher.id"
-									:property="{id: publisher.id, name: publisher.name}"
-									:isSelected="selectedPublishers.includes(publisher.id)"
-									@toggle="selectedPublishers.push(publisher.id)"
-									@untoggle="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
-								/>
-							</template>
-							<template #pills>
-								<FilterPill
-									v-for="publisher in selectedPublisherNames"
-									:key="publisher.id"
-									:item="{id: publisher.id, name: publisher.name}"
-									@remove="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
-								/>
-							</template>
-						</FilterDropdownArea>
+					<FilterDropdownArea
+						filterName="publishers"
+						byLine="Published by"
+						selectLine="Select publishers..."
+						:emptyOptions="publisherFilterOptions.length === 0"
+						:selectedCount="selectedPublishers.length"
+					>
+						<template #options>
+							<FilterDropdown
+								v-for="publisher in publisherFilterOptions"
+								:key="publisher.id"
+								:property="{id: publisher.id, name: publisher.name}"
+								:isSelected="selectedPublishers.includes(publisher.id)"
+								@toggle="selectedPublishers.push(publisher.id)"
+								@untoggle="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
+							/>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="publisher in selectedPublisherNames"
+								:key="publisher.id"
+								:item="{id: publisher.id, name: publisher.name}"
+								@remove="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-						<FilterDropdownArea
-							filterName="colorists"
-							byLine="Colored by"
-							selectLine="Select colorists..."
-							:emptyOptions="coloristFilterOptions.length === 0"
-							:selectedCount="selectedColorists.length"
-						>
-							<template #options>
-								<FilterDropdown
-									v-for="colorist in coloristFilterOptions"
-									:key="colorist.id"
-									:property="{id: colorist.id, name: colorist.name}"
-									:isSelected="selectedColorists.includes(colorist.id)"
-									@toggle="selectedColorists.push(colorist.id)"
-									@untoggle="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
-								/>
-							</template>
-							<template #pills>
-								<FilterPill
-									v-for="colorist in selectedColoristNames"
-									:key="colorist.id"
-									:item="{id: colorist.id, name: colorist.name}"
-									@remove="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
-								/>
-							</template>
-						</FilterDropdownArea>
+					<FilterDropdownArea
+						filterName="colorists"
+						byLine="Colored by"
+						selectLine="Select colorists..."
+						:emptyOptions="coloristFilterOptions.length === 0"
+						:selectedCount="selectedColorists.length"
+					>
+						<template #options>
+							<FilterDropdown
+								v-for="colorist in coloristFilterOptions"
+								:key="colorist.id"
+								:property="{id: colorist.id, name: colorist.name}"
+								:isSelected="selectedColorists.includes(colorist.id)"
+								@toggle="selectedColorists.push(colorist.id)"
+								@untoggle="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
+							/>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="colorist in selectedColoristNames"
+								:key="colorist.id"
+								:item="{id: colorist.id, name: colorist.name}"
+								@remove="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-						<FilterDropdownArea
-							filterName="letterers"
-							byLine="Lettered by"
-							selectLine="Select letterers..."
-							:emptyOptions="lettererFilterOptions.length === 0"
-							:selectedCount="selectedLetterers.length"
-						>
-							<template #options>
-								<FilterDropdown
-									v-for="letterer in lettererFilterOptions"
-									:key="letterer.id"
-									:property="{id: letterer.id, name: letterer.name}"
-									:isSelected="selectedLetterers.includes(letterer.id)"
-									@toggle="selectedLetterers.push(letterer.id)"
-									@untoggle="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
-								/>
-							</template>
-							<template #pills>
-								<FilterPill
-									v-for="letterer in selectedLettererNames"
-									:key="letterer.id"
-									:item="{id: letterer.id, name: letterer.name}"
-									@remove="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
-								/>
-							</template>
-						</FilterDropdownArea>
+					<FilterDropdownArea
+						filterName="letterers"
+						byLine="Lettered by"
+						selectLine="Select letterers..."
+						:emptyOptions="lettererFilterOptions.length === 0"
+						:selectedCount="selectedLetterers.length"
+					>
+						<template #options>
+							<FilterDropdown
+								v-for="letterer in lettererFilterOptions"
+								:key="letterer.id"
+								:property="{id: letterer.id, name: letterer.name}"
+								:isSelected="selectedLetterers.includes(letterer.id)"
+								@toggle="selectedLetterers.push(letterer.id)"
+								@untoggle="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
+							/>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="letterer in selectedLettererNames"
+								:key="letterer.id"
+								:item="{id: letterer.id, name: letterer.name}"
+								@remove="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-						<FilterDropdownArea
-							filterName="editors"
-							byLine="Edited by"
-							selectLine="Select editors..."
-							:emptyOptions="editorFilterOptions.length === 0"
-							:selectedCount="selectedEditors.length"
-						>
-							<template #options>
-								<FilterDropdown
-									v-for="editor in editorFilterOptions"
-									:key="editor.id"
-									:property="{id: editor.id, name: editor.name}"
-									:isSelected="selectedEditors.includes(editor.id)"
-									@toggle="selectedEditors.push(editor.id)"
-									@untoggle="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
-								/>
-							</template>
-							<template #pills>
-								<FilterPill
-									v-for="editor in selectedEditorNames"
-									:key="editor.id"
-									:item="{id: editor.id, name: editor.name}"
-									@remove="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
-								/>
-							</template>
-						</FilterDropdownArea>
+					<FilterDropdownArea
+						filterName="editors"
+						byLine="Edited by"
+						selectLine="Select editors..."
+						:emptyOptions="editorFilterOptions.length === 0"
+						:selectedCount="selectedEditors.length"
+					>
+						<template #options>
+							<FilterDropdown
+								v-for="editor in editorFilterOptions"
+								:key="editor.id"
+								:property="{id: editor.id, name: editor.name}"
+								:isSelected="selectedEditors.includes(editor.id)"
+								@toggle="selectedEditors.push(editor.id)"
+								@untoggle="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
+							/>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="editor in selectedEditorNames"
+								:key="editor.id"
+								:item="{id: editor.id, name: editor.name}"
+								@remove="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-						<FilterDropdownArea
-							filterName="cover artists"
-							byLine="Cover by"
-							selectLine="Select cover artists..."
-							:emptyOptions="coverArtistFilterOptions.length === 0"
-							:selectedCount="selectedCoverArtists.length"
-						>
-							<template #options>
-								<FilterDropdown
-									v-for="coverArtist in coverArtistFilterOptions"
-									:key="coverArtist.id"
-									:property="{id: coverArtist.id, name: coverArtist.name}"
-									:isSelected="selectedCoverArtists.includes(coverArtist.id)"
-									@toggle="selectedCoverArtists.push(coverArtist.id)"
-									@untoggle="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
-								/>
-							</template>
-							<template #pills>
-								<FilterPill
-									v-for="coverArtist in selectedCoverArtistNames"
-									:key="coverArtist.id"
-									:item="{id: coverArtist.id, name: coverArtist.name}"
-									@remove="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
-								/>
-							</template>
-						</FilterDropdownArea>
-					</div>
-				</div>
+					<FilterDropdownArea
+						filterName="cover artists"
+						byLine="Cover by"
+						selectLine="Select cover artists..."
+						:emptyOptions="coverArtistFilterOptions.length === 0"
+						:selectedCount="selectedCoverArtists.length"
+					>
+						<template #options>
+							<FilterDropdown
+								v-for="coverArtist in coverArtistFilterOptions"
+								:key="coverArtist.id"
+								:property="{id: coverArtist.id, name: coverArtist.name}"
+								:isSelected="selectedCoverArtists.includes(coverArtist.id)"
+								@toggle="selectedCoverArtists.push(coverArtist.id)"
+								@untoggle="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
+							/>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="coverArtist in selectedCoverArtistNames"
+								:key="coverArtist.id"
+								:item="{id: coverArtist.id, name: coverArtist.name}"
+								@remove="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
+				</FilterColumn>
 			</div>
 		</div>
 
