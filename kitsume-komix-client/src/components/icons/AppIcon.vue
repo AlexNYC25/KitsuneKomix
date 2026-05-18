@@ -35,6 +35,7 @@ const piToOh: Record<string, string> = {
   bookContent: 'md-menubook-round',
   arrowUp: 'io-caret-up',
   arrowDown: 'io-caret-down',
+  remove: 'io-remove-circle-sharp',
 }
 
 </script>
