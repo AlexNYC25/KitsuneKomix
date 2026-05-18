@@ -6,6 +6,7 @@ import { useComicSeriesStore } from '@/stores/comic-series';
 
 import ComicSeriesCard from './ComicSeriesCard.vue';
 import AppIcon from './icons/AppIcon.vue';
+import FilterPill from './gallery/FilterPill.vue';
 
 import type { ComicSeriesListItem } from '@/types';
 import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
@@ -14,11 +15,6 @@ const comics = ref<ComicSeriesListItem[]>([]);
 
 const showFilters = ref(false);
 const filtersAllowed = ref<ComicSeriesFilterValuesData | null>(null);
-const filtersApplied = ref({
-	genre: [] as string[],
-	status: [] as string[],
-	rating: [] as string[],
-});
 
 const yearFilterOptions = computed(() => filtersAllowed.value?.years ?? []);
 const genreFilterOptions = computed(() => {
@@ -161,7 +157,21 @@ watch(
 );
 
 const areThereActiveFilters = computed(() => {
-	return Object.values(filtersApplied.value).some(filterArray => filterArray.length > 0);
+	return [
+		selectedGenres.value,
+		selectedYears.value,
+		selectedLetters.value,
+		selectedCharacters.value,
+		selectedTeams.value,
+		selectedLocations.value,
+		selectedWriters.value,
+		selectedArtists.value,
+		selectedPublishers.value,
+		selectedColorists.value,
+		selectedLetterers.value,
+		selectedEditors.value,
+		selectedCoverArtists.value,
+	].some(selectedValues => selectedValues.length > 0);
 });
 
 onMounted(async () => {
@@ -183,7 +193,12 @@ onMounted(async () => {
 				<button
 					type="button"
 					@click="showFilters = !showFilters"
-					class="px-3 py-1.5 rounded-md bg-black/40 text-text-primary text-sm font-medium border border-white/15 hover:bg-black/60 transition-colors"
+					:class="[
+						'px-3 py-1.5 rounded-md text-text-primary text-sm font-medium border transition-colors',
+						areThereActiveFilters
+							? 'bg-primary/30 border-primary/60 hover:bg-primary/40'
+							: 'bg-black/40 border-white/15 hover:bg-black/60'
+					]"
 				>
 					<AppIcon v-if="areThereActiveFilters" name="filter" scale="0.8" class="mr-1" />
 					<AppIcon v-else name="filterOff" scale="0.8" class="mr-1" />
@@ -264,19 +279,12 @@ onMounted(async () => {
 						</div>
 					</div>
 					<div v-if="selectedGenreNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<span
+						<FilterPill
 							v-for="genre in selectedGenreNames"
 							:key="genre.id"
-							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-						>
-							{{ genre.name }}
-							<button
-								type="button"
-								@click="selectedGenres = selectedGenres.filter(id => id !== genre.id)"
-								class="leading-none hover:text-red-400"
-								aria-label="Remove"
-							>×</button>
-						</span>
+							:item="{id: genre.id, name: genre.name}"
+							@remove="selectedGenres = selectedGenres.filter(id => id !== genre.id)"
+						/>
 					</div>
 
 					<div class="text-sm text-text-secondary">
@@ -311,19 +319,12 @@ onMounted(async () => {
 						</div>
 					</div>
 					<div v-if="selectedYearValues.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<span
+						<FilterPill
 							v-for="year in selectedYearValues"
 							:key="year"
-							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-						>
-							{{ year }}
-							<button
-								type="button"
-								@click="selectedYears = selectedYears.filter(selectedYear => selectedYear !== year)"
-								class="leading-none hover:text-red-400"
-								aria-label="Remove"
-							>×</button>
-						</span>
+							:item="{id: year, name: year.toString()}"
+							@remove="selectedYears = selectedYears.filter(selectedYear => selectedYear !== year)"
+						/>
 					</div>
 
 					<div class="text-sm text-text-secondary">
@@ -358,19 +359,12 @@ onMounted(async () => {
 						</div>
 					</div>
 					<div v-if="selectedLetterValues.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<span
+						<FilterPill
 							v-for="letter in selectedLetterValues"
 							:key="letter"
-							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary uppercase"
-						>
-							{{ letter }}
-							<button
-								type="button"
-								@click="selectedLetters = selectedLetters.filter(selectedLetter => selectedLetter !== letter)"
-								class="leading-none hover:text-red-400"
-								aria-label="Remove"
-							>×</button>
-						</span>
+							:item="{id: letter, name: letter.toUpperCase()}"
+							@remove="selectedLetters = selectedLetters.filter(selectedLetter => selectedLetter !== letter)"
+						/>
 					</div>
 				</div>
 
@@ -421,19 +415,12 @@ onMounted(async () => {
 					</div>
 					<!-- Selected chips -->
 					<div v-if="selectedCharacterNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<span
+						<FilterPill
 							v-for="character in selectedCharacterNames"
 							:key="character.id"
-							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-						>
-							{{ character.name }}
-							<button
-								type="button"
-								@click="selectedCharacters = selectedCharacters.filter(id => id !== character.id)"
-								class="leading-none hover:text-red-400"
-								aria-label="Remove"
-							>×</button>
-						</span>
+							:item="{id: character.id, name: character.name}"
+							@remove="selectedCharacters = selectedCharacters.filter(id => id !== character.id)"
+						/>
 					</div>
 
 					<div class="text-sm text-text-secondary">
@@ -468,19 +455,12 @@ onMounted(async () => {
 						</div>
 					</div>
 					<div v-if="selectedTeamNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<span
+						<FilterPill
 							v-for="team in selectedTeamNames"
 							:key="team.id"
-							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-						>
-							{{ team.name }}
-							<button
-								type="button"
-								@click="selectedTeams = selectedTeams.filter(id => id !== team.id)"
-								class="leading-none hover:text-red-400"
-								aria-label="Remove"
-							>×</button>
-						</span>
+							:item="{id: team.id, name: team.name}"
+							@remove="selectedTeams = selectedTeams.filter(id => id !== team.id)"
+						/>
 					</div>
 
 					<div class="text-sm text-text-secondary">
@@ -515,19 +495,12 @@ onMounted(async () => {
 						</div>
 					</div>
 					<div v-if="selectedLocationNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<span
+						<FilterPill
 							v-for="location in selectedLocationNames"
 							:key="location.id"
-							class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-						>
-							{{ location.name }}
-							<button
-								type="button"
-								@click="selectedLocations = selectedLocations.filter(id => id !== location.id)"
-								class="leading-none hover:text-red-400"
-								aria-label="Remove"
-							>×</button>
-						</span>
+							:item="{id: location.id, name: location.name}"
+							@remove="selectedLocations = selectedLocations.filter(id => id !== location.id)"
+						/>
 					</div>
 				</div>
 
@@ -570,19 +543,12 @@ onMounted(async () => {
 							</div>
 						</div>
 						<div v-if="selectedWriterNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<span
+							<FilterPill
 								v-for="writer in selectedWriterNames"
 								:key="writer.id"
-								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-							>
-								{{ writer.name }}
-								<button
-									type="button"
-									@click="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
-									class="leading-none hover:text-red-400"
-									aria-label="Remove"
-								>×</button>
-							</span>
+								:item="{id: writer.id, name: writer.name}"
+								@remove="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
+							/>
 						</div>
 
 						<div class="text-sm text-text-secondary">
@@ -617,19 +583,12 @@ onMounted(async () => {
 							</div>
 						</div>
 						<div v-if="selectedArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<span
+							<FilterPill
 								v-for="artist in selectedArtistNames"
 								:key="artist.id"
-								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-							>
-								{{ artist.name }}
-								<button
-									type="button"
-									@click="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
-									class="leading-none hover:text-red-400"
-									aria-label="Remove"
-								>×</button>
-							</span>
+								:item="{id: artist.id, name: artist.name}"
+								@remove="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
+							/>
 						</div>
 
 						<div class="text-sm text-text-secondary">
@@ -664,19 +623,12 @@ onMounted(async () => {
 							</div>
 						</div>
 						<div v-if="selectedPublisherNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<span
+							<FilterPill
 								v-for="publisher in selectedPublisherNames"
 								:key="publisher.id"
-								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-							>
-								{{ publisher.name }}
-								<button
-									type="button"
-									@click="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
-									class="leading-none hover:text-red-400"
-									aria-label="Remove"
-								>×</button>
-							</span>
+								:item="{id: publisher.id, name: publisher.name}"
+								@remove="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
+							/>
 						</div>
 
 						<div class="text-sm text-text-secondary">
@@ -711,19 +663,12 @@ onMounted(async () => {
 							</div>
 						</div>
 						<div v-if="selectedColoristNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<span
+							<FilterPill
 								v-for="colorist in selectedColoristNames"
 								:key="colorist.id"
-								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-							>
-								{{ colorist.name }}
-								<button
-									type="button"
-									@click="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
-									class="leading-none hover:text-red-400"
-									aria-label="Remove"
-								>×</button>
-							</span>
+								:item="{id: colorist.id, name: colorist.name}"
+								@remove="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
+							/>
 						</div>
 
 						<div class="text-sm text-text-secondary">
@@ -758,19 +703,12 @@ onMounted(async () => {
 							</div>
 						</div>
 						<div v-if="selectedLettererNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<span
+							<FilterPill
 								v-for="letterer in selectedLettererNames"
 								:key="letterer.id"
-								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-							>
-								{{ letterer.name }}
-								<button
-									type="button"
-									@click="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
-									class="leading-none hover:text-red-400"
-									aria-label="Remove"
-								>×</button>
-							</span>
+								:item="{id: letterer.id, name: letterer.name}"
+								@remove="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
+							/>
 						</div>
 
 						<div class="text-sm text-text-secondary">
@@ -805,19 +743,12 @@ onMounted(async () => {
 							</div>
 						</div>
 						<div v-if="selectedEditorNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<span
+							<FilterPill
 								v-for="editor in selectedEditorNames"
 								:key="editor.id"
-								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-							>
-								{{ editor.name }}
-								<button
-									type="button"
-									@click="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
-									class="leading-none hover:text-red-400"
-									aria-label="Remove"
-								>×</button>
-							</span>
+								:item="{id: editor.id, name: editor.name}"
+								@remove="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
+							/>
 						</div>
 
 						<div class="text-sm text-text-secondary">
@@ -852,20 +783,14 @@ onMounted(async () => {
 							</div>
 						</div>
 						<div v-if="selectedCoverArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<span
+							<FilterPill
 								v-for="coverArtist in selectedCoverArtistNames"
 								:key="coverArtist.id"
-								class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 border border-primary/40 text-xs text-text-primary"
-							>
-								{{ coverArtist.name }}
-								<button
-									type="button"
-									@click="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
-									class="leading-none hover:text-red-400"
-									aria-label="Remove"
-								>×</button>
-							</span>
+								:item="{id: coverArtist.id, name: coverArtist.name}"
+								@remove="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
+							/>
 						</div>
+
 					</div>
 				</div>
 			</div>
