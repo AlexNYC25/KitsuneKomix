@@ -36,6 +36,7 @@ const piToOh: Record<string, string> = {
   arrowUp: 'io-caret-up',
   arrowDown: 'io-caret-down',
   remove: 'io-remove-circle-sharp',
+  add: 'io-add-circle-sharp',
 }
 
 </script>
