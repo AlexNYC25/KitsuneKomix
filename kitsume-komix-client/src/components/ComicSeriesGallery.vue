@@ -8,6 +8,7 @@ import ComicSeriesCard from './ComicSeriesCard.vue';
 import AppIcon from './icons/AppIcon.vue';
 import FilterPill from './gallery/FilterPill.vue';
 import FilterDropdown from './gallery/FilterDropdown.vue';
+import FilterDropdownArea from './gallery/FilterDropdownArea.vue';
 
 import type { ComicSeriesListItem } from '@/types';
 import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
@@ -23,12 +24,10 @@ const genreFilterOptions = computed(() => {
 	return [...genres].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedGenres = ref<number[]>([]);
-const showGenresDropdown = ref(false);
 const selectedGenreNames = computed(() =>
 	genreFilterOptions.value.filter(g => selectedGenres.value.includes(g.id))
 );
 const selectedYears = ref<number[]>([]);
-const showYearsDropdown = ref(false);
 const selectedYearValues = computed(() =>
 	yearFilterOptions.value.filter(year => selectedYears.value.includes(year))
 );
@@ -37,7 +36,6 @@ const letterFilterOptions = computed(() => {
 	return [...letters].sort((a, b) => a.localeCompare(b));
 });
 const selectedLetters = ref<string[]>([]);
-const showLettersDropdown = ref(false);
 const selectedLetterValues = computed(() =>
 	letterFilterOptions.value.filter(letter => selectedLetters.value.includes(letter))
 );
@@ -47,7 +45,6 @@ const characterFilterOptions = computed(() => {
 });
 
 const selectedCharacters = ref<number[]>([]);
-const showCharactersDropdown = ref(false);
 const selectedCharacterNames = computed(() =>
 	characterFilterOptions.value.filter(c => selectedCharacters.value.includes(c.id))
 );
@@ -57,7 +54,6 @@ const teamFilterOptions = computed(() => {
 	return [...teams].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedTeams = ref<number[]>([]);
-const showTeamsDropdown = ref(false);
 const selectedTeamNames = computed(() =>
 	teamFilterOptions.value.filter(t => selectedTeams.value.includes(t.id))
 );
@@ -67,7 +63,6 @@ const locationFilterOptions = computed(() => {
 	return [...locations].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedLocations = ref<number[]>([]);
-const showLocationsDropdown = ref(false);
 const selectedLocationNames = computed(() =>
 	locationFilterOptions.value.filter(l => selectedLocations.value.includes(l.id))
 );
@@ -77,7 +72,6 @@ const writerFilterOptions = computed(() => {
 	return [...writers].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedWriters = ref<number[]>([]);
-const showWritersDropdown = ref(false);
 const selectedWriterNames = computed(() =>
 	writerFilterOptions.value.filter(w => selectedWriters.value.includes(w.id))
 );
@@ -87,7 +81,6 @@ const artistFilterOptions = computed(() => {
 	return [...artists].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedArtists = ref<number[]>([]);
-const showArtistsDropdown = ref(false);
 const selectedArtistNames = computed(() =>
 	artistFilterOptions.value.filter(a => selectedArtists.value.includes(a.id))
 );
@@ -97,7 +90,6 @@ const publisherFilterOptions = computed(() => {
 	return [...publishers].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedPublishers = ref<number[]>([]);
-const showPublishersDropdown = ref(false);
 const selectedPublisherNames = computed(() =>
 	publisherFilterOptions.value.filter(p => selectedPublishers.value.includes(p.id))
 );
@@ -107,7 +99,6 @@ const coloristFilterOptions = computed(() => {
 	return [...colorists].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedColorists = ref<number[]>([]);
-const showColoristsDropdown = ref(false);
 const selectedColoristNames = computed(() =>
 	coloristFilterOptions.value.filter(c => selectedColorists.value.includes(c.id))
 );
@@ -117,7 +108,6 @@ const lettererFilterOptions = computed(() => {
 	return [...letterers].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedLetterers = ref<number[]>([]);
-const showLetterersDropdown = ref(false);
 const selectedLettererNames = computed(() =>
 	lettererFilterOptions.value.filter(l => selectedLetterers.value.includes(l.id))
 );
@@ -127,7 +117,6 @@ const editorFilterOptions = computed(() => {
 	return [...editors].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedEditors = ref<number[]>([]);
-const showEditorsDropdown = ref(false);
 const selectedEditorNames = computed(() =>
 	editorFilterOptions.value.filter(e => selectedEditors.value.includes(e.id))
 );
@@ -137,7 +126,6 @@ const coverArtistFilterOptions = computed(() => {
 	return [...coverArtists].sort((a, b) => a.name.localeCompare(b.name));
 });
 const selectedCoverArtists = ref<number[]>([]);
-const showCoverArtistsDropdown = ref(false);
 const selectedCoverArtistNames = computed(() =>
 	coverArtistFilterOptions.value.filter(c => selectedCoverArtists.value.includes(c.id))
 );
@@ -248,27 +236,14 @@ onMounted(async () => {
 						Browse
 					</label>
 
-					<div class="text-sm text-text-secondary">
-						Genres
-					</div>
-					<div class="relative">
-						<button
-							type="button"
-							@click="showGenresDropdown = !showGenresDropdown"
-							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-						>
-							<span class="text-text-secondary/70">
-								{{ selectedGenres.length === 0 ? 'Select genres...' : `${selectedGenres.length} selected` }}
-							</span>
-							<AppIcon :name="showGenresDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-						</button>
-						<div
-							v-if="showGenresDropdown"
-							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-						>
-							<div v-if="genreFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-								No genres found
-							</div>
+					<FilterDropdownArea
+						filterName="genres"
+						byLine="Genres"
+						selectLine="Select genres..."
+						:emptyOptions="genreFilterOptions.length === 0"
+						:selectedCount="selectedGenres.length"
+					>
+						<template #options>
 							<FilterDropdown
 								v-for="genre in genreFilterOptions"
 								:key="genre.id"
@@ -277,96 +252,70 @@ onMounted(async () => {
 								@toggle="selectedGenres.push(genre.id)"
 								@untoggle="selectedGenres = selectedGenres.filter(id => id !== genre.id)"
 							/>
-						</div>
-					</div>
-					<div v-if="selectedGenreNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<FilterPill
-							v-for="genre in selectedGenreNames"
-							:key="genre.id"
-							:item="{id: genre.id, name: genre.name}"
-							@remove="selectedGenres = selectedGenres.filter(id => id !== genre.id)"
-						/>
-					</div>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="genre in selectedGenreNames"
+								:key="genre.id"
+								:item="{id: genre.id, name: genre.name}"
+								@remove="selectedGenres = selectedGenres.filter(id => id !== genre.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-					<div class="text-sm text-text-secondary">
-						Years
-					</div>
-					<div class="relative">
-						<button
-							type="button"
-							@click="showYearsDropdown = !showYearsDropdown"
-							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-						>
-							<span class="text-text-secondary/70">
-								{{ selectedYears.length === 0 ? 'Select years...' : `${selectedYears.length} selected` }}
-							</span>
-							<AppIcon :name="showYearsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-						</button>
-						<div
-							v-if="showYearsDropdown"
-							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-						>
-							<div v-if="yearFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-								No years found
-							</div>
+					<FilterDropdownArea
+						filterName="years"
+						byLine="Years"
+						selectLine="Select years..."
+						:emptyOptions="yearFilterOptions.length === 0"
+						:selectedCount="selectedYears.length"
+					>
+						<template #options>
 							<FilterDropdown
 								v-for="year in yearFilterOptions"
 								:key="year"
 								:property="{id: year, name: year.toString()}"
 								:isSelected="selectedYears.includes(year)"
 								@toggle="selectedYears.push(year)"
-								@untoggle="selectedYears = selectedYears.filter(selectedYear => selectedYear !== year)"
+								@untoggle="selectedYears = selectedYears.filter(y => y !== year)"
 							/>
-						</div>
-					</div>
-					<div v-if="selectedYearValues.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<FilterPill
-							v-for="year in selectedYearValues"
-							:key="year"
-							:item="{id: year, name: year.toString()}"
-							@remove="selectedYears = selectedYears.filter(selectedYear => selectedYear !== year)"
-						/>
-					</div>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="year in selectedYearValues"
+								:key="year"
+								:item="{id: year, name: year.toString()}"
+								@remove="selectedYears = selectedYears.filter(y => y !== year)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-					<div class="text-sm text-text-secondary">
-						Letters
-					</div>
-					<div class="relative">
-						<button
-							type="button"
-							@click="showLettersDropdown = !showLettersDropdown"
-							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-						>
-							<span class="text-text-secondary/70">
-								{{ selectedLetters.length === 0 ? 'Select letters...' : `${selectedLetters.length} selected` }}
-							</span>
-							<AppIcon :name="showLettersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-						</button>
-						<div
-							v-if="showLettersDropdown"
-							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-						>
-							<div v-if="letterFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-								No letters found
-							</div>
+					<FilterDropdownArea
+						filterName="letters"
+						byLine="Letters"
+						selectLine="Select letters..."
+						:emptyOptions="letterFilterOptions.length === 0"
+						:selectedCount="selectedLetters.length"
+					>
+						<template #options>
 							<FilterDropdown
 								v-for="letter in letterFilterOptions"
 								:key="letter"
 								:property="{id: letter, name: letter.toUpperCase()}"
 								:isSelected="selectedLetters.includes(letter)"
 								@toggle="selectedLetters.push(letter)"
-								@untoggle="selectedLetters = selectedLetters.filter(selectedLetter => selectedLetter !== letter)"
+								@untoggle="selectedLetters = selectedLetters.filter(l => l !== letter)"
 							/>
-						</div>
-					</div>
-					<div v-if="selectedLetterValues.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<FilterPill
-							v-for="letter in selectedLetterValues"
-							:key="letter"
-							:item="{id: letter, name: letter.toUpperCase()}"
-							@remove="selectedLetters = selectedLetters.filter(selectedLetter => selectedLetter !== letter)"
-						/>
-					</div>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="letter in selectedLetterValues"
+								:key="letter"
+								:item="{id: letter, name: letter.toUpperCase()}"
+								@remove="selectedLetters = selectedLetters.filter(l => l !== letter)"
+							/>
+						</template>
+					</FilterDropdownArea>
 				</div>
 
 				<!-- Filter Column - Content -->
@@ -376,29 +325,14 @@ onMounted(async () => {
 						Contents
 					</label>
 
-					<div class="text-sm text-text-secondary">
-						Characters
-					</div>
-					<!-- Dropdown trigger -->
-					<div class="relative">
-						<button
-							type="button"
-							@click="showCharactersDropdown = !showCharactersDropdown"
-							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-						>
-							<span class="text-text-secondary/70">
-								{{ selectedCharacters.length === 0 ? 'Select characters...' : `${selectedCharacters.length} selected` }}
-							</span>
-							<AppIcon :name="showCharactersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-						</button>
-						<!-- Dropdown list -->
-						<div
-							v-if="showCharactersDropdown"
-							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-						>
-							<div v-if="characterFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-								No characters found
-							</div>
+					<FilterDropdownArea
+						filterName="characters"
+						byLine="Characters"
+						selectLine="Select characters..."
+						:emptyOptions="characterFilterOptions.length === 0"
+						:selectedCount="selectedCharacters.length"
+					>
+						<template #options>
 							<FilterDropdown
 								v-for="character in characterFilterOptions"
 								:key="character.id"
@@ -407,39 +341,25 @@ onMounted(async () => {
 								@toggle="selectedCharacters.push(character.id)"
 								@untoggle="selectedCharacters = selectedCharacters.filter(id => id !== character.id)"
 							/>
-						</div>
-					</div>
-					<!-- Selected chips -->
-					<div v-if="selectedCharacterNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<FilterPill
-							v-for="character in selectedCharacterNames"
-							:key="character.id"
-							:item="{id: character.id, name: character.name}"
-							@remove="selectedCharacters = selectedCharacters.filter(id => id !== character.id)"
-						/>
-					</div>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="character in selectedCharacterNames"
+								:key="character.id"
+								:item="{id: character.id, name: character.name}"
+								@remove="selectedCharacters = selectedCharacters.filter(id => id !== character.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-					<div class="text-sm text-text-secondary">
-						Teams
-					</div>
-					<div class="relative">
-						<button
-							type="button"
-							@click="showTeamsDropdown = !showTeamsDropdown"
-							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-						>
-							<span class="text-text-secondary/70">
-								{{ selectedTeams.length === 0 ? 'Select teams...' : `${selectedTeams.length} selected` }}
-							</span>
-							<AppIcon :name="showTeamsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-						</button>
-						<div
-							v-if="showTeamsDropdown"
-							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-						>
-							<div v-if="teamFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-								No teams found
-							</div>
+					<FilterDropdownArea
+						filterName="teams"
+						byLine="Teams"
+						selectLine="Select teams..."
+						:emptyOptions="teamFilterOptions.length === 0"
+						:selectedCount="selectedTeams.length"
+					>
+						<template #options>
 							<FilterDropdown
 								v-for="team in teamFilterOptions"
 								:key="team.id"
@@ -448,38 +368,25 @@ onMounted(async () => {
 								@toggle="selectedTeams.push(team.id)"
 								@untoggle="selectedTeams = selectedTeams.filter(id => id !== team.id)"
 							/>
-						</div>
-					</div>
-					<div v-if="selectedTeamNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<FilterPill
-							v-for="team in selectedTeamNames"
-							:key="team.id"
-							:item="{id: team.id, name: team.name}"
-							@remove="selectedTeams = selectedTeams.filter(id => id !== team.id)"
-						/>
-					</div>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="team in selectedTeamNames"
+								:key="team.id"
+								:item="{id: team.id, name: team.name}"
+								@remove="selectedTeams = selectedTeams.filter(id => id !== team.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 
-					<div class="text-sm text-text-secondary">
-						Locations
-					</div>
-					<div class="relative">
-						<button
-							type="button"
-							@click="showLocationsDropdown = !showLocationsDropdown"
-							class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-						>
-							<span class="text-text-secondary/70">
-								{{ selectedLocations.length === 0 ? 'Select locations...' : `${selectedLocations.length} selected` }}
-							</span>
-							<AppIcon :name="showLocationsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-						</button>
-						<div
-							v-if="showLocationsDropdown"
-							class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-						>
-							<div v-if="locationFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-								No locations found
-							</div>
+					<FilterDropdownArea
+						filterName="locations"
+						byLine="Locations"
+						selectLine="Select locations..."
+						:emptyOptions="locationFilterOptions.length === 0"
+						:selectedCount="selectedLocations.length"
+					>
+						<template #options>
 							<FilterDropdown
 								v-for="location in locationFilterOptions"
 								:key="location.id"
@@ -488,16 +395,16 @@ onMounted(async () => {
 								@toggle="selectedLocations.push(location.id)"
 								@untoggle="selectedLocations = selectedLocations.filter(id => id !== location.id)"
 							/>
-						</div>
-					</div>
-					<div v-if="selectedLocationNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-						<FilterPill
-							v-for="location in selectedLocationNames"
-							:key="location.id"
-							:item="{id: location.id, name: location.name}"
-							@remove="selectedLocations = selectedLocations.filter(id => id !== location.id)"
-						/>
-					</div>
+						</template>
+						<template #pills>
+							<FilterPill
+								v-for="location in selectedLocationNames"
+								:key="location.id"
+								:item="{id: location.id, name: location.name}"
+								@remove="selectedLocations = selectedLocations.filter(id => id !== location.id)"
+							/>
+						</template>
+					</FilterDropdownArea>
 				</div>
 
 				<!-- Filter Column Creators -->
@@ -506,28 +413,15 @@ onMounted(async () => {
 						<AppIcon name="edit" scale="0.8" class="mr-1" />
 						Creators
 					</label>
-					<div class="space-y-2 text-sm text-text-secondary">
-						<div class="text-sm text-text-secondary">
-							Written by
-						</div>
-						<div class="relative">
-							<button
-								type="button"
-								@click="showWritersDropdown = !showWritersDropdown"
-								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-							>
-								<span class="text-text-secondary/70">
-									{{ selectedWriters.length === 0 ? 'Select writers...' : `${selectedWriters.length} selected` }}
-								</span>
-								<AppIcon :name="showWritersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-							</button>
-							<div
-								v-if="showWritersDropdown"
-								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-							>
-								<div v-if="writerFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-									No writers found
-								</div>
+					<div class="space-y-2">
+						<FilterDropdownArea
+							filterName="writers"
+							byLine="Written by"
+							selectLine="Select writers..."
+							:emptyOptions="writerFilterOptions.length === 0"
+							:selectedCount="selectedWriters.length"
+						>
+							<template #options>
 								<FilterDropdown
 									v-for="writer in writerFilterOptions"
 									:key="writer.id"
@@ -536,38 +430,25 @@ onMounted(async () => {
 									@toggle="selectedWriters.push(writer.id)"
 									@untoggle="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
 								/>
-							</div>
-						</div>
-						<div v-if="selectedWriterNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<FilterPill
-								v-for="writer in selectedWriterNames"
-								:key="writer.id"
-								:item="{id: writer.id, name: writer.name}"
-								@remove="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
-							/>
-						</div>
+							</template>
+							<template #pills>
+								<FilterPill
+									v-for="writer in selectedWriterNames"
+									:key="writer.id"
+									:item="{id: writer.id, name: writer.name}"
+									@remove="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
+								/>
+							</template>
+						</FilterDropdownArea>
 
-						<div class="text-sm text-text-secondary">
-							Illustrated by
-						</div>
-						<div class="relative">
-							<button
-								type="button"
-								@click="showArtistsDropdown = !showArtistsDropdown"
-								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-							>
-								<span class="text-text-secondary/70">
-									{{ selectedArtists.length === 0 ? 'Select artists...' : `${selectedArtists.length} selected` }}
-								</span>
-								<AppIcon :name="showArtistsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-							</button>
-							<div
-								v-if="showArtistsDropdown"
-								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-							>
-								<div v-if="artistFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-									No artists found
-								</div>
+						<FilterDropdownArea
+							filterName="artists"
+							byLine="Illustrated by"
+							selectLine="Select artists..."
+							:emptyOptions="artistFilterOptions.length === 0"
+							:selectedCount="selectedArtists.length"
+						>
+							<template #options>
 								<FilterDropdown
 									v-for="artist in artistFilterOptions"
 									:key="artist.id"
@@ -576,38 +457,25 @@ onMounted(async () => {
 									@toggle="selectedArtists.push(artist.id)"
 									@untoggle="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
 								/>
-							</div>
-						</div>
-						<div v-if="selectedArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<FilterPill
-								v-for="artist in selectedArtistNames"
-								:key="artist.id"
-								:item="{id: artist.id, name: artist.name}"
-								@remove="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
-							/>
-						</div>
+							</template>
+							<template #pills>
+								<FilterPill
+									v-for="artist in selectedArtistNames"
+									:key="artist.id"
+									:item="{id: artist.id, name: artist.name}"
+									@remove="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
+								/>
+							</template>
+						</FilterDropdownArea>
 
-						<div class="text-sm text-text-secondary">
-							Published by
-						</div>
-						<div class="relative">
-							<button
-								type="button"
-								@click="showPublishersDropdown = !showPublishersDropdown"
-								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-							>
-								<span class="text-text-secondary/70">
-									{{ selectedPublishers.length === 0 ? 'Select publishers...' : `${selectedPublishers.length} selected` }}
-								</span>
-								<AppIcon :name="showPublishersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-							</button>
-							<div
-								v-if="showPublishersDropdown"
-								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-							>
-								<div v-if="publisherFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-									No publishers found
-								</div>
+						<FilterDropdownArea
+							filterName="publishers"
+							byLine="Published by"
+							selectLine="Select publishers..."
+							:emptyOptions="publisherFilterOptions.length === 0"
+							:selectedCount="selectedPublishers.length"
+						>
+							<template #options>
 								<FilterDropdown
 									v-for="publisher in publisherFilterOptions"
 									:key="publisher.id"
@@ -616,38 +484,25 @@ onMounted(async () => {
 									@toggle="selectedPublishers.push(publisher.id)"
 									@untoggle="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
 								/>
-							</div>
-						</div>
-						<div v-if="selectedPublisherNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<FilterPill
-								v-for="publisher in selectedPublisherNames"
-								:key="publisher.id"
-								:item="{id: publisher.id, name: publisher.name}"
-								@remove="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
-							/>
-						</div>
+							</template>
+							<template #pills>
+								<FilterPill
+									v-for="publisher in selectedPublisherNames"
+									:key="publisher.id"
+									:item="{id: publisher.id, name: publisher.name}"
+									@remove="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
+								/>
+							</template>
+						</FilterDropdownArea>
 
-						<div class="text-sm text-text-secondary">
-							Colored by
-						</div>
-						<div class="relative">
-							<button
-								type="button"
-								@click="showColoristsDropdown = !showColoristsDropdown"
-								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-							>
-								<span class="text-text-secondary/70">
-									{{ selectedColorists.length === 0 ? 'Select colorists...' : `${selectedColorists.length} selected` }}
-								</span>
-								<AppIcon :name="showColoristsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-							</button>
-							<div
-								v-if="showColoristsDropdown"
-								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-							>
-								<div v-if="coloristFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-									No colorists found
-								</div>
+						<FilterDropdownArea
+							filterName="colorists"
+							byLine="Colored by"
+							selectLine="Select colorists..."
+							:emptyOptions="coloristFilterOptions.length === 0"
+							:selectedCount="selectedColorists.length"
+						>
+							<template #options>
 								<FilterDropdown
 									v-for="colorist in coloristFilterOptions"
 									:key="colorist.id"
@@ -656,38 +511,25 @@ onMounted(async () => {
 									@toggle="selectedColorists.push(colorist.id)"
 									@untoggle="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
 								/>
-							</div>
-						</div>
-						<div v-if="selectedColoristNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<FilterPill
-								v-for="colorist in selectedColoristNames"
-								:key="colorist.id"
-								:item="{id: colorist.id, name: colorist.name}"
-								@remove="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
-							/>
-						</div>
+							</template>
+							<template #pills>
+								<FilterPill
+									v-for="colorist in selectedColoristNames"
+									:key="colorist.id"
+									:item="{id: colorist.id, name: colorist.name}"
+									@remove="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
+								/>
+							</template>
+						</FilterDropdownArea>
 
-						<div class="text-sm text-text-secondary">
-							Lettered by
-						</div>
-						<div class="relative">
-							<button
-								type="button"
-								@click="showLetterersDropdown = !showLetterersDropdown"
-								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-							>
-								<span class="text-text-secondary/70">
-									{{ selectedLetterers.length === 0 ? 'Select letterers...' : `${selectedLetterers.length} selected` }}
-								</span>
-								<AppIcon :name="showLetterersDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-							</button>
-							<div
-								v-if="showLetterersDropdown"
-								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-							>
-								<div v-if="lettererFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-									No letterers found
-								</div>
+						<FilterDropdownArea
+							filterName="letterers"
+							byLine="Lettered by"
+							selectLine="Select letterers..."
+							:emptyOptions="lettererFilterOptions.length === 0"
+							:selectedCount="selectedLetterers.length"
+						>
+							<template #options>
 								<FilterDropdown
 									v-for="letterer in lettererFilterOptions"
 									:key="letterer.id"
@@ -696,38 +538,25 @@ onMounted(async () => {
 									@toggle="selectedLetterers.push(letterer.id)"
 									@untoggle="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
 								/>
-							</div>
-						</div>
-						<div v-if="selectedLettererNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<FilterPill
-								v-for="letterer in selectedLettererNames"
-								:key="letterer.id"
-								:item="{id: letterer.id, name: letterer.name}"
-								@remove="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
-							/>
-						</div>
+							</template>
+							<template #pills>
+								<FilterPill
+									v-for="letterer in selectedLettererNames"
+									:key="letterer.id"
+									:item="{id: letterer.id, name: letterer.name}"
+									@remove="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
+								/>
+							</template>
+						</FilterDropdownArea>
 
-						<div class="text-sm text-text-secondary">
-							Edited by
-						</div>
-						<div class="relative">
-							<button
-								type="button"
-								@click="showEditorsDropdown = !showEditorsDropdown"
-								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-							>
-								<span class="text-text-secondary/70">
-									{{ selectedEditors.length === 0 ? 'Select editors...' : `${selectedEditors.length} selected` }}
-								</span>
-								<AppIcon :name="showEditorsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-							</button>
-							<div
-								v-if="showEditorsDropdown"
-								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-							>
-								<div v-if="editorFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-									No editors found
-								</div>
+						<FilterDropdownArea
+							filterName="editors"
+							byLine="Edited by"
+							selectLine="Select editors..."
+							:emptyOptions="editorFilterOptions.length === 0"
+							:selectedCount="selectedEditors.length"
+						>
+							<template #options>
 								<FilterDropdown
 									v-for="editor in editorFilterOptions"
 									:key="editor.id"
@@ -736,38 +565,25 @@ onMounted(async () => {
 									@toggle="selectedEditors.push(editor.id)"
 									@untoggle="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
 								/>
-							</div>
-						</div>
-						<div v-if="selectedEditorNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<FilterPill
-								v-for="editor in selectedEditorNames"
-								:key="editor.id"
-								:item="{id: editor.id, name: editor.name}"
-								@remove="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
-							/>
-						</div>
+							</template>
+							<template #pills>
+								<FilterPill
+									v-for="editor in selectedEditorNames"
+									:key="editor.id"
+									:item="{id: editor.id, name: editor.name}"
+									@remove="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
+								/>
+							</template>
+						</FilterDropdownArea>
 
-						<div class="text-sm text-text-secondary">
-							Cover by
-						</div>
-						<div class="relative">
-							<button
-								type="button"
-								@click="showCoverArtistsDropdown = !showCoverArtistsDropdown"
-								class="w-full flex items-center justify-between px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
-							>
-								<span class="text-text-secondary/70">
-									{{ selectedCoverArtists.length === 0 ? 'Select cover artists...' : `${selectedCoverArtists.length} selected` }}
-								</span>
-								<AppIcon :name="showCoverArtistsDropdown ? 'arrowUp' : 'arrowDown'" scale="0.7" />
-							</button>
-							<div
-								v-if="showCoverArtistsDropdown"
-								class="absolute z-10 mt-1 w-full rounded-md bg-surface-elevated border border-white/15 shadow-lg max-h-48 overflow-y-auto"
-							>
-								<div v-if="coverArtistFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
-									No cover artists found
-								</div>
+						<FilterDropdownArea
+							filterName="cover artists"
+							byLine="Cover by"
+							selectLine="Select cover artists..."
+							:emptyOptions="coverArtistFilterOptions.length === 0"
+							:selectedCount="selectedCoverArtists.length"
+						>
+							<template #options>
 								<FilterDropdown
 									v-for="coverArtist in coverArtistFilterOptions"
 									:key="coverArtist.id"
@@ -776,17 +592,16 @@ onMounted(async () => {
 									@toggle="selectedCoverArtists.push(coverArtist.id)"
 									@untoggle="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
 								/>
-							</div>
-						</div>
-						<div v-if="selectedCoverArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
-							<FilterPill
-								v-for="coverArtist in selectedCoverArtistNames"
-								:key="coverArtist.id"
-								:item="{id: coverArtist.id, name: coverArtist.name}"
-								@remove="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
-							/>
-						</div>
-
+							</template>
+							<template #pills>
+								<FilterPill
+									v-for="coverArtist in selectedCoverArtistNames"
+									:key="coverArtist.id"
+									:item="{id: coverArtist.id, name: coverArtist.name}"
+									@remove="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
+								/>
+							</template>
+						</FilterDropdownArea>
 					</div>
 				</div>
 			</div>
