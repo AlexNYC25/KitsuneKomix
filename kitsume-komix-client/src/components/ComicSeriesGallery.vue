@@ -7,6 +7,7 @@ import { useComicSeriesStore } from '@/stores/comic-series';
 import ComicSeriesCard from './ComicSeriesCard.vue';
 import AppIcon from './icons/AppIcon.vue';
 import FilterPill from './gallery/FilterPill.vue';
+import FilterDropdown from './gallery/FilterDropdown.vue';
 
 import type { ComicSeriesListItem } from '@/types';
 import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
@@ -268,14 +269,14 @@ onMounted(async () => {
 							<div v-if="genreFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 								No genres found
 							</div>
-							<label
+							<FilterDropdown
 								v-for="genre in genreFilterOptions"
 								:key="genre.id"
-								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-							>
-								<input type="checkbox" :value="genre.id" v-model="selectedGenres" class="accent-primary" />
-								{{ genre.name }}
-							</label>
+								:property="{id: genre.id, name: genre.name}"
+								:isSelected="selectedGenres.includes(genre.id)"
+								@toggle="selectedGenres.push(genre.id)"
+								@untoggle="selectedGenres = selectedGenres.filter(id => id !== genre.id)"
+							/>
 						</div>
 					</div>
 					<div v-if="selectedGenreNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -308,14 +309,14 @@ onMounted(async () => {
 							<div v-if="yearFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 								No years found
 							</div>
-							<label
+							<FilterDropdown
 								v-for="year in yearFilterOptions"
 								:key="year"
-								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-							>
-								<input type="checkbox" :value="year" v-model="selectedYears" class="accent-primary" />
-								{{ year }}
-							</label>
+								:property="{id: year, name: year.toString()}"
+								:isSelected="selectedYears.includes(year)"
+								@toggle="selectedYears.push(year)"
+								@untoggle="selectedYears = selectedYears.filter(selectedYear => selectedYear !== year)"
+							/>
 						</div>
 					</div>
 					<div v-if="selectedYearValues.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -348,14 +349,14 @@ onMounted(async () => {
 							<div v-if="letterFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 								No letters found
 							</div>
-							<label
+							<FilterDropdown
 								v-for="letter in letterFilterOptions"
 								:key="letter"
-								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-							>
-								<input type="checkbox" :value="letter" v-model="selectedLetters" class="accent-primary" />
-								{{ letter.toUpperCase() }}
-							</label>
+								:property="{id: letter, name: letter.toUpperCase()}"
+								:isSelected="selectedLetters.includes(letter)"
+								@toggle="selectedLetters.push(letter)"
+								@untoggle="selectedLetters = selectedLetters.filter(selectedLetter => selectedLetter !== letter)"
+							/>
 						</div>
 					</div>
 					<div v-if="selectedLetterValues.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -398,19 +399,14 @@ onMounted(async () => {
 							<div v-if="characterFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 								No characters found
 							</div>
-							<label
+							<FilterDropdown
 								v-for="character in characterFilterOptions"
 								:key="character.id"
-								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-							>
-								<input
-									type="checkbox"
-									:value="character.id"
-									v-model="selectedCharacters"
-									class="accent-primary"
-								/>
-								{{ character.name }}
-							</label>
+								:property="{id: character.id, name: character.name}"
+								:isSelected="selectedCharacters.includes(character.id)"
+								@toggle="selectedCharacters.push(character.id)"
+								@untoggle="selectedCharacters = selectedCharacters.filter(id => id !== character.id)"
+							/>
 						</div>
 					</div>
 					<!-- Selected chips -->
@@ -444,14 +440,14 @@ onMounted(async () => {
 							<div v-if="teamFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 								No teams found
 							</div>
-							<label
+							<FilterDropdown
 								v-for="team in teamFilterOptions"
 								:key="team.id"
-								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-							>
-								<input type="checkbox" :value="team.id" v-model="selectedTeams" class="accent-primary" />
-								{{ team.name }}
-							</label>
+								:property="{id: team.id, name: team.name}"
+								:isSelected="selectedTeams.includes(team.id)"
+								@toggle="selectedTeams.push(team.id)"
+								@untoggle="selectedTeams = selectedTeams.filter(id => id !== team.id)"
+							/>
 						</div>
 					</div>
 					<div v-if="selectedTeamNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -484,14 +480,14 @@ onMounted(async () => {
 							<div v-if="locationFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 								No locations found
 							</div>
-							<label
+							<FilterDropdown
 								v-for="location in locationFilterOptions"
 								:key="location.id"
-								class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-							>
-								<input type="checkbox" :value="location.id" v-model="selectedLocations" class="accent-primary" />
-								{{ location.name }}
-							</label>
+								:property="{id: location.id, name: location.name}"
+								:isSelected="selectedLocations.includes(location.id)"
+								@toggle="selectedLocations.push(location.id)"
+								@untoggle="selectedLocations = selectedLocations.filter(id => id !== location.id)"
+							/>
 						</div>
 					</div>
 					<div v-if="selectedLocationNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -532,14 +528,14 @@ onMounted(async () => {
 								<div v-if="writerFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 									No writers found
 								</div>
-								<label
+								<FilterDropdown
 									v-for="writer in writerFilterOptions"
 									:key="writer.id"
-									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-								>
-									<input type="checkbox" :value="writer.id" v-model="selectedWriters" class="accent-primary" />
-									{{ writer.name }}
-								</label>
+									:property="{id: writer.id, name: writer.name}"
+									:isSelected="selectedWriters.includes(writer.id)"
+									@toggle="selectedWriters.push(writer.id)"
+									@untoggle="selectedWriters = selectedWriters.filter(id => id !== writer.id)"
+								/>
 							</div>
 						</div>
 						<div v-if="selectedWriterNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -572,14 +568,14 @@ onMounted(async () => {
 								<div v-if="artistFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 									No artists found
 								</div>
-								<label
+								<FilterDropdown
 									v-for="artist in artistFilterOptions"
 									:key="artist.id"
-									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-								>
-									<input type="checkbox" :value="artist.id" v-model="selectedArtists" class="accent-primary" />
-									{{ artist.name }}
-								</label>
+									:property="{id: artist.id, name: artist.name}"
+									:isSelected="selectedArtists.includes(artist.id)"
+									@toggle="selectedArtists.push(artist.id)"
+									@untoggle="selectedArtists = selectedArtists.filter(id => id !== artist.id)"
+								/>
 							</div>
 						</div>
 						<div v-if="selectedArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -612,14 +608,14 @@ onMounted(async () => {
 								<div v-if="publisherFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 									No publishers found
 								</div>
-								<label
+								<FilterDropdown
 									v-for="publisher in publisherFilterOptions"
 									:key="publisher.id"
-									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-								>
-									<input type="checkbox" :value="publisher.id" v-model="selectedPublishers" class="accent-primary" />
-									{{ publisher.name }}
-								</label>
+									:property="{id: publisher.id, name: publisher.name}"
+									:isSelected="selectedPublishers.includes(publisher.id)"
+									@toggle="selectedPublishers.push(publisher.id)"
+									@untoggle="selectedPublishers = selectedPublishers.filter(id => id !== publisher.id)"
+								/>
 							</div>
 						</div>
 						<div v-if="selectedPublisherNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -652,14 +648,14 @@ onMounted(async () => {
 								<div v-if="coloristFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 									No colorists found
 								</div>
-								<label
+								<FilterDropdown
 									v-for="colorist in coloristFilterOptions"
 									:key="colorist.id"
-									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-								>
-									<input type="checkbox" :value="colorist.id" v-model="selectedColorists" class="accent-primary" />
-									{{ colorist.name }}
-								</label>
+									:property="{id: colorist.id, name: colorist.name}"
+									:isSelected="selectedColorists.includes(colorist.id)"
+									@toggle="selectedColorists.push(colorist.id)"
+									@untoggle="selectedColorists = selectedColorists.filter(id => id !== colorist.id)"
+								/>
 							</div>
 						</div>
 						<div v-if="selectedColoristNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -692,14 +688,14 @@ onMounted(async () => {
 								<div v-if="lettererFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 									No letterers found
 								</div>
-								<label
+								<FilterDropdown
 									v-for="letterer in lettererFilterOptions"
 									:key="letterer.id"
-									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-								>
-									<input type="checkbox" :value="letterer.id" v-model="selectedLetterers" class="accent-primary" />
-									{{ letterer.name }}
-								</label>
+									:property="{id: letterer.id, name: letterer.name}"
+									:isSelected="selectedLetterers.includes(letterer.id)"
+									@toggle="selectedLetterers.push(letterer.id)"
+									@untoggle="selectedLetterers = selectedLetterers.filter(id => id !== letterer.id)"
+								/>
 							</div>
 						</div>
 						<div v-if="selectedLettererNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -732,14 +728,14 @@ onMounted(async () => {
 								<div v-if="editorFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 									No editors found
 								</div>
-								<label
+								<FilterDropdown
 									v-for="editor in editorFilterOptions"
 									:key="editor.id"
-									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-								>
-									<input type="checkbox" :value="editor.id" v-model="selectedEditors" class="accent-primary" />
-									{{ editor.name }}
-								</label>
+									:property="{id: editor.id, name: editor.name}"
+									:isSelected="selectedEditors.includes(editor.id)"
+									@toggle="selectedEditors.push(editor.id)"
+									@untoggle="selectedEditors = selectedEditors.filter(id => id !== editor.id)"
+								/>
 							</div>
 						</div>
 						<div v-if="selectedEditorNames.length > 0" class="flex flex-wrap gap-1 mt-1">
@@ -772,14 +768,14 @@ onMounted(async () => {
 								<div v-if="coverArtistFilterOptions.length === 0" class="px-3 py-2 text-xs text-text-secondary/70">
 									No cover artists found
 								</div>
-								<label
+								<FilterDropdown
 									v-for="coverArtist in coverArtistFilterOptions"
 									:key="coverArtist.id"
-									class="flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 cursor-pointer text-sm text-text-primary"
-								>
-									<input type="checkbox" :value="coverArtist.id" v-model="selectedCoverArtists" class="accent-primary" />
-									{{ coverArtist.name }}
-								</label>
+									:property="{id: coverArtist.id, name: coverArtist.name}"
+									:isSelected="selectedCoverArtists.includes(coverArtist.id)"
+									@toggle="selectedCoverArtists.push(coverArtist.id)"
+									@untoggle="selectedCoverArtists = selectedCoverArtists.filter(id => id !== coverArtist.id)"
+								/>
 							</div>
 						</div>
 						<div v-if="selectedCoverArtistNames.length > 0" class="flex flex-wrap gap-1 mt-1">
