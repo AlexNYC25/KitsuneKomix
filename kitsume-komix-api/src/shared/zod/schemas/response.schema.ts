@@ -74,6 +74,12 @@ const PaginationMetaSchema = z.object({
 const FilterMetaSchema = z.object({
   filterProperty: z.string().optional(),
   filterValue: z.string().optional(),
+  filters: z.array(
+    z.object({
+      filterProperty: z.string(),
+      filterValue: z.string(),
+    }),
+  ).optional(),
 }).openapi({
   title: "FilterMeta",
   description: "Metadata for filtered responses",

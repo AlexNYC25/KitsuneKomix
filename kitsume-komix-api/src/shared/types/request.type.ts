@@ -1,13 +1,14 @@
-import { z } from "zod";
+import type { z } from "zod";
 
-import {
+import type {
   ComicMetadataBulkUpdateSchema,
   ComicMetadataSingleUpdateSchema,
   PaginationLetterQuerySchema,
   PaginationSortFilterQuerySchema,
+  PaginationSortMultiFilterQuerySchema,
 } from "#zod/schemas/request.schema.ts";
 
-import { metadataUpdateSchema } from "#zod/schemas/data/comicMetadata.schema.ts";
+import type { metadataUpdateSchema } from "#zod/schemas/data/comicMetadata.schema.ts";
 
 // *** Zod Inferred Types ***
 
@@ -21,6 +22,9 @@ export type QueryData = z.infer<typeof PaginationSortFilterQuerySchema>;
 export type QueryDataWithLetter =
   & z.infer<typeof PaginationSortFilterQuerySchema>
   & z.infer<typeof PaginationLetterQuerySchema>;
+
+// The type representation of the query data when the request query = PaginationSortMultiFilterQuerySchema is used.
+export type QueryDataMultiFilter = z.infer<typeof PaginationSortMultiFilterQuerySchema>;
 
 export type ComicMetadataSingleUpdateData = z.infer<
   typeof ComicMetadataSingleUpdateSchema
@@ -124,7 +128,10 @@ export type RequestParametersValidated<
 > = {
   pagination: RequestPaginationParametersValidated;
   sort: RequestSortParametersValidated<TSortField>;
+  /** Single filter (legacy). Used by most routes. */
   filter?: RequestFilterParametersValidated<TFilterField>;
+  /** Multiple filters. Takes precedence over `filter` when present. */
+  filters?: RequestFilterParametersValidated<TFilterField>[];
 
   insertDetails?: RequestInsertionParametersValidated;
   updateDetails?: RequestUpdateParametersValidated;

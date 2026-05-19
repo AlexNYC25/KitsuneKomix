@@ -153,6 +153,34 @@ export const PaginationSortFilterQuerySchema = PaginationQuerySchema
   .extend(FilterQuerySchema.shape);
 
 /**
+ * Schema for multi-value filter query parameters
+ *
+ * Accepts either a single string or an array of strings for both filter and
+ * filterProperty, allowing multiple filter pairs in a single request via
+ * repeated query keys (e.g. ?filterProperty=name&filter=Batman&filterProperty=libraryId&filter=5).
+ */
+const MultiFilterQuerySchema = z.object({
+  filter: z.union([z.string(), z.array(z.string())]).optional().openapi({
+    description: "Filter value(s). Repeat the key for multiple filters.",
+    example: "Batman",
+  }),
+  filterProperty: z.union([z.string(), z.array(z.string())]).optional().openapi({
+    description: "Filter property name(s). Must be paired with a matching filter value.",
+    example: "name",
+  }),
+});
+
+/**
+ * Common schema for pagination query parameters with sorting and multiple filter pairs
+ *
+ * Extends the standard pagination+sort schema to accept arrays of filter pairs,
+ * enabling the client to supply several filterProperty/filter pairs in one request.
+ */
+export const PaginationSortMultiFilterQuerySchema = PaginationQuerySchema
+  .extend(SortQuerySchema.shape)
+  .extend(MultiFilterQuerySchema.shape);
+
+/**
  * Schema for comic metadata updates in request body
  *
  * Used in routes that update comic metadata for single or multiple comic books.
