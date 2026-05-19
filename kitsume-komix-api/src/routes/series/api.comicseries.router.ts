@@ -10,6 +10,7 @@ import {
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
 import {
   PaginationLetterQuerySchema,
+  PaginationSortMultiFilterQuerySchema,
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamIdThumbnailIdSchema,
@@ -35,6 +36,7 @@ import type {
   ComicSeriesSortField,
   ComicSeriesWithMetadata,
   QueryData,
+  QueryDataMultiFilter,
   QueryDataWithLetter,
   RequestFilterParametersValidated,
   RequestPaginationParametersValidated,
@@ -63,7 +65,7 @@ app.openapi(
     tags: ["Comic Series"],
     middleware: [requireAuth],
     request: {
-      query: PaginationSortFilterQuerySchema,
+      query: PaginationSortMultiFilterQuerySchema,
     },
     responses: {
       200: {
@@ -101,7 +103,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: QueryData = c.req.valid("query");
+    const queryData: QueryDataMultiFilter = c.req.valid("query");
 
     const serviceData: RequestParametersValidated<
       ComicSeriesSortField,
@@ -115,9 +117,9 @@ app.openapi(
 
       const serviceDataPagination: RequestPaginationParametersValidated =
         serviceData.pagination;
-      const serviceDataFilter:
-        | RequestFilterParametersValidated<ComicSeriesFilterField>
-        | undefined = serviceData.filter;
+      const serviceDataFilters:
+        | RequestFilterParametersValidated<ComicSeriesFilterField>[]
+        | undefined = serviceData.filters;
       const serviceDataSort: RequestSortParametersValidated<
         ComicSeriesSortField
       > = serviceData.sort;
@@ -133,8 +135,10 @@ app.openapi(
         hasNextPage: hasNextPage,
         currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filterProperty: serviceDataFilter?.filterProperty,
-        filterValue: serviceDataFilter?.filterValue,
+        filters: serviceDataFilters?.map((f) => ({
+          filterProperty: f.filterProperty ?? "",
+          filterValue: f.filterValue ?? "",
+        })),
         sortProperty: serviceDataSort.sortProperty,
         sortOrder: serviceDataSort.sortOrder,
       };
