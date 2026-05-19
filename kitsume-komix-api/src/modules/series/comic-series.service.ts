@@ -49,16 +49,21 @@ export const fetchComicSeries = async (
   try {
     const serviceDataPagination: RequestPaginationParametersValidated =
       queryData.pagination;
-    const serviceDataFilter:
-      | RequestFilterParametersValidated<ComicSeriesFilterField>
-      | undefined = queryData.filter;
+
+    // Prefer the multi-filter array when provided, fall back to the legacy single filter.
+    const resolvedFilters: ComicSeriesFilterItem[] = queryData.filters
+      ? queryData.filters as ComicSeriesFilterItem[]
+      : queryData.filter
+      ? [queryData.filter] as ComicSeriesFilterItem[]
+      : [];
+
     const serviceDataSort: RequestSortParametersValidated<
       ComicSeriesSortField
     > = queryData.sort;
 
     const comicSeriesFromDb: ComicSeries[] =
       await getComicSeriesWithMetadataFilteringSorting({
-        filters: [serviceDataFilter] as ComicSeriesFilterItem[], // Cast to expected type
+        filters: resolvedFilters,
         sort: {
           property: serviceDataSort.sortProperty,
           order: serviceDataSort.sortOrder,
