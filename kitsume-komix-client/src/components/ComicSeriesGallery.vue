@@ -164,6 +164,31 @@ const areThereActiveFilters = computed(() => {
 	].some(selectedValues => selectedValues.length > 0);
 });
 
+const activeFilters = computed(() => ({
+	genres: selectedGenres.value,
+	years: selectedYears.value,
+	letters: selectedLetters.value,
+	characters: selectedCharacters.value,
+	teams: selectedTeams.value,
+	locations: selectedLocations.value,
+	writers: selectedWriters.value,
+	artists: selectedArtists.value,
+	publishers: selectedPublishers.value,
+	colorists: selectedColorists.value,
+	letterers: selectedLetterers.value,
+	editors: selectedEditors.value,
+	coverArtists: selectedCoverArtists.value,
+}));
+
+const applyFilters = (filters: typeof activeFilters.value) => {
+	// TODO: send filters to the API request
+	console.log('Filters changed:', filters);
+};
+
+watch(activeFilters, (filters) => {
+	applyFilters(filters);
+}, { deep: true });
+
 onMounted(async () => {
 	const comicSeriesStore = useComicSeriesStore();
 	const data = await comicSeriesStore.fetchComicSeriesList(1, 20, "latest");
