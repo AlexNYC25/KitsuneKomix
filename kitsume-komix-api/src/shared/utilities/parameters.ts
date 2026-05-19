@@ -6,6 +6,8 @@ import {
   ComicSeriesSortField,
   ComicSortField,
   QueryData,
+  QueryDataMultiFilter,
+  RequestFilterParametersValidated,
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   SortOrder,
@@ -97,6 +99,45 @@ const validateFilter = (
   };
 };
 
+/**
+ * Validates an array of filter pairs against allowed columns for a data type.
+ *
+ * Accepts either a single string or an array of strings for both filterProperties
+ * and filterValues, normalising both to arrays and pairing them by index.
+ * Pairs where the property is not in the allowed list are silently dropped.
+ *
+ * @param filterProperties Single property name or array of property names
+ * @param filterValues Single filter value or array of filter values
+ * @param allowedFilterFields Array of allowed filter field names
+ * @returns Array of validated { filterProperty, filterValue } pairs (may be empty)
+ */
+export const validateFilters = <TFilterField extends string>(
+  filterProperties: string | string[] | undefined,
+  filterValues: string | string[] | undefined,
+  allowedFilterFields: string[],
+): RequestFilterParametersValidated<TFilterField>[] => {
+  const props = Array.isArray(filterProperties)
+    ? filterProperties
+    : filterProperties ? [filterProperties] : [];
+  const vals = Array.isArray(filterValues)
+    ? filterValues
+    : filterValues ? [filterValues] : [];
+
+  const result: RequestFilterParametersValidated<TFilterField>[] = [];
+  const len = Math.min(props.length, vals.length);
+  for (let i = 0; i < len; i++) {
+    const prop = props[i];
+    const val = vals[i];
+    if (prop && val && allowedFilterFields.includes(prop)) {
+      result.push({
+        filterProperty: prop as TFilterField,
+        filterValue: val.trim(),
+      });
+    }
+  }
+  return result;
+};
+
 // ============================================================================
 // MAIN PARAMETER BUILDER - FUNCTION OVERLOADS
 // ============================================================================
@@ -113,6 +154,11 @@ export function validateAndBuildQueryParams(
 
 export function validateAndBuildQueryParams(
   queryData: QueryData,
+  dataType: "comicSeries",
+): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
+
+export function validateAndBuildQueryParams(
+  queryData: QueryDataMultiFilter,
   dataType: "comicSeries",
 ): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
 
@@ -151,7 +197,7 @@ export function validateAndBuildQueryParams(
  * // Can safely pass to service functions
  */
 export function validateAndBuildQueryParams(
-  queryData: QueryData,
+  queryData: QueryData | QueryDataMultiFilter,
   dataType: keyof typeof QueryableColumns,
 ): RequestParametersValidated<string, string> {
   // Get the queryable columns for this data type
@@ -175,9 +221,24 @@ export function validateAndBuildQueryParams(
     allowedSortFields[0] || "createdAt", // Use first allowed field as default
   );
 
+  // When either field is an array, validate as multiple filters.
+  // Otherwise fall back to the single-filter path.
+  const isMultiFilter =
+    Array.isArray(queryData.filterProperty) ||
+    Array.isArray(queryData.filter);
+
+  if (isMultiFilter) {
+    const filters = validateFilters(
+      queryData.filterProperty as string | string[] | undefined,
+      queryData.filter as string | string[] | undefined,
+      allowedFilterFields,
+    );
+    return { pagination, sort, filters };
+  }
+
   const filter = validateFilter(
-    queryData.filterProperty,
-    queryData.filter,
+    queryData.filterProperty as string | undefined,
+    queryData.filter as string | undefined,
     allowedFilterFields,
   );
 
