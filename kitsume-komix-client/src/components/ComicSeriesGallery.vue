@@ -134,7 +134,7 @@ const selectedCoverArtistNames = computed(() =>
 
 const sortCategory = ref("");
 const pageSize = ref(20);
-const PAGE_SIZE_OPTIONS = [10, 20, 25, 30, 40, 50, 100];
+const PAGE_SIZE_OPTIONS = [4, 10, 20, 25, 30, 40, 50, 100];
 const route = useRoute();
 
 const isLatestRoute = computed(() => route.path === '/comic-series/latest');
@@ -207,12 +207,22 @@ const currentPage = ref(1);
 const totalCount = ref(0);
 const hasNextPage = ref(false);
 
+const hasEstimatedPagination = computed(() => hasNextPage.value || currentPage.value > 1);
+
 const totalPages = computed(() =>
 	totalCount.value > 0 ? Math.ceil(totalCount.value / pageSize.value) : 0,
 );
 
+const displayTotalPages = computed(() => {
+	if (totalPages.value > 1) return totalPages.value;
+	if (hasEstimatedPagination.value) {
+		return currentPage.value + (hasNextPage.value ? 1 : 0);
+	}
+	return totalPages.value;
+});
+
 const visiblePages = computed((): (number | 'ellipsis')[] => {
-	const total = totalPages.value;
+	const total = displayTotalPages.value;
 	if (total <= 1) return total === 1 ? [1] : [];
 	const current = currentPage.value;
 	const delta = 2;
@@ -255,11 +265,11 @@ const fetchPage = async (page: number) => {
 	comics.value = result.data;
 	totalCount.value = result.meta.count;
 	hasNextPage.value = result.meta.hasNextPage;
-	currentPage.value = page;
+	currentPage.value = result.meta.currentPage || page;
 };
 
 const goToPage = (page: number) => {
-	if (page < 1 || page > totalPages.value) return;
+	if (page < 1 || page > displayTotalPages.value) return;
 	fetchPage(page);
 };
 
@@ -276,11 +286,7 @@ watch(pageSize, () => {
 });
 
 onMounted(async () => {
-	const result = await comicSeriesStore.fetchComicSeriesList(1, pageSize.value, "latest");
-	comics.value = result.data || [];
-	totalCount.value = result.meta.count;
-	hasNextPage.value = result.meta.hasNextPage;
-
+	await fetchPage(currentPage.value);
 	const filterValues = await comicSeriesStore.fetchComicSeriesFilterValues();
 	filtersAllowed.value = filterValues || null;
 })
@@ -720,11 +726,19 @@ onMounted(async () => {
 		</div>
 
 		<!-- Pagination -->
-		<div v-if="totalPages > 1" class="flex items-center justify-between px-8 py-4 mx-5 mb-5">
+		<div v-if="displayTotalPages > 1" class="flex items-center justify-between px-8 py-4 mx-5 mb-5">
 			<span class="text-sm text-text-secondary">
 				Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }} series
 			</span>
 			<div class="flex items-center gap-1">
+				<button
+					type="button"
+					@click="goToPage(1)"
+					:disabled="currentPage === 1"
+					class="px-3 py-1.5 rounded-md text-sm border border-white/15 bg-black/30 text-text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black/50 transition-colors"
+				>
+					First
+				</button>
 				<button
 					type="button"
 					@click="goToPage(currentPage - 1)"
@@ -756,6 +770,14 @@ onMounted(async () => {
 					class="px-3 py-1.5 rounded-md text-sm border border-white/15 bg-black/30 text-text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black/50 transition-colors"
 				>
 					Next
+				</button>
+				<button
+					type="button"
+					@click="goToPage(displayTotalPages)"
+					:disabled="currentPage === displayTotalPages"
+					class="px-3 py-1.5 rounded-md text-sm border border-white/15 bg-black/30 text-text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black/50 transition-colors"
+				>
+					Last
 				</button>
 			</div>
 		</div>
