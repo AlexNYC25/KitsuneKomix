@@ -21,6 +21,7 @@ const router = createRouter({
   routes: [
     { path: '/', component: Home, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/login', component: Login, meta: { requiresAuth: false, layout: 'auth' } },
+    { path: '/comic-series/list', component: ComicSeriesGallery, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/comic-series/latest', component: ComicSeriesGallery, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/comic-series/updated', component: ComicSeriesGallery, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/comic-series/:id', component: ComicSeries, meta: { requiresAuth: true, layout: 'default' } },

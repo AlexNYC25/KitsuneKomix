@@ -17,7 +17,7 @@ const bookmarks = ref([
 	{ label: 'Latest Comics', icon: 'md-menubook-sharp' },
 	{ label: 'Latest Series', icon: 'io-library-sharp', path: '/comic-series/latest' },
 	{ label: 'All Comics', icon: 'md-menubook-sharp' },
-	{ label: 'All Comic Series', icon: 'io-library-sharp' },
+	{ label: 'All Comic Series', icon: 'io-library-sharp',  path: '/comic-series/list' },
 	{ label: 'All Comic Series Groups', icon: 'hi-solid-library' },
 	{ label: 'All Comic Readlists', icon: 'md-librarybooks-sharp' }
 ]);
