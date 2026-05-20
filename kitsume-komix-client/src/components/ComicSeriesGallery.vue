@@ -132,7 +132,7 @@ const selectedCoverArtistNames = computed(() =>
 	coverArtistFilterOptions.value.filter(c => selectedCoverArtists.value.includes(c.id))
 );
 
-const sortCategory = ref("latest");
+const sortCategory = ref("");
 const route = useRoute();
 
 const isLatestRoute = computed(() => route.path === '/comic-series/latest');
@@ -141,7 +141,11 @@ watch(
 	() => route.path,
 	(newPath) => {
 		if (newPath === '/comic-series/latest') {
-			sortCategory.value = 'latest';
+			sortCategory.value = 'createdAt';
+		} else if (newPath === '/comic-series/updated') {
+			sortCategory.value = 'updatedAt';
+		} else if (newPath === '/comic-series/list') {
+			sortCategory.value = 'name';
 		}
 	},
 	{ immediate: true },
@@ -209,7 +213,10 @@ const applyFilters = async (filters: typeof activeFilters.value) => {
 		}
 	}
 
-	const data = await comicSeriesStore.fetchComicSeriesWithFilters(
+	const data = await comicSeriesStore.fetchComicSeriesList(
+		1,
+		20,
+		sortCategory.value,
 		filterProperties,
 		filterValues,
 	);
@@ -219,6 +226,10 @@ const applyFilters = async (filters: typeof activeFilters.value) => {
 watch(activeFilters, (filters) => {
 	applyFilters(filters);
 }, { deep: true });
+
+watch(sortCategory, () => {
+	applyFilters(activeFilters.value);
+});
 
 onMounted(async () => {
 	const data = await comicSeriesStore.fetchComicSeriesList(1, 20, "latest");
@@ -256,8 +267,8 @@ onMounted(async () => {
 					:disabled="isLatestRoute"
 					class="px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
 				>
-					<option value="latest">Latest</option>
-					<option value="updated">Recently Updated</option>
+					<option value="createdAt">Latest</option>
+					<option value="updatedAt">Recently Updated</option>
 					<option value="name">Name</option>
 				</select>
 			</div>
