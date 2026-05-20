@@ -133,6 +133,8 @@ const selectedCoverArtistNames = computed(() =>
 );
 
 const sortCategory = ref("");
+const pageSize = ref(20);
+const PAGE_SIZE_OPTIONS = [10, 20, 25, 30, 40, 50, 100];
 const route = useRoute();
 
 const isLatestRoute = computed(() => route.path === '/comic-series/latest');
@@ -215,7 +217,7 @@ const applyFilters = async (filters: typeof activeFilters.value) => {
 
 	const data = await comicSeriesStore.fetchComicSeriesList(
 		1,
-		20,
+		pageSize.value,
 		sortCategory.value,
 		filterProperties,
 		filterValues,
@@ -231,8 +233,12 @@ watch(sortCategory, () => {
 	applyFilters(activeFilters.value);
 });
 
+watch(pageSize, () => {
+	applyFilters(activeFilters.value);
+});
+
 onMounted(async () => {
-	const data = await comicSeriesStore.fetchComicSeriesList(1, 20, "latest");
+	const data = await comicSeriesStore.fetchComicSeriesList(1, pageSize.value, "latest");
 	comics.value = data || [];
 
 	const filterValues = await comicSeriesStore.fetchComicSeriesFilterValues();
@@ -271,6 +277,14 @@ onMounted(async () => {
 					<option value="updatedAt">Recently Updated</option>
 					<option value="name">Name</option>
 					<option value="publicationDate">Publication Date</option>
+				</select>
+				<label for="page-size" class="text-sm text-text-secondary">Per page</label>
+				<select
+					id="page-size"
+					v-model.number="pageSize"
+					class="px-3 py-1.5 rounded-md bg-black/30 border border-white/15 text-text-primary text-sm focus:outline-none"
+				>
+					<option v-for="size in PAGE_SIZE_OPTIONS" :key="size" :value="size">{{ size }}</option>
 				</select>
 			</div>
 
