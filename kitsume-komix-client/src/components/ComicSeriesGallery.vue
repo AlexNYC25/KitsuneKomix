@@ -15,6 +15,7 @@ import type { ComicSeriesListItem } from '@/types';
 import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
 
 const comics = ref<ComicSeriesListItem[]>([]);
+const comicSeriesStore = useComicSeriesStore();
 
 const showFilters = ref(false);
 const filtersAllowed = ref<ComicSeriesFilterValuesData | null>(null);
@@ -180,9 +181,39 @@ const activeFilters = computed(() => ({
 	coverArtists: selectedCoverArtists.value,
 }));
 
-const applyFilters = (filters: typeof activeFilters.value) => {
-	// TODO: send filters to the API request
-	console.log('Filters changed:', filters);
+const FILTER_PROPERTY_MAP: Record<keyof typeof activeFilters.value, string> = {
+	genres: 'genreId',
+	years: 'year',
+	letters: 'letter',
+	characters: 'characterId',
+	teams: 'teamId',
+	locations: 'locationId',
+	writers: 'writerId',
+	artists: 'pencillerId',
+	publishers: 'publisherId',
+	colorists: 'coloristId',
+	letterers: 'lettererId',
+	editors: 'editorId',
+	coverArtists: 'coverArtistId',
+};
+
+const applyFilters = async (filters: typeof activeFilters.value) => {
+	const filterProperties: string[] = [];
+	const filterValues: string[] = [];
+
+	for (const [key, ids] of Object.entries(filters)) {
+		const prop = FILTER_PROPERTY_MAP[key as keyof typeof filters];
+		for (const id of ids) {
+			filterProperties.push(prop);
+			filterValues.push(String(id));
+		}
+	}
+
+	const data = await comicSeriesStore.fetchComicSeriesWithFilters(
+		filterProperties,
+		filterValues,
+	);
+	comics.value = data;
 };
 
 watch(activeFilters, (filters) => {
@@ -190,7 +221,6 @@ watch(activeFilters, (filters) => {
 }, { deep: true });
 
 onMounted(async () => {
-	const comicSeriesStore = useComicSeriesStore();
 	const data = await comicSeriesStore.fetchComicSeriesList(1, 20, "latest");
 	comics.value = data || [];
 
