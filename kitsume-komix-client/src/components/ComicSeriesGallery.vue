@@ -203,47 +203,86 @@ const FILTER_PROPERTY_MAP: Record<keyof typeof activeFilters.value, string> = {
 	coverArtists: 'coverArtistId',
 };
 
-const applyFilters = async (filters: typeof activeFilters.value) => {
+const currentPage = ref(1);
+const totalCount = ref(0);
+const hasNextPage = ref(false);
+
+const totalPages = computed(() =>
+	totalCount.value > 0 ? Math.ceil(totalCount.value / pageSize.value) : 0,
+);
+
+const visiblePages = computed((): (number | 'ellipsis')[] => {
+	const total = totalPages.value;
+	if (total <= 1) return total === 1 ? [1] : [];
+	const current = currentPage.value;
+	const delta = 2;
+	const pages = new Set<number>();
+	pages.add(1);
+	pages.add(total);
+	for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+		pages.add(i);
+	}
+	const sorted = [...pages].sort((a, b) => a - b);
+	const result: (number | 'ellipsis')[] = [];
+	for (let i = 0; i < sorted.length; i++) {
+		result.push(sorted[i]);
+		if (i < sorted.length - 1 && sorted[i + 1] - sorted[i] > 1) {
+			result.push('ellipsis');
+		}
+	}
+	return result;
+});
+
+const fetchPage = async (page: number) => {
 	const filterProperties: string[] = [];
 	const filterValues: string[] = [];
 
-	for (const [key, ids] of Object.entries(filters)) {
-		const prop = FILTER_PROPERTY_MAP[key as keyof typeof filters];
+	for (const [key, ids] of Object.entries(activeFilters.value)) {
+		const prop = FILTER_PROPERTY_MAP[key as keyof typeof activeFilters.value];
 		for (const id of ids) {
 			filterProperties.push(prop);
 			filterValues.push(String(id));
 		}
 	}
 
-	const data = await comicSeriesStore.fetchComicSeriesList(
-		1,
+	const result = await comicSeriesStore.fetchComicSeriesList(
+		page,
 		pageSize.value,
 		sortCategory.value,
 		filterProperties,
 		filterValues,
 	);
-	comics.value = data;
+	comics.value = result.data;
+	totalCount.value = result.meta.count;
+	hasNextPage.value = result.meta.hasNextPage;
+	currentPage.value = page;
 };
 
-watch(activeFilters, (filters) => {
-	applyFilters(filters);
+const goToPage = (page: number) => {
+	if (page < 1 || page > totalPages.value) return;
+	fetchPage(page);
+};
+
+watch(activeFilters, () => {
+	fetchPage(1);
 }, { deep: true });
 
 watch(sortCategory, () => {
-	applyFilters(activeFilters.value);
+	fetchPage(1);
 });
 
 watch(pageSize, () => {
-	applyFilters(activeFilters.value);
+	fetchPage(1);
 });
 
 onMounted(async () => {
-	const data = await comicSeriesStore.fetchComicSeriesList(1, pageSize.value, "latest");
-	comics.value = data || [];
+	const result = await comicSeriesStore.fetchComicSeriesList(1, pageSize.value, "latest");
+	comics.value = result.data || [];
+	totalCount.value = result.meta.count;
+	hasNextPage.value = result.meta.hasNextPage;
 
 	const filterValues = await comicSeriesStore.fetchComicSeriesFilterValues();
 	filtersAllowed.value = filterValues || null;
-
 })
 </script>
 
@@ -303,7 +342,7 @@ onMounted(async () => {
 				>
 					<AppIcon name="list" scale="0.8" />
 				</button>
-				<span class="ml-2 text-sm text-text-secondary">{{ comics.length }} series</span>
+				<span class="ml-2 text-sm text-text-secondary">{{ totalCount }} series</span>
 			</div>
 			
 		</div>
@@ -677,6 +716,47 @@ onMounted(async () => {
 		<div class="flex-1 p-4 mx-8">
 			<div class="grid grid-cols-5 gap-6">
 				<ComicSeriesCard v-for="comic in comics" :key="comic.id" :comicSeriesData="comic" />
+			</div>
+		</div>
+
+		<!-- Pagination -->
+		<div v-if="totalPages > 1" class="flex items-center justify-between px-8 py-4 mx-5 mb-5">
+			<span class="text-sm text-text-secondary">
+				Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }} series
+			</span>
+			<div class="flex items-center gap-1">
+				<button
+					type="button"
+					@click="goToPage(currentPage - 1)"
+					:disabled="currentPage === 1"
+					class="px-3 py-1.5 rounded-md text-sm border border-white/15 bg-black/30 text-text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black/50 transition-colors"
+				>
+					Prev
+				</button>
+				<template v-for="(item, idx) in visiblePages" :key="idx">
+					<span v-if="item === 'ellipsis'" class="px-2 text-text-secondary select-none">…</span>
+					<button
+						v-else
+						type="button"
+						@click="goToPage(item)"
+						:class="[
+							'w-9 h-9 rounded-md text-sm border transition-colors',
+							item === currentPage
+								? 'bg-primary/30 border-primary/60 text-text-primary font-medium'
+								: 'bg-black/30 border-white/15 text-text-primary hover:bg-black/50'
+						]"
+					>
+						{{ item }}
+					</button>
+				</template>
+				<button
+					type="button"
+					@click="goToPage(currentPage + 1)"
+					:disabled="!hasNextPage"
+					class="px-3 py-1.5 rounded-md text-sm border border-white/15 bg-black/30 text-text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black/50 transition-colors"
+				>
+					Next
+				</button>
 			</div>
 		</div>
 	</div>

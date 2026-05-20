@@ -10,7 +10,7 @@ const FILTER_VALUES_CACHE_TTL_MS = 10 * 60 * 1000;
 
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({
-    comicSeriesCache: new Map<string, { data: ComicSeriesResponseItem[]; timestamp: number }>(),
+    comicSeriesCache: new Map<string, { data: ComicSeriesResponseItem[]; meta: { count: number; hasNextPage: boolean; currentPage: number; pageSize: number }; timestamp: number }>(),
     comicsInSeriesData: new Map<number, ComicBooksSeriesResponse>(),
     comicSeriesById: new Map<number, ComicSeriesResponseItem>(),
     comicSeriesFilterValuesCache: new Map<number, ComicSeriesFilterValuesData>(),
@@ -101,7 +101,7 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 			sort: string = "latest",
 			filterProperties: string[] = [],
 			filterValues: string[] = [],
-		): Promise<ComicSeriesResponseItem[]> {
+		): Promise<{ data: ComicSeriesResponseItem[]; meta: { count: number; hasNextPage: boolean; currentPage: number; pageSize: number } }> {
 			const mapForCategoryToDbField: Record<string, string> = {
 				latest: 'createdAt',
 				updated: 'updatedAt',
@@ -116,7 +116,7 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				const cacheKey = createCacheKey(page, pageSize, resolvedSort);
 				const cached = this.comicSeriesCache.get(cacheKey);
 				if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
-					return cached.data;
+					return { data: cached.data, meta: cached.meta };
 				}
 			}
 
@@ -145,13 +145,14 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				}
 
 				const seriesData = data.data || [];
+				const metaData = { count: data.meta.count, hasNextPage: data.meta.hasNextPage, currentPage: data.meta.currentPage, pageSize: data.meta.pageSize };
 
 				if (!hasFilters) {
 					const cacheKey = createCacheKey(page, pageSize, resolvedSort);
-					this.comicSeriesCache.set(cacheKey, { data: seriesData, timestamp: Date.now() });
+					this.comicSeriesCache.set(cacheKey, { data: seriesData, meta: metaData, timestamp: Date.now() });
 				}
 
-				return seriesData;
+				return { data: seriesData, meta: metaData };
 			} catch (err) {
 				throw new Error(err instanceof Error ? err.message : 'Failed to fetch comic series list');
 			}
