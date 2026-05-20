@@ -1,10 +1,22 @@
-import { asc, desc, eq, ilike } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, SQL } from "drizzle-orm";
 import { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
 
 import {
+  comicBookCharactersTable,
+  comicBookColoristsTable,
+  comicBookCoverArtistsTable,
+  comicBookEditorsTable,
+  comicBookGenresTable,
+  comicBookLetterersTable,
+  comicBookLocationsTable,
+  comicBookPencillersTable,
+  comicBookPublishersTable,
+  comicBookTeamsTable,
+  comicBookWritersTable,
+  comicBooksTable,
   comicLibrariesSeriesTable,
   comicLibrariesTable,
   comicSeriesBooksTable,
@@ -24,39 +36,140 @@ import {
 } from "#config/env.ts";
 
 /**
- * Exclusive dynamic filtering function specifcally for getComicSeriesWithMetadataFilteringSorting
- * This is necessary as the filtering can be applied to any of the fields in the comic series table and we need to dynamically apply it to the query builder.
- * @param filter
- * @param query
- * @returns the query with the filter applied
+ * Builds a Drizzle SQL condition for a single ComicSeriesFilterItem.
+ *
+ * Metadata filters (genreId, characterId, etc.) use EXISTS subqueries through the
+ * comic_series_books junction table so no extra top-level JOINs are needed.
  */
-const addFilteringToQuery = <T extends SQLiteSelect>(
-  filter: ComicSeriesFilterItem | undefined,
-  query: T,
-): T => {
-  if (!filter) {
-    return query;
-  }
-
+const buildFilterCondition = (
+  db: ReturnType<typeof getClient>["db"],
+  filter: ComicSeriesFilterItem,
+): SQL | undefined => {
+  if (!db) return undefined;
   const { filterProperty, filterValue } = filter;
 
   switch (filterProperty) {
     case "id":
-      query.where(eq(comicSeriesTable.id, Number(filterValue)));
-      break;
+      return eq(comicSeriesTable.id, Number(filterValue));
     case "name":
-      query.where(ilike(comicSeriesTable.name, `%${filterValue}%`));
-      break;
+      return ilike(comicSeriesTable.name, `%${filterValue}%`);
     case "description":
-      query.where(ilike(comicSeriesTable.description, `%${filterValue}%`));
-      break;
+      return ilike(comicSeriesTable.description, `%${filterValue}%`);
     case "libraryId":
-      query.where(eq(comicLibrariesTable.id, Number(filterValue)));
-      break;
-
+      return eq(comicLibrariesTable.id, Number(filterValue));
+    case "letter":
+      return ilike(comicSeriesTable.name, `${filterValue}%`);
+    case "year":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBooksTable, eq(comicSeriesBooksTable.comicBookId, comicBooksTable.id))
+          .where(eq(comicBooksTable.year, Number(filterValue))),
+      );
+    case "genreId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookGenresTable, eq(comicSeriesBooksTable.comicBookId, comicBookGenresTable.comicBookId))
+          .where(eq(comicBookGenresTable.comicGenreId, Number(filterValue))),
+      );
+    case "characterId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookCharactersTable, eq(comicSeriesBooksTable.comicBookId, comicBookCharactersTable.comicBookId))
+          .where(eq(comicBookCharactersTable.comicCharacterId, Number(filterValue))),
+      );
+    case "teamId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookTeamsTable, eq(comicSeriesBooksTable.comicBookId, comicBookTeamsTable.comicBookId))
+          .where(eq(comicBookTeamsTable.comicTeamId, Number(filterValue))),
+      );
+    case "locationId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookLocationsTable, eq(comicSeriesBooksTable.comicBookId, comicBookLocationsTable.comicBookId))
+          .where(eq(comicBookLocationsTable.comicLocationId, Number(filterValue))),
+      );
+    case "writerId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookWritersTable, eq(comicSeriesBooksTable.comicBookId, comicBookWritersTable.comicBookId))
+          .where(eq(comicBookWritersTable.comicWriterId, Number(filterValue))),
+      );
+    case "pencillerId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookPencillersTable, eq(comicSeriesBooksTable.comicBookId, comicBookPencillersTable.comicBookId))
+          .where(eq(comicBookPencillersTable.comicPencillerId, Number(filterValue))),
+      );
+    case "publisherId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookPublishersTable, eq(comicSeriesBooksTable.comicBookId, comicBookPublishersTable.comicBookId))
+          .where(eq(comicBookPublishersTable.comicPublisherId, Number(filterValue))),
+      );
+    case "coloristId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookColoristsTable, eq(comicSeriesBooksTable.comicBookId, comicBookColoristsTable.comicBookId))
+          .where(eq(comicBookColoristsTable.comicColoristId, Number(filterValue))),
+      );
+    case "lettererId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookLetterersTable, eq(comicSeriesBooksTable.comicBookId, comicBookLetterersTable.comicBookId))
+          .where(eq(comicBookLetterersTable.comicLettererId, Number(filterValue))),
+      );
+    case "editorId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookEditorsTable, eq(comicSeriesBooksTable.comicBookId, comicBookEditorsTable.comicBookId))
+          .where(eq(comicBookEditorsTable.comicEditorId, Number(filterValue))),
+      );
+    case "coverArtistId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookCoverArtistsTable, eq(comicSeriesBooksTable.comicBookId, comicBookCoverArtistsTable.comicBookId))
+          .where(eq(comicBookCoverArtistsTable.comicCoverArtistId, Number(filterValue))),
+      );
+    default:
+      return undefined;
   }
-
-  return query;
 };
 
 /**
@@ -145,11 +258,13 @@ export const getComicSeriesWithMetadataFilteringSorting = async (
     }
 
     if (serviceDetails.filters && serviceDetails.filters.length > 0) {
-      const firstValidFilter = serviceDetails.filters.find(
-        (filter): filter is ComicSeriesFilterItem => filter !== undefined,
-      );
+      const conditions: SQL[] = serviceDetails.filters
+        .map((filter) => buildFilterCondition(db, filter as ComicSeriesFilterItem))
+        .filter((c): c is SQL => c !== undefined);
 
-      query = addFilteringToQuery(firstValidFilter, query);
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
     }
 
     return await query;
