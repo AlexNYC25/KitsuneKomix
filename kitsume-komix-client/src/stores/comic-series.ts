@@ -94,6 +94,42 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				throw new Error(err instanceof Error ? err.message : 'Failed to fetch comics in series');
 			}
 		},
+		async fetchComicSeriesWithFilters(
+			filterProperties: string[],
+			filterValues: string[],
+			page: number = 1,
+			pageSize: number = 20,
+			sort: string = "latest",
+		): Promise<ComicSeriesResponseItem[]> {
+			try {
+				const { data, error } = await apiClient.GET('/comic-series', {
+					params: {
+						query: { page, pageSize, sort },
+					},
+					// The generated schema reflects the single-filter version of the endpoint.
+					// Use a custom querySerializer to emit repeated filterProperty/filter keys
+					// for multi-filter support without conflicting with the stale schema types.
+					querySerializer: (baseQuery) => {
+						const sp = new URLSearchParams(
+							Object.entries(baseQuery as Record<string, string>)
+								.filter(([, v]) => v !== undefined && v !== null)
+								.map(([k, v]) => [k, String(v)]),
+						);
+						filterProperties.forEach((p) => sp.append('filterProperty', p));
+						filterValues.forEach((v) => sp.append('filter', v));
+						return sp.toString();
+					},
+				});
+
+				if (error || !data) {
+					throw new Error(error?.message || 'Failed to fetch filtered comic series list');
+				}
+
+				return data.data || [];
+			} catch (err) {
+				throw new Error(err instanceof Error ? err.message : 'Failed to fetch filtered comic series list');
+			}
+		},
 		async fetchComicSeriesList(page: number = 1, pageSize: number = 20, sort: string = "latest"): Promise<ComicSeriesResponseItem[]> {
 			const mapForCategoryToDbField: Record<string, string> = {
 				latest: 'createdAt',
