@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, inArray, SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, sql, SQL } from "drizzle-orm";
 import { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
@@ -199,6 +199,21 @@ const addSortingToQuery = <T extends SQLiteSelect>(
       break;
     case "updatedAt":
       query.orderBy(direction(comicSeriesTable.updatedAt));
+      break;
+    case "publicationDate":
+      // Sort series by the publication date of their first issue (lowest issue number).
+      query.orderBy(
+        direction(
+          sql`(
+            SELECT cb.publication_date
+            FROM comic_series_books csb
+            JOIN comic_books cb ON csb.comic_book_id = cb.id
+            WHERE csb.comic_series_id = ${comicSeriesTable.id}
+            ORDER BY CAST(cb.issue_number AS REAL), cb.issue_number ASC
+            LIMIT 1
+          )`,
+        ),
+      );
       break;
   }
 

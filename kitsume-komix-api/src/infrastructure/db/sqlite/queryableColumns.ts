@@ -82,6 +82,7 @@ export const QueryableColumns = {
       name: "name",
       createdAt: "createdAt",
       updatedAt: "updatedAt",
+      publicationDate: "publicationDate",
     },
   },
   comicReadlists: {
