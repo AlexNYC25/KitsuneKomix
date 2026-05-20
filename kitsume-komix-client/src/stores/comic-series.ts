@@ -106,6 +106,7 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				latest: 'createdAt',
 				updated: 'updatedAt',
 				name: 'name',
+				publicationDate: 'publicationDate',
 			};
 			const resolvedSort = mapForCategoryToDbField[sort] || sort;
 			const hasFilters = filterProperties.length > 0;

@@ -270,6 +270,7 @@ onMounted(async () => {
 					<option value="createdAt">Latest</option>
 					<option value="updatedAt">Recently Updated</option>
 					<option value="name">Name</option>
+					<option value="publicationDate">Publication Date</option>
 				</select>
 			</div>
 
