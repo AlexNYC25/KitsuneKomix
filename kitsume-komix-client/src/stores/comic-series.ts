@@ -77,7 +77,8 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 							page,
 							pageSize,
 							filterProperty: 'seriesId',
-							filter: String(seriesId)
+							filter: String(seriesId),
+							sort: "createdAt"
 						}
 					}
 				});
@@ -94,21 +95,38 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				throw new Error(err instanceof Error ? err.message : 'Failed to fetch comics in series');
 			}
 		},
-		async fetchComicSeriesWithFilters(
-			filterProperties: string[],
-			filterValues: string[],
+		async fetchComicSeriesList(
 			page: number = 1,
 			pageSize: number = 20,
 			sort: string = "latest",
+			filterProperties: string[] = [],
+			filterValues: string[] = [],
 		): Promise<ComicSeriesResponseItem[]> {
+			const mapForCategoryToDbField: Record<string, string> = {
+				latest: 'createdAt',
+				updated: 'updatedAt',
+				name: 'name',
+			};
+			const resolvedSort = mapForCategoryToDbField[sort] || sort;
+			const hasFilters = filterProperties.length > 0;
+
+			// Only use cache for unfiltered requests
+			if (!hasFilters) {
+				const cacheKey = createCacheKey(page, pageSize, resolvedSort);
+				const cached = this.comicSeriesCache.get(cacheKey);
+				if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+					return cached.data;
+				}
+			}
+
 			try {
 				const { data, error } = await apiClient.GET('/comic-series', {
 					params: {
-						query: { page, pageSize, sort },
+						query: { page, pageSize, sort: resolvedSort },
 					},
-					// The generated schema reflects the single-filter version of the endpoint.
-					// Use a custom querySerializer to emit repeated filterProperty/filter keys
-					// for multi-filter support without conflicting with the stale schema types.
+					// Use a custom querySerializer to emit repeated filterProperty/filter keys.
+					// The generated schema only describes single-value filter params, so we
+					// build the query string manually to support multi-filter requests.
 					querySerializer: (baseQuery) => {
 						const sp = new URLSearchParams(
 							Object.entries(baseQuery as Record<string, string>)
@@ -122,51 +140,15 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				});
 
 				if (error || !data) {
-					throw new Error(error?.message || 'Failed to fetch filtered comic series list');
-				}
-
-				return data.data || [];
-			} catch (err) {
-				throw new Error(err instanceof Error ? err.message : 'Failed to fetch filtered comic series list');
-			}
-		},
-		async fetchComicSeriesList(page: number = 1, pageSize: number = 20, sort: string = "latest"): Promise<ComicSeriesResponseItem[]> {
-			const mapForCategoryToDbField: Record<string, string> = {
-				latest: 'createdAt',
-				updated: 'updatedAt',
-				name: 'name'
-			};
-
-			const cacheKey = createCacheKey(page, pageSize, mapForCategoryToDbField[sort] || 'createdAt');
-			const cached = this.comicSeriesCache.get(cacheKey);
-			
-			// Return cached data if available and less than 5 minutes old
-			if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
-				return cached.data;
-			}
-
-			try {
-				const { data, error } = await apiClient.GET('/comic-series', {
-					params: {
-						query: {
-							page,
-							pageSize,
-							sort
-						}
-					}
-				});
-
-				if (error || !data) {
 					throw new Error(error?.message || 'Failed to fetch comic series list');
 				}
 
 				const seriesData = data.data || [];
-				
-				// Store in cache with timestamp
-				this.comicSeriesCache.set(cacheKey, {
-					data: seriesData,
-					timestamp: Date.now()
-				});
+
+				if (!hasFilters) {
+					const cacheKey = createCacheKey(page, pageSize, resolvedSort);
+					this.comicSeriesCache.set(cacheKey, { data: seriesData, timestamp: Date.now() });
+				}
 
 				return seriesData;
 			} catch (err) {
