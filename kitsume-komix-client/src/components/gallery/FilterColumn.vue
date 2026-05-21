@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppIcon from '../icons/AppIcon.vue';
 
 defineProps<{
 	label: string,
@@ -7,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-	<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg"">
+	<div class="flex flex-col gap-2 bg-surface-overlay/80 p-3 rounded-lg">
 		<label class="text-xs font-semibold text-text-primary uppercase">
 			<AppIcon :name="iconName" scale="0.8" class="mr-1" />
 			{{ label }}
