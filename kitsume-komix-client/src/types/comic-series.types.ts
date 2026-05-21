@@ -45,6 +45,24 @@ export type GetComicSeriesFilterValuesResponse = paths['/comic-series/filter-val
 
 export type ComicSeriesFilterValuesData = GetComicSeriesFilterValuesResponse['data'];
 
+export type GalleryActiveFilters = {
+	genres: number[];
+	years: number[];
+	letters: string[];
+	characters: number[];
+	teams: number[];
+	locations: number[];
+	writers: number[];
+	artists: number[];
+	publishers: number[];
+	colorists: number[];
+	letterers: number[];
+	editors: number[];
+	coverArtists: number[];
+};
+
+export type GalleryFilterKey = keyof GalleryActiveFilters;
+
 // These definitions can be used as comic book metadata types as well, we use the same data just compile it into 
 // arrays for the series 
 export type ComicSeriesFilterWritersValues = NonNullable<ComicSeriesFilterValuesData['writers']>;
