@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 
 import type { LatestComicSeriesSingle, UpdatedComicSeriesSingle } from '@/types/comic-series.types'
 import { apiClient } from '@/utilities/apiClient'
-import { DEFAULT_HEADER_AUTHORIZATION } from '@/utilities/constants';
 import { buildComicThumbnailUrl } from "@/utilities/urls"
 
 export const useDashboardStore = defineStore('dashboard', {
@@ -13,11 +12,7 @@ export const useDashboardStore = defineStore('dashboard', {
   actions: {
     async fetchLatestSeries() {
       try {
-        const { data, error } = await apiClient.GET('/comic-series/latest', {
-          params: {
-            header: DEFAULT_HEADER_AUTHORIZATION
-          }
-        });
+        const { data, error } = await apiClient.GET('/comic-series/latest');
 
         if (error || !data) {
           throw new Error(error?.message || 'Failed to fetch latest series');
@@ -37,11 +32,7 @@ export const useDashboardStore = defineStore('dashboard', {
     },
     async fetchUpdatedSeries() {
       try {
-        const { data, error } = await apiClient.GET('/comic-series/updated', {
-          params: {
-            header: DEFAULT_HEADER_AUTHORIZATION
-          }
-        });
+        const { data, error } = await apiClient.GET('/comic-series/updated');
 
         if (error || !data) {
           throw new Error(error?.message || 'Failed to fetch updated series');

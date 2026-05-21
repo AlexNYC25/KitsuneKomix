@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import type { ComicBooksSeriesResponse } from '@/types/comic-books.types'
 import type { ComicSeriesResponseItem, ComicSeriesFilterValuesData } from '@/types/comic-series.types'
 import { apiClient } from '@/utilities/apiClient'
-import { DEFAULT_HEADER_AUTHORIZATION } from '@/utilities/constants'
 
 const createCacheKey = (page: number, pageSize: number, sort: string) => `${page}:${pageSize}:${sort}`;
 const FILTER_VALUES_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -166,11 +165,7 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 			}
 
 			try {
-				const { data, error } = await apiClient.GET('/comic-series/filter-values', {
-					params: {
-						header: DEFAULT_HEADER_AUTHORIZATION
-					}
-				});
+				const { data, error } = await apiClient.GET('/comic-series/filter-values');
 
 				if (error || !data?.data) {
 					throw new Error(error?.message || 'Failed to fetch comic series filter values');
