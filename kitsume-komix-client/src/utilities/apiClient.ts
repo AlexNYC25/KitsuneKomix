@@ -1,8 +1,7 @@
 import createClient, { type Middleware } from "openapi-fetch";
 
 import { env } from "@/config/env";
-import type { paths } from "@/openapi/openapi-schema";
-
+import type { AuthRelaxedPaths } from "@/types/api.types";
 
 const apiClientBaseURL = env.API_URL + "/api";
 const apiRootBaseURL = env.API_URL;
@@ -28,11 +27,17 @@ export function setTokenRefreshCallback(callback: (() => Promise<boolean>) | nul
   onTokenRefresh = callback;
 }
 
+const getAuthorizationHeader = (): string | null => {
+	return authToken ? `Bearer ${authToken}` : null;
+};
+
 const withAuthHeader = (request: Request): Request => {
   const headers = new Headers(request.headers);
 
-  if (authToken) {
-    headers.set("Authorization", `Bearer ${authToken}`);
+  const authorizationHeader = getAuthorizationHeader();
+
+  if (authorizationHeader) {
+    headers.set("Authorization", authorizationHeader);
   }
 
   return new Request(request, { headers });
@@ -66,8 +71,10 @@ const authMiddleware: Middleware = {
     // Keep a cloned copy so retry logic can resend requests with bodies.
     retryableRequests.set(request, request.clone());
 
-    if (authToken) {
-      request.headers.set("Authorization", `Bearer ${authToken}`);
+    const authorizationHeader = getAuthorizationHeader();
+
+    if (authorizationHeader) {
+      request.headers.set("Authorization", authorizationHeader);
     }
     return request;
   },
@@ -96,7 +103,7 @@ const authMiddleware: Middleware = {
   },
 };
 
-export const apiClient = createClient<paths>({
+export const apiClient = createClient<AuthRelaxedPaths>({
   baseUrl: apiClientBaseURL,
   credentials: 'include',
 });
