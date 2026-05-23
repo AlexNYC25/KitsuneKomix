@@ -3,6 +3,7 @@ import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 import { AuthRefreshToken } from "./data/auth.schema.ts";
 import { ComicLibraryCompiledInfoSchema, ComicLibrariesAssignmentSchema } from "./data/comicLibraries.schema.ts";
+import { AllowedComicFiltersSchema, AllowedComicSeriesFiltersSchema } from "./data/queryableColumns.schema.ts";
 
 /**
  * Common schema for path parameter 'id'
@@ -152,6 +153,29 @@ export const PaginationSortFilterQuerySchema = PaginationQuerySchema
   .extend(SortQuerySchema.shape)
   .extend(FilterQuerySchema.shape);
 
+
+
+/**
+ * Generic schema for pagination query parameters with sorting and multiple filter pairs
+ */
+const FilterValue = z.union([z.string(), z.array(z.string())]).optional().openapi({
+  description: "Filter value(s). Repeat the key for multiple filters.",
+  example: "Batman",
+})
+
+/**
+ * Schema for pagination query parameters with sorting and multiple filter pairs, with filter properties limited to comic book fields
+ */
+const FilterPropertiesForComicBooks = z.union([AllowedComicFiltersSchema]).optional().openapi({
+  description: "Filter property name(s). Must be paired with a matching filter value.",
+  example: "name",
+})
+
+const FilterPropertiesForComicSeries = z.union([AllowedComicSeriesFiltersSchema]).optional().openapi({
+  description: "Filter property name(s) for comic series. Must be paired with a matching filter value.",
+  example: "name",
+})
+
 /**
  * Schema for multi-value filter query parameters
  *
@@ -160,10 +184,7 @@ export const PaginationSortFilterQuerySchema = PaginationQuerySchema
  * repeated query keys (e.g. ?filterProperty=name&filter=Batman&filterProperty=libraryId&filter=5).
  */
 const MultiFilterQuerySchema = z.object({
-  filter: z.union([z.string(), z.array(z.string())]).optional().openapi({
-    description: "Filter value(s). Repeat the key for multiple filters.",
-    example: "Batman",
-  }),
+  filter: FilterValue,
   filterProperty: z.union([z.string(), z.array(z.string())]).optional().openapi({
     description: "Filter property name(s). Must be paired with a matching filter value.",
     example: "name",
@@ -179,6 +200,32 @@ const MultiFilterQuerySchema = z.object({
 export const PaginationSortMultiFilterQuerySchema = PaginationQuerySchema
   .extend(SortQuerySchema.shape)
   .extend(MultiFilterQuerySchema.shape);
+
+/**
+ * Schema for pagination query parameters with sorting and multiple filter pairs, with filter properties limited to comic book fields
+ *
+ * Extends the standard pagination+sort schema to accept arrays of filter pairs,
+ * but restricts filterProperty values to those valid for comic books.
+ */
+export const PaginationSortMultiFilterComicQuerySchema = PaginationQuerySchema
+  .extend(SortQuerySchema.shape)
+  .extend({
+    filter: FilterValue,
+    filterProperty: FilterPropertiesForComicBooks,
+  });
+
+/**
+ * Schema for pagination query parameters with sorting and multiple filter pairs, with filter properties limited to comic series fields
+ *
+ * Extends the standard pagination+sort schema to accept arrays of filter pairs,
+ * but restricts filterProperty values to those valid for comic series.
+ */
+export const PaginationSortMultiFilterComicSeriesQuerySchema = PaginationQuerySchema
+  .extend(SortQuerySchema.shape)
+  .extend({
+    filter: FilterValue,
+    filterProperty: FilterPropertiesForComicSeries,
+  });
 
 /**
  * Schema for comic metadata updates in request body
