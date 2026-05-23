@@ -1,4 +1,4 @@
-import {
+import type {
   ComicFilterField,
   ComicReadlistsFilterField,
   ComicReadlistsSortField,
@@ -18,6 +18,9 @@ import {
 } from "#config/env.ts";
 
 import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+
+export const VALIDATE_COMIC_KEY = "comics"
+export const VALIDATE_COMIC_SERIES_KEY = "comicSeries"
 
 // ============================================================================
 // PARAMETER VALIDATION FUNCTIONS
@@ -149,22 +152,22 @@ export const validateFilters = <TFilterField extends string>(
 
 export function validateAndBuildQueryParams(
   queryData: QueryData,
-  dataType: "comics",
+  dataType: typeof VALIDATE_COMIC_KEY,
 ): RequestParametersValidated<ComicSortField, ComicFilterField>;
 
 export function validateAndBuildQueryParams(
   queryData: QueryDataMultiFilter,
-  dataType: "comics",
+  dataType: typeof VALIDATE_COMIC_KEY,
 ): RequestParametersValidated<ComicSortField, ComicFilterField>;
 
 export function validateAndBuildQueryParams(
   queryData: QueryData,
-  dataType: "comicSeries",
+  dataType: typeof VALIDATE_COMIC_SERIES_KEY,
 ): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
 
 export function validateAndBuildQueryParams(
   queryData: QueryDataMultiFilter,
-  dataType: "comicSeries",
+  dataType: typeof VALIDATE_COMIC_SERIES_KEY,
 ): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
 
 export function validateAndBuildQueryParams(
