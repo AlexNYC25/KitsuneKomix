@@ -92,14 +92,14 @@ app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
 });
 
 /**
- * GET /api/comic-books/all
+ * GET /api/comic-books/
  *
  * Get all comic books with pagination, sorting, and filtering
  */
 app.openapi(
   createRoute({
     method: "get",
-    path: "/all",
+    path: "/",
     summary: "Get all comic books",
     description:
       "Retrieve all comic books in the database with pagination, sorting, and filtering",
@@ -145,8 +145,6 @@ app.openapi(
   }),
   async (c) => {
     const queryData: QueryData = c.req.valid("query");
-
-    const userId = c.get("userId")!;
 
     const serviceData: RequestParametersValidated<
       ComicSortField,
