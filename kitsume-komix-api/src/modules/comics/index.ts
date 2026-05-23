@@ -50,3 +50,5 @@ export {
 } from "./comic-navigation.service.ts";
 
 export { attachThumbnailToComicBook } from "./comic-books.service.ts";
+
+export { packDataIntoComicBookMultipleResponse } from "./comic-response-helpers.service.ts";
