@@ -154,10 +154,7 @@ app.openapi(
     const serviceData: RequestParametersValidated< ComicSortField, ComicFilterField > = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_KEY);
 
     try {
-      const comics: ComicBookWithMetadata[] =
-        await fetchComicBooksWithRelatedMetadata(
-          serviceData,
-        );
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData);
 
       const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
       const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;

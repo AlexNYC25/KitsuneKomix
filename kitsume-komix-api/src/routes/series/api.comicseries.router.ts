@@ -5,6 +5,7 @@ import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
 import {
   compileEntireSeriesMetadataAndAdditionalSeriesInfo,
   fetchComicSeries,
+  packDataIntoComicSeriesMultipleResponse,
 } from "#modules/series/index.ts";
 
 import { AuthHeaderSchema } from "#zod/schemas/header.schema.ts";
@@ -14,6 +15,7 @@ import {
   PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamIdThumbnailIdSchema,
+  PaginationSortMultiFilterComicSeriesQuerySchema
 } from "#zod/schemas/request.schema.ts";
 import {
   AllowedFilterValuesResponseSchema,
@@ -65,7 +67,7 @@ app.openapi(
     tags: ["Comic Series"],
     middleware: [requireAuth],
     request: {
-      query: PaginationSortMultiFilterQuerySchema,
+      query: PaginationSortMultiFilterComicSeriesQuerySchema,
     },
     responses: {
       200: {
@@ -111,42 +113,18 @@ app.openapi(
     > = validateAndBuildQueryParams(queryData, "comicSeries");
 
     try {
-      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(
-        serviceData,
-      );
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
 
-      const serviceDataPagination: RequestPaginationParametersValidated =
-        serviceData.pagination;
-      const serviceDataFilters:
-        | RequestFilterParametersValidated<ComicSeriesFilterField>[]
-        | undefined = serviceData.filters;
-      const serviceDataSort: RequestSortParametersValidated<
-        ComicSeriesSortField
-      > = serviceData.sort;
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilters: RequestFilterParametersValidated<ComicSeriesFilterField>[] | undefined = serviceData.filters;
+      const serviceDataSort: RequestSortParametersValidated<ComicSeriesSortField> = serviceData.sort;
 
-      const hasNextPage: boolean =
-        comicSeries.length > serviceDataPagination.pageSize;
-      const resultComicSeries: ComicSeriesMultipleResponseData = hasNextPage
-        ? comicSeries.slice(0, serviceDataPagination.pageSize)
-        : comicSeries;
-
-      const requestMetadata: ComicSeriesMultipleResponseMeta = {
-        count: resultComicSeries.length,
-        hasNextPage: hasNextPage,
-        currentPage: serviceDataPagination.pageNumber,
-        pageSize: serviceDataPagination.pageSize,
-        filters: serviceDataFilters?.map((f) => ({
-          filterProperty: f.filterProperty ?? "",
-          filterValue: f.filterValue ?? "",
-        })),
-        sortProperty: serviceDataSort.sortProperty,
-        sortOrder: serviceDataSort.sortOrder,
-      };
-
-      const returnObj: ComicSeriesMultipleResponse = {
-        data: resultComicSeries,
-        meta: requestMetadata,
-      };
+      const returnObj: ComicSeriesMultipleResponse = packDataIntoComicSeriesMultipleResponse(
+        comicSeries,
+        serviceDataPagination,
+        serviceDataFilters,
+        serviceDataSort
+      )
 
       return c.json(returnObj, 200);
     } catch (error) {
