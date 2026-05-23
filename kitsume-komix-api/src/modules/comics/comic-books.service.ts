@@ -70,15 +70,20 @@ export const fetchComicBooksWithRelatedMetadata = async (
   try {
     const serviceDataPagination: RequestPaginationParametersValidated =
       queryData.pagination;
-    const serviceDataFilter:
-      | RequestFilterParametersValidated<ComicFilterField>
-      | undefined = queryData.filter;
+
+    // Prefer the multi-filter array when provided, fall back to the legacy single filter.
+    const resolvedFilters: ComicBookFilterItem[] = queryData.filters
+      ? queryData.filters as ComicBookFilterItem[]
+      : queryData.filter
+      ? [queryData.filter] as ComicBookFilterItem[]
+      : [];
+
     const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
       queryData.sort;
 
     const comicsFromDb: ComicBook[] =
       await getComicBooksWithMetadataFilteringSorting({
-        filters: [serviceDataFilter] as ComicBookFilterItem[],
+        filters: resolvedFilters,
         sort: {
           property: serviceDataSort.sortProperty,
           order: serviceDataSort.sortOrder,
