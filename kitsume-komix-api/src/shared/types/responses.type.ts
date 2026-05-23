@@ -1,5 +1,5 @@
-import { z } from "zod";
-import {
+import type { z } from "zod";
+import type {
   ComicBookMultipleResponseSchema,
   ComicSeriesMultipleResponseSchema,
 } from "#zod/schemas/response.schema.ts";
