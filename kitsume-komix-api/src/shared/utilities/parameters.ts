@@ -153,6 +153,11 @@ export function validateAndBuildQueryParams(
 ): RequestParametersValidated<ComicSortField, ComicFilterField>;
 
 export function validateAndBuildQueryParams(
+  queryData: QueryDataMultiFilter,
+  dataType: "comics",
+): RequestParametersValidated<ComicSortField, ComicFilterField>;
+
+export function validateAndBuildQueryParams(
   queryData: QueryData,
   dataType: "comicSeries",
 ): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
