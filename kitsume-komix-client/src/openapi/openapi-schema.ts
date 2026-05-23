@@ -2077,10 +2077,10 @@ export interface paths {
                     sort?: string;
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
+                    /** @description Filter value(s). Repeat the key for multiple filters. */
+                    filter?: string | string[];
+                    /** @description Filter property name(s). Must be paired with a matching filter value. */
+                    filterProperty?: string | string[];
                 };
                 header?: never;
                 path?: never;
@@ -2317,6 +2317,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -2629,6 +2633,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -2941,6 +2949,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -3438,6 +3450,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -3751,6 +3767,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -4379,7 +4399,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/comic-books/all": {
+    "/comic-books": {
         parameters: {
             query?: never;
             header?: never;
@@ -4401,10 +4421,10 @@ export interface paths {
                     sort?: string;
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
+                    /** @description Filter value(s). Repeat the key for multiple filters. */
+                    filter?: string | string[];
+                    /** @description Filter property name(s). Must be paired with a matching filter value. */
+                    filterProperty?: string | string[];
                 };
                 header?: never;
                 path?: never;
@@ -4497,6 +4517,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -4670,6 +4694,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -4843,6 +4871,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -5012,6 +5044,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -5181,6 +5217,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -5365,6 +5405,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
@@ -7712,6 +7756,10 @@ export interface paths {
                                 pageSize: number;
                                 filterProperty?: string;
                                 filterValue?: string;
+                                filters?: {
+                                    filterProperty: string;
+                                    filterValue: string;
+                                }[];
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
