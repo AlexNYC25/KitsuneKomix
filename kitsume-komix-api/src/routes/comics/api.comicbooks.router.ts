@@ -49,6 +49,7 @@ import {
   ParamIdSchema,
   ParamIdStreamPageSchema,
   ParamIdThumbnailIdSchema,
+  PaginationSortMultiFilterQuerySchema
 } from "#zod/schemas/request.schema.ts";
 
 import type {
@@ -75,7 +76,8 @@ import type {
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   RequestSortParametersValidated,
-  ComicBookThumbnailItem
+  ComicBookThumbnailItem,
+  QueryDataMultiFilter
 } from "#types/index.ts";
 
 import {
@@ -106,7 +108,7 @@ app.openapi(
     tags: ["Comic Books"],
     middleware: [requireAuth],
     request: {
-      query: PaginationSortFilterQuerySchema,
+      query: PaginationSortMultiFilterQuerySchema,
     },
     responses: {
       200: {
@@ -144,7 +146,7 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: QueryData = c.req.valid("query");
+    const queryData: QueryDataMultiFilter = c.req.valid("query");
 
     const serviceData: RequestParametersValidated<
       ComicSortField,
@@ -159,9 +161,9 @@ app.openapi(
 
       const serviceDataPagination: RequestPaginationParametersValidated =
         serviceData.pagination;
-      const serviceDataFilter:
-        | RequestFilterParametersValidated<ComicFilterField>
-        | undefined = serviceData.filter;
+      const serviceDataFilters:
+        | RequestFilterParametersValidated<ComicFilterField>[]
+        | undefined = serviceData.filters;
       const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
         serviceData.sort;
 
@@ -177,8 +179,10 @@ app.openapi(
         hasNextPage: hasNextPage,
         currentPage: serviceDataPagination.pageNumber,
         pageSize: serviceDataPagination.pageSize,
-        filterProperty: serviceDataFilter?.filterProperty,
-        filterValue: serviceDataFilter?.filterValue,
+        filters: serviceDataFilters?.map((f) => ({
+          filterProperty: f.filterProperty ?? "",
+          filterValue: f.filterValue ?? "",
+        })),
         sortProperty: serviceDataSort.sortProperty,
         sortOrder: serviceDataSort.sortOrder,
       };
