@@ -22,6 +22,7 @@ import {
   startStreamingComicBookFile,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
+  packDataIntoComicBookMultipleResponse
 } from "#modules/comics/index.ts";
 
 import { ComicBookSchema } from "#zod/schemas/data/comicBooks.schema.ts";
@@ -49,7 +50,8 @@ import {
   ParamIdSchema,
   ParamIdStreamPageSchema,
   ParamIdThumbnailIdSchema,
-  PaginationSortMultiFilterQuerySchema
+  PaginationSortMultiFilterQuerySchema,
+  PaginationSortMultiFilterComicQuerySchema
 } from "#zod/schemas/request.schema.ts";
 
 import type {
@@ -83,6 +85,7 @@ import type {
 import {
   validateAndBuildQueryParams,
   validatePagination,
+  VALIDATE_COMIC_KEY
 } from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
@@ -105,10 +108,10 @@ app.openapi(
     summary: "Get all comic books",
     description:
       "Retrieve all comic books in the database with pagination, sorting, and filtering",
-    tags: ["Comic Books"],
+    tags: ["Comic Books", "Pagination", "Sorting", "Filtering"],
     middleware: [requireAuth],
     request: {
-      query: PaginationSortMultiFilterQuerySchema,
+      query: PaginationSortMultiFilterComicQuerySchema,
     },
     responses: {
       200: {
@@ -148,10 +151,7 @@ app.openapi(
   async (c) => {
     const queryData: QueryDataMultiFilter = c.req.valid("query");
 
-    const serviceData: RequestParametersValidated<
-      ComicSortField,
-      ComicFilterField
-    > = validateAndBuildQueryParams(queryData, "comics");
+    const serviceData: RequestParametersValidated< ComicSortField, ComicFilterField > = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_KEY);
 
     try {
       const comics: ComicBookWithMetadata[] =
@@ -159,38 +159,16 @@ app.openapi(
           serviceData,
         );
 
-      const serviceDataPagination: RequestPaginationParametersValidated =
-        serviceData.pagination;
-      const serviceDataFilters:
-        | RequestFilterParametersValidated<ComicFilterField>[]
-        | undefined = serviceData.filters;
-      const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
-        serviceData.sort;
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;
+      const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
 
-      // Check if there's a next page
-      const hasNextPage: boolean =
-        comics.length > serviceDataPagination.pageSize;
-      const resultComics: ComicBookMultipleResponseData = hasNextPage
-        ? comics.slice(0, serviceDataPagination.pageSize)
-        : comics;
-
-      const requestMetadata: ComicBookMultipleResponseMeta = {
-        count: resultComics.length,
-        hasNextPage: hasNextPage,
-        currentPage: serviceDataPagination.pageNumber,
-        pageSize: serviceDataPagination.pageSize,
-        filters: serviceDataFilters?.map((f) => ({
-          filterProperty: f.filterProperty ?? "",
-          filterValue: f.filterValue ?? "",
-        })),
-        sortProperty: serviceDataSort.sortProperty,
-        sortOrder: serviceDataSort.sortOrder,
-      };
-
-      const returnObj: ComicBookMultipleResponse = {
-        data: resultComics,
-        meta: requestMetadata,
-      };
+      const returnObj: ComicBookMultipleResponse = packDataIntoComicBookMultipleResponse(
+        comics,
+        serviceDataPagination,
+        serviceDataFilters,
+        serviceDataSort
+      );
 
       return c.json(returnObj, 200);
     } catch (error) {
