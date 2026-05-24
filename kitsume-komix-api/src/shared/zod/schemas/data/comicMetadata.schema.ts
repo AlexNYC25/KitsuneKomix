@@ -94,3 +94,28 @@ export const MetadataExpandedWithSeriesCompiledSchema = MetadataExpandedSchema.e
   title: "ComicSeriesMetadataExpandedWithSeriesCompiled",
   description: "Expanded metadata for a comic series with compiled series information",
 });
+
+/**
+ * Canonical filter-values payload for series browsing.
+ */
+export const SeriesFilterValuesSchema = MetadataExpandedWithSeriesCompiledSchema.openapi({
+  title: "SeriesFilterValues",
+  description: "Filter values available for comic series browsing",
+});
+
+/**
+ * Canonical filter-values payload for comic-book browsing.
+ * Includes additional scalar fields that are valid comic-level filters.
+ */
+export const ComicBookFilterValuesSchema = MetadataExpandedWithSeriesCompiledSchema.extend({
+  languages: z.array(z.string()).optional(),
+  formats: z.array(z.string()).optional(),
+  readingDirections: z.array(z.string()).optional(),
+  ageRatings: z.array(z.string()).optional(),
+  libraryIds: z.array(z.number()).optional(),
+  manga: z.array(z.number()).optional(),
+  blackAndWhite: z.array(z.number()).optional(),
+}).openapi({
+  title: "ComicBookFilterValues",
+  description: "Filter values available for comic book browsing",
+});

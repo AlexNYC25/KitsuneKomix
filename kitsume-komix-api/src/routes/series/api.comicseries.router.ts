@@ -17,7 +17,7 @@ import {
   PaginationSortMultiFilterComicSeriesQuerySchema
 } from "#zod/schemas/request.schema.ts";
 import {
-  AllowedFilterValuesResponseSchema,
+  SeriesAllowedFilterValuesResponseSchema,
   ComicSeriesMultipleResponseSchema,
   ErrorResponseSchema,
   MessageResponseSchema,
@@ -284,7 +284,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: AllowedFilterValuesResponseSchema,
+            schema: SeriesAllowedFilterValuesResponseSchema,
           },
         },
         description: "Filter values retrieved successfully",

@@ -40,7 +40,7 @@ import {
   FileDownloadResponseSchema,
   SuccessResponseSchema,
   MessageResponseSchema,
-  AllowedFilterValuesResponseSchema
+  ComicBookAllowedFilterValuesResponseSchema
 } from "#zod/schemas/response.schema.ts";
 import {
   ComicMetadataBulkUpdateSchema,
@@ -361,7 +361,7 @@ app.openapi(
       200: {
         content: {
           "application/json": {
-            schema: AllowedFilterValuesResponseSchema,
+            schema: ComicBookAllowedFilterValuesResponseSchema,
           },
         },
         description: "Filter values retrieved successfully",

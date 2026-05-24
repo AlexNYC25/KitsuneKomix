@@ -9,7 +9,10 @@ import {
 } from "./data/database.schema.ts";
 import { ComicBookSchema } from "./data/comicBooks.schema.ts";
 import { ComicSeriesSchema } from "./data/comicSeries.schema.ts";
-import { MetadataExpandedWithSeriesCompiledSchema } from "./data/comicMetadata.schema.ts";
+import {
+  ComicBookFilterValuesSchema,
+  SeriesFilterValuesSchema,
+} from "./data/comicMetadata.schema.ts";
 
 // **** Basic response schemas **** //
 /**
@@ -165,13 +168,24 @@ export const ComicSeriesMultipleResponseSchema = z.object({
 /**
  * Schema for the allowed filted values response
  */
-export const AllowedFilterValuesResponseSchema = z.object({
-  data: MetadataExpandedWithSeriesCompiledSchema,
+export const SeriesAllowedFilterValuesResponseSchema = z.object({
+  data: SeriesFilterValuesSchema,
 }).openapi({
-  title: "AllowedFilterValuesResponse",
+  title: "SeriesAllowedFilterValuesResponse",
   description:
-    "Response containing the allowed filter values for comic series, including expanded metadata with compiled series information",
+    "Response containing allowed filter values for comic series",
 });
+
+export const ComicBookAllowedFilterValuesResponseSchema = z.object({
+  data: ComicBookFilterValuesSchema,
+}).openapi({
+  title: "ComicBookAllowedFilterValuesResponse",
+  description:
+    "Response containing allowed filter values for comic books",
+});
+
+// Backward-compatible alias while call sites migrate.
+export const AllowedFilterValuesResponseSchema = SeriesAllowedFilterValuesResponseSchema;
 
 /**
  * Schema for returning multiple comic books as part of a response
