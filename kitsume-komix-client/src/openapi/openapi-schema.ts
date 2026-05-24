@@ -2390,15 +2390,12 @@ export interface paths {
                     sort?: string;
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
+                    /** @description Filter value(s). Repeat the key for multiple filters. */
+                    filter?: string | string[];
+                    /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
+                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencillerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
                 };
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
+                header?: never;
                 path?: never;
                 cookie?: never;
             };
@@ -2706,15 +2703,12 @@ export interface paths {
                     sort?: string;
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
+                    /** @description Filter value(s). Repeat the key for multiple filters. */
+                    filter?: string | string[];
+                    /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
+                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencillerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
                 };
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
+                header?: never;
                 path?: never;
                 cookie?: never;
             };
@@ -3014,10 +3008,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
-                    /** @description Bearer token for authentication */
-                    authorization: string;
-                };
+                header?: never;
                 path?: never;
                 cookie?: never;
             };
@@ -4598,10 +4589,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
+                    /** @description The specific property to sort by */
+                    sort?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value(s). Repeat the key for multiple filters. */
+                    filter?: string | string[];
+                    /** @description Filter property name(s). Must be paired with a matching filter value. */
+                    filterProperty?: "id" | "seriesId" | "hash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId";
                 };
                 header?: never;
                 path?: never;
@@ -4775,10 +4770,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
+                    /** @description The specific property to sort by */
+                    sort?: string;
+                    /** @description Sort direction */
+                    sortDirection?: "asc" | "desc";
+                    /** @description Filter value(s). Repeat the key for multiple filters. */
+                    filter?: string | string[];
+                    /** @description Filter property name(s). Must be paired with a matching filter value. */
+                    filterProperty?: "id" | "seriesId" | "hash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId";
                 };
                 header?: never;
                 path?: never;
@@ -4921,6 +4920,189 @@ export interface paths {
                             errors?: {
                                 [key: string]: Record<string, never>;
                             };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comic-books/filter-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get filter values for comic series */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Filter values retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * ComicSeriesMetadataExpandedWithSeriesCompiled
+                             * @description Expanded metadata for a comic series with compiled series information
+                             */
+                            data: {
+                                writers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                pencillers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                inkers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                colorists?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                letterers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                editors?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                coverArtists?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                publishers?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                imprints?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                genres?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                characters?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                teams?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                locations?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                storyArcs?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                seriesGroups?: {
+                                    id: number;
+                                    name: string;
+                                    description: string | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                }[];
+                                letters?: string[];
+                                years?: number[];
+                            };
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
                         };
                     };
                 };
