@@ -70,7 +70,7 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 		},
 		async fetchComicsInSeries(seriesId: number, page: number = 1, pageSize: number = 20): Promise<ComicBooksSeriesResponse> {
 			try {
-				const { data, error } = await apiClient.GET('/comic-books/all', {
+				const { data, error } = await apiClient.GET('/comic-books', {
 					params: {
 						query: {
 							page,
