@@ -2079,8 +2079,8 @@ export interface paths {
                     sortDirection?: "asc" | "desc";
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
-                    /** @description Filter property name(s). Must be paired with a matching filter value. */
-                    filterProperty?: string | string[];
+                    /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
+                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencillerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
                 };
                 header?: never;
                 path?: never;
@@ -4424,7 +4424,7 @@ export interface paths {
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s). Must be paired with a matching filter value. */
-                    filterProperty?: string | string[];
+                    filterProperty?: "id" | "seriesId" | "hash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId";
                 };
                 header?: never;
                 path?: never;
