@@ -22,6 +22,7 @@ export {
 
 export {
   fetchAComicsAssociatedMetadataById,
+  compileEntireComicBooksMetadataAndAdditionalComicBookInfo,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
 } from "./comic-metadata.service.ts";
