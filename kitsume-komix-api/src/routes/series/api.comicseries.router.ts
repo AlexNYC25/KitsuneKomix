@@ -280,9 +280,6 @@ app.openapi(
     summary: "Get filter values for comic series",
     tags: ["Comic Series"],
     middleware: [requireAuth],
-    request: {
-      headers: AuthHeaderSchema,
-    },
     responses: {
       200: {
         content: {
