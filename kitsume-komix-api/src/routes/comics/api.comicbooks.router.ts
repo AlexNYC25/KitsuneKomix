@@ -189,10 +189,10 @@ app.openapi(
     summary: "Get latest comic books",
     description:
       "Retrieve the latest comic books added to the database, sorted by creation date in descending order",
-    tags: ["Comic Books"],
+    tags: ["Comic Books", "latest"],
     middleware: [requireAuth],
     request: {
-      query: PaginationFilterQuerySchema,
+      query: PaginationSortMultiFilterComicQuerySchema,
     },
     responses: {
       200: {
@@ -230,51 +230,25 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: QueryData = c.req.valid("query");
+    const queryData: QueryDataMultiFilter = c.req.valid("query");
+
     queryData.sort = "createdAt";
 
-    const userId = c.get("userId")!;
-
-    const serviceData: RequestParametersValidated<
-      ComicSortField,
-      ComicFilterField
-    > = validateAndBuildQueryParams(queryData, "comics");
+    const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_KEY);
 
     try {
-      const comics: ComicBookWithMetadata[] =
-        await fetchComicBooksWithRelatedMetadata(
-          serviceData,
-        );
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData);
 
-      const serviceDataPagination: RequestPaginationParametersValidated =
-        serviceData.pagination;
-      const serviceDataFilter:
-        | RequestFilterParametersValidated<ComicFilterField>
-        | undefined = serviceData.filter;
-      const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
-        serviceData.sort;
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;
+      const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
 
-      const hasNextPage: boolean =
-        comics.length > serviceDataPagination.pageSize;
-      const resultComics: ComicBookWithMetadata[] = hasNextPage
-        ? comics.slice(0, serviceDataPagination.pageSize)
-        : comics;
-
-      const requestMetadata: ComicBookMultipleResponseMeta = {
-        count: resultComics.length,
-        hasNextPage: hasNextPage,
-        currentPage: serviceDataPagination.pageNumber,
-        pageSize: serviceDataPagination.pageSize,
-        filterProperty: serviceDataFilter?.filterProperty,
-        filterValue: serviceDataFilter?.filterValue,
-        sortProperty: serviceDataSort.sortProperty,
-        sortOrder: serviceDataSort.sortOrder,
-      };
-
-      const returnObj: ComicBookMultipleResponse = {
-        data: resultComics,
-        meta: requestMetadata,
-      };
+      const returnObj: ComicBookMultipleResponse = packDataIntoComicBookMultipleResponse(
+        comics,
+        serviceDataPagination,
+        serviceDataFilters,
+        serviceDataSort
+      );
 
       return c.json(returnObj, 200);
     } catch (error) {
@@ -283,6 +257,8 @@ app.openapi(
     }
   },
 );
+
+
 
 /**
  * Get the newest comic books by publication date
@@ -298,10 +274,10 @@ app.openapi(
     summary: "Get newest comic books",
     description:
       "Retrieve the newest comic books sorted by publication date in descending order",
-    tags: ["Comic Books"],
+    tags: ["Comic Books", "newest"],
     middleware: [requireAuth],
     request: {
-      query: PaginationFilterQuerySchema,
+      query: PaginationSortMultiFilterComicQuerySchema,
     },
     responses: {
       200: {
@@ -339,51 +315,25 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: QueryData = c.req.valid("query");
+    const queryData: QueryDataMultiFilter = c.req.valid("query");
+
     queryData.sort = "date";
 
-    const userId = c.get("userId")!;
-
-    const serviceData: RequestParametersValidated<
-      ComicSortField,
-      ComicFilterField
-    > = validateAndBuildQueryParams(queryData, "comics");
+    const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_KEY);
 
     try {
-      const comics: ComicBookWithMetadata[] =
-        await fetchComicBooksWithRelatedMetadata(
-          serviceData,
-        );
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData);
 
-      const serviceDataPagination: RequestPaginationParametersValidated =
-        serviceData.pagination;
-      const serviceDataFilter:
-        | RequestFilterParametersValidated<ComicFilterField>
-        | undefined = serviceData.filter;
-      const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
-        serviceData.sort;
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;
+      const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
 
-      const hasNextPage: boolean =
-        comics.length > serviceDataPagination.pageSize;
-      const resultComics: ComicBookWithMetadata[] = hasNextPage
-        ? comics.slice(0, serviceDataPagination.pageSize)
-        : comics;
-
-      const requestMetadata: ComicBookMultipleResponseMeta = {
-        count: resultComics.length,
-        hasNextPage: hasNextPage,
-        currentPage: serviceDataPagination.pageNumber,
-        pageSize: serviceDataPagination.pageSize,
-        filterProperty: serviceDataFilter?.filterProperty,
-        filterValue: serviceDataFilter?.filterValue,
-        sortProperty: serviceDataSort.sortProperty,
-        sortOrder: serviceDataSort.sortOrder,
-      };
-
-      const returnObj: ComicBookMultipleResponse = {
-        data: resultComics,
-        meta: requestMetadata,
-      };
+      const returnObj: ComicBookMultipleResponse = packDataIntoComicBookMultipleResponse(
+        comics,
+        serviceDataPagination,
+        serviceDataFilters,
+        serviceDataSort
+      );
 
       return c.json(returnObj, 200);
     } catch (error) {
