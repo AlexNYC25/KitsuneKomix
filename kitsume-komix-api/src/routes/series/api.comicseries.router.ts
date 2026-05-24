@@ -210,11 +210,10 @@ app.openapi(
     method: "get",
     path: "/updated",
     summary: "Get updated comic series",
-    tags: ["Comic Series"],
+    tags: ["Comic Series", "updated"],
     middleware: [requireAuth],
     request: {
-      headers: AuthHeaderSchema,
-      query: PaginationSortFilterQuerySchema,
+      query: PaginationSortMultiFilterComicSeriesQuerySchema,
     },
     responses: {
       200: {
@@ -240,52 +239,27 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: QueryData = c.req.valid("query");
+    const queryData: QueryDataMultiFilter = c.req.valid("query");
 
     // Override sort to always be by updatedAt in descending order
     queryData.sort = "updatedAt";
     queryData.sortDirection = "desc";
 
-    const serviceData: RequestParametersValidated<
-      ComicSeriesSortField,
-      ComicSeriesFilterField
-    > = validateAndBuildQueryParams(queryData, "comicSeries");
+    const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_SERIES_KEY);
 
     try {
-      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(
-        serviceData,
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilters: RequestFilterParametersValidated<ComicSeriesFilterField>[] | undefined = serviceData.filters;
+      const serviceDataSort: RequestSortParametersValidated<ComicSeriesSortField> = serviceData.sort;
+
+      const returnObj: ComicSeriesMultipleResponse = packDataIntoComicSeriesMultipleResponse(
+        comicSeries,
+        serviceDataPagination,
+        serviceDataFilters,
+        serviceDataSort
       );
-
-      const serviceDataPagination: RequestPaginationParametersValidated =
-        serviceData.pagination;
-      const serviceDataFilter:
-        | RequestFilterParametersValidated<ComicSeriesFilterField>
-        | undefined = serviceData.filter;
-      const serviceDataSort: RequestSortParametersValidated<
-        ComicSeriesSortField
-      > = serviceData.sort;
-
-      const hasNextPage: boolean =
-        comicSeries.length > serviceDataPagination.pageSize;
-      const resultComicSeries: ComicSeriesMultipleResponseData = hasNextPage
-        ? comicSeries.slice(0, serviceDataPagination.pageSize)
-        : comicSeries;
-
-      const requestMetadata: ComicSeriesMultipleResponseMeta = {
-        count: resultComicSeries.length,
-        hasNextPage: hasNextPage,
-        currentPage: serviceDataPagination.pageNumber,
-        pageSize: serviceDataPagination.pageSize,
-        filterProperty: serviceDataFilter?.filterProperty,
-        filterValue: serviceDataFilter?.filterValue,
-        sortProperty: serviceDataSort.sortProperty,
-        sortOrder: serviceDataSort.sortOrder,
-      };
-
-      const returnObj: ComicSeriesMultipleResponse = {
-        data: resultComicSeries,
-        meta: requestMetadata,
-      };
 
       return c.json(returnObj, 200);
     } catch (error) {
@@ -334,8 +308,7 @@ app.openapi(
   }),
   async (c) => {
     try {
-      const allowedFilterValues =
-        await compileEntireSeriesMetadataAndAdditionalSeriesInfo();
+      const allowedFilterValues = await compileEntireSeriesMetadataAndAdditionalSeriesInfo();
 
       return c.json({
         data: allowedFilterValues,
