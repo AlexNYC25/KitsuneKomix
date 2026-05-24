@@ -22,7 +22,8 @@ import {
   startStreamingComicBookFile,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
-  packDataIntoComicBookMultipleResponse
+  packDataIntoComicBookMultipleResponse,
+  compileEntireComicBooksMetadataAndAdditionalComicBookInfo
 } from "#modules/comics/index.ts";
 
 import { ComicBookSchema } from "#zod/schemas/data/comicBooks.schema.ts";
@@ -38,6 +39,8 @@ import {
   ErrorResponseSchema,
   FileDownloadResponseSchema,
   SuccessResponseSchema,
+  MessageResponseSchema,
+  AllowedFilterValuesResponseSchema
 } from "#zod/schemas/response.schema.ts";
 import {
   ComicMetadataBulkUpdateSchema,
@@ -79,7 +82,7 @@ import type {
   RequestParametersValidated,
   RequestSortParametersValidated,
   ComicBookThumbnailItem,
-  QueryDataMultiFilter
+  QueryDataMultiFilter,
 } from "#types/index.ts";
 
 import {
@@ -342,6 +345,55 @@ app.openapi(
     }
   },
 );
+
+/**
+ * GET /api/comic-book/filter-values
+ * 
+ */
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/filter-values",
+    summary: "Get filter values for comic series",
+    tags: ["Comic Series"],
+    middleware: [requireAuth],
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: AllowedFilterValuesResponseSchema,
+          },
+        },
+        description: "Filter values retrieved successfully",
+      },
+      400: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Bad Request",
+      },
+      401: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Unauthorized",
+      },
+      500: {
+        content: { "application/json": { schema: MessageResponseSchema } },
+        description: "Internal Server Error",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const allowedFilterValues = await compileEntireComicBooksMetadataAndAdditionalComicBookInfo();
+
+      return c.json({
+        data: allowedFilterValues,
+      }, 200);
+    } catch (error) {
+      apiLogger.error("Error fetching comic series filter values:" + error);
+      return c.json({ message: "Internal Server Error" }, 500);
+    }
+  },
+);
+
 
 /**
  * GET /api/comic-books/duplicates
