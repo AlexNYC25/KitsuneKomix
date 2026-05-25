@@ -37,7 +37,15 @@ export type ComicBookThumbnail = ComicBookThumbnailsData[number];
 // /comic-books/filter-values
 export type GetComicBooksFilterValuesResponse = paths['/comic-books/filter-values']['get']['responses']['200']['content']['application/json'];
 
-export type ComicBooksFilterValuesData = GetComicBooksFilterValuesResponse['data'];
+export type ComicBooksFilterValuesData = GetComicBooksFilterValuesResponse['data'] & {
+	languages?: string[];
+	formats?: string[];
+	readingDirections?: string[];
+	ageRatings?: string[];
+	libraryIds?: number[];
+	manga?: number[];
+	blackAndWhite?: number[];
+};
 
 export type ComicBookWriterValues = NonNullable<ComicBooksFilterValuesData['writers']>[number];
 
