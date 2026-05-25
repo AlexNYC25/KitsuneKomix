@@ -100,6 +100,18 @@ const SortMetaSchema = z.object({
 });
 
 /**
+ * Schema for timestamp metadata in responses
+ */
+const TimestampMetaSchema = z.object({
+  timestamp: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid timestamp format",
+  }),
+}).openapi({
+  title: "TimestampMeta",
+  description: "Metadata containing a timestamp string in ISO format",
+});
+
+/**
  * Schema for update results in bulk update responses
  */
 const UpdatedResultsSchema = z.object({
@@ -159,7 +171,8 @@ export const HealthCheckResponseSchema = z.object({
 export const ComicSeriesMultipleResponseSchema = z.object({
   data: z.array(ComicSeriesSchema),
   meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape)
-    .extend(SortMetaSchema.shape),
+    .extend(SortMetaSchema.shape)
+    .extend(TimestampMetaSchema.shape),
 }).openapi({
   title: "ComicSeriesMultipleResponse",
   description: "Response containing paginated comic series data",
@@ -193,7 +206,8 @@ export const AllowedFilterValuesResponseSchema = SeriesAllowedFilterValuesRespon
 export const ComicBookMultipleResponseSchema = z.object({
   data: z.array(ComicBookSchema),
   meta: z.object(PaginationMetaSchema.shape).extend(FilterMetaSchema.shape)
-    .extend(SortMetaSchema.shape),
+    .extend(SortMetaSchema.shape)
+    .extend(TimestampMetaSchema.shape),
 }).openapi({
   title: "ComicBookMultipleResponse",
   description: "Response containing multiple comic books",
