@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 
-import type { ComicBooksSeriesResponse } from '@/types/comic-books.types'
+import type { GetComicsResponse } from '@/types/comic-books.types'
 import type { ComicSeriesResponseItem, ComicSeriesFilterValuesData } from '@/types/comic-series.types'
-import { apiClient } from '@/utilities/apiClient'
+import { apiClient, serializeFilterParmas } from '@/utilities/apiClient'
 
 const createCacheKey = (page: number, pageSize: number, sort: string) => `${page}:${pageSize}:${sort}`;
 const FILTER_VALUES_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -10,12 +10,12 @@ const FILTER_VALUES_CACHE_TTL_MS = 10 * 60 * 1000;
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({
     comicSeriesCache: new Map<string, { data: ComicSeriesResponseItem[]; meta: { count: number; hasNextPage: boolean; currentPage: number; pageSize: number }; timestamp: number }>(),
-    comicsInSeriesData: new Map<number, ComicBooksSeriesResponse>(),
+    comicsInSeriesData: new Map<number, GetComicsResponse>(),
     comicSeriesById: new Map<number, ComicSeriesResponseItem>(),
     comicSeriesFilterValuesCache: new Map<number, ComicSeriesFilterValuesData>(),
   }),
 	getters: {
-		getComicsInSeries: (state) => (seriesId: number): ComicBooksSeriesResponse | undefined => {
+		getComicsInSeries: (state) => (seriesId: number): GetComicsResponse | undefined => {
 			return state.comicsInSeriesData.get(seriesId);
 		},
 		getComicSeriesByParams: (state) => (page: number, pageSize: number, sort: string) => {
@@ -68,7 +68,7 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				return null;
 			}
 		},
-		async fetchComicsInSeries(seriesId: number, page: number = 1, pageSize: number = 20): Promise<ComicBooksSeriesResponse> {
+		async fetchComicsInSeries(seriesId: number, page: number = 1, pageSize: number = 20): Promise<GetComicsResponse> {
 			try {
 				const { data, error } = await apiClient.GET('/comic-books', {
 					params: {
@@ -124,19 +124,8 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 					params: {
 						query: { page, pageSize, sort: resolvedSort },
 					},
-					// Use a custom querySerializer to emit repeated filterProperty/filter keys.
-					// The generated schema only describes single-value filter params, so we
-					// build the query string manually to support multi-filter requests.
-					querySerializer: (baseQuery) => {
-						const sp = new URLSearchParams(
-							Object.entries(baseQuery as Record<string, string>)
-								.filter(([, v]) => v !== undefined && v !== null)
-								.map(([k, v]) => [k, String(v)]),
-						);
-						filterProperties.forEach((p) => sp.append('filterProperty', p));
-						filterValues.forEach((v) => sp.append('filter', v));
-						return sp.toString();
-					},
+					// Emit repeated filterProperty/filter keys for multi-filter support.
+					querySerializer: (baseQuery) => serializeFilterParmas(baseQuery, filterProperties, filterValues),
 				});
 
 				if (error || !data) {
