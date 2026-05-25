@@ -2324,6 +2324,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -2637,6 +2638,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -2950,6 +2952,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -3022,8 +3025,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             /**
-                             * ComicSeriesMetadataExpandedWithSeriesCompiled
-                             * @description Expanded metadata for a comic series with compiled series information
+                             * SeriesFilterValues
+                             * @description Filter values available for comic series browsing
                              */
                             data: {
                                 writers?: {
@@ -3448,6 +3451,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -3765,6 +3769,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -4515,6 +4520,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -4696,6 +4702,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -4877,6 +4884,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -4958,8 +4966,8 @@ export interface paths {
                     content: {
                         "application/json": {
                             /**
-                             * ComicSeriesMetadataExpandedWithSeriesCompiled
-                             * @description Expanded metadata for a comic series with compiled series information
+                             * ComicBookFilterValues
+                             * @description Filter values available for comic book browsing
                              */
                             data: {
                                 writers?: {
@@ -5069,6 +5077,13 @@ export interface paths {
                                 }[];
                                 letters?: string[];
                                 years?: number[];
+                                languages?: string[];
+                                formats?: string[];
+                                readingDirections?: string[];
+                                ageRatings?: string[];
+                                libraryIds?: number[];
+                                manga?: number[];
+                                blackAndWhite?: number[];
                             };
                         };
                     };
@@ -5233,6 +5248,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -5406,6 +5422,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
@@ -5594,6 +5611,7 @@ export interface paths {
                                 sortProperty?: string;
                                 /** @enum {string} */
                                 sortOrder?: "asc" | "desc";
+                                timestamp: string;
                             };
                         };
                     };
