@@ -406,6 +406,7 @@ app.openapi(
         filterValue: serviceDataFilter?.filterValue,
         sortProperty: serviceDataSort.sortProperty,
         sortOrder: serviceDataSort.sortOrder,
+        timestamp: new Date().toISOString(),
       };
 
       const returnObj: ComicSeriesMultipleResponse = {
@@ -499,6 +500,7 @@ app.openapi(
         hasNextPage: hasNextPage,
         currentPage: paginationData.pageNumber,
         pageSize: paginationData.pageSize,
+        timestamp: new Date().toISOString(),
       };
 
       const returnObj: ComicSeriesMultipleResponse = {

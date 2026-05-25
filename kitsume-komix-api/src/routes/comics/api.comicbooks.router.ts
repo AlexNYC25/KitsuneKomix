@@ -472,6 +472,7 @@ app.openapi(
           hasNextPage: hasNextPage,
           currentPage: paginationData.pageNumber,
           pageSize: paginationData.pageSize,
+          timestamp: new Date().toISOString(),
         };
 
         const returnObj: ComicBookMultipleResponse = {
@@ -486,6 +487,7 @@ app.openapi(
           hasNextPage: false,
           currentPage: 0,
           pageSize: 0,
+          timestamp: new Date().toISOString(),
         };
 
         const returnObj: ComicBookMultipleResponse = {
@@ -590,6 +592,7 @@ app.openapi(
         hasNextPage: hasNextPage,
         currentPage: paginationData.pageNumber,
         pageSize: paginationData.pageSize,
+        timestamp: new Date().toISOString(),
       };
 
       const returnObj: ComicBookMultipleResponse = {
@@ -693,6 +696,7 @@ app.openapi(
         hasNextPage: hasNextPage,
         currentPage: paginationData.pageNumber,
         pageSize: paginationData.pageSize,
+        timestamp: new Date().toISOString(),
       };
 
       const returnObj: ComicBookMultipleResponse = {

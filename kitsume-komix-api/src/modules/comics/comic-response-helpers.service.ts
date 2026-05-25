@@ -51,6 +51,7 @@ export const packDataIntoComicBookMultipleResponse = (
 		filters: filters,
 		sortProperty: serviceDataSort.sortProperty,
 		sortOrder: serviceDataSort.sortOrder,
+		timestamp: new Date().toISOString(),
 	};
 
 	return {
