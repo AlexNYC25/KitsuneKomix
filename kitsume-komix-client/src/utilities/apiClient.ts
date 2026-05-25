@@ -15,6 +15,36 @@ export function composeStaticUrl(path: string): string {
   return `${apiRootBaseURL}${path}`;
 }
 
+/**
+ * Helper function to serialize filter parameters for API requests. 
+ * 
+ * It takes a base query object and arrays of filter properties and values, 
+ * and constructs a URL query string that includes both the base query parameters 
+ * and the filter parameters in the format expected by the API.
+ * 
+ * 
+ * @param baseQuery 
+ * @param filterProperties 
+ * @param filterValues 
+ * @returns 
+ */
+export const serializeFilterParmas = (
+  baseQuery: unknown,
+  filterProperties: string[] = [],
+  filterValues: string[] = [],
+): string => {
+  const sp = new URLSearchParams(
+    Object.entries((baseQuery ?? {}) as Record<string, unknown>)
+      .filter(([, v]) => v !== undefined && v !== null)
+      .map(([k, v]) => [k, String(v)]),
+  );
+
+  filterProperties.forEach((property) => sp.append("filterProperty", property));
+  filterValues.forEach((value) => sp.append("filter", value));
+
+  return sp.toString();
+};
+
 export function setAuthToken(token: string | null) {
   authToken = token;
 }
