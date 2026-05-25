@@ -1,15 +1,13 @@
 import type { paths } from '@/openapi/openapi-schema';
 
 // /comic-books/ endpoint types - Used for fetching comics by series via filterProperty=seriesId
-export type GetComicsBySeries = paths['/comic-books']['get']['responses']['200']['content']['application/json'];
+export type GetComicsResponse = paths['/comic-books']['get']['responses']['200']['content']['application/json'];
 
-export type ComicBookInSeriesData = GetComicsBySeries['data'];
+export type GetComicsResponseData = GetComicsResponse['data'];
 
-export type ComicBook = ComicBookInSeriesData[number];
+export type ComicBook = GetComicsResponseData[number];
 
-export type ComicBooksSeriesMeta = GetComicsBySeries['meta'];
-
-export type ComicBooksSeriesResponse = GetComicsBySeries;
+export type ComicBooksResponseMeta = GetComicsResponse['meta'];
 
 // Creator/Person interface for metadata fields
 export interface Creator {

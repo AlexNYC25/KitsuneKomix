@@ -10,7 +10,7 @@ import SkeletonPage from '@/components/states/SkeletonPage.vue';
 import { getButtonClasses } from '@/composables/useButton';
 import { useAuthStore } from '@/stores/auth';
 import { useComicSeriesStore } from '@/stores/comic-series';
-import type { ComicBook, ComicBooksSeriesResponse } from '@/types/comic-books.types';
+import type { ComicBook, GetComicsResponse } from '@/types/comic-books.types';
 import type { ComicSeriesResponseItem } from '@/types/comic-series.types';
 import { apiClient } from '@/utilities/apiClient';
 import { resolveImageSrc, revokeBlobUrls } from '@/utilities/image';
@@ -23,7 +23,7 @@ const authStore = useAuthStore();
 const comicSeriesStore = useComicSeriesStore();
 
 const comicSeriesData = ref<ComicSeriesResponseItem | null>(null);
-const comicsData = ref<ComicBooksSeriesResponse | null>(null);
+const comicsData = ref<GetComicsResponse | null>(null);
 
 const currentPage = ref(0);
 const itemsPerPage = 25;
