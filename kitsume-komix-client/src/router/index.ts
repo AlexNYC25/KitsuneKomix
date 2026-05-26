@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import ComicBooksGallery from '@/components/ComicBooksGallery.vue'
 import ComicSeriesGallery from '@/components/ComicSeriesGallery.vue'
 import ComicBook from '@/pages/ComicBookPage.vue'
 import ComicSeries from '@/pages/ComicSeriesPage.vue'
@@ -25,6 +26,7 @@ const router = createRouter({
     { path: '/comic-series/latest', component: ComicSeriesGallery, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/comic-series/updated', component: ComicSeriesGallery, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/comic-series/:id', component: ComicSeries, meta: { requiresAuth: true, layout: 'default' } },
+    { path: '/comic-books/list', component: ComicBooksGallery, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/comic-book/:id', component: ComicBook, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/settings', component: Settings, meta: { requiresAuth: true, layout: 'default' } },
     { path: '/:pathMatch(.*)*', component: NotFound, meta: { requiresAuth: false, layout: 'default' } },
