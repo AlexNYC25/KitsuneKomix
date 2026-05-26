@@ -2,7 +2,7 @@
 import { toRef, watch } from 'vue';
 
 import { useGalleryFilters } from '@/composables/useGalleryFilters';
-import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
+import type { ComicSeriesFilterValuesData, ComicBooksFilterValuesData } from '@/types';
 
 import FilterPill from './FilterPill.vue';
 import FilterDropdown from './FilterDropdown.vue';
@@ -10,7 +10,7 @@ import FilterDropdownArea from './FilterDropdownArea.vue';
 import FilterColumn from './FilterColumn.vue';
 
 const props = defineProps<{
-  filtersAllowed: ComicSeriesFilterValuesData | null;
+  filtersAllowed: ComicSeriesFilterValuesData | ComicBooksFilterValuesData | null;
   showFilters: boolean;
 }>();
 

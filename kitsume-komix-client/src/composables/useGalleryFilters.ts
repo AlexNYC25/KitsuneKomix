@@ -1,9 +1,9 @@
 import { computed, type Ref, ref } from 'vue';
 
 import { FILTER_PROPERTY_MAP } from '@/config/gallery';
-import type { ComicSeriesFilterValuesData, GalleryActiveFilters } from '@/types/comic-series.types';
+import type { ComicSeriesFilterValuesData, GalleryActiveFilters, ComicBooksFilterValuesData } from '@/types';
 
-export function useGalleryFilters(filtersAllowed: Ref<ComicSeriesFilterValuesData | null>) {
+export function useGalleryFilters(filtersAllowed: Ref<ComicSeriesFilterValuesData | ComicBooksFilterValuesData | null>) {
   const selectedGenres = ref<number[]>([]);
   const selectedYears = ref<number[]>([]);
   const selectedLetters = ref<string[]>([]);
