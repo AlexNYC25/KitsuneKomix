@@ -1,26 +1,30 @@
 import { defineStore } from 'pinia'
 
+import { CACHE_TTL_MS } from "@/config/cache";
+import { mapForCategoryToDbField } from "@/config/sort";
 import type { GetComicsResponse } from '@/types/comic-books.types'
-import type { ComicSeriesResponseItem, ComicSeriesFilterValuesData } from '@/types/comic-series.types'
+import type { 
+	GetComicSeriesResponse, 
+	ComicSeriesResponseItem, 
+	ComicSeriesFilterValuesData,
+} from '@/types/comic-series.types'
 import { apiClient, serializeFilterParmas } from '@/utilities/apiClient'
-
-const createCacheKey = (page: number, pageSize: number, sort: string) => `${page}:${pageSize}:${sort}`;
-const FILTER_VALUES_CACHE_TTL_MS = 10 * 60 * 1000;
+import { createCacheKeyForComics } from "@/utilities/cache";
 
 export const useComicSeriesStore = defineStore('comicSeries', {
   state: () => ({
-    comicSeriesCache: new Map<string, { data: ComicSeriesResponseItem[]; meta: { count: number; hasNextPage: boolean; currentPage: number; pageSize: number }; timestamp: number }>(),
+    comicSeriesCache: new Map<string, GetComicSeriesResponse>(),
     comicsInSeriesData: new Map<number, GetComicsResponse>(),
     comicSeriesById: new Map<number, ComicSeriesResponseItem>(),
     comicSeriesFilterValuesCache: new Map<number, ComicSeriesFilterValuesData>(),
   }),
 	getters: {
+		getComicSeriesByParams: (state) => (page: number, pageSize: number, sort: string) => {
+			const cacheKey: string = createCacheKeyForComics(page, pageSize, sort);
+			return state.comicSeriesCache.get(cacheKey)?.data;
+		},
 		getComicsInSeries: (state) => (seriesId: number): GetComicsResponse | undefined => {
 			return state.comicsInSeriesData.get(seriesId);
-		},
-		getComicSeriesByParams: (state) => (page: number, pageSize: number, sort: string) => {
-			const cacheKey = createCacheKey(page, pageSize, sort);
-			return state.comicSeriesCache.get(cacheKey)?.data;
 		},
 		getLatestComicSeriesFilterValues: (state): { timestamp: number; data: ComicSeriesFilterValuesData } | undefined => {
 			let latestCachedEntry: { timestamp: number; data: ComicSeriesFilterValuesData } | undefined;
@@ -36,28 +40,28 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 	},
   actions: {
 		async fetchComicSeries(id: number) {
-			const cached = this.comicSeriesById.get(id);
+			const cached: ComicSeriesResponseItem | undefined = this.comicSeriesById.get(id);
 			if (cached) {
 				return cached;
 			}
 
 			const { data, error } = await apiClient.GET('/comic-series/{id}', {
-			params: {
-				path: {
-					id: String(id)
+				params: {
+					path: {
+						id: String(id)
+					}
 				}
-			}
 			});
 
 			if (error || !data) {
-			throw new Error(error?.message || 'Failed to fetch comic series');
+				throw new Error(error?.message || 'Failed to fetch comic series');
 			}
 
 			if (!data.data?.length) {
-			throw new Error('Comic series not found');
+				throw new Error('Comic series not found');
 			}
 
-			const series = data.data[0];
+			const series: ComicSeriesResponseItem | undefined = data.data[0];
 			this.comicSeriesById.set(id, series);
 			return series;
 		},
@@ -94,6 +98,22 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 				throw new Error(err instanceof Error ? err.message : 'Failed to fetch comics in series');
 			}
 		},
+		fetchComicSeriesListFromCache(
+			page: number = 1,
+			pageSize: number = 20,
+			sort: string = "createdAt"
+		): GetComicSeriesResponse | null {
+			const cacheKey: string = createCacheKeyForComics(page, pageSize, sort);
+			const cachedEntry: GetComicSeriesResponse | undefined = this.comicSeriesCache.get(cacheKey);
+
+			if (cachedEntry && (Date.now() - Number(cachedEntry.meta.timestamp) < CACHE_TTL_MS)) {
+				return cachedEntry;
+			} else if (cachedEntry) {
+				this.comicSeriesCache.delete(cacheKey);
+			}
+
+			return null;
+		},
 		async fetchComicSeriesList(
 			page: number = 1,
 			pageSize: number = 20,
@@ -101,30 +121,22 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 			filterProperties: string[] = [],
 			filterValues: string[] = [],
 		): Promise<{ data: ComicSeriesResponseItem[]; meta: { count: number; hasNextPage: boolean; currentPage: number; pageSize: number } }> {
-			const mapForCategoryToDbField: Record<string, string> = {
-				latest: 'createdAt',
-				updated: 'updatedAt',
-				name: 'name',
-				publicationDate: 'publicationDate',
-			};
-			const resolvedSort = mapForCategoryToDbField[sort] || sort;
-			const hasFilters = filterProperties.length > 0;
+			const resolvedSortForRequest: string = mapForCategoryToDbField[sort] || sort;
+			const hasFilters: boolean = filterProperties.length > 0;
 
-			// Only use cache for unfiltered requests
 			if (!hasFilters) {
-				const cacheKey = createCacheKey(page, pageSize, resolvedSort);
-				const cached = this.comicSeriesCache.get(cacheKey);
-				if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
-					return { data: cached.data, meta: cached.meta };
+				const cachedDataSet: GetComicSeriesResponse | null = this.fetchComicSeriesListFromCache(page, pageSize, resolvedSortForRequest);
+
+				if (cachedDataSet) {
+					return cachedDataSet;
 				}
 			}
 
 			try {
 				const { data, error } = await apiClient.GET('/comic-series', {
 					params: {
-						query: { page, pageSize, sort: resolvedSort },
+						query: { page, pageSize, sort: resolvedSortForRequest },
 					},
-					// Emit repeated filterProperty/filter keys for multi-filter support.
 					querySerializer: (baseQuery) => serializeFilterParmas(baseQuery, filterProperties, filterValues),
 				});
 
@@ -132,24 +144,23 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 					throw new Error(error?.message || 'Failed to fetch comic series list');
 				}
 
-				const seriesData = data.data || [];
-				const metaData = { count: data.meta.count, hasNextPage: data.meta.hasNextPage, currentPage: data.meta.currentPage, pageSize: data.meta.pageSize };
+				const seriesData: GetComicSeriesResponse = data || [];
 
 				if (!hasFilters) {
-					const cacheKey = createCacheKey(page, pageSize, resolvedSort);
-					this.comicSeriesCache.set(cacheKey, { data: seriesData, meta: metaData, timestamp: Date.now() });
+					const cacheKey: string = createCacheKeyForComics(page, pageSize, resolvedSortForRequest);
+					this.comicSeriesCache.set(cacheKey, seriesData);
 				}
 
-				return { data: seriesData, meta: metaData };
+				return { data: seriesData.data, meta: seriesData.meta };
 			} catch (err) {
 				throw new Error(err instanceof Error ? err.message : 'Failed to fetch comic series list');
 			}
 		},
 		async fetchComicSeriesFilterValues(): Promise<ComicSeriesFilterValuesData> {
-			const latestCachedEntry = this.getLatestComicSeriesFilterValues;
+			const latestCachedEntry: { timestamp: number; data: ComicSeriesFilterValuesData } | undefined = this.getLatestComicSeriesFilterValues;
 
 			// Reuse the cached filter values when the newest entry is still within the staleness window.
-			if (latestCachedEntry && Date.now() - latestCachedEntry.timestamp < FILTER_VALUES_CACHE_TTL_MS) {
+			if (latestCachedEntry && Date.now() - latestCachedEntry.timestamp < CACHE_TTL_MS) {
 				return latestCachedEntry.data;
 			}
 
@@ -160,7 +171,7 @@ export const useComicSeriesStore = defineStore('comicSeries', {
 					throw new Error(error?.message || 'Failed to fetch comic series filter values');
 				}
 
-				const fetchedAt = Date.now();
+				const fetchedAt: number = Date.now();
 				this.comicSeriesFilterValuesCache.set(fetchedAt, data.data);
 
 				return data.data;
