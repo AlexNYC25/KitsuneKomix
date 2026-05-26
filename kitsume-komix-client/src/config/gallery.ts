@@ -13,6 +13,9 @@ export const ROUTE_SORT_CATEGORY_MAP: Record<string, string> = {
   '/comic-series/latest': 'createdAt',
   '/comic-series/updated': 'updatedAt',
   '/comic-series/list': 'name',
+  '/comic-books/latest': 'createdAt',
+  '/comic-books/updated': 'updatedAt',
+  '/comic-books/list': 'name',
 };
 
 export const FILTER_PROPERTY_MAP: Record<GalleryFilterKey, string> = {
