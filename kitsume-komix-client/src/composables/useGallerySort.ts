@@ -7,7 +7,10 @@ export function useGallerySort() {
   const route = useRoute();
   const sortCategory = ref('');
 
-  const isLatestRoute = computed(() => route.path === '/comic-series/latest');
+  const isLatestRoute = computed(() => route.path === '/comic-series/latest' || route.path === '/comic-books/latest');
+  const isListRoute = computed(() => route.path === '/comic-series/list' || route.path === '/comic-books/list');
+
+
 
   watch(
     () => route.path,
@@ -19,6 +22,7 @@ export function useGallerySort() {
 
   return {
     isLatestRoute,
+    isListRoute,
     sortCategory,
   };
 }
