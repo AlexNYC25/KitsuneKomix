@@ -11,8 +11,7 @@ import GalleryPagination from './gallery/GalleryPagination.vue';
 import GalleryResultsGrid from './gallery/GalleryResultsGrid.vue';
 import GalleryToolbar from './gallery/GalleryToolbar.vue';
 
-import type { ComicSeriesListItem } from '@/types';
-import type { ComicSeriesFilterValuesData } from '@/types/comic-series.types';
+import type { ComicSeriesListItem, ComicSeriesFilterValuesData } from '@/types';
 
 const comics = ref<ComicSeriesListItem[]>([]);
 const comicSeriesStore = useComicSeriesStore();
