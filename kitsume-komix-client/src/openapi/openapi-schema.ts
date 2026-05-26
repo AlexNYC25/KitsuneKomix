@@ -2304,6 +2304,12 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
+                                    /**
+                                     * Format: uri
+                                     * @description URL to the primary thumbnail image for the comic book
+                                     * @example https://example.com/image/thumbnails/cover123.jpg
+                                     */
+                                    thumbnailUrl?: string;
                                 }[];
                             }[];
                             meta: {
@@ -2618,6 +2624,12 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
+                                    /**
+                                     * Format: uri
+                                     * @description URL to the primary thumbnail image for the comic book
+                                     * @example https://example.com/image/thumbnails/cover123.jpg
+                                     */
+                                    thumbnailUrl?: string;
                                 }[];
                             }[];
                             meta: {
@@ -2932,6 +2944,12 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
+                                    /**
+                                     * Format: uri
+                                     * @description URL to the primary thumbnail image for the comic book
+                                     * @example https://example.com/image/thumbnails/cover123.jpg
+                                     */
+                                    thumbnailUrl?: string;
                                 }[];
                             }[];
                             meta: {
@@ -3431,6 +3449,12 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
+                                    /**
+                                     * Format: uri
+                                     * @description URL to the primary thumbnail image for the comic book
+                                     * @example https://example.com/image/thumbnails/cover123.jpg
+                                     */
+                                    thumbnailUrl?: string;
                                 }[];
                             }[];
                             meta: {
@@ -3749,6 +3773,12 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
+                                    /**
+                                     * Format: uri
+                                     * @description URL to the primary thumbnail image for the comic book
+                                     * @example https://example.com/image/thumbnails/cover123.jpg
+                                     */
+                                    thumbnailUrl?: string;
                                 }[];
                             }[];
                             meta: {
@@ -4501,6 +4531,12 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
+                                /**
+                                 * Format: uri
+                                 * @description URL to the primary thumbnail image for the comic book
+                                 * @example https://example.com/image/thumbnails/cover123.jpg
+                                 */
+                                thumbnailUrl?: string;
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -4683,6 +4719,12 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
+                                /**
+                                 * Format: uri
+                                 * @description URL to the primary thumbnail image for the comic book
+                                 * @example https://example.com/image/thumbnails/cover123.jpg
+                                 */
+                                thumbnailUrl?: string;
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -4865,6 +4907,12 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
+                                /**
+                                 * Format: uri
+                                 * @description URL to the primary thumbnail image for the comic book
+                                 * @example https://example.com/image/thumbnails/cover123.jpg
+                                 */
+                                thumbnailUrl?: string;
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -5229,6 +5277,12 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
+                                /**
+                                 * Format: uri
+                                 * @description URL to the primary thumbnail image for the comic book
+                                 * @example https://example.com/image/thumbnails/cover123.jpg
+                                 */
+                                thumbnailUrl?: string;
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -5403,6 +5457,12 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
+                                /**
+                                 * Format: uri
+                                 * @description URL to the primary thumbnail image for the comic book
+                                 * @example https://example.com/image/thumbnails/cover123.jpg
+                                 */
+                                thumbnailUrl?: string;
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -5592,6 +5652,12 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
+                                /**
+                                 * Format: uri
+                                 * @description URL to the primary thumbnail image for the comic book
+                                 * @example https://example.com/image/thumbnails/cover123.jpg
+                                 */
+                                thumbnailUrl?: string;
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -5878,6 +5944,12 @@ export interface paths {
                                 createdAt: string;
                                 updatedAt: string;
                             }[];
+                            /**
+                             * Format: uri
+                             * @description URL to the primary thumbnail image for the comic book
+                             * @example https://example.com/image/thumbnails/cover123.jpg
+                             */
+                            thumbnailUrl?: string;
                         };
                     };
                 };
@@ -7161,6 +7233,12 @@ export interface paths {
                                 createdAt: string;
                                 updatedAt: string;
                             }[];
+                            /**
+                             * Format: uri
+                             * @description URL to the primary thumbnail image for the comic book
+                             * @example https://example.com/image/thumbnails/cover123.jpg
+                             */
+                            thumbnailUrl?: string;
                         };
                     };
                 };
@@ -7324,6 +7402,12 @@ export interface paths {
                                 createdAt: string;
                                 updatedAt: string;
                             }[];
+                            /**
+                             * Format: uri
+                             * @description URL to the primary thumbnail image for the comic book
+                             * @example https://example.com/image/thumbnails/cover123.jpg
+                             */
+                            thumbnailUrl?: string;
                         };
                     };
                 };

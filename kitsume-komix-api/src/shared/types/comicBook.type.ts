@@ -47,7 +47,7 @@ export type ComicBookMetadataOnly = {
   seriesGroups?: ComicSeriesGroup[];
 };
 
-export type ComicBookWithMetadata = ComicBook & ComicBookMetadataOnly;
+export type ComicBookWithMetadata = ComicBookWithThumbnail & ComicBookMetadataOnly;
 
 // Filter types for advanced comic book querying
 export type ComicBookFilterItem = {

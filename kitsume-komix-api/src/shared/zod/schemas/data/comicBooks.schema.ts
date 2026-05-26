@@ -13,6 +13,10 @@ import { MetadataSchema } from "./comicMetadata.schema.ts";
 export const ComicBookSchema: z.ZodObject = ComicBookSelectSchema.extend({
   metadata: MetadataSchema.optional(),
   thumbnails: z.array(ComicBookThumbnailSelectSchema).optional(),
+  thumbnailUrl: z.url().openapi({
+    description: "URL to the primary thumbnail image for the comic book",
+    example: "https://example.com/image/thumbnails/cover123.jpg",
+  }).optional(),
 }).openapi({
   title: "ComicBook",
   description:
