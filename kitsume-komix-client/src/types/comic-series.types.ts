@@ -14,9 +14,7 @@ export type ComicSeriesWithComics = GetComicSeriesByIdResponse['data'];
 
 export type ComicSeriesResponseItem = ComicSeriesWithComics[number];
 
-export type ComicSeriesComic = NonNullable<ComicSeriesResponseItem['comicBooks']>[number];
-
-export type ComicSeriesWithComicsSingleComic = ComicSeriesComic;
+export type ComicSeries = NonNullable<ComicSeriesResponseItem['comicBooks']>[number];
 
 // /comic-series/latest endpoint types
 export type GetLatestComicSeriesResponse = paths['/comic-series/latest']['get']['responses']['200']['content']['application/json'];
