@@ -11,6 +11,8 @@ import GalleryPagination from './gallery/GalleryPagination.vue';
 import GalleryResultsGrid from './gallery/GalleryResultsGrid.vue';
 import GalleryToolbar from './gallery/GalleryToolbar.vue';
 
+import ComicSeriesCard from './ComicSeriesCard.vue';
+
 import type { ComicSeriesListItem, ComicSeriesFilterValuesData } from '@/types';
 
 const comics = ref<ComicSeriesListItem[]>([]);
@@ -117,7 +119,13 @@ onMounted(async () => {
 			:isLoading="isLoading"
 			@retry="fetchPage(currentPage)"
 		>
-			<GalleryResultsGrid :comics="comics" />
+			<GalleryResultsGrid>
+				<ComicSeriesCard
+					v-for="comic in comics"
+					:key="comic.id"
+					:comicSeriesData="comic"
+				/>
+			</GalleryResultsGrid>
 		</GalleryBodyState>
 
 		<GalleryPagination
