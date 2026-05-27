@@ -9,6 +9,9 @@ import GalleryToolbar from './gallery/GalleryToolbar.vue';
 import GalleryFiltersPanel from './gallery/GalleryFiltersPanel.vue';
 import GalleryBodyState from './gallery/GalleryBodyState.vue';
 import GalleryPagination from './gallery/GalleryPagination.vue';
+import GalleryResultsGrid from './gallery/GalleryResultsGrid.vue';
+
+import ComicBookCard from './ComicBookCard.vue';
 
 import type { ComicBook, ComicBooksFilterValuesData } from '@/types';
 
@@ -79,9 +82,13 @@ watch(pageSize, () => {
 });
 
 
-onMounted(() => {
+onMounted(async () => {
+	await fetchPage(currentPage.value);
+
 	try {
-		comicBooksStore.fetchComicBookFilterValues();
+		const filterValues = await comicBooksStore.fetchComicBookFilterValues();
+
+		filtersAllowed.value = filterValues || null;
 	} catch (error) {
 		console.error('Failed to fetch comic books filter values:', error instanceof Error ? error.message : error);
 	}
@@ -116,7 +123,13 @@ onMounted(() => {
 			:isLoading="isLoading"
 			@retry="fetchPage(currentPage)"
 		>
-	
+			<GalleryResultsGrid>
+				<ComicBookCard
+					v-for="comic in comics"
+					:key="comic.id"
+					:comicBookData="comic"
+				/>
+			</GalleryResultsGrid>
 		</GalleryBodyState>
 
 		<GalleryPagination
