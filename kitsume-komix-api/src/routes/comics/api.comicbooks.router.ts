@@ -46,14 +46,11 @@ import {
   ComicMetadataBulkUpdateSchema,
   ComicMetadataSingleUpdateSchema,
   CreateCustomThumbnailSchema,
-  PaginationFilterQuerySchema,
   PaginationLetterQuerySchema,
   PaginationQuerySchema,
-  PaginationSortFilterQuerySchema,
   ParamIdSchema,
   ParamIdStreamPageSchema,
   ParamIdThumbnailIdSchema,
-  PaginationSortMultiFilterQuerySchema,
   PaginationSortMultiFilterComicQuerySchema
 } from "#zod/schemas/request.schema.ts";
 
@@ -70,6 +67,7 @@ import type {
   ComicBookThumbnail,
   ComicBookWithMetadata,
   ComicFilterField,
+  ComicBooksFilterValues,
   ComicMetadataBulkUpdateData,
   ComicMetadataSingleUpdateData,
   ComicMetadataUpdateData,
@@ -382,7 +380,7 @@ app.openapi(
   }),
   async (c) => {
     try {
-      const allowedFilterValues = await compileEntireComicBooksMetadataAndAdditionalComicBookInfo();
+      const allowedFilterValues: ComicBooksFilterValues = await compileEntireComicBooksMetadataAndAdditionalComicBookInfo();
 
       return c.json({
         data: allowedFilterValues,
