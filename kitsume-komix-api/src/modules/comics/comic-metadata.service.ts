@@ -61,6 +61,8 @@ import {
   unlinkSeriesGroupsToComicBook,
 } from "#infrastructure/db/sqlite/models/comicMetadataImports.ts";
 
+import { dedupeById } from "#utilities/standardize.ts";
+
 import type {
   ComicBookWithMetadata,
   ComicBooksFilterValues,
@@ -357,18 +359,7 @@ export const updateComicBookMetadataBulk = async (
 };
 
 /**
- * Local helper function to deduplicate metadata entities by their ID.
- */
-const dedupeById = <T extends { id: number | string }>(items: T[]): T[] => {
-  const uniqueCredits = new Map<number | string, T>();
-  for (const credit of items) {
-    uniqueCredits.set(credit.id, credit);
-  }
-  return Array.from(uniqueCredits.values());
-};
-
-/**
- * Compiles the metadata values concertning creator credits (writers, artists, etc.) across a list of comic books.
+ * Compiles the metadata values concerning creator credits (writers, artists, etc.) across a list of comic books.
  * 
  * @param comicBooks - Array of ComicBookWithMetadata to compile creator credits from
  * @returns ComicBookMetadataOnly containing aggregated creator credits without duplicates
