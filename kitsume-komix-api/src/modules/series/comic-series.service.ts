@@ -19,13 +19,16 @@ import type {
   ComicSeriesWithMetadata,
   ComicSortField,
   QueryData,
-  RequestFilterParametersValidated,
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   RequestSortParametersValidated,
+  ComicSeriesLevelMetadataOnly,
+  ComicSeriesCreditMetadata,
+  ComicSeriesFilterValues
 } from "#types/index.ts";
 
 import { validateAndBuildQueryParams } from "#utilities/parameters.ts";
+import { dedupeById } from "#utilities/standardize.ts";
 
 /**
  * Fetch all comic series with related metadata.
@@ -315,32 +318,91 @@ export const compileTheCompleteComicSeriesCreditsMetadata = (
 };
 
 /**
- * Goes through the entire library of comic books across all series and compiles the
- * unique metadata values that can be used as filter options in the UI.
- *
- * The response shape mirrors MetadataExpandedWithSeriesCompiledSchema, so the route can
- * return it directly under the `data` key.
+ * Compiles the metadata values concerning creator credits (writers, artists, etc.) across a list of comic books.
+ * 
+ * @param comicSeries - Array of ComicSeriesWithMetadata to compile creator credits from
+ * @returns ComicSeriesCreditMetadata containing aggregated creator credits without duplicates
  */
-export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Promise<ComicBookMetadataOnly & { years?: number[]; letters?: string[] }> => {
-  // Fetch all comic series with their metadata using a large page size to ensure we get all series in one request.
-  // fetchComicSeries handles pagination and metadata enrichment (credits and years) per series.
-  const queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = {
-    pagination: { pageNumber: 1, pageSize: 999999 }, // Large page size to fetch all series at once
-    sort: { sortProperty: 'id' as ComicSeriesSortField, sortOrder: 'asc' },
-    filter: undefined,
-  };
+const compileCreatorCredits = (comicSeries: ComicSeriesWithMetadata[]): ComicSeriesCreditMetadata => {
+  const completeCreatorCredits: ComicSeriesCreditMetadata = {};
+  const creatorFields = ["writers", "pencillers", "inkers", "letterers", "editors", "colorists", "coverArtists"] as const;
 
-  const allSeriesWithMetadata: ComicSeriesWithMetadata[] = await fetchComicSeries(queryData);
+  for (const series of comicSeries) {
+    creatorFields.forEach((field) => {
+      if(series?.credits?.[field]) {
+        completeCreatorCredits[field] = (completeCreatorCredits[field] || []).concat(series?.credits?.[field]);
+      }
+    });
+  }
 
-  // Initialize aggregation variables for library-wide filter values.
+  creatorFields.forEach((field) => {
+    if (completeCreatorCredits[field]) {
+      completeCreatorCredits[field] = dedupeById(completeCreatorCredits[field]!);
+    }
+  })
+
+  return completeCreatorCredits;
+}
+
+/**
+ * Compiles the metadata values concerning publishers and imprints across a list of comic books.
+ * 
+ * @param comicSeries - Array of ComicSeriesWithMetadata to compile publishing credits from
+ * @return ComicSeriesCreditMetadata containing aggregated publisher and imprint credits without duplicates
+ */
+const compilePublishingCredits = (comicSeries: ComicSeriesWithMetadata[]): ComicSeriesCreditMetadata => {
+  const completePublishingCredits: ComicSeriesCreditMetadata = {};
+  const publishingFields = ["publishers", "imprints", "genres"] as const;
+
+  for (const series of comicSeries) {
+    publishingFields.forEach((field) => {
+      if(series?.credits?.[field]) {
+        completePublishingCredits[field] = (completePublishingCredits[field] || []).concat(series?.credits?.[field]);
+      }
+    });
+  }
+
+  publishingFields.forEach((field) => {
+    if (completePublishingCredits[field]) {
+      completePublishingCredits[field] = dedupeById(completePublishingCredits[field]!);
+    }
+  });
+
+  return completePublishingCredits;
+}
+
+/**
+ * Compiles the metadata values concerning characters, teams, and locations across a list of comic books.
+ * 
+ * @param comicSeries - Array of ComicSeriesWithMetadata to compile character, teams and locations from
+ * @returns ComicSeriesCreditMetadata containing aggregated character, team, and location credits without duplicates
+ */
+const compileStoryAndWorldCredits = (comicSeries: ComicSeriesWithMetadata[]): ComicSeriesCreditMetadata => {
+  const completeStoryAndWorldCredits: ComicSeriesCreditMetadata = {};
+  const storyAndWorldFields = ["characters", "teams", "locations", "storyArcs", "seriesGroups"] as const;
+
+  for (const series of comicSeries) {
+    storyAndWorldFields.forEach((field) => {
+      if(series?.credits?.[field]) {
+        completeStoryAndWorldCredits[field] = (completeStoryAndWorldCredits[field] || []).concat(series?.credits?.[field]);
+      }
+    });
+  }
+
+  storyAndWorldFields.forEach((field) => {
+    if (completeStoryAndWorldCredits[field]) {
+      completeStoryAndWorldCredits[field] = dedupeById(completeStoryAndWorldCredits[field]!);
+    }
+  });
+
+  return completeStoryAndWorldCredits;
+}
+
+const compileComicSeriesLevelFilterValues = (comicSeries: ComicSeriesWithMetadata[]): ComicSeriesLevelMetadataOnly => {
   const allYears = new Set<number>();
   const allLetters = new Set<string>();
-  const completeLibraryCredits: ComicBookMetadataOnly = {};
 
-  // Iterate through all series and aggregate their metadata.
-  // We only collect the nested credit arrays and years here because those are the values
-  // the filter-values endpoint needs to expose to the client.
-  for (const series of allSeriesWithMetadata) {
+  for (const series of comicSeries) {
     const normalizedSeriesName = series.name.trim();
     const startingLetter = normalizedSeriesName.charAt(0).toLowerCase();
 
@@ -352,120 +414,46 @@ export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Prom
     if (series.years) {
       series.years.forEach(year => allYears.add(year));
     }
-
-    // Aggregate credits from each series into library-wide credits.
-    // We deduplicate each category after the collection pass so repeated names only appear once.
-    if (series.credits) {
-      if (series.credits.writers) {
-        completeLibraryCredits.writers = (completeLibraryCredits.writers || []).concat(series.credits.writers);
-      }
-      if (series.credits.pencillers) {
-        completeLibraryCredits.pencillers = (completeLibraryCredits.pencillers || []).concat(series.credits.pencillers);
-      }
-      if (series.credits.inkers) {
-        completeLibraryCredits.inkers = (completeLibraryCredits.inkers || []).concat(series.credits.inkers);
-      }
-      if (series.credits.letterers) {
-        completeLibraryCredits.letterers = (completeLibraryCredits.letterers || []).concat(series.credits.letterers);
-      }
-      if (series.credits.editors) {
-        completeLibraryCredits.editors = (completeLibraryCredits.editors || []).concat(series.credits.editors);
-      }
-      if (series.credits.colorists) {
-        completeLibraryCredits.colorists = (completeLibraryCredits.colorists || []).concat(series.credits.colorists);
-      }
-      if (series.credits.coverArtists) {
-        completeLibraryCredits.coverArtists = (completeLibraryCredits.coverArtists || []).concat(series.credits.coverArtists);
-      }
-      if (series.credits.publishers) {
-        completeLibraryCredits.publishers = (completeLibraryCredits.publishers || []).concat(series.credits.publishers);
-      }
-      if (series.credits.imprints) {
-        completeLibraryCredits.imprints = (completeLibraryCredits.imprints || []).concat(series.credits.imprints);
-      }
-      if (series.credits.genres) {
-        completeLibraryCredits.genres = (completeLibraryCredits.genres || []).concat(series.credits.genres);
-      }
-      if (series.credits.characters) {
-        completeLibraryCredits.characters = (completeLibraryCredits.characters || []).concat(series.credits.characters);
-      }
-      if (series.credits.teams) {
-        completeLibraryCredits.teams = (completeLibraryCredits.teams || []).concat(series.credits.teams);
-      }
-      if (series.credits.locations) {
-        completeLibraryCredits.locations = (completeLibraryCredits.locations || []).concat(series.credits.locations);
-      }
-      if (series.credits.storyArcs) {
-        completeLibraryCredits.storyArcs = (completeLibraryCredits.storyArcs || []).concat(series.credits.storyArcs);
-      }
-      if (series.credits.seriesGroups) {
-        completeLibraryCredits.seriesGroups = (completeLibraryCredits.seriesGroups || []).concat(series.credits.seriesGroups);
-      }
-    }
   }
 
-  // Helper function to deduplicate credits by their unique ID
-  // This reuses the same deduplication logic as compileTheCompleteComicSeriesCreditsMetadata
-  const dedupeById = <T extends { id: number | string }>(items: T[]): T[] => {
-    const uniqueCredits = new Map<number | string, T>();
-    for (const credit of items) {
-      uniqueCredits.set(credit.id, credit);
-    }
-    return Array.from(uniqueCredits.values());
+  return {
+    letters: Array.from(allLetters).sort((a, b) => a.localeCompare(b)),
+    years: Array.from(allYears).sort((a, b) => a - b),
+  };
+}
+
+/**
+ * Goes through the entire library of comic books across all series and compiles the
+ * unique metadata values that can be used as filter options in the UI.
+ *
+ * The response shape mirrors MetadataExpandedWithSeriesCompiledSchema, so the route can
+ * return it directly under the `data` key.
+ */
+export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Promise<ComicSeriesFilterValues> => {
+  // Fetch all comic series with their metadata using a large page size to ensure we get all series in one request.
+  // fetchComicSeries handles pagination and metadata enrichment (credits and years) per series.
+  const queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = {
+    pagination: { pageNumber: 1, pageSize: 999999 }, // Large page size to fetch all series at once
+    sort: { sortProperty: 'id' as ComicSeriesSortField, sortOrder: 'asc' },
+    filter: undefined,
   };
 
-  // Deduplicate all aggregated credit types to create a unique library-wide credits list
-  // This ensures that if a creator worked on comics in multiple series, they only appear once in the library metadata
-  if (completeLibraryCredits.writers) {
-    completeLibraryCredits.writers = dedupeById(completeLibraryCredits.writers);
-  }
-  if (completeLibraryCredits.pencillers) {
-    completeLibraryCredits.pencillers = dedupeById(completeLibraryCredits.pencillers);
-  }
-  if (completeLibraryCredits.inkers) {
-    completeLibraryCredits.inkers = dedupeById(completeLibraryCredits.inkers);
-  }
-  if (completeLibraryCredits.letterers) {
-    completeLibraryCredits.letterers = dedupeById(completeLibraryCredits.letterers);
-  }
-  if (completeLibraryCredits.editors) {
-    completeLibraryCredits.editors = dedupeById(completeLibraryCredits.editors);
-  }
-  if (completeLibraryCredits.colorists) {
-    completeLibraryCredits.colorists = dedupeById(completeLibraryCredits.colorists);
-  }
-  if (completeLibraryCredits.coverArtists) {
-    completeLibraryCredits.coverArtists = dedupeById(completeLibraryCredits.coverArtists);
-  }
-  if (completeLibraryCredits.publishers) {
-    completeLibraryCredits.publishers = dedupeById(completeLibraryCredits.publishers);
-  }
-  if (completeLibraryCredits.imprints) {
-    completeLibraryCredits.imprints = dedupeById(completeLibraryCredits.imprints);
-  }
-  if (completeLibraryCredits.genres) {
-    completeLibraryCredits.genres = dedupeById(completeLibraryCredits.genres);
-  }
-  if (completeLibraryCredits.characters) {
-    completeLibraryCredits.characters = dedupeById(completeLibraryCredits.characters);
-  }
-  if (completeLibraryCredits.teams) {
-    completeLibraryCredits.teams = dedupeById(completeLibraryCredits.teams);
-  }
-  if (completeLibraryCredits.locations) {
-    completeLibraryCredits.locations = dedupeById(completeLibraryCredits.locations);
-  }
-  if (completeLibraryCredits.storyArcs) {
-    completeLibraryCredits.storyArcs = dedupeById(completeLibraryCredits.storyArcs);
-  }
-  if (completeLibraryCredits.seriesGroups) {
-    completeLibraryCredits.seriesGroups = dedupeById(completeLibraryCredits.seriesGroups);
-  }
+  const allSeriesWithMetadata: ComicSeriesWithMetadata[] = await fetchComicSeries(queryData);
+
+  const completeLibraryCredits = {};
+
+  const creatorCredits: ComicSeriesCreditMetadata = compileCreatorCredits(allSeriesWithMetadata);
+  const publishingCredits: ComicSeriesCreditMetadata = compilePublishingCredits(allSeriesWithMetadata);
+  const storyAndWorldCredits: ComicSeriesCreditMetadata = compileStoryAndWorldCredits(allSeriesWithMetadata);
+
+  const comicSeriesLevelFilterValues: ComicSeriesLevelMetadataOnly = compileComicSeriesLevelFilterValues(allSeriesWithMetadata);
+  
+  Object.assign(completeLibraryCredits, creatorCredits, publishingCredits, storyAndWorldCredits)
 
   // Return the flattened metadata object expected by the response schema.
   return {
     ...completeLibraryCredits,
-    letters: Array.from(allLetters).sort((a, b) => a.localeCompare(b)),
-    years: Array.from(allYears).sort((a, b) => a - b),
+    years: comicSeriesLevelFilterValues.years,
+    letters: comicSeriesLevelFilterValues.letters,
   };
 };
