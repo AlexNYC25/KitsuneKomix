@@ -28,6 +28,7 @@
     "npm:pino@^9.11.0": "9.11.0",
     "npm:redis@^5.11.0": "5.11.0_@redis+client@5.11.0",
     "npm:sharp@~0.34.4": "0.34.4",
+    "npm:utility-types@^3.11.0": "3.11.0",
     "npm:zod@^4.1.11": "4.1.11"
   },
   "jsr": {
@@ -498,9 +499,6 @@
       "os": ["win32"],
       "cpu": ["x64"]
     },
-    "@ioredis/commands@1.4.0": {
-      "integrity": "sha512-aFT2yemJJo+TZCmieA7qnYGQooOS7QfNmYrzGtsYd3g9j5iDP8AimYYAesf79ohjbLG12XxC4nG5DyEnC88AsQ=="
-    },
     "@ioredis/commands@1.5.1": {
       "integrity": "sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw=="
     },
@@ -686,7 +684,7 @@
       "integrity": "sha512-hQPfUOLE7/aidCiQSMc5K1EYF6eAuOYSGNdKoLbTpYuRsjYsY0uGUBNX7VrESvAerUpklrsgPLqbunySUxWh5Q==",
       "dependencies": [
         "cron-parser",
-        "ioredis@5.8.0",
+        "ioredis",
         "msgpackr",
         "node-abort-controller",
         "semver",
@@ -901,21 +899,7 @@
     "ioredis@5.10.0": {
       "integrity": "sha512-HVBe9OFuqs+Z6n64q09PQvP1/R4Bm+30PAyyD4wIEqssh3v9L21QjCVk4kRLucMBcDokJTcLjsGeVRlq/nH6DA==",
       "dependencies": [
-        "@ioredis/commands@1.5.1",
-        "cluster-key-slot",
-        "debug",
-        "denque",
-        "lodash.defaults",
-        "lodash.isarguments",
-        "redis-errors",
-        "redis-parser",
-        "standard-as-callback"
-      ]
-    },
-    "ioredis@5.8.0": {
-      "integrity": "sha512-AUXbKn9gvo9hHKvk6LbZJQSKn/qIfkWXrnsyL9Yrf+oeXmla9Nmf6XEumOddyhM8neynpK5oAV6r9r99KBuwzA==",
-      "dependencies": [
-        "@ioredis/commands@1.4.0",
+        "@ioredis/commands",
         "cluster-key-slot",
         "debug",
         "denque",
@@ -1250,6 +1234,9 @@
     "undici-types@7.10.0": {
       "integrity": "sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag=="
     },
+    "utility-types@3.11.0": {
+      "integrity": "sha512-6Z7Ma2aVEWisaL6TvBCy7P8rm2LQoPv6dJ7ecIaIixHcwfbJ0x7mWdbcwlIM5IGQxPZSFYeqRCqlOOeKoJYMkw=="
+    },
     "uuid@11.1.0": {
       "integrity": "sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==",
       "bin": true
@@ -1295,6 +1282,7 @@
       "npm:pino@^9.11.0",
       "npm:redis@^5.11.0",
       "npm:sharp@~0.34.4",
+      "npm:utility-types@^3.11.0",
       "npm:zod@^4.1.11"
     ]
   }

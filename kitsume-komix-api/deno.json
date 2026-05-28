@@ -36,6 +36,7 @@
     "pino-pretty": "npm:pino-pretty@^13.1.1",
     "redis": "npm:redis@^5.11.0",
     "sharp": "npm:sharp@^0.34.4",
+    "utility-types": "npm:utility-types@^3.11.0",
     "zod": "npm:zod@^4.1.11"
   },
   "exports": {
