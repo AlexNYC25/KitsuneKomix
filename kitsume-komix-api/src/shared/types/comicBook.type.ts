@@ -1,3 +1,5 @@
+import { SetIntersection } from 'utility-types';
+
 import type {
   ComicBook,
   ComicCharacter,
@@ -46,6 +48,21 @@ export type ComicBookMetadataOnly = {
   storyArcs?: ComicStoryArc[];
   seriesGroups?: ComicSeriesGroup[];
 };
+
+export type ComicBookLevelMetadata = {
+  letters?: string[];
+  years?: number[];
+  languages?: string[];
+  formats?: string[];
+  readingDirections?: string[];
+  ageRatings?: string[];
+  libraryIds?: number[];
+  manga?: number[];
+  blackAndWhite?: number[];
+  seriesNames?: string[];
+}
+
+export type ComicBooksFilterValues = ComicBookMetadataOnly & ComicBookLevelMetadata;
 
 export type ComicBookWithMetadata = ComicBookWithThumbnail & ComicBookMetadataOnly;
 
