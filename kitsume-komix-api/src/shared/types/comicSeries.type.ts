@@ -3,6 +3,7 @@ import type { z } from "zod";
 import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
 import type { ComicSeriesSchema, ComicSeriesMetaData } from "#zod/schemas/data/comicSeries.schema.ts";
+import type { MetadataExpandedSchema } from "#zod/schemas/data/comicMetadata.schema.ts";
 
 import type { ComicSeriesSortField } from "#types/parameters.type.ts";
 
@@ -29,4 +30,13 @@ export type ComicSeriesFilteringAndSortingParams = {
 
 export type ComicSeriesMetadata = z.infer<typeof ComicSeriesMetaData>;
 
+export type ComicSeriesCreditMetadata = z.infer<typeof MetadataExpandedSchema>;
+
 export type ComicSeriesWithMetadata = z.infer<typeof ComicSeriesSchema>;
+
+export type ComicSeriesLevelMetadataOnly = {
+  years?: number[];
+  letters?: string[];
+};
+
+export type ComicSeriesFilterValues = ComicSeriesCreditMetadata & ComicSeriesLevelMetadataOnly;
