@@ -63,24 +63,13 @@ import {
 
 import type {
   ComicBookWithMetadata,
+  ComicBooksFilterValues,
   ComicFilterField,
   ComicSortField,
   ComicBookMetadataOnly,
   ComicMetadataUpdateData,
   RequestParametersValidated,
 } from "#types/index.ts";
-
-type ComicBooksFilterValues = ComicBookMetadataOnly & {
-  letters?: string[];
-  years?: number[];
-  languages?: string[];
-  formats?: string[];
-  readingDirections?: string[];
-  ageRatings?: string[];
-  libraryIds?: number[];
-  manga?: number[];
-  blackAndWhite?: number[];
-};
 
 /**
  * Fetch all associated metadata for a specific comic book.
@@ -368,23 +357,107 @@ export const updateComicBookMetadataBulk = async (
 };
 
 /**
- * Compiles all comic-book-level metadata and additional scalar values that are
- * valid filter options for comic-book browsing.
- *
- * This mirrors the series-level filter-values compiler, but aggregates directly
- * from comic books instead of from pre-aggregated series records.
+ * Local helper function to deduplicate metadata entities by their ID.
  */
-export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (): Promise<ComicBooksFilterValues> => {
-  const queryData: RequestParametersValidated<ComicSortField, ComicFilterField> = {
-    pagination: { pageNumber: 1, pageSize: 999999 },
-    sort: { sortProperty: "createdAt", sortOrder: "asc" },
-    filter: undefined,
-  };
+const dedupeById = <T extends { id: number | string }>(items: T[]): T[] => {
+  const uniqueCredits = new Map<number | string, T>();
+  for (const credit of items) {
+    uniqueCredits.set(credit.id, credit);
+  }
+  return Array.from(uniqueCredits.values());
+};
 
-  const allComicBooks: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(queryData);
+/**
+ * Compiles the metadata values concertning creator credits (writers, artists, etc.) across a list of comic books.
+ * 
+ * @param comicBooks - Array of ComicBookWithMetadata to compile creator credits from
+ * @returns ComicBookMetadataOnly containing aggregated creator credits without duplicates
+ */
+const compileCreatorCredits = (comicBooks: ComicBookWithMetadata[]): ComicBookMetadataOnly => {
+  const completeCreatorCredits: ComicBookMetadataOnly = {};
+  const creatorFields = ["writers", "pencillers", "inkers", "letterers", "editors", "colorists", "coverArtists"] as const;
 
+  for (const comic of comicBooks) {
+    creatorFields.forEach((field) => {
+      if(comic[field]) {
+        completeCreatorCredits[field] = (completeCreatorCredits[field] || []).concat(comic[field]);
+      }
+    });
+  }
+
+  creatorFields.forEach((field) => {
+    if (completeCreatorCredits[field]) {
+      completeCreatorCredits[field] = dedupeById(completeCreatorCredits[field]!);
+    }
+  })
+
+  return completeCreatorCredits;
+}
+
+/**
+ * Compiles the metadata values concerning publishers and imprints across a list of comic books.
+ * 
+ * @param comicBooks - Array of ComicBookWithMetadata to compile publishing credits from
+ * @return ComicBookMetadataOnly containing aggregated publisher and imprint credits without duplicates
+ */
+const compilePublishingCredits = (comicBooks: ComicBookWithMetadata[]): ComicBookMetadataOnly => {
+  const completePublishingCredits: ComicBookMetadataOnly = {};
+  const publishingFields = ["publishers", "imprints", "genres"] as const;
+
+  for (const comic of comicBooks) {
+    publishingFields.forEach((field) => {
+      if(comic[field]) {
+        completePublishingCredits[field] = (completePublishingCredits[field] || []).concat(comic[field]);
+      }
+    });
+  }
+
+  publishingFields.forEach((field) => {
+    if (completePublishingCredits[field]) {
+      completePublishingCredits[field] = dedupeById(completePublishingCredits[field]!);
+    }
+  });
+
+  return completePublishingCredits;
+}
+
+/**
+ * Compiles the metadata values concerning characters, teams, and locations across a list of comic books.
+ * 
+ * @param comicBooks - Array of ComicBookWithMetadata to compile character, teams and locations from
+ * @returns ComicBookMetadataOnly containing aggregated character, team, and location credits without duplicates
+ */
+const compileStoryAndWorldCredits = (comicBooks: ComicBookWithMetadata[]): ComicBookMetadataOnly => {
+  const completeStoryAndWorldCredits: ComicBookMetadataOnly = {};
+  const storyAndWorldFields = ["characters", "teams", "locations", "storyArcs", "seriesGroups"] as const;
+
+  for (const comic of comicBooks) {
+    storyAndWorldFields.forEach((field) => {
+      if(comic[field]) {
+        completeStoryAndWorldCredits[field] = (completeStoryAndWorldCredits[field] || []).concat(comic[field]);
+      }
+    });
+  }
+
+  storyAndWorldFields.forEach((field) => {
+    if (completeStoryAndWorldCredits[field]) {
+      completeStoryAndWorldCredits[field] = dedupeById(completeStoryAndWorldCredits[field]!);
+    }
+  });
+
+  return completeStoryAndWorldCredits;
+}
+
+
+/**
+ * Compiles all comic-book-level metadata and additional scalar values that are valid filter options for comic-book browsing.
+ * 
+ * @param comicBooks - Array of ComicBookWithMetadata to compile filter values from
+ * @returns 
+ */
+const compileComicBookLevelFilterValues = (comicBooks: ComicBookWithMetadata[]): ComicBooksFilterValues => {
   const allYears = new Set<number>();
-  const allLetters = new Set<string>();
+  const allLetters = new Set<string>(); // This will contain the starting letters of comic book titles, used for letter-based pagination filtering
   const allLanguages = new Set<string>();
   const allFormats = new Set<string>();
   const allReadingDirections = new Set<string>();
@@ -392,18 +465,9 @@ export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (
   const allLibraryIds = new Set<number>();
   const allMangaValues = new Set<number>();
   const allBlackAndWhiteValues = new Set<number>();
+  const allSeriesNames = new Set<string>();
 
-  const completeLibraryCredits: ComicBookMetadataOnly = {};
-
-  for (const comic of allComicBooks) {
-    const normalizedTitle = comic.title?.trim();
-    if (normalizedTitle) {
-      const startingLetter = normalizedTitle.charAt(0).toLowerCase();
-      if (/^[a-z]$/.test(startingLetter)) {
-        allLetters.add(startingLetter);
-      }
-    }
-
+  for (const comic of comicBooks) {
     if (comic.publicationDate) {
       const publicationYear = new Date(comic.publicationDate).getFullYear();
       if (!Number.isNaN(publicationYear)) {
@@ -411,6 +475,20 @@ export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (
       }
     } else if (comic.year !== null && comic.year !== undefined) {
       allYears.add(comic.year);
+    }
+
+    if (comic.title) {
+      const normalizedTitle = comic.title.trim();
+      if (normalizedTitle) {
+        const startingLetter = normalizedTitle.charAt(0).toLowerCase();
+        if (/^[a-z]$/.test(startingLetter)) {
+          allLetters.add(startingLetter);
+        }
+      }
+    }
+
+    if (comic.series) {
+      allSeriesNames.add(comic.series);
     }
 
     if (comic.language) {
@@ -435,118 +513,52 @@ export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (
     if (comic.blackAndWhite !== null && comic.blackAndWhite !== undefined) {
       allBlackAndWhiteValues.add(comic.blackAndWhite);
     }
-
-    if (comic.writers) {
-      completeLibraryCredits.writers = (completeLibraryCredits.writers || []).concat(comic.writers);
-    }
-    if (comic.pencillers) {
-      completeLibraryCredits.pencillers = (completeLibraryCredits.pencillers || []).concat(comic.pencillers);
-    }
-    if (comic.inkers) {
-      completeLibraryCredits.inkers = (completeLibraryCredits.inkers || []).concat(comic.inkers);
-    }
-    if (comic.letterers) {
-      completeLibraryCredits.letterers = (completeLibraryCredits.letterers || []).concat(comic.letterers);
-    }
-    if (comic.editors) {
-      completeLibraryCredits.editors = (completeLibraryCredits.editors || []).concat(comic.editors);
-    }
-    if (comic.colorists) {
-      completeLibraryCredits.colorists = (completeLibraryCredits.colorists || []).concat(comic.colorists);
-    }
-    if (comic.coverArtists) {
-      completeLibraryCredits.coverArtists = (completeLibraryCredits.coverArtists || []).concat(comic.coverArtists);
-    }
-    if (comic.publishers) {
-      completeLibraryCredits.publishers = (completeLibraryCredits.publishers || []).concat(comic.publishers);
-    }
-    if (comic.imprints) {
-      completeLibraryCredits.imprints = (completeLibraryCredits.imprints || []).concat(comic.imprints);
-    }
-    if (comic.genres) {
-      completeLibraryCredits.genres = (completeLibraryCredits.genres || []).concat(comic.genres);
-    }
-    if (comic.characters) {
-      completeLibraryCredits.characters = (completeLibraryCredits.characters || []).concat(comic.characters);
-    }
-    if (comic.teams) {
-      completeLibraryCredits.teams = (completeLibraryCredits.teams || []).concat(comic.teams);
-    }
-    if (comic.locations) {
-      completeLibraryCredits.locations = (completeLibraryCredits.locations || []).concat(comic.locations);
-    }
-    if (comic.storyArcs) {
-      completeLibraryCredits.storyArcs = (completeLibraryCredits.storyArcs || []).concat(comic.storyArcs);
-    }
-    if (comic.seriesGroups) {
-      completeLibraryCredits.seriesGroups = (completeLibraryCredits.seriesGroups || []).concat(comic.seriesGroups);
-    }
-  }
-
-  const dedupeById = <T extends { id: number | string }>(items: T[]): T[] => {
-    const uniqueCredits = new Map<number | string, T>();
-    for (const credit of items) {
-      uniqueCredits.set(credit.id, credit);
-    }
-    return Array.from(uniqueCredits.values());
-  };
-
-  if (completeLibraryCredits.writers) {
-    completeLibraryCredits.writers = dedupeById(completeLibraryCredits.writers);
-  }
-  if (completeLibraryCredits.pencillers) {
-    completeLibraryCredits.pencillers = dedupeById(completeLibraryCredits.pencillers);
-  }
-  if (completeLibraryCredits.inkers) {
-    completeLibraryCredits.inkers = dedupeById(completeLibraryCredits.inkers);
-  }
-  if (completeLibraryCredits.letterers) {
-    completeLibraryCredits.letterers = dedupeById(completeLibraryCredits.letterers);
-  }
-  if (completeLibraryCredits.editors) {
-    completeLibraryCredits.editors = dedupeById(completeLibraryCredits.editors);
-  }
-  if (completeLibraryCredits.colorists) {
-    completeLibraryCredits.colorists = dedupeById(completeLibraryCredits.colorists);
-  }
-  if (completeLibraryCredits.coverArtists) {
-    completeLibraryCredits.coverArtists = dedupeById(completeLibraryCredits.coverArtists);
-  }
-  if (completeLibraryCredits.publishers) {
-    completeLibraryCredits.publishers = dedupeById(completeLibraryCredits.publishers);
-  }
-  if (completeLibraryCredits.imprints) {
-    completeLibraryCredits.imprints = dedupeById(completeLibraryCredits.imprints);
-  }
-  if (completeLibraryCredits.genres) {
-    completeLibraryCredits.genres = dedupeById(completeLibraryCredits.genres);
-  }
-  if (completeLibraryCredits.characters) {
-    completeLibraryCredits.characters = dedupeById(completeLibraryCredits.characters);
-  }
-  if (completeLibraryCredits.teams) {
-    completeLibraryCredits.teams = dedupeById(completeLibraryCredits.teams);
-  }
-  if (completeLibraryCredits.locations) {
-    completeLibraryCredits.locations = dedupeById(completeLibraryCredits.locations);
-  }
-  if (completeLibraryCredits.storyArcs) {
-    completeLibraryCredits.storyArcs = dedupeById(completeLibraryCredits.storyArcs);
-  }
-  if (completeLibraryCredits.seriesGroups) {
-    completeLibraryCredits.seriesGroups = dedupeById(completeLibraryCredits.seriesGroups);
   }
 
   return {
-    ...completeLibraryCredits,
-    letters: Array.from(allLetters).sort((a, b) => a.localeCompare(b)),
     years: Array.from(allYears).sort((a, b) => a - b),
-    languages: Array.from(allLanguages).sort((a, b) => a.localeCompare(b)),
-    formats: Array.from(allFormats).sort((a, b) => a.localeCompare(b)),
-    readingDirections: Array.from(allReadingDirections).sort((a, b) => a.localeCompare(b)),
-    ageRatings: Array.from(allAgeRatings).sort((a, b) => a.localeCompare(b)),
+    letters: Array.from(allLetters).sort(),
+    languages: Array.from(allLanguages).sort(),
+    formats: Array.from(allFormats).sort(),
+    readingDirections: Array.from(allReadingDirections).sort(),
+    ageRatings: Array.from(allAgeRatings).sort(),
     libraryIds: Array.from(allLibraryIds).sort((a, b) => a - b),
-    manga: Array.from(allMangaValues),
-    blackAndWhite: Array.from(allBlackAndWhiteValues),
+    manga: Array.from(allMangaValues).sort((a, b) => a - b),
+    blackAndWhite: Array.from(allBlackAndWhiteValues).sort((a, b) => a - b),
+    seriesNames: Array.from(allSeriesNames).sort(),
   };
+}
+
+/**
+ * Compiles all comic-book-level metadata and additional scalar values that are
+ * valid filter options for comic-book browsing.
+ *
+ * This mirrors the series-level filter-values compiler, but aggregates directly
+ * from comic books instead of from pre-aggregated series records.
+ */
+export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (): Promise<ComicBooksFilterValues> => {
+  const queryData: RequestParametersValidated<ComicSortField, ComicFilterField> = {
+    pagination: { pageNumber: 1, pageSize: 999999 },
+    sort: { sortProperty: "createdAt", sortOrder: "asc" },
+    filter: undefined,
+  };
+
+  const allComicBooks: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(queryData);
+
+  const completeLibraryCredits: ComicBookMetadataOnly = {};
+
+  const creatorCredits: ComicBookMetadataOnly = compileCreatorCredits(allComicBooks);
+  const publishingCredits: ComicBookMetadataOnly = compilePublishingCredits(allComicBooks);
+  const storyAndWorldCredits: ComicBookMetadataOnly = compileStoryAndWorldCredits(allComicBooks);
+
+  const comicBookLevelFilterValues: ComicBooksFilterValues = compileComicBookLevelFilterValues(allComicBooks);
+
+  Object.assign(completeLibraryCredits, creatorCredits, publishingCredits, storyAndWorldCredits, comicBookLevelFilterValues);
+
+  const totalMetadataFilterValues: ComicBooksFilterValues = {
+    ...comicBookLevelFilterValues,
+    ...completeLibraryCredits,
+  }
+
+  return totalMetadataFilterValues;
 };
