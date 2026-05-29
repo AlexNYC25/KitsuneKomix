@@ -15,7 +15,7 @@ import { getFileNameFromPath } from "#utilities/file.ts";
 
 import {
   getWritersByComicBookId,
-  getPencillersByComicBookId,
+  getPencilersByComicBookId,
   getInkersByComicBookId,
   getLetterersByComicBookId,
   getEditorsByComicBookId,
@@ -309,7 +309,7 @@ const attachMetadataToComicBook = async (
   const metadata: ComicBookWithMetadata = {
     ...comic,
     writers: await getWritersByComicBookId(comic.id),
-    pencillers: await getPencillersByComicBookId(comic.id),
+    pencilers: await getPencilersByComicBookId(comic.id),
     inkers: await getInkersByComicBookId(comic.id),
     letterers: await getLetterersByComicBookId(comic.id),
     editors: await getEditorsByComicBookId(comic.id),

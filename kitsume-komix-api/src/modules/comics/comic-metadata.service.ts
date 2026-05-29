@@ -7,10 +7,10 @@ import {
   insertComicWriter,
   linkWriterToComicBook,
   unlinkWritersToComicBook,
-  getPencillersByComicBookId,
-  insertComicPenciller,
-  linkPencillerToComicBook,
-  unlinkPencillersToComicBook,
+  getPencilersByComicBookId,
+  insertComicPenciler,
+  linkPencilerToComicBook,
+  unlinkPencilersToComicBook,
   getInkersByComicBookId,
   insertComicInker,
   linkInkerToComicBook,
@@ -85,7 +85,7 @@ import type {
  *
  * @example
  * const metadata = await fetchAComicsAssociatedMetadataById(123);
- * // Returns: { writers: [...], pencillers: [...], publishers: [...], ... }
+ * // Returns: { writers: [...], pencilers: [...], publishers: [...], ... }
  *
  * @usedBy
  * - /api/comic-books/{id}/metadata
@@ -102,7 +102,7 @@ export const fetchAComicsAssociatedMetadataById = async (
   try {
     const metadata = {
       writers: await getWritersByComicBookId(id),
-      pencillers: await getPencillersByComicBookId(id),
+      pencilers: await getPencilersByComicBookId(id),
       inkers: await getInkersByComicBookId(id),
       letterers: await getLetterersByComicBookId(id),
       editors: await getEditorsByComicBookId(id),
@@ -170,8 +170,8 @@ export const updateComicBookMetadata = async (
             case "writers":
               await unlinkWritersToComicBook(comicId);
               break;
-            case "pencillers":
-              await unlinkPencillersToComicBook(comicId);
+            case "pencilers":
+              await unlinkPencilersToComicBook(comicId);
               break;
             case "inkers":
               await unlinkInkersToComicBook(comicId);
@@ -229,9 +229,9 @@ export const updateComicBookMetadata = async (
               await linkWriterToComicBook(metadataId, comicId);
               break;
             }
-            case "pencillers": {
-              metadataId = await insertComicPenciller(value);
-              await linkPencillerToComicBook(metadataId, comicId);
+            case "pencilers": {
+              metadataId = await insertComicPenciler(value);
+              await linkPencilerToComicBook(metadataId, comicId);
               break;
             }
             case "inkers": {
@@ -366,7 +366,7 @@ export const updateComicBookMetadataBulk = async (
  */
 const compileCreatorCredits = (comicBooks: ComicBookWithMetadata[]): ComicBookMetadataOnly => {
   const completeCreatorCredits: ComicBookMetadataOnly = {};
-  const creatorFields = ["writers", "pencillers", "inkers", "letterers", "editors", "colorists", "coverArtists"] as const;
+  const creatorFields = ["writers", "pencilers", "inkers", "letterers", "editors", "colorists", "coverArtists"] as const;
 
   for (const comic of comicBooks) {
     creatorFields.forEach((field) => {

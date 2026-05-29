@@ -10,7 +10,7 @@ import {
   ComicInkerSelectSchema,
   ComicLettererSelectSchema,
   ComicLocationSelectSchema,
-  ComicPencillerSelectSchema,
+  ComicPencilerSelectSchema,
   ComicPublisherSelectSchema,
   ComicSeriesGroupSelectSchema,
   ComicStoryArcSelectSchema,
@@ -37,7 +37,7 @@ export const metadataUpdateSchema = z.object({
  */
 export const MetadataSchema = z.object({
   writers: z.string().optional(),
-  pencillers: z.string().optional(),
+  pencilers: z.string().optional(),
   inkers: z.string().optional(),
   colorists: z.string().optional(),
   letterers: z.string().optional(),
@@ -62,7 +62,7 @@ export const MetadataSchema = z.object({
  */
 export const MetadataExpandedSchema = z.object({
   writers: z.array(ComicWriterSelectSchema).optional(),
-  pencillers: z.array(ComicPencillerSelectSchema).optional(),
+  pencilers: z.array(ComicPencilerSelectSchema).optional(),
   inkers: z.array(ComicInkerSelectSchema).optional(),
   colorists: z.array(ComicColoristSelectSchema).optional(),
   letterers: z.array(ComicLettererSelectSchema).optional(),

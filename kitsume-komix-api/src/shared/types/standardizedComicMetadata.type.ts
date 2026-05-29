@@ -37,7 +37,7 @@ export interface StandardizedComicMetadata {
   review?: string;
 
   writers?: string[];
-  pencillers?: string[];
+  pencilers?: string[];
   inkers?: string[];
   colorists?: string[];
   letterers?: string[];

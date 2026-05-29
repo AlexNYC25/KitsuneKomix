@@ -2,15 +2,15 @@ import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
 
 import { comicBooksTable } from "../tables/comicBooks.table.ts";
-import { comicPencillersTable } from "../tables/comicPencillers.table.ts";
+import { comicPencilersTable } from "../tables/comicPencilers.table.ts";
 
-export const comicBookPencillersTable = sqliteTable("comic_book_pencillers", {
+export const comicBookPencilersTable = sqliteTable("comic_book_pencilers", {
   id: int().primaryKey({ autoIncrement: true }),
   comicBookId: int().notNull().references(() => comicBooksTable.id, {
     onDelete: "cascade",
   }),
-  comicPencillerId: int().notNull().references(
-    () => comicPencillersTable.id,
+  comicPencilerId: int().notNull().references(
+    () => comicPencilersTable.id,
     { onDelete: "cascade" },
   ),
   createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),

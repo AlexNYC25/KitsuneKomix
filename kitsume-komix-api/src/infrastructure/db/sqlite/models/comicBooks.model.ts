@@ -13,7 +13,7 @@ import {
   comicBookImprintsTable,
   comicBookInkersTable,
   comicBookLetterersTable,
-  comicBookPencillersTable,
+  comicBookPencilersTable,
   comicBookPublishersTable,
   comicBookSeriesGroupsTable,
   comicBooksTable,
@@ -304,8 +304,8 @@ export const getComicBooksWithMetadataFilteringSorting = async (
         eq(comicBooksTable.id, comicBookWritersTable.comicBookId),
       )
       .leftJoin(
-        comicBookPencillersTable,
-        eq(comicBooksTable.id, comicBookPencillersTable.comicBookId),
+        comicBookPencilersTable,
+        eq(comicBooksTable.id, comicBookPencilersTable.comicBookId),
       )
       .leftJoin(
         comicBookInkersTable,

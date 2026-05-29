@@ -66,8 +66,8 @@ export type GalleryFilterKey = keyof GalleryActiveFilters;
 export type ComicSeriesFilterWritersValues = NonNullable<ComicSeriesFilterValuesData['writers']>;
 export type ComicSeriesFilterWriter = ComicSeriesFilterWritersValues[number];
 
-export type ComicSeriesFilterPencillersValues = NonNullable<ComicSeriesFilterValuesData['pencillers']>;
-export type ComicSeriesFilterPencillers = ComicSeriesFilterPencillersValues[number];
+export type ComicSeriesFilterPencilersValues = NonNullable<ComicSeriesFilterValuesData['pencilers']>;
+export type ComicSeriesFilterPencilers = ComicSeriesFilterPencilersValues[number];
 
 export type ComicSeriesFilterInkersValues = NonNullable<ComicSeriesFilterValuesData['inkers']>;
 export type ComicSeriesFilterInker = ComicSeriesFilterInkersValues[number];

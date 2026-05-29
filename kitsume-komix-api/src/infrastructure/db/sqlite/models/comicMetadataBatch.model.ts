@@ -3,8 +3,8 @@ import { inArray, eq } from "drizzle-orm";
 import {
   comicBookWritersTable,
   comicWritersTable,
-  comicBookPencillersTable,
-  comicPencillersTable,
+  comicBookPencilersTable,
+  comicPencilersTable,
   comicBookInkersTable,
   comicInkersTable,
   comicBookLetterersTable,
@@ -39,7 +39,7 @@ import type {
 
 
 /**
- * Fetches all metadata (writers, pencillers, genres, etc.) for multiple comic books in a single batch operation.
+ * Fetches all metadata (writers, pencilers, genres, etc.) for multiple comic books in a single batch operation.
  * This is significantly more efficient than fetching metadata for each comic individually,
  * as it reduces N*15 queries to just 15 parallel queries.
  *
@@ -76,7 +76,7 @@ export const getMetadataForComicBooksBatch = async (
     result[id] = {};
   });
 
-  const [writers, pencillers, inkers, letterers, editors, colorists, coverArtists, publishers, imprints, genres, characters, teams, locations, storyArcs, seriesGroups] = await Promise.all([
+  const [writers, pencilers, inkers, letterers, editors, colorists, coverArtists, publishers, imprints, genres, characters, teams, locations, storyArcs, seriesGroups] = await Promise.all([
     db
       .select({ id: comicWritersTable.id, name: comicWritersTable.name, description: comicWritersTable.description, createdAt: comicWritersTable.createdAt, updatedAt: comicWritersTable.updatedAt, comicBookId: comicBookWritersTable.comicBookId })
       .from(comicWritersTable)
@@ -84,10 +84,10 @@ export const getMetadataForComicBooksBatch = async (
       .where(inArray(comicBookWritersTable.comicBookId, comicBookIds)),
 
     db
-      .select({ id: comicPencillersTable.id, name: comicPencillersTable.name, description: comicPencillersTable.description, createdAt: comicPencillersTable.createdAt, updatedAt: comicPencillersTable.updatedAt, comicBookId: comicBookPencillersTable.comicBookId })
-      .from(comicPencillersTable)
-      .innerJoin(comicBookPencillersTable, eq(comicPencillersTable.id, comicBookPencillersTable.comicPencillerId))
-      .where(inArray(comicBookPencillersTable.comicBookId, comicBookIds)),
+      .select({ id: comicPencilersTable.id, name: comicPencilersTable.name, description: comicPencilersTable.description, createdAt: comicPencilersTable.createdAt, updatedAt: comicPencilersTable.updatedAt, comicBookId: comicBookPencilersTable.comicBookId })
+      .from(comicPencilersTable)
+      .innerJoin(comicBookPencilersTable, eq(comicPencilersTable.id, comicBookPencilersTable.comicPencilerId))
+      .where(inArray(comicBookPencilersTable.comicBookId, comicBookIds)),
 
     db
       .select({ id: comicInkersTable.id, name: comicInkersTable.name, description: comicInkersTable.description, createdAt: comicInkersTable.createdAt, updatedAt: comicInkersTable.updatedAt, comicBookId: comicBookInkersTable.comicBookId })
@@ -176,11 +176,11 @@ export const getMetadataForComicBooksBatch = async (
     }
   });
 
-  pencillers.forEach((row) => {
+  pencilers.forEach((row) => {
     if (result[row.comicBookId]) {
-      result[row.comicBookId].pencillers = result[row.comicBookId].pencillers || [];
+      result[row.comicBookId].pencilers = result[row.comicBookId].pencilers || [];
       const { comicBookId, ...data } = row;
-      result[row.comicBookId].pencillers!.push(data);
+      result[row.comicBookId].pencilers!.push(data);
     }
   });
 

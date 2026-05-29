@@ -107,14 +107,14 @@ CREATE TABLE `comic_book_locations` (
 	FOREIGN KEY (`comic_location_id`) REFERENCES `comic_locations`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `comic_book_pencillers` (
+CREATE TABLE `comic_book_pencilers` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`comic_book_id` integer NOT NULL,
-	`comic_penciller_id` integer NOT NULL,
+	`comic_penciler_id` integer NOT NULL,
 	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	FOREIGN KEY (`comic_book_id`) REFERENCES `comic_books`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`comic_penciller_id`) REFERENCES `comic_pencillers`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`comic_penciler_id`) REFERENCES `comic_pencilers`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `comic_book_publishers` (
@@ -320,7 +320,7 @@ CREATE TABLE `comic_pages` (
 	FOREIGN KEY (`comic_book_id`) REFERENCES `comic_books`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `comic_pencillers` (
+CREATE TABLE `comic_pencilers` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
@@ -328,7 +328,7 @@ CREATE TABLE `comic_pencillers` (
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `comic_pencillers_name_unique` ON `comic_pencillers` (`name`);--> statement-breakpoint
+CREATE UNIQUE INDEX `comic_pencilers_name_unique` ON `comic_pencilers` (`name`);--> statement-breakpoint
 CREATE TABLE `comic_publishers` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,

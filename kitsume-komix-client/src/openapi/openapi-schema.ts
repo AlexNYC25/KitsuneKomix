@@ -2080,7 +2080,7 @@ export interface paths {
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencillerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
+                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
                 };
                 header?: never;
                 path?: never;
@@ -2139,7 +2139,7 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
-                                    pencillers?: {
+                                    pencilers?: {
                                         id: number;
                                         name: string;
                                         description: string | null;
@@ -2277,7 +2277,7 @@ export interface paths {
                                      */
                                     metadata?: {
                                         writers?: string;
-                                        pencillers?: string;
+                                        pencilers?: string;
                                         inkers?: string;
                                         colorists?: string;
                                         letterers?: string;
@@ -2400,7 +2400,7 @@ export interface paths {
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencillerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
+                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
                 };
                 header?: never;
                 path?: never;
@@ -2459,7 +2459,7 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
-                                    pencillers?: {
+                                    pencilers?: {
                                         id: number;
                                         name: string;
                                         description: string | null;
@@ -2597,7 +2597,7 @@ export interface paths {
                                      */
                                     metadata?: {
                                         writers?: string;
-                                        pencillers?: string;
+                                        pencilers?: string;
                                         inkers?: string;
                                         colorists?: string;
                                         letterers?: string;
@@ -2720,7 +2720,7 @@ export interface paths {
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencillerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
+                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
                 };
                 header?: never;
                 path?: never;
@@ -2779,7 +2779,7 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
-                                    pencillers?: {
+                                    pencilers?: {
                                         id: number;
                                         name: string;
                                         description: string | null;
@@ -2917,7 +2917,7 @@ export interface paths {
                                      */
                                     metadata?: {
                                         writers?: string;
-                                        pencillers?: string;
+                                        pencilers?: string;
                                         inkers?: string;
                                         colorists?: string;
                                         letterers?: string;
@@ -3054,7 +3054,7 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
-                                pencillers?: {
+                                pencilers?: {
                                     id: number;
                                     name: string;
                                     description: string | null;
@@ -3284,7 +3284,7 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
-                                    pencillers?: {
+                                    pencilers?: {
                                         id: number;
                                         name: string;
                                         description: string | null;
@@ -3422,7 +3422,7 @@ export interface paths {
                                      */
                                     metadata?: {
                                         writers?: string;
-                                        pencillers?: string;
+                                        pencilers?: string;
                                         inkers?: string;
                                         colorists?: string;
                                         letterers?: string;
@@ -3608,7 +3608,7 @@ export interface paths {
                                         createdAt: string;
                                         updatedAt: string;
                                     }[];
-                                    pencillers?: {
+                                    pencilers?: {
                                         id: number;
                                         name: string;
                                         description: string | null;
@@ -3746,7 +3746,7 @@ export interface paths {
                                      */
                                     metadata?: {
                                         writers?: string;
-                                        pencillers?: string;
+                                        pencilers?: string;
                                         inkers?: string;
                                         colorists?: string;
                                         letterers?: string;
@@ -4504,7 +4504,7 @@ export interface paths {
                                  */
                                 metadata?: {
                                     writers?: string;
-                                    pencillers?: string;
+                                    pencilers?: string;
                                     inkers?: string;
                                     colorists?: string;
                                     letterers?: string;
@@ -4692,7 +4692,7 @@ export interface paths {
                                  */
                                 metadata?: {
                                     writers?: string;
-                                    pencillers?: string;
+                                    pencilers?: string;
                                     inkers?: string;
                                     colorists?: string;
                                     letterers?: string;
@@ -4880,7 +4880,7 @@ export interface paths {
                                  */
                                 metadata?: {
                                     writers?: string;
-                                    pencillers?: string;
+                                    pencilers?: string;
                                     inkers?: string;
                                     colorists?: string;
                                     letterers?: string;
@@ -5025,7 +5025,7 @@ export interface paths {
                                     createdAt: string;
                                     updatedAt: string;
                                 }[];
-                                pencillers?: {
+                                pencilers?: {
                                     id: number;
                                     name: string;
                                     description: string | null;
@@ -5250,7 +5250,7 @@ export interface paths {
                                  */
                                 metadata?: {
                                     writers?: string;
-                                    pencillers?: string;
+                                    pencilers?: string;
                                     inkers?: string;
                                     colorists?: string;
                                     letterers?: string;
@@ -5430,7 +5430,7 @@ export interface paths {
                                  */
                                 metadata?: {
                                     writers?: string;
-                                    pencillers?: string;
+                                    pencilers?: string;
                                     inkers?: string;
                                     colorists?: string;
                                     letterers?: string;
@@ -5625,7 +5625,7 @@ export interface paths {
                                  */
                                 metadata?: {
                                     writers?: string;
-                                    pencillers?: string;
+                                    pencilers?: string;
                                     inkers?: string;
                                     colorists?: string;
                                     letterers?: string;
@@ -5917,7 +5917,7 @@ export interface paths {
                              */
                             metadata?: {
                                 writers?: string;
-                                pencillers?: string;
+                                pencilers?: string;
                                 inkers?: string;
                                 colorists?: string;
                                 letterers?: string;
@@ -6055,7 +6055,7 @@ export interface paths {
                                 createdAt: string;
                                 updatedAt: string;
                             }[];
-                            pencillers?: {
+                            pencilers?: {
                                 id: number;
                                 name: string;
                                 description: string | null;
@@ -7206,7 +7206,7 @@ export interface paths {
                              */
                             metadata?: {
                                 writers?: string;
-                                pencillers?: string;
+                                pencilers?: string;
                                 inkers?: string;
                                 colorists?: string;
                                 letterers?: string;
@@ -7375,7 +7375,7 @@ export interface paths {
                              */
                             metadata?: {
                                 writers?: string;
-                                pencillers?: string;
+                                pencilers?: string;
                                 inkers?: string;
                                 colorists?: string;
                                 letterers?: string;

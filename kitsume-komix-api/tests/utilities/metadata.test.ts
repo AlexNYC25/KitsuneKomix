@@ -45,7 +45,7 @@ Deno.test("extract-metadata - ensure metadata is read correctly", async () => {
 	assert(metadata.teams && metadata.teams.length > 0, "Expected teams to be defined and not empty");
 	assert(metadata.locations && metadata.locations.length > 0, "Expected locations to be defined and not empty");
 	assert(metadata.writers && metadata.writers.length > 0, "Expected writers to be defined and not empty");
-	assert(metadata.pencillers && metadata.pencillers.length > 0, "Expected pencillers to be defined and not empty");
+	assert(metadata.pencilers && metadata.pencilers.length > 0, "Expected pencilers to be defined and not empty");
 	assert(metadata.inkers && metadata.inkers.length > 0, "Expected inkers to be defined and not empty");
 	assert(metadata.colorists && metadata.colorists.length > 0, "Expected colorists to be defined and not empty");
 	assert(metadata.letterers && metadata.letterers.length > 0, "Expected letterers to be defined and not empty");

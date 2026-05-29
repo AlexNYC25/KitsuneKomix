@@ -10,7 +10,7 @@ export interface ComicBookQueryParams {
   titleFilter?: string;
   seriesFilter?: string;
   writerFilter?: string;
-  artistFilter?: string; // Will search across pencillers, inkers, colorists, etc.
+  artistFilter?: string; // Will search across pencilers, inkers, colorists, etc.
   publisherFilter?: string;
   genreFilter?: string;
   characterFilter?: string;

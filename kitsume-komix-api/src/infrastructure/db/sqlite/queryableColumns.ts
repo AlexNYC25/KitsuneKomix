@@ -70,7 +70,7 @@ export const QueryableColumns = {
       teamId: "teamId",
       locationId: "locationId",
       writerId: "writerId",
-      pencillerId: "pencillerId",
+      pencilerId: "pencilerId",
       publisherId: "publisherId",
       coloristId: "coloristId",
       lettererId: "lettererId",

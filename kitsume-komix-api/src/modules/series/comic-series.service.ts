@@ -186,7 +186,7 @@ const fetchAComicSeriesAssociatedMetadataById = async (
 
 /**
  * We want to compile the complete credits metadata for a comic series by iterating through all the comic books in the series
- * and collecting their credits (writers, pencillers, inkers, letterers, editors, colorists, cover artists, publishers, imprints, genres, characters, teams, locations, story arcs, and series groups).
+ * and collecting their credits (writers, pencilers, inkers, letterers, editors, colorists, cover artists, publishers, imprints, genres, characters, teams, locations, story arcs, and series groups).
  * We will then deduplicate these credits to get a unique list of credits for the entire series.
  *
  * @param comicBooks An array of data objects that are of the type ComicBookWithMetadata
@@ -202,9 +202,9 @@ export const compileTheCompleteComicSeriesCreditsMetadata = (
       completeCredits.writers = completeCredits.writers || [];
       completeCredits.writers.push(...book.writers);
     }
-    if (book.pencillers) {
-      completeCredits.pencillers = completeCredits.pencillers || [];
-      completeCredits.pencillers.push(...book.pencillers);
+    if (book.pencilers) {
+      completeCredits.pencilers = completeCredits.pencilers || [];
+      completeCredits.pencilers.push(...book.pencilers);
     }
     if (book.inkers) {
       completeCredits.inkers = completeCredits.inkers || [];
@@ -271,8 +271,8 @@ export const compileTheCompleteComicSeriesCreditsMetadata = (
   if (completeCredits.writers) {
     completeCredits.writers = dedupeById(completeCredits.writers);
   }
-  if (completeCredits.pencillers) {
-    completeCredits.pencillers = dedupeById(completeCredits.pencillers);
+  if (completeCredits.pencilers) {
+    completeCredits.pencilers = dedupeById(completeCredits.pencilers);
   }
   if (completeCredits.inkers) {
     completeCredits.inkers = dedupeById(completeCredits.inkers);
@@ -325,7 +325,7 @@ export const compileTheCompleteComicSeriesCreditsMetadata = (
  */
 const compileCreatorCredits = (comicSeries: ComicSeriesWithMetadata[]): ComicSeriesCreditMetadata => {
   const completeCreatorCredits: ComicSeriesCreditMetadata = {};
-  const creatorFields = ["writers", "pencillers", "inkers", "letterers", "editors", "colorists", "coverArtists"] as const;
+  const creatorFields = ["writers", "pencilers", "inkers", "letterers", "editors", "colorists", "coverArtists"] as const;
 
   for (const series of comicSeries) {
     creatorFields.forEach((field) => {

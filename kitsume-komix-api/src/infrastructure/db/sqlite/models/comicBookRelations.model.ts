@@ -12,7 +12,7 @@ import {
   comicBookInkersTable,
   comicBookLetterersTable,
   comicBookLocationsTable,
-  comicBookPencillersTable,
+  comicBookPencilersTable,
   comicBookPublishersTable,
   comicBookSeriesGroupsTable,
   comicBookStoryArcsTable,
@@ -23,7 +23,7 @@ import {
 import type {
   NewComicBookCharacter,
   NewComicBookGenre,
-  NewComicBookPenciller,
+  NewComicBookPenciler,
   NewComicBookPublisher,
   NewComicBookWriter,
 } from "#types/index.ts";
@@ -90,15 +90,15 @@ export const removeComicBookWriter = async (
   }
 };
 
-// Pencillers
+// Pencilers
 
 /**
- * Add a penciller relation to a comic book.
- * @param relation NewComicBookPenciller The penciller relation to add.
- * @returns Promise<number> The ID of the newly added penciller relation.
+ * Add a penciler relation to a comic book.
+ * @param relation NewComicBookPenciler The penciler relation to add.
+ * @returns Promise<number> The ID of the newly added penciler relation.
  */
-export const addComicBookPenciller = async (
-  relation: NewComicBookPenciller,
+export const addComicBookPenciler = async (
+  relation: NewComicBookPenciler,
 ): Promise<number> => {
   const { db, client } = getClient();
 
@@ -108,14 +108,14 @@ export const addComicBookPenciller = async (
 
   try {
     const result = await db
-      .insert(comicBookPencillersTable)
+      .insert(comicBookPencilersTable)
       .values(relation)
       .onConflictDoNothing()
-      .returning({ id: comicBookPencillersTable.id });
+      .returning({ id: comicBookPencilersTable.id });
 
     return result.length > 0 ? result[0].id : 0;
   } catch (error) {
-    dbLogger.error("Error adding comic book penciller relation:" + error);
+    dbLogger.error("Error adding comic book penciler relation:" + error);
     throw error;
   }
 };
@@ -229,8 +229,8 @@ export const removeAllComicBookRelations = async (
       db.delete(comicBookWritersTable).where(
         eq(comicBookWritersTable.comicBookId, comicBookId),
       ),
-      db.delete(comicBookPencillersTable).where(
-        eq(comicBookPencillersTable.comicBookId, comicBookId),
+      db.delete(comicBookPencilersTable).where(
+        eq(comicBookPencilersTable.comicBookId, comicBookId),
       ),
       db.delete(comicBookInkersTable).where(
         eq(comicBookInkersTable.comicBookId, comicBookId),

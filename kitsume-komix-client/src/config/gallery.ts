@@ -26,7 +26,7 @@ export const FILTER_PROPERTY_MAP: Record<GalleryFilterKey, string> = {
   teams: 'teamId',
   locations: 'locationId',
   writers: 'writerId',
-  artists: 'pencillerId',
+  artists: 'pencilerId',
   publishers: 'publisherId',
   colorists: 'coloristId',
   letterers: 'lettererId',

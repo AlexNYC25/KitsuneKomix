@@ -11,7 +11,7 @@ import type {
   ComicInker,
   ComicLetterer,
   ComicLocation,
-  ComicPenciller,
+  ComicPenciler,
   ComicPublisher,
   ComicSeriesGroup,
   ComicStoryArc,
@@ -33,7 +33,7 @@ export type AllowedSortProperties =
 
 export type ComicBookMetadataOnly = {
   writers?: ComicWriter[];
-  pencillers?: ComicPenciller[];
+  pencilers?: ComicPenciler[];
   inkers?: ComicInker[];
   letterers?: ComicLetterer[];
   editors?: ComicEditor[];

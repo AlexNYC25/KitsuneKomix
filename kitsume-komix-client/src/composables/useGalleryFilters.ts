@@ -44,7 +44,7 @@ export function useGalleryFilters(filtersAllowed: Ref<ComicSeriesFilterValuesDat
     return [...writers].sort((a, b) => a.name.localeCompare(b.name));
   });
   const artistFilterOptions = computed(() => {
-    const artists = filtersAllowed.value?.pencillers ?? [];
+    const artists = filtersAllowed.value?.pencilers ?? [];
     return [...artists].sort((a, b) => a.name.localeCompare(b.name));
   });
   const publisherFilterOptions = computed(() => {

@@ -47,7 +47,7 @@ export type ComicBooksFilterValuesData = GetComicBooksFilterValuesResponse['data
 
 export type ComicBookWriterValues = NonNullable<ComicBooksFilterValuesData['writers']>[number];
 
-export type ComicBookPencillerValues = NonNullable<ComicBooksFilterValuesData['pencillers']>[number];
+export type ComicBookPencilerValues = NonNullable<ComicBooksFilterValuesData['pencilers']>[number];
 
 export type ComicBookInkerValues = NonNullable<ComicBooksFilterValuesData['inkers']>[number];
 

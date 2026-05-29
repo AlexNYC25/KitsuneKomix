@@ -5,11 +5,11 @@ export {
   unlinkWritersToComicBook,
 } from "#infrastructure/db/sqlite/models/comicWriters.model.ts";
 export {
-  getPencillersByComicBookId,
-  insertComicPenciller,
-  linkPencillerToComicBook,
-  unlinkPencillersToComicBook,
-} from "#infrastructure/db/sqlite/models/comicPencillers.model.ts";
+  getPencilersByComicBookId,
+  insertComicPenciler,
+  linkPencilerToComicBook,
+  unlinkPencilersToComicBook,
+} from "#infrastructure/db/sqlite/models/comicPencilers.model.ts";
 export {
   getInkersByComicBookId,
   insertComicInker,

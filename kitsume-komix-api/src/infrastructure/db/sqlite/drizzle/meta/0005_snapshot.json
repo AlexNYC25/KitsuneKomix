@@ -883,8 +883,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "comic_book_pencillers": {
-      "name": "comic_book_pencillers",
+    "comic_book_pencilers": {
+      "name": "comic_book_pencilers",
       "columns": {
         "id": {
           "name": "id",
@@ -900,8 +900,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "comic_penciller_id": {
-          "name": "comic_penciller_id",
+        "comic_penciler_id": {
+          "name": "comic_penciler_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -926,9 +926,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "comic_book_pencillers_comic_book_id_comic_books_id_fk": {
-          "name": "comic_book_pencillers_comic_book_id_comic_books_id_fk",
-          "tableFrom": "comic_book_pencillers",
+        "comic_book_pencilers_comic_book_id_comic_books_id_fk": {
+          "name": "comic_book_pencilers_comic_book_id_comic_books_id_fk",
+          "tableFrom": "comic_book_pencilers",
           "tableTo": "comic_books",
           "columnsFrom": [
             "comic_book_id"
@@ -939,12 +939,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "comic_book_pencillers_comic_penciller_id_comic_pencillers_id_fk": {
-          "name": "comic_book_pencillers_comic_penciller_id_comic_pencillers_id_fk",
-          "tableFrom": "comic_book_pencillers",
-          "tableTo": "comic_pencillers",
+        "comic_book_pencilers_comic_penciler_id_comic_pencilers_id_fk": {
+          "name": "comic_book_pencilers_comic_penciler_id_comic_pencilers_id_fk",
+          "tableFrom": "comic_book_pencilers",
+          "tableTo": "comic_pencilers",
           "columnsFrom": [
-            "comic_penciller_id"
+            "comic_penciler_id"
           ],
           "columnsTo": [
             "id"
@@ -2384,8 +2384,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "comic_pencillers": {
-      "name": "comic_pencillers",
+    "comic_pencilers": {
+      "name": "comic_pencilers",
       "columns": {
         "id": {
           "name": "id",
@@ -2426,8 +2426,8 @@
         }
       },
       "indexes": {
-        "comic_pencillers_name_unique": {
-          "name": "comic_pencillers_name_unique",
+        "comic_pencilers_name_unique": {
+          "name": "comic_pencilers_name_unique",
           "columns": [
             "name"
           ],

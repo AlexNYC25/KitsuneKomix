@@ -218,7 +218,7 @@ const METADATA_SECTIONS: MetadataSection[] = [
     title: 'Credits',
     fields: [
       { key: 'writers', label: 'Writers' },
-      { key: 'pencillers', label: 'Pencillers' },
+      { key: 'pencilers', label: 'Pencilers' },
       { key: 'inkers', label: 'Inkers' },
       { key: 'letterers', label: 'Letterers' },
       { key: 'colorists', label: 'Colorists' },

@@ -12,7 +12,7 @@ import {
   comicBookGenresTable,
   comicBookLetterersTable,
   comicBookLocationsTable,
-  comicBookPencillersTable,
+  comicBookPencilersTable,
   comicBookPublishersTable,
   comicBookTeamsTable,
   comicBookWritersTable,
@@ -113,14 +113,14 @@ const buildFilterCondition = (
           .innerJoin(comicBookWritersTable, eq(comicSeriesBooksTable.comicBookId, comicBookWritersTable.comicBookId))
           .where(eq(comicBookWritersTable.comicWriterId, Number(filterValue))),
       );
-    case "pencillerId":
+    case "pencilerId":
       return inArray(
         comicSeriesTable.id,
         db
           .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
           .from(comicSeriesBooksTable)
-          .innerJoin(comicBookPencillersTable, eq(comicSeriesBooksTable.comicBookId, comicBookPencillersTable.comicBookId))
-          .where(eq(comicBookPencillersTable.comicPencillerId, Number(filterValue))),
+          .innerJoin(comicBookPencilersTable, eq(comicSeriesBooksTable.comicBookId, comicBookPencilersTable.comicBookId))
+          .where(eq(comicBookPencilersTable.comicPencilerId, Number(filterValue))),
       );
     case "publisherId":
       return inArray(

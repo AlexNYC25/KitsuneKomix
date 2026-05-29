@@ -1,6 +1,6 @@
 import type {
   ComicWriter,
-  ComicPenciller,
+  ComicPenciler,
   ComicInker,
   ComicLetterer,
   ComicEditor,
@@ -18,7 +18,7 @@ import type {
 
 export type ComicBookMetadata = {
   writers?: ComicWriter[];
-  pencillers?: ComicPenciller[];
+  pencilers?: ComicPenciler[];
   inkers?: ComicInker[];
   letterers?: ComicLetterer[];
   editors?: ComicEditor[];

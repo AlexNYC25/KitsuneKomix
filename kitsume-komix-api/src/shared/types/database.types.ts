@@ -11,7 +11,7 @@ import type {
   comicBookInkersTable,
   comicBookLetterersTable,
   comicBookLocationsTable,
-  comicBookPencillersTable,
+  comicBookPencilersTable,
   comicBookPublishersTable,
   comicBookSeriesGroupsTable,
   comicBooksTable,
@@ -30,7 +30,7 @@ import type {
   comicLibrariesTable,
   comicLocationsTable,
   comicPagesTable,
-  comicPencillersTable,
+  comicPencilersTable,
   comicPublishersTable,
   comicSeriesGroupsTable,
   comicSeriesTable,
@@ -74,8 +74,8 @@ export type NewComicWriter = InferInsertModel<typeof comicWritersTable>;
 export type ComicBookWriter = InferSelectModel<typeof comicBookWritersTable>;
 export type NewComicBookWriter = InferInsertModel<typeof comicBookWritersTable>;
 
-export type ComicPenciller = InferSelectModel<typeof comicPencillersTable>;
-export type NewComicPenciller = InferInsertModel<typeof comicPencillersTable>;
+export type ComicPenciler = InferSelectModel<typeof comicPencilersTable>;
+export type NewComicPenciler = InferInsertModel<typeof comicPencilersTable>;
 
 export type ComicInker = InferSelectModel<typeof comicInkersTable>;
 export type NewComicInker = InferInsertModel<typeof comicInkersTable>;
@@ -123,11 +123,11 @@ export type NewComicSeriesGroup = InferInsertModel<
 export type ComicPage = InferSelectModel<typeof comicPagesTable>;
 export type NewComicPage = InferInsertModel<typeof comicPagesTable>;
 
-export type ComicBookPenciller = InferSelectModel<
-  typeof comicBookPencillersTable
+export type ComicBookPenciler = InferSelectModel<
+  typeof comicBookPencilersTable
 >;
-export type NewComicBookPenciller = InferInsertModel<
-  typeof comicBookPencillersTable
+export type NewComicBookPenciler = InferInsertModel<
+  typeof comicBookPencilersTable
 >;
 
 export type ComicBookInker = InferSelectModel<typeof comicBookInkersTable>;

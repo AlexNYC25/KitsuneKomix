@@ -11,7 +11,7 @@ import {
   comicBookInkersTable,
   comicBookLetterersTable,
   comicBookLocationsTable,
-  comicBookPencillersTable,
+  comicBookPencilersTable,
   comicBookPublishersTable,
   comicBookSeriesGroupsTable,
   comicBooksTable,
@@ -30,7 +30,7 @@ import {
   comicLibrariesTable,
   comicLocationsTable,
   comicPagesTable,
-  comicPencillersTable,
+  comicPencilersTable,
   comicPublishersTable,
   comicSeriesGroupsTable,
   comicSeriesTable,
@@ -104,8 +104,8 @@ export const ComicBookLocationSelectSchema = createSelectSchema(
   comicBookLocationsTable,
 );
 
-export const ComicBookPencillerSelectSchema = createSelectSchema(
-  comicBookPencillersTable,
+export const ComicBookPencilerSelectSchema = createSelectSchema(
+  comicBookPencilersTable,
 );
 
 export const ComicBookPublisherSelectSchema = createSelectSchema(
@@ -168,8 +168,8 @@ export const ComicPageSelectSchema = createSelectSchema(
   comicPagesTable,
 );
 
-export const ComicPencillerSelectSchema = createSelectSchema(
-  comicPencillersTable,
+export const ComicPencilerSelectSchema = createSelectSchema(
+  comicPencilersTable,
 );
 
 export const ComicPublisherSelectSchema = createSelectSchema(

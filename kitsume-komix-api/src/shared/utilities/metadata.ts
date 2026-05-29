@@ -111,7 +111,7 @@ const standardizeFromComicInfo = (
 
     // People - handle both string and array formats
     writers: splitAndClean(comicInfo.writer),
-    pencillers: splitAndClean(comicInfo.penciller),
+    pencilers: splitAndClean(comicInfo.penciler),
     inkers: splitAndClean(comicInfo.inker),
     colorists: splitAndClean(comicInfo.colorist),
     letterers: splitAndClean(comicInfo.letterer),
@@ -189,7 +189,7 @@ const standardizeFromCoMet = (comet: CoMet): StandardizedComicMetadata => {
 
     // People - Use basic fields available in CoMet
     writers: splitAndClean(comet.writer),
-    pencillers: undefined, // Not available in CoMet
+    pencilers: undefined, // Not available in CoMet
     inkers: undefined,
     colorists: undefined,
     letterers: undefined,

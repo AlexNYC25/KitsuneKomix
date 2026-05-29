@@ -10,9 +10,9 @@ import {
 	linkWriterToComicBook,
 } from "#db/sqlite/models/comicWriters.model.ts";
 import {
-	insertComicPenciller,
-	linkPencillerToComicBook,
-} from "#db/sqlite/models/comicPencillers.model.ts";
+	insertComicPenciler,
+	linkPencilerToComicBook,
+} from "#db/sqlite/models/comicPencilers.model.ts";
 import {
 	insertComicInker,
 	linkInkerToComicBook,
@@ -493,10 +493,10 @@ export const saveComicBookMetadata = async (job: { comicId: number; filePath: st
 				link: linkWriterToComicBook,
 			},
 			{
-				label: "penciller",
-				values: standardizedMetadata.pencillers,
-				insert: insertComicPenciller,
-				link: linkPencillerToComicBook,
+				label: "penciler",
+				values: standardizedMetadata.pencilers,
+				insert: insertComicPenciler,
+				link: linkPencilerToComicBook,
 			},
 			{
 				label: "inker",
