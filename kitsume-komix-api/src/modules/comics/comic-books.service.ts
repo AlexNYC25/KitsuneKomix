@@ -37,7 +37,6 @@ import type {
   ComicBookWithMetadata,
   ComicFilterField,
   ComicSortField,
-  RequestFilterParametersValidated,
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   RequestSortParametersValidated,
@@ -96,7 +95,7 @@ export const fetchComicBooksWithRelatedMetadata = async (
 
     const comicBookIds = comicsFromDb.map((comic) => comic.id);
 
-    const [metadataMap, thumbnails] = await Promise.all([
+    const [_metadataMap, thumbnails] = await Promise.all([
       getMetadataForComicBooksBatch(comicBookIds),
       getThumbnailsByComicBookIds(comicBookIds),
     ]);
@@ -114,11 +113,9 @@ export const fetchComicBooksWithRelatedMetadata = async (
 
     const comicsWithMetadata: ComicBookWithMetadata[] = comicsFromDb.map(
       (comic) => {
-        const metadata = metadataMap[comic.id] || {};
         const thumbnailUrl = thumbnailMap.get(comic.id.toString());
         return {
           ...comic,
-          ...metadata,
           thumbnailUrl,
         };
       },
