@@ -1,4 +1,4 @@
-import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
 /**
  * Type helpers to extract sort and filter field types from QueryableColumns
