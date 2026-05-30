@@ -2,7 +2,7 @@ import { assert, assertEquals, assertExists } from "@std/assert";
 import { dirname, fromFileUrl, join } from "@std/path";
 
 import { standardizeMetadata, loadMetadataIntoCache, retrieveMetadataFromCache, removeMetadataFromCache } from "#utilities/metadata.ts";
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { StandardizedComicMetadata } from "#types/index.ts";
 
 // The first step of the extract-metadata job processor 
 // is to standardize the metadata from the comic file, so we want to ensure that this step is 

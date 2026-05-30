@@ -7,7 +7,7 @@ deleteComicSeries,
   insertComicSeries,
 } from "#db/sqlite/models/comicSeries.model.ts";
 import { loadMetadataIntoCache, retrieveMetadataFromCache, standardizeMetadata } from "#utilities/metadata.ts";
-import { StandardizedComicMetadata } from "#interfaces/index.ts";
+import { StandardizedComicMetadata } from "#types/index.ts";
 import { NewComicSeries } from "#types/index.ts";
 
 // Note: from the inital process-comic-series job there are 2 different routes that can be taken
