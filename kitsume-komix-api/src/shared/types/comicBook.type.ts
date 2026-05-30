@@ -1,28 +1,13 @@
-import { SetIntersection } from 'utility-types';
+import type { z } from "zod";
 
-import type {
-  ComicBook,
-  ComicCharacter,
-  ComicColorist,
-  ComicCoverArtist,
-  ComicEditor,
-  ComicGenre,
-  ComicImprint,
-  ComicInker,
-  ComicLetterer,
-  ComicLocation,
-  ComicPenciler,
-  ComicPublisher,
-  ComicSeriesGroup,
-  ComicStoryArc,
-  ComicTeam,
-  ComicWriter,
-} from "./database.types.ts";
+import type { 
+  ComicBookWithMetadataSchema, 
+  ComicBookCreatorContentSchema,
+  ComicBookLevelMetadataSchema,
+  ComicBookFilterValuesSchema
+} from "#zod/schemas/data/comicBooks.schema.ts";
 
 import type { ComicSortField } from "./parameters.type.ts";
-
-export type ComicBookWithThumbnail = ComicBook & { thumbnailUrl?: string };
-
 import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
 
 export type AllowedFilterProperties =
@@ -31,40 +16,13 @@ export type AllowedFilterProperties =
 export type AllowedSortProperties =
   keyof typeof QueryableColumns["comics"]["sort"];
 
-export type ComicBookMetadataOnly = {
-  writers?: ComicWriter[];
-  pencilers?: ComicPenciler[];
-  inkers?: ComicInker[];
-  letterers?: ComicLetterer[];
-  editors?: ComicEditor[];
-  colorists?: ComicColorist[];
-  coverArtists?: ComicCoverArtist[];
-  publishers?: ComicPublisher[];
-  imprints?: ComicImprint[];
-  genres?: ComicGenre[];
-  characters?: ComicCharacter[];
-  teams?: ComicTeam[];
-  locations?: ComicLocation[];
-  storyArcs?: ComicStoryArc[];
-  seriesGroups?: ComicSeriesGroup[];
-};
+export type ComicBookMetadataOnly = z.infer<typeof ComicBookCreatorContentSchema>;
 
-export type ComicBookLevelMetadata = {
-  letters?: string[];
-  years?: number[];
-  languages?: string[];
-  formats?: string[];
-  readingDirections?: string[];
-  ageRatings?: string[];
-  libraryIds?: number[];
-  manga?: number[];
-  blackAndWhite?: number[];
-  seriesNames?: string[];
-}
+export type ComicBookLevelMetadata = z.infer<typeof ComicBookLevelMetadataSchema>;
 
-export type ComicBooksFilterValues = ComicBookMetadataOnly & ComicBookLevelMetadata;
+export type ComicBooksFilterValues = z.infer<typeof ComicBookFilterValuesSchema>;
 
-export type ComicBookWithMetadata = ComicBookWithThumbnail & ComicBookMetadataOnly;
+export type ComicBookWithMetadata = z.infer<typeof ComicBookWithMetadataSchema>;
 
 // Filter types for advanced comic book querying
 export type ComicBookFilterItem = {
