@@ -1,16 +1,16 @@
-import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+import type {
+  QueryableDomain,
+  QueryableFilterField,
+  QueryableSortField,
+} from "#zod/schemas/data/queryableColumns.schema.ts";
 
 /**
- * Type helpers to extract sort and filter field types from QueryableColumns
- * for any data type (comics, series, readlists, etc.)
+ * Type helpers to extract sort and filter field types from the canonical
+ * queryable domain config for any data type (comics, series, readlists, etc.)
  */
-export type ExtractSortField<T extends keyof typeof QueryableColumns> =
-  typeof QueryableColumns[T]["sort"][keyof typeof QueryableColumns[T]["sort"]];
+export type ExtractSortField<T extends QueryableDomain> = QueryableSortField<T>;
 
-export type ExtractFilterField<T extends keyof typeof QueryableColumns> =
-  typeof QueryableColumns[T]["filter"][
-    keyof typeof QueryableColumns[T]["filter"]
-  ];
+export type ExtractFilterField<T extends QueryableDomain> = QueryableFilterField<T>;
 
 export type ComicSortField = ExtractSortField<"comics">;
 export type ComicFilterField = ExtractFilterField<"comics">;

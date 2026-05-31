@@ -17,7 +17,11 @@ import {
   env
 } from "#config/env.ts";
 
-import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+import {
+  getAllowedFilterFields,
+  getAllowedSortFields,
+  type QueryableDomain,
+} from "#zod/schemas/data/queryableColumns.schema.ts";
 
 export const VALIDATE_COMIC_KEY = "comics"
 export const VALIDATE_COMIC_SERIES_KEY = "comicSeries"
@@ -180,7 +184,7 @@ export function validateAndBuildQueryParams(
 
 export function validateAndBuildQueryParams(
   queryData: QueryData,
-  dataType: keyof typeof QueryableColumns,
+  dataType: QueryableDomain,
 ): RequestParametersValidated<string, string>;
 
 /**
@@ -206,18 +210,10 @@ export function validateAndBuildQueryParams(
  */
 export function validateAndBuildQueryParams(
   queryData: QueryData | QueryDataMultiFilter,
-  dataType: keyof typeof QueryableColumns,
+  dataType: QueryableDomain,
 ): RequestParametersValidated<string, string> {
-  // Get the queryable columns for this data type
-  const columnConfig = QueryableColumns[dataType];
-
-  if (!columnConfig) {
-    throw new Error(`Unknown data type: ${dataType}`);
-  }
-
-  // Extract allowed columns
-  const allowedSortFields = Object.values(columnConfig.sort);
-  const allowedFilterFields = Object.values(columnConfig.filter);
+  const allowedSortFields = [...getAllowedSortFields(dataType)];
+  const allowedFilterFields = [...getAllowedFilterFields(dataType)];
 
   // Validate and build each parameter set
   const pagination = validatePagination(queryData.page, queryData.pageSize);

@@ -1,101 +1,22 @@
+import {
+  QueryableDomainFieldConfig,
+  type QueryableDomain,
+} from "#zod/schemas/data/queryableColumns.schema.ts";
+
+const toFieldMap = <const TFields extends readonly string[]>(fields: TFields) => {
+  const mapped = Object.fromEntries(fields.map((field) => [field, field]));
+  return mapped as {
+    readonly [K in TFields[number]]: K;
+  };
+};
+
+const buildDomainConfig = <TDomain extends QueryableDomain>(domain: TDomain) => ({
+  filter: toFieldMap(QueryableDomainFieldConfig[domain].filter),
+  sort: toFieldMap(QueryableDomainFieldConfig[domain].sort),
+});
+
 export const QueryableColumns = {
-  comics: {
-    filter: {
-      id: "id",
-      seriesId: "seriesId",
-      hash: "hash",
-      title: "title",
-      series: "series",
-      issueNumber: "issueNumber",
-      volume: "volume",
-      alternateSeries: "alternateSeries",
-      alternateIssueNumber: "alternateIssueNumber",
-      fileSize: "fileSize",
-      summary: "summary",
-      notes: "notes",
-      year: "year",
-      month: "month",
-      day: "day",
-      date: "date",
-      publisher: "publisher",
-      publicationDate: "publicationDate",
-      scanInfo: "scanInfo",
-      language: "language",
-      format: "format",
-      blackAndWhite: "blackAndWhite",
-      manga: "manga",
-      readingDirection: "readingDirection",
-      review: "review",
-      ageRating: "ageRating",
-      communityRating: "communityRating",
-      createdAt: "createdAt",
-      updatedAt: "updatedAt",
-      listLetter: "listLetter", // Special filter for first letter of title
-      libraryId: "libraryId"
-    },
-    sort: {
-      title: "title",
-      issueNumber: "issueNumber",
-      volume: "volume",
-      alternateSeries: "alternateSeries",
-      alternateIssueNumber: "alternateIssueNumber",
-      fileSize: "fileSize",
-      year: "year",
-      month: "month",
-      day: "day",
-      date: "date",
-      publisher: "publisher",
-      publicationDate: "publicationDate",
-      language: "language",
-      format: "format",
-      blackAndWhite: "blackAndWhite",
-      manga: "manga",
-      readingDirection: "readingDirection",
-      ageRating: "ageRating",
-      communityRating: "communityRating",
-      createdAt: "createdAt",
-      updatedAt: "updatedAt",
-    },
-  },
-  comicSeries: {
-    filter: {
-      id: "id",
-      name: "name",
-      description: "description",
-      libraryId: "libraryId",
-      letter: "letter",
-      year: "year",
-      genreId: "genreId",
-      characterId: "characterId",
-      teamId: "teamId",
-      locationId: "locationId",
-      writerId: "writerId",
-      pencilerId: "pencilerId",
-      publisherId: "publisherId",
-      coloristId: "coloristId",
-      lettererId: "lettererId",
-      editorId: "editorId",
-      coverArtistId: "coverArtistId",
-    },
-    sort: {
-      id: "id",
-      name: "name",
-      createdAt: "createdAt",
-      updatedAt: "updatedAt",
-      publicationDate: "publicationDate",
-    },
-  },
-  comicReadlists: {
-    filter: {
-      id: "id",
-      name: "name",
-      description: "description",
-    },
-    sort: {
-      id: "id",
-      name: "name",
-      createdAt: "createdAt",
-      updatedAt: "updatedAt",
-    },
-  },
+  comics: buildDomainConfig("comics"),
+  comicSeries: buildDomainConfig("comicSeries"),
+  comicReadlists: buildDomainConfig("comicReadlists"),
 } as const;

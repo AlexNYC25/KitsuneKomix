@@ -1,10 +1,14 @@
 import { ComicStoryArc } from "./database.types.ts";
-import { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+import type {
+  ComicReadlistsFilterField,
+  ComicReadlistsSortField,
+} from "./parameters.type.ts";
+
 export type AllowedComicStoryArcFilterProperties =
-  keyof typeof QueryableColumns["comicReadlists"]["filter"];
+  ComicReadlistsFilterField;
 
 export type AllowedComicStoryArcSortProperties =
-  keyof typeof QueryableColumns["comicReadlists"]["sort"];
+  ComicReadlistsSortField;
 
 // Comic Story Arc with associated comic book IDs
 export type ComicStoryArcWithComicIds = ComicStoryArc & {

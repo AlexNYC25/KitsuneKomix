@@ -7,14 +7,11 @@ import type {
   ComicBookFilterValuesSchema
 } from "#zod/schemas/data/comicBooks.schema.ts";
 
-import type { ComicSortField } from "./parameters.type.ts";
-import type { QueryableColumns } from "#infrastructure/db/sqlite/queryableColumns.ts";
+import type { ComicFilterField, ComicSortField } from "./parameters.type.ts";
 
-export type AllowedFilterProperties =
-  keyof typeof QueryableColumns["comics"]["filter"];
+export type AllowedFilterProperties = ComicFilterField;
 
-export type AllowedSortProperties =
-  keyof typeof QueryableColumns["comics"]["sort"];
+export type AllowedSortProperties = ComicSortField;
 
 export type ComicBookMetadataOnly = z.infer<typeof ComicBookCreatorContentSchema>;
 

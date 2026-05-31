@@ -3,7 +3,12 @@ import { metadataUpdateSchema } from "./data/comicMetadata.schema.ts";
 
 import { AuthRefreshToken } from "./data/auth.schema.ts";
 import { ComicLibraryCompiledInfoSchema, ComicLibrariesAssignmentSchema } from "./data/comicLibraries.schema.ts";
-import { AllowedComicFiltersSchema, AllowedComicSeriesFiltersSchema } from "./data/queryableColumns.schema.ts";
+import {
+  AllowedComicFiltersSchema,
+  AllowedComicSeriesFiltersSchema,
+  AllowedComicSortSchema,
+  AllowedComicSeriesSortSchema,
+} from "./data/queryableColumns.schema.ts";
 
 /**
  * Common schema for path parameter 'id'
@@ -166,12 +171,12 @@ const FilterValue = z.union([z.string(), z.array(z.string())]).optional().openap
 /**
  * Schema for pagination query parameters with sorting and multiple filter pairs, with filter properties limited to comic book fields
  */
-const FilterPropertiesForComicBooks = z.union([AllowedComicFiltersSchema]).optional().openapi({
+const FilterPropertiesForComicBooks = z.union([AllowedComicFiltersSchema, z.array(AllowedComicFiltersSchema)]).optional().openapi({
   description: "Filter property name(s). Must be paired with a matching filter value.",
   example: "name",
 })
 
-const FilterPropertiesForComicSeries = z.union([AllowedComicSeriesFiltersSchema]).optional().openapi({
+const FilterPropertiesForComicSeries = z.union([AllowedComicSeriesFiltersSchema, z.array(AllowedComicSeriesFiltersSchema)]).optional().openapi({
   description: "Filter property name(s) for comic series. Must be paired with a matching filter value.",
   example: "name",
 })
@@ -208,7 +213,16 @@ export const PaginationSortMultiFilterQuerySchema = PaginationQuerySchema
  * but restricts filterProperty values to those valid for comic books.
  */
 export const PaginationSortMultiFilterComicQuerySchema = PaginationQuerySchema
-  .extend(SortQuerySchema.shape)
+  .extend({
+    sort: AllowedComicSortSchema.optional().openapi({
+      description: "The specific property to sort comic books by",
+      example: "createdAt",
+    }),
+    sortDirection: z.enum(["asc", "desc"]).optional().openapi({
+      description: "Sort direction",
+      example: "desc",
+    }),
+  })
   .extend({
     filter: FilterValue,
     filterProperty: FilterPropertiesForComicBooks,
@@ -221,7 +235,16 @@ export const PaginationSortMultiFilterComicQuerySchema = PaginationQuerySchema
  * but restricts filterProperty values to those valid for comic series.
  */
 export const PaginationSortMultiFilterComicSeriesQuerySchema = PaginationQuerySchema
-  .extend(SortQuerySchema.shape)
+  .extend({
+    sort: AllowedComicSeriesSortSchema.optional().openapi({
+      description: "The specific property to sort comic series by",
+      example: "createdAt",
+    }),
+    sortDirection: z.enum(["asc", "desc"]).optional().openapi({
+      description: "Sort direction",
+      example: "desc",
+    }),
+  })
   .extend({
     filter: FilterValue,
     filterProperty: FilterPropertiesForComicSeries,
