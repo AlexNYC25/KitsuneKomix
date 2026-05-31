@@ -20,7 +20,6 @@ All of the following derive from this config:
 - Zod enums for request validation (`AllowedComicFiltersSchema`, `AllowedComicSortSchema`, etc.)
 - Runtime helpers (`getAllowedFilterFields`, `getAllowedSortFields`)
 - TypeScript types (`ComicFilterField`, `ComicSortField`, etc.)
-- Infrastructure queryable map (`QueryableColumns`)
 
 ## Supported Domains
 
