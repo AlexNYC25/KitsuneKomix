@@ -1,5 +1,5 @@
-import { z } from "zod";
+import type {
+  ComicBookThumbnail
+ } from "#types/index.ts";
 
-import { ComicBookThumbnailSelectSchema } from "#zod/schemas/data/database.schema.ts";
-
-export type ComicBookThumbnailItem = z.infer<typeof ComicBookThumbnailSelectSchema>;
+export type BatchComicBookThumbnails = Record<number, ComicBookThumbnail[]>;
