@@ -4,7 +4,8 @@ import type {
   ComicBookWithMetadataSchema, 
   ComicBookCreatorContentSchema,
   ComicBookLevelMetadataSchema,
-  ComicBookFilterValuesSchema
+  ComicBookFilterValuesSchema,
+  ComicBookReadingHistorySchema
 } from "#zod/schemas/data/comicBooks.schema.ts";
 
 import type { ComicFilterField, ComicSortField } from "./parameters.type.ts";
@@ -12,6 +13,8 @@ import type { ComicFilterField, ComicSortField } from "./parameters.type.ts";
 export type AllowedFilterProperties = ComicFilterField;
 
 export type AllowedSortProperties = ComicSortField;
+
+export type ComicBookHistoryOnly = z.infer<typeof ComicBookReadingHistorySchema>;
 
 export type ComicBookMetadataOnly = z.infer<typeof ComicBookCreatorContentSchema>;
 
