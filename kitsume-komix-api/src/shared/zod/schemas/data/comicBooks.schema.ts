@@ -18,6 +18,7 @@ import {
   ComicStoryArcSelectSchema,
   ComicTeamSelectSchema,
   ComicWriterSelectSchema,
+  ComicBookHistorySelectSchema
 } from "./database.schema.ts";
 import { MetadataSchema } from "./comicMetadata.schema.ts";
 
@@ -38,6 +39,20 @@ export const ComicBookSchema: z.ZodObject = ComicBookSelectSchema.extend({
   description:
     "Schema representing a comic book, including optional metadata and thumbnails",
 });
+
+/**
+ * Basic schema for defining the reading status of a comic book for a user
+ */
+export const ComicBookReadingHistorySchema = z.object({
+  read: z.boolean().openapi({
+    description: "Indicates whether the comic book has been marked as read by the user",
+    example: true,
+  }),
+  lastReadPage: z.number().optional().openapi({
+    description: "The last page number that the user read in the comic book",
+    example: 42,
+  }),
+})
 
 /**
  * Schema for representing the level metadata for comic books, including letters, years, languages, formats, reading directions, age ratings, library IDs, manga flag, black and white flag, and series names.
@@ -106,7 +121,7 @@ export const ComicBookFilterValuesSchema = ComicBookCreatorContentSchema.extend(
     "Schema representing the combined filter values for comic books, including creator content metadata and level metadata",
 });
 
-export const ComicBookWithMetadataSchema = ComicBookSelectSchema.extend(ComicBookCreatorContentSchema.shape).extend(ComicBookThumbnailsSchema.shape).openapi({
+export const ComicBookWithMetadataSchema = ComicBookSelectSchema.extend(ComicBookCreatorContentSchema.shape).extend(ComicBookThumbnailsSchema.shape).extend(ComicBookReadingHistorySchema.shape).openapi({
   title: "ComicBookWithMetadata",
   description:
     "Schema representing a comic book with detailed metadata about its creators and related content",
