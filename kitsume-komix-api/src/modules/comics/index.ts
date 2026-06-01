@@ -35,6 +35,7 @@ export {
 export {
   checkComicReadByUser,
   setComicReadByUser,
+  attachReadStatusToComicBooksForUser,
 } from "./comic-reading.service.ts";
 
 export {
