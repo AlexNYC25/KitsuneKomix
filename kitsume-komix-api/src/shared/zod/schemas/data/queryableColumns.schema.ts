@@ -44,6 +44,8 @@ export const QueryableDomainFieldConfig = {
 			"updatedAt",
 			"listLetter",
 			"libraryId",
+      "storyArcId",
+      "seriesGroupId",
 		]),
 		sort: asNonEmptyTuple([
 			"title",
