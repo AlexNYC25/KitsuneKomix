@@ -69,6 +69,8 @@ export const QueryableDomainFieldConfig = {
 			"communityRating",
 			"createdAt",
 			"updatedAt",
+      "storyArcPosition",
+      "seriesGroupPosition",
 		]),
 	},
 	comicSeries: {
