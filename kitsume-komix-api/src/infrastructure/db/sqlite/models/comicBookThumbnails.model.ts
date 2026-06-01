@@ -3,7 +3,7 @@ import { dbLogger } from "#logger/loggers.ts";
 import { comicBookThumbnailsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import { eq, inArray } from "drizzle-orm";
-import type { ComicBookThumbnail } from "#types/index.ts";
+import type { ComicBookThumbnail, BatchComicBookThumbnails } from "#types/index.ts";
 import type { Row } from "@libsql/client";
 
 /**
@@ -211,46 +211,39 @@ export const deleteComicBookThumbnail = async (
 };
 
 /**
- * Fetch thumbnails for multiple comic books in a single query.
- * Results are sorted to prefer generated thumbnails over custom ones.
- *
- * @param comicBookIds - Array of comic book IDs to fetch thumbnails for
- * @returns A promise that resolves to an array of ComicBookThumbnail objects for all requested comic books
- *
- * @example
- * ```ts
- * const thumbnails = await getThumbnailsByComicBookIds([1, 2, 3]);
- * // Returns all thumbnails for comic books 1, 2, and 3
- * ```
+ * Fetches thumbnails for multiple comic books in a single batch operation.
+ * @param comicBookIds An array of comic book IDs to fetch thumbnails for.
+ * @returns A record mapping each comic book ID to an array of its associated thumbnails.
  */
-export const getThumbnailsByComicBookIds = async (
+export const getComicBooksThumbnailsByComicBookIdsBatch = async (
   comicBookIds: number[],
-): Promise<ComicBookThumbnail[]> => {
+): Promise<BatchComicBookThumbnails> => {
   const { db, client } = getClient();
 
   if (!db || !client) {
     throw new Error("Database is not initialized.");
   }
 
-  if (comicBookIds.length === 0) {
-    return [];
-  }
-
   try {
-    const results: ComicBookThumbnail[] = await db
+    const result: ComicBookThumbnail[] = await db
       .select()
       .from(comicBookThumbnailsTable)
       .where(inArray(comicBookThumbnailsTable.comicBookId, comicBookIds));
 
-    const sorted: ComicBookThumbnail[] = results.sort((a, b) => {
-      const aIsGenerated: number = a.filePath?.includes("_thumb.") ? 0 : 1;
-      const bIsGenerated: number = b.filePath?.includes("_thumb.") ? 0 : 1;
-      return aIsGenerated - bIsGenerated;
-    }) as ComicBookThumbnail[];
+    // Group thumbnails by comic book ID
+    const grouped: BatchComicBookThumbnails = {};
+    result.forEach((thumbnail) => {
+      if (thumbnail.comicBookId) {
+        if (!grouped[thumbnail.comicBookId]) {
+          grouped[thumbnail.comicBookId] = [];
+        }
+        grouped[thumbnail.comicBookId].push(thumbnail);
+      }
+    });
 
-    return sorted;
+    return grouped;
   } catch (error) {
-    dbLogger.error("Error fetching thumbnails by comic book IDs:" + error);
+    dbLogger.error("Error fetching comic book thumbnails by comic book IDs:" + error);
     throw error;
   }
 };
