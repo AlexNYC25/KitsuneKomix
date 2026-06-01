@@ -70,6 +70,7 @@ export const insertComicSeriesGroup = async (
 export const linkSeriesGroupToComicBook = async (
   seriesGroupId: number,
   comicBookId: number,
+  position: number = 0,
 ): Promise<void> => {
   const { db, client } = getClient();
 
@@ -83,6 +84,7 @@ export const linkSeriesGroupToComicBook = async (
       .values({
         comicSeriesGroupId: seriesGroupId,
         comicBookId: comicBookId,
+        position
       })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
