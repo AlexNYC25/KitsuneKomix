@@ -146,7 +146,6 @@ const addFilteringToQuery = <T extends SQLiteSelect>(
     case "libraryId":
       query.where(eq(comicLibrariesTable.id, Number(filterValue)));
       break;
-
   }
 
   return query;
@@ -229,6 +228,12 @@ const addSortingToQuery = <T extends SQLiteSelect>(
     case "updatedAt":
       query.orderBy(direction(comicBooksTable.updatedAt));
       break;
+    case "storyArcPosition":
+      query.orderBy(direction(comicBookStoryArcsTable.position));
+      break;
+    case "seriesGroupPosition":
+      query.orderBy(direction(comicBookSeriesGroupsTable.position));
+      
   }
 
   return query;
