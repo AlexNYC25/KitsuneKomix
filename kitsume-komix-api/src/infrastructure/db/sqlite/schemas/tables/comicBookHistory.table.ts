@@ -12,8 +12,8 @@ export const comicBookHistoryTable = sqliteTable("comic_book_history", {
   comicBookId: int().notNull().references(() => comicBooksTable.id, {
     onDelete: "cascade",
   }),
-  read: int().notNull().default(0),
-  lastReadPage: int(),
+  read: int({mode: "boolean"}).notNull().default(false),
+  lastReadPage: int().default(0),
   createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
