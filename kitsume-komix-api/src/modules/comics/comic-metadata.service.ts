@@ -1,6 +1,9 @@
 import { apiLogger } from "#logger/loggers.ts";
 import { getClient } from "#infrastructure/db/sqlite/client.ts";
+
 import { fetchComicBooksWithRelatedMetadata } from "./comic-books.service.ts";
+
+import { getMetadataForComicBooksBatch } from "#infrastructure/db/sqlite/models/comicMetadataBatch.model.ts";
 
 import {
   getWritersByComicBookId,
@@ -71,6 +74,9 @@ import type {
   ComicBookMetadataOnly,
   ComicMetadataUpdateData,
   RequestParametersValidated,
+  ComicBook,
+  BatchMetadataResult,
+  ComicBookMetadata
 } from "#types/index.ts";
 
 /**
@@ -552,4 +558,43 @@ export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (
   }
 
   return totalMetadataFilterValues;
+};
+
+/**
+ * Assembles complete metadata for a batch of comic books by fetching all related metadata in parallel and then combining it into a structured format.
+ * @param comicBooks An array of comic books to fetch metadata for
+ * @returns An array of comic books with their associated metadata attached
+ */
+export const assembleComicBookMetadataBatch = async (
+  comicBooks: ComicBook[],
+): Promise<Partial<ComicBookWithMetadata>[]> => {
+  const comicBookIds: number[] = comicBooks.map((comic) => comic.id);
+  const metadataList: BatchMetadataResult = await getMetadataForComicBooksBatch(comicBookIds);
+
+  const comicsWithMetadata: Partial<ComicBookWithMetadata>[] = [];
+
+  for (const comic of comicBooks) {
+    const metadata: ComicBookMetadata = metadataList[comic.id];
+    comicsWithMetadata.push({
+      ...comic,
+      writers: metadata?.writers || [],
+      pencilers: metadata?.pencilers || [],
+      inkers: metadata?.inkers || [],
+      letterers: metadata?.letterers || [],
+      editors: metadata?.editors || [],
+      colorists: metadata?.colorists || [],
+      coverArtists: metadata?.coverArtists || [],
+      publishers: metadata?.publishers || [],
+      imprints: metadata?.imprints || [],
+      genres: metadata?.genres || [],
+      characters: metadata?.characters || [],
+      teams: metadata?.teams || [],
+      locations: metadata?.locations || [],
+      storyArcs: metadata?.storyArcs || [],
+      seriesGroups: metadata?.seriesGroups || [],
+    });
+
+  }
+
+  return comicsWithMetadata;
 };
