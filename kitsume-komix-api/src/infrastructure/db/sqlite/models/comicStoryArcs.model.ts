@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, ilike } from "drizzle-orm";
-import { SQLiteColumn, SQLiteSelect } from "drizzle-orm/sqlite-core";
+import { asc, desc, eq, ilike } from "drizzle-orm";
+import type { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
@@ -10,16 +10,12 @@ import {
 } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
-  ComicBookFilteringAndSortingParams,
   ComicStoryArc,
   ComicStoryArcFilterItem,
   ComicStoryArcsFilteringAndSortingParams,
-} from "#types/index.ts";
-import type { ComicStoryArcQueryParams } from "#types/index.ts";
-import type {
   ComicReadlistsFilterField,
   ComicReadlistsSortField,
-} from "#types/parameters.type.ts";
+} from "#types/index.ts";
 
 import {
   env
@@ -86,6 +82,11 @@ const addSortingToQuery = <T extends SQLiteSelect>(
   return query;
 };
 
+/**
+ * Gets Readlists/story arcs with optional filtering and sorting.
+ * @param serviceDetails - Filtering and sorting parameters
+ * @returns 
+ */
 export const getComicStoryArcsFilteringSorting = async (
   serviceDetails: ComicStoryArcsFilteringAndSortingParams,
 ): Promise<ComicStoryArc[]> => {
@@ -133,7 +134,7 @@ export const getComicStoryArcsFilteringSorting = async (
       query = addFilteringToQuery(serviceDetails.filters[0], query);
     }
 
-    return query;
+    return await query;
   } catch (error) {
     dbLogger.error("Error fetching comic books with metadata filtering and sorting:" + error);
     throw new Error(
@@ -332,6 +333,7 @@ export const deleteComicStoryArcById = async (
 export const linkStoryArcToComicBook = async (
   storyArcId: number,
   comicBookId: number,
+  position: number = 0,
 ): Promise<void> => {
   const { db, client } = getClient();
 
@@ -342,7 +344,7 @@ export const linkStoryArcToComicBook = async (
   try {
     await db
       .insert(comicBookStoryArcsTable)
-      .values({ comicStoryArcId: storyArcId, comicBookId: comicBookId })
+      .values({ comicStoryArcId: storyArcId, comicBookId: comicBookId, position: position })
       .onConflictDoNothing(); // Avoid duplicate links
   } catch (error) {
     dbLogger.error("Error linking comic story arc to comic book:" + error);
