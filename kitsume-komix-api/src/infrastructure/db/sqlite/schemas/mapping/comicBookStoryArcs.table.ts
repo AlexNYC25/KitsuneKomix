@@ -12,6 +12,7 @@ export const comicBookStoryArcsTable = sqliteTable("comic_book_story_arcs", {
   comicStoryArcId: int().notNull().references(() => comicStoryArcsTable.id, {
     onDelete: "cascade",
   }),
+  position: int().notNull(),
   createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });

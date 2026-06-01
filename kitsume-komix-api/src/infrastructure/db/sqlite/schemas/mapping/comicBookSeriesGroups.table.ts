@@ -15,6 +15,7 @@ export const comicBookSeriesGroupsTable = sqliteTable(
       () => comicSeriesGroupsTable.id,
       { onDelete: "cascade" },
     ),
+    position: int().notNull(),
     createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   },
