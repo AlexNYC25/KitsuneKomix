@@ -7,10 +7,14 @@ import {
   getComicThumbnailById,
   getThumbnailsByComicBookId,
   insertCustomComicBookThumbnail,
+  getComicBooksThumbnailsByComicBookIdsBatch
 } from "#infrastructure/db/sqlite/models/comicBookThumbnails.model.ts";
+
+import { getFileNameFromPath } from "#utilities/file.ts";
 
 import type {
   ComicBookThumbnail,
+  ComicBookWithMetadata,
 } from "#types/index.ts";
 
 /**
@@ -220,3 +224,29 @@ export const deleteComicBookThumbnails = async (
 
   return true;
 };
+
+/**
+ * Updates a batch of comic books with their associated thumbnails.
+ * @param comicBooks 
+ * @returns 
+ */
+export const assembleComicBookThumbnailsBatch = async (
+  comicBooks: Partial<ComicBookWithMetadata>[],
+): Promise<Partial<ComicBookWithMetadata>[]> => {
+  const thumbnailsBatch = await getComicBooksThumbnailsByComicBookIdsBatch(
+    comicBooks.map((comic) => comic?.id).filter((id): id is number => id !== undefined),
+  );
+
+  const comicBooksWithThumbnails: ComicBookWithMetadata[] = comicBooks
+    .filter((comic): comic is ComicBookWithMetadata => comic?.id !== undefined)
+    .map((comic) => {
+      return {
+        ...comic,
+        thumbnails: thumbnailsBatch[comic.id] ? thumbnailsBatch[comic.id] : [],
+        thumbnailUrl: thumbnailsBatch[comic.id] && thumbnailsBatch[comic.id].length > 0 ? `/api/image/thumbnails/${getFileNameFromPath(thumbnailsBatch[comic.id][0].filePath)}`
+          : undefined,
+      };
+    });
+
+  return comicBooksWithThumbnails;
+}
