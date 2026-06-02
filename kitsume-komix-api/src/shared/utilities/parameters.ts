@@ -253,3 +253,18 @@ export function validateAndBuildQueryParams(
     filter,
   };
 }
+
+/**
+ * Helper function to hard code additional filter values into a QueryDataMultiFilter object.
+ * @param queryObject The original query object to modify
+ * @param filterProperty The filter property to add
+ * @param filterValue The filter value to add
+ * @returns The modified query object with the new filter added
+ */
+export const hardCodeFilterValues = (queryObject: QueryDataMultiFilter, filterProperty: string, filterValue: string): QueryDataMultiFilter => {
+
+  queryObject.filter = Array.isArray(queryObject.filter) ? [...queryObject.filter, filterProperty] : queryObject.filter ? [ queryObject.filter, filterProperty ] : filterProperty;
+  queryObject.filterProperty = Array.isArray(queryObject.filterProperty) ? [...queryObject.filterProperty, filterValue] : queryObject.filterProperty ? [ queryObject.filterProperty, filterValue ] : filterValue;
+
+  return queryObject;
+} 
