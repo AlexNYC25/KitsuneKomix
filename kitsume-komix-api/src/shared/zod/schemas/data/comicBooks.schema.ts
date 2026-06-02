@@ -121,7 +121,11 @@ export const ComicBookFilterValuesSchema = ComicBookCreatorContentSchema.extend(
     "Schema representing the combined filter values for comic books, including creator content metadata and level metadata",
 });
 
-export const ComicBookWithMetadataSchema = ComicBookSelectSchema.extend(ComicBookCreatorContentSchema.shape).extend(ComicBookThumbnailsSchema.shape).extend(ComicBookReadingHistorySchema.shape).openapi({
+export const ComicBookWithMetadataSchema = ComicBookSelectSchema
+  .extend(ComicBookCreatorContentSchema.shape)
+  .extend(ComicBookThumbnailsSchema.shape)
+  .extend(ComicBookReadingHistorySchema.shape)
+  .openapi({
   title: "ComicBookWithMetadata",
   description:
     "Schema representing a comic book with detailed metadata about its creators and related content",
