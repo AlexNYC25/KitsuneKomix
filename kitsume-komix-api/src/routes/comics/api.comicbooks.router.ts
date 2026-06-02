@@ -23,7 +23,7 @@ import {
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
   packDataIntoComicBookMultipleResponse,
-  compileEntireComicBooksMetadataAndAdditionalComicBookInfo
+  compileEntireComicBooksMetadataAndAdditionalComicBookInfo,
 } from "#modules/comics/index.ts";
 
 import { ComicBookSchema } from "#zod/schemas/data/comicBooks.schema.ts";
@@ -79,13 +79,13 @@ import type {
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   RequestSortParametersValidated,
-  ComicBookThumbnailItem,
   QueryDataMultiFilter,
 } from "#types/index.ts";
 
 import {
   validateAndBuildQueryParams,
   validatePagination,
+  hardCodeFilterValues,
   VALIDATE_COMIC_KEY
 } from "#utilities/parameters.ts";
 
@@ -151,11 +151,12 @@ app.openapi(
   }),
   async (c) => {
     const queryData: QueryDataMultiFilter = c.req.valid("query");
+    const userId: number = c.get("userId")!;
 
     const serviceData: RequestParametersValidated< ComicSortField, ComicFilterField > = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_KEY);
 
     try {
-      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData);
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData, userId);
 
       const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
       const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;
@@ -232,13 +233,15 @@ app.openapi(
   }),
   async (c) => {
     const queryData: QueryDataMultiFilter = c.req.valid("query");
+    const userId: number = c.get("userId")!;
 
     queryData.sort = "createdAt";
+    queryData.sortDirection = "desc";
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_KEY);
 
     try {
-      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData);
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData, userId);
 
       const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
       const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;
@@ -317,13 +320,15 @@ app.openapi(
   }),
   async (c) => {
     const queryData: QueryDataMultiFilter = c.req.valid("query");
+    const userId: number = c.get("userId")!;
 
     queryData.sort = "date";
+    queryData.sortDirection = "desc";
 
     const serviceData: RequestParametersValidated<ComicSortField, ComicFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_KEY);
 
     try {
-      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData);
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData, userId);
 
       const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
       const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;
@@ -380,7 +385,9 @@ app.openapi(
   }),
   async (c) => {
     try {
-      const allowedFilterValues: ComicBooksFilterValues = await compileEntireComicBooksMetadataAndAdditionalComicBookInfo();
+      const userId: number = c.get("userId")!;
+
+      const allowedFilterValues: ComicBooksFilterValues = await compileEntireComicBooksMetadataAndAdditionalComicBookInfo(userId);
 
       return c.json({
         data: allowedFilterValues,
@@ -445,56 +452,28 @@ app.openapi(
     },
   }),
   async (c) => {
-    const queryData: QueryData = c.req.valid("query");
+    const queryData: QueryDataMultiFilter = c.req.valid("query");
+    const userId: number = c.get("userId")!;
 
-    const userId = c.get("userId")!;
+    const queryDataWithDuplicateHashFilter: QueryDataMultiFilter = hardCodeFilterValues(queryData, "duplicateHash", "true");
 
-    const paginationData: RequestPaginationParametersValidated =
-      validatePagination(queryData.page, queryData.pageSize);
+    const serviceData: RequestParametersValidated< ComicSortField, ComicFilterField > = validateAndBuildQueryParams(queryDataWithDuplicateHashFilter, VALIDATE_COMIC_KEY);
 
     try {
-      const duplicates: ComicBook[] = await fetchComicDuplicatesInTheDb({
-        pageNumber: paginationData.pageNumber,
-        pageSize: paginationData.pageSize,
-      });
+      const comics: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(serviceData, userId);
 
-      if (duplicates.length > 0) {
-        const hasNextPage: boolean =
-          duplicates.length > paginationData.pageSize;
-        const resultComics: ComicBookWithMetadata[] = hasNextPage
-          ? duplicates.slice(0, paginationData.pageSize)
-          : duplicates;
+      const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
+      const serviceDataFilters: RequestFilterParametersValidated<ComicFilterField>[] | undefined = serviceData.filters;
+      const serviceDataSort: RequestSortParametersValidated<ComicSortField> = serviceData.sort;
 
-        const requestMetadata: ComicBookMultipleResponseMeta = {
-          count: duplicates.length,
-          hasNextPage: hasNextPage,
-          currentPage: paginationData.pageNumber,
-          pageSize: paginationData.pageSize,
-          timestamp: new Date().toISOString(),
-        };
+      const returnObj: ComicBookMultipleResponse = packDataIntoComicBookMultipleResponse(
+        comics,
+        serviceDataPagination,
+        serviceDataFilters,
+        serviceDataSort
+      );
 
-        const returnObj: ComicBookMultipleResponse = {
-          data: resultComics,
-          meta: requestMetadata,
-        };
-
-        return c.json(returnObj, 200);
-      } else {
-        const requestMetadata: ComicBookMultipleResponseMeta = {
-          count: 0,
-          hasNextPage: false,
-          currentPage: 0,
-          pageSize: 0,
-          timestamp: new Date().toISOString(),
-        };
-
-        const returnObj: ComicBookMultipleResponse = {
-          data: [],
-          meta: requestMetadata,
-        };
-
-        return c.json(returnObj, 200);
-      }
+      return c.json(returnObj, 200);
     } catch (error) {
       apiLogger.error("Error fetching comic book duplicates:" + error);
       return c.json({ message: "Failed to fetch comic book duplicates" }, 500);
@@ -565,7 +544,6 @@ app.openapi(
   }),
   async (c) => {
     const queryData: QueryData = c.req.valid("query");
-
     const userId = c.get("userId")!;
 
     const paginationData: RequestPaginationParametersValidated =
@@ -602,110 +580,6 @@ app.openapi(
     } catch (error) {
       apiLogger.error("Error fetching random comic book:" + error);
       return c.json({ message: "Failed to fetch random comic book" }, 500);
-    }
-  },
-);
-
-/**
- * Get comic books filtered by first letter
- *
- * GET /api/comic-books/list
- *
- * This route returns comic books whose titles start with a specific letter, with pagination support
- * @param letter - The first letter to filter comic book titles by
- * @return JSON object containing the list of comic books starting with the specified letter
- */
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/list",
-    summary: "Get comic books by letter",
-    description:
-      "Retrieve comic books filtered by their first letter with pagination",
-    tags: ["Comic Books"],
-    request: {
-      query: PaginationLetterQuerySchema,
-    },
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: ComicBookMultipleResponseSchema,
-          },
-        },
-        description: "Comic books retrieved successfully",
-      },
-      400: {
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-        description: "Bad Request",
-      },
-      401: {
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-        description: "Unauthorized",
-      },
-      500: {
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-        description: "Internal Server Error",
-      },
-    },
-  }),
-  async (c) => {
-    const queryData: QueryDataWithLetter = c.req.valid("query");
-
-    queryData.sort = "title";
-    queryData.sortDirection = "asc";
-    queryData.filter = queryData.letter;
-    queryData.filterProperty = "listLetter";
-
-    const userId = c.get("userId")!;
-
-    const serviceData: RequestParametersValidated<
-      ComicSortField,
-      ComicFilterField
-    > = validateAndBuildQueryParams(queryData, "comics");
-    const paginationData: RequestPaginationParametersValidated =
-      validatePagination(queryData.page, queryData.pageSize);
-
-    try {
-      const comics: ComicBookWithMetadata[] =
-        await fetchComicBooksWithRelatedMetadata(
-          serviceData,
-        );
-
-      const hasNextPage: boolean = comics.length > paginationData.pageSize;
-      const resultComics: ComicBookWithMetadata[] = hasNextPage
-        ? comics.slice(0, paginationData.pageSize)
-        : comics;
-
-      const requestMetadata: ComicBookMultipleResponseMeta = {
-        count: comics.length,
-        hasNextPage: hasNextPage,
-        currentPage: paginationData.pageNumber,
-        pageSize: paginationData.pageSize,
-        timestamp: new Date().toISOString(),
-      };
-
-      const returnObj: ComicBookMultipleResponse = {
-        data: resultComics,
-        meta: requestMetadata,
-      };
-
-      return c.json(returnObj, 200);
-    } catch (error) {
-      apiLogger.error("Error fetching comic book list:" + error);
-      return c.json({ message: "Failed to fetch comic book list" }, 500);
     }
   },
 );
@@ -889,7 +763,7 @@ app.openapi(
           pagination: { pageNumber: 1, pageSize: 1 },
           filter: { filterProperty: "id", filterValue: id.toString() },
           sort: { sortProperty: "createdAt", sortOrder: "asc" },
-        });
+        }, userId);
 
       const comicWithMetadata: ComicBookWithMetadata | null =
         comicWithMetadataSearchResults.length > 0
@@ -1057,7 +931,7 @@ app.openapi(
           pagination: { pageNumber: 1, pageSize: 1 },
           filter: { filterProperty: "id", filterValue: id.toString() },
           sort: { sortProperty: "createdAt", sortOrder: "asc" },
-        });
+        }, userId);
 
       const comicWithMetadata = comicWithMetadataSearchResults.length > 0
         ? comicWithMetadataSearchResults[0]
@@ -1397,7 +1271,7 @@ app.openapi(
     const userId = c.get("userId")!;
 
     try {
-      const hasRead: boolean = await checkComicReadByUser(userId, id);
+      const hasRead: boolean = (await checkComicReadByUser(userId, id)).read;
       return c.json({
         id,
         read: hasRead,
@@ -2013,7 +1887,7 @@ app.openapi(
       if (thumbnails && thumbnails.length > 0) {
         return c.json({
           message: "Fetched comic book thumbnails successfully",
-          thumbnails: thumbnails as ComicBookThumbnailItem[],
+          thumbnails: thumbnails as ComicBookThumbnail[],
         }, 200);
       } else {
         return c.json({
@@ -2095,7 +1969,7 @@ app.openapi(
     const userId = c.get("userId")!;
 
     try {
-      const thumbnail: ComicBookThumbnailItem | null =
+      const thumbnail: ComicBookThumbnail | null =
         await getComicThumbnailByComicIdThumbnailId(id, thumbId);
 
       if (thumbnail) {
