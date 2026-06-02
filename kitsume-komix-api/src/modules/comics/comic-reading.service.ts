@@ -4,11 +4,14 @@ import {
   getComicBookHistoryByUserAndComic,
   insertComicBookHistory,
   updateComicBookHistory,
+  getComicBooksHistoryByUserIdBulk
 } from "#infrastructure/db/sqlite/models/comicBookHistory.model.ts";
 
 import type {
   ComicBook,
   ComicBookHistory,
+  ComicBookWithMetadata,
+  ComicBookHistoryOnly
 } from "#types/index.ts";
 
 /**
@@ -31,14 +34,39 @@ import type {
 export const checkComicReadByUser = async (
   comicId: number,
   userId: number,
-): Promise<boolean> => {
+): Promise<ComicBookHistoryOnly> => {
   const history: ComicBookHistory | null =
     await getComicBookHistoryByUserAndComic(userId, comicId);
-  if (history && history.read === 1) {
-    return true;
+  if (history) {
+    return {
+      read: history.read,
+      lastReadPage: history.lastReadPage || undefined,
+    };
   }
-  return false;
+
+  return {
+    read: false,
+    lastReadPage: undefined,
+  };
 };
+
+/**
+ * Used to specifically fetch the last read page for a comic book for a specific user, used to determine where to open the comic book for the user in the frontend.
+ * @param comicId the comic book ID to fetch the last read page for
+ * @param userId the specific user ID to fetch the last read page for
+ * @returns either the last read page number or null if there is no history for the user and comic book or if the last read page is not set
+ */
+export const getComicBooksLastReadPageForUser = async (
+  comicId: number,
+  userId: number,
+): Promise<number | null> => {
+  const history: ComicBookHistory | null =
+    await getComicBookHistoryByUserAndComic(userId, comicId);
+  if (history) {
+    return history.lastReadPage;
+  }
+  return null;
+}
 
 /**
  * Set the read status of a comic book for a user.
@@ -85,10 +113,9 @@ export const setComicReadByUser = async (
   );
 
   if (existingHistory) {
-    const readValue = read ? 1 : 0;
     const comicbookHistoryId = await updateComicBookHistory(
       existingHistory.id,
-      { read: readValue, lastReadPage: null },
+      { read: read, lastReadPage: null },
     );
 
     if (!comicbookHistoryId) {
@@ -104,7 +131,7 @@ export const setComicReadByUser = async (
     const newHistory = {
       userId: userId,
       comicBookId: comicId,
-      read: read ? 1 : 0,
+      read: read,
       lastReadPage: null,
     };
     const comicbookHistoryId = await insertComicBookHistory(newHistory);
@@ -116,3 +143,39 @@ export const setComicReadByUser = async (
     return true;
   }
 };
+
+/**
+ * The service that fetches the comic book history for a set of comic books for a specific user, then attaches the history information to the comic books.
+ * @param comicBooks an array of comic books to attach the history information to
+ * @param userId the specific user ID to fetch the history information for
+ * @returns an array of comic books with the history information attached to each comic book
+ */
+export const assembleComicBookReadStatusBatch = async (
+  comicBooks: Partial<ComicBookWithMetadata>[],
+  userId: number,
+): Promise<Partial<ComicBookWithMetadata>[]> => {
+  const comicBookHistoryRecords = await getComicBooksHistoryByUserIdBulk(
+    userId,
+    comicBooks.map((comic) => comic.id!).filter((id): id is number => id !== undefined),
+  );
+  const comicBooksWithReadStatus: Partial<ComicBookWithMetadata>[] = [];
+
+  for (const comicBook of comicBooks) {
+    if (!comicBook.id) continue;
+
+    const history = comicBookHistoryRecords[comicBook.id];
+    const isRead = history && history.read || false;
+    const lastReadPage = history && history.lastReadPage || undefined;
+
+    const comicBookWithMetadata: ComicBookWithMetadata = {
+      ...comicBook,
+      id: comicBook.id,
+      read: isRead,
+      lastReadPage: lastReadPage,
+    } as ComicBookWithMetadata;
+
+    comicBooksWithReadStatus.push(comicBookWithMetadata);
+  }
+
+  return comicBooksWithReadStatus;
+}
