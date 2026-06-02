@@ -13,6 +13,7 @@ import {
   ComicBookFilterValuesSchema,
   SeriesFilterValuesSchema,
 } from "./data/comicMetadata.schema.ts";
+import { ReadListSchema } from "./data/comicReadlists.schema.ts";
 
 // **** Basic response schemas **** //
 /**
@@ -400,14 +401,10 @@ export const ImageResponseSchema = z.any().openapi({
  * Schema for readlists response containing an array of readlists
  * Each readlist has an id and name
  */
-export const ReadlistsResponseSchema = z.array(z.object({
-  id: z.number().openapi({
-    example: 1,
-  }),
-  name: z.string().openapi({
-    example: "My Readlist",
-  }),
-})).openapi({
+export const ReadlistsResponseSchema = z.object({
+  data: z.array(ReadListSchema),
+  meta: PaginationMetaSchema
+}).openapi({
   title: "ReadlistsResponse",
   description: "Array of readlists with id and name",
 });
