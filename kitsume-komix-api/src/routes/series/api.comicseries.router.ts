@@ -110,7 +110,7 @@ app.openapi(
     const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_SERIES_KEY);
 
     try {
-      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData, c.get("userId")!);
 
       const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
       const serviceDataFilters: RequestFilterParametersValidated<ComicSeriesFilterField>[] | undefined = serviceData.filters;
@@ -181,7 +181,7 @@ app.openapi(
     const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_SERIES_KEY);
 
     try {
-      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData, c.get("userId")!);
 
       const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
       const serviceDataFilters: RequestFilterParametersValidated<ComicSeriesFilterField>[] | undefined = serviceData.filters;
@@ -248,7 +248,7 @@ app.openapi(
     const serviceData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_SERIES_KEY);
 
     try {
-      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData);
+      const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(serviceData, c.get("userId")!);
 
       const serviceDataPagination: RequestPaginationParametersValidated = serviceData.pagination;
       const serviceDataFilters: RequestFilterParametersValidated<ComicSeriesFilterField>[] | undefined = serviceData.filters;
@@ -305,7 +305,7 @@ app.openapi(
   }),
   async (c) => {
     try {
-      const allowedFilterValues = await compileEntireSeriesMetadataAndAdditionalSeriesInfo();
+      const allowedFilterValues = await compileEntireSeriesMetadataAndAdditionalSeriesInfo(c.get("userId")!);
 
       return c.json({
         data: allowedFilterValues,
@@ -383,6 +383,7 @@ app.openapi(
     try {
       const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(
         serviceData,
+        c.get("userId")!
       );
       if (!comicSeries || comicSeries.length === 0) {
         return c.json({ message: "Comic series not found" }, 404);
@@ -488,6 +489,7 @@ app.openapi(
     try {
       const comicSeries: ComicSeriesWithMetadata[] = await fetchComicSeries(
         serviceData,
+        c.get("userId")!
       );
 
       const hasNextPage: boolean = comicSeries.length > paginationData.pageSize;

@@ -533,14 +533,14 @@ const compileComicBookLevelFilterValues = (comicBooks: ComicBookWithMetadata[]):
  * This mirrors the series-level filter-values compiler, but aggregates directly
  * from comic books instead of from pre-aggregated series records.
  */
-export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (): Promise<ComicBooksFilterValues> => {
+export const compileEntireComicBooksMetadataAndAdditionalComicBookInfo = async (userId: number): Promise<ComicBooksFilterValues> => {
   const queryData: RequestParametersValidated<ComicSortField, ComicFilterField> = {
     pagination: { pageNumber: 1, pageSize: 999999 },
     sort: { sortProperty: "createdAt", sortOrder: "asc" },
     filter: undefined,
   };
 
-  const allComicBooks: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(queryData);
+  const allComicBooks: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(queryData, userId);
 
   const completeLibraryCredits: ComicBookMetadataOnly = {};
 

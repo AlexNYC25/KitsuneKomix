@@ -48,6 +48,7 @@ export const fetchComicSeries = async (
     ComicSeriesSortField,
     ComicSeriesFilterField
   >,
+  userId: number
 ): Promise<ComicSeriesWithMetadata[]> => {
   try {
     const serviceDataPagination: RequestPaginationParametersValidated =
@@ -80,7 +81,7 @@ export const fetchComicSeries = async (
 
     for (const series of comicSeriesFromDb) {
       const currentComicSeriesMetadata: ComicSeriesMetadata =
-        await fetchAComicSeriesAssociatedMetadataById(series.id);
+        await fetchAComicSeriesAssociatedMetadataById(series.id, userId);
 
       (series as ComicSeriesWithMetadata).totalComicBooks =
         currentComicSeriesMetadata.totalComicBooks;
@@ -115,6 +116,7 @@ export const fetchComicSeries = async (
  */
 const fetchAComicSeriesAssociatedMetadataById = async (
   seriesId: number,
+  userId: number
 ): Promise<ComicSeriesMetadata> => {
   const queryData: QueryData = {
     page: 0,
@@ -127,7 +129,7 @@ const fetchAComicSeriesAssociatedMetadataById = async (
     ComicFilterField
   > = validateAndBuildQueryParams(queryData, "comics");
   const comicBooksBelongingToSeries: ComicBookWithMetadata[] =
-    await fetchComicBooksWithRelatedMetadata(serviceData);
+    await fetchComicBooksWithRelatedMetadata(serviceData, userId);
 
   const totalComicBooks: number = comicBooksBelongingToSeries.length;
   const totalSize: number = comicBooksBelongingToSeries.reduce(
@@ -429,7 +431,7 @@ const compileComicSeriesLevelFilterValues = (comicSeries: ComicSeriesWithMetadat
  * The response shape mirrors MetadataExpandedWithSeriesCompiledSchema, so the route can
  * return it directly under the `data` key.
  */
-export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Promise<ComicSeriesFilterValues> => {
+export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (userId: number): Promise<ComicSeriesFilterValues> => {
   // Fetch all comic series with their metadata using a large page size to ensure we get all series in one request.
   // fetchComicSeries handles pagination and metadata enrichment (credits and years) per series.
   const queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField> = {
@@ -438,7 +440,7 @@ export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (): Prom
     filter: undefined,
   };
 
-  const allSeriesWithMetadata: ComicSeriesWithMetadata[] = await fetchComicSeries(queryData);
+  const allSeriesWithMetadata: ComicSeriesWithMetadata[] = await fetchComicSeries(queryData, userId);
 
   const completeLibraryCredits = {};
 
