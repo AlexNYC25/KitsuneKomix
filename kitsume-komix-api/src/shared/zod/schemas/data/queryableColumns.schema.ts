@@ -16,6 +16,7 @@ export const QueryableDomainFieldConfig = {
 			"id",
 			"seriesId",
 			"hash",
+			"duplicateHash",
 			"title",
 			"series",
 			"issueNumber",

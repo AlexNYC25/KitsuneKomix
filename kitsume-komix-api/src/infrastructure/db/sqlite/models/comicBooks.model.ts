@@ -1,5 +1,5 @@
 import { asc, desc, eq, ilike, sql } from "drizzle-orm";
-import { SQLiteSelect } from "drizzle-orm/sqlite-core";
+import type { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
@@ -65,6 +65,24 @@ const addFilteringToQuery = <T extends SQLiteSelect>(
       break;
     case "hash":
       query.where(eq(comicBooksTable.hash, filterValue));
+      break;
+    case "duplicateHash":
+      if (filterValue === "true") {
+        query.where(sql`${comicBooksTable.hash} IN (
+          SELECT ${comicBooksTable.hash}
+          FROM ${comicBooksTable}
+          GROUP BY ${comicBooksTable.hash}
+          HAVING COUNT(*) > 1
+        )`);
+      }
+      if (filterValue === "false") {
+        query.where(sql`${comicBooksTable.hash} IN (
+          SELECT ${comicBooksTable.hash}
+          FROM ${comicBooksTable}
+          GROUP BY ${comicBooksTable.hash}
+          HAVING COUNT(*) = 1
+        )`);
+      }
       break;
     case "title":
       query.where(ilike(comicBooksTable.title, `%${filterValue}%`));
