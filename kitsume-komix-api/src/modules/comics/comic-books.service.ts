@@ -1,4 +1,11 @@
 import { apiLogger } from "#logger/loggers.ts";
+
+import { 
+  assembleComicBookMetadataBatch, 
+  assembleComicBookThumbnailsBatch, 
+  assembleComicBookReadStatusBatch 
+} from "#modules/comics/index.ts";
+
 import {
   deleteComicBook,
   getComicBookById as dbGetComicBookById,
@@ -7,10 +14,8 @@ import {
   getRandomBook,
 } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 import {
-  getThumbnailsByComicBookId,
-  getThumbnailsByComicBookIds,
+  getThumbnailsByComicBookId
 } from "#infrastructure/db/sqlite/models/comicBookThumbnails.model.ts";
-import { getMetadataForComicBooksBatch } from "#infrastructure/db/sqlite/models/comicMetadataBatch.model.ts";
 import { getFileNameFromPath } from "#utilities/file.ts";
 
 import {
@@ -62,9 +67,11 @@ import type {
  * - /api/comic-books/all
  * - /api/comic-books/latest
  * - /api/comic-books/newest
+ * - /api/comic-books/duplicates
  */
 export const fetchComicBooksWithRelatedMetadata = async (
   queryData: RequestParametersValidated<ComicSortField, ComicFilterField>,
+  userId: number
 ): Promise<ComicBookWithMetadata[]> => {
   try {
     const serviceDataPagination: RequestPaginationParametersValidated =
@@ -80,6 +87,9 @@ export const fetchComicBooksWithRelatedMetadata = async (
     const serviceDataSort: RequestSortParametersValidated<ComicSortField> =
       queryData.sort;
 
+    
+    // Fetch comic books with applied filters, sorting, and pagination.
+    // Note: This initial fetch does not include metadata or thumbnails.
     const comicsFromDb: ComicBook[] =
       await getComicBooksWithMetadataFilteringSorting({
         filters: resolvedFilters,
@@ -93,35 +103,21 @@ export const fetchComicBooksWithRelatedMetadata = async (
         limit: serviceDataPagination.pageSize + 1,
       });
 
-    const comicBookIds = comicsFromDb.map((comic) => comic.id);
+    const comicBooksWithMetadata: Partial<ComicBookWithMetadata>[] = await assembleComicBookMetadataBatch(comicsFromDb);
 
-    const [_metadataMap, thumbnails] = await Promise.all([
-      getMetadataForComicBooksBatch(comicBookIds),
-      getThumbnailsByComicBookIds(comicBookIds),
-    ]);
+    const comicBooksWithThumbnails: Partial<ComicBookWithMetadata>[] = await assembleComicBookThumbnailsBatch(comicBooksWithMetadata);
 
-    const thumbnailMap = new Map<string, string | undefined>();
-    thumbnails.forEach((thumb) => {
-      const existing = thumbnailMap.get(thumb.comicBookId.toString());
-      if (!existing) {
-        thumbnailMap.set(
-          thumb.comicBookId.toString(),
-          `/api/image/thumbnails/${getFileNameFromPath(thumb.filePath)}`,
-        );
+    const comicBooksWithUserHistory: Partial<ComicBookWithMetadata>[] = await assembleComicBookReadStatusBatch(comicBooksWithThumbnails, userId!);
+
+    // now we verify the final structure is a full ComicBookWithMetadata for the return type, if not we throw an error
+    const finalComicBooksWithMetadata: ComicBookWithMetadata[] = comicBooksWithUserHistory.map((comic) => {
+      if (!comic.id || !comic.title) {
+        throw new Error("Invalid comic book data: missing required fields.");
       }
+      return comic as ComicBookWithMetadata;
     });
 
-    const comicsWithMetadata: ComicBookWithMetadata[] = comicsFromDb.map(
-      (comic) => {
-        const thumbnailUrl = thumbnailMap.get(comic.id.toString());
-        return {
-          ...comic,
-          thumbnailUrl,
-        };
-      },
-    );
-
-    return comicsWithMetadata;
+    return finalComicBooksWithMetadata;
   } catch (error) {
     apiLogger.error("Error fetching comic books with related metadata:" + error);
     throw error;
@@ -320,6 +316,8 @@ const attachMetadataToComicBook = async (
     locations: await getLocationsByComicBookId(comic.id),
     storyArcs: await getStoryArcsByComicBookId(comic.id),
     seriesGroups: await getSeriesGroupsByComicBookId(comic.id),
+    read: false, // default value; actual read status should be attached separately based on user
+    lastReadPage: undefined, // default value; actual last read page should be attached separately based on user
   };
 
   return metadata;
