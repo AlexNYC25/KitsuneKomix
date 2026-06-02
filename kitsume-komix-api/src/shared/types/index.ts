@@ -22,6 +22,7 @@ export * from "./comicSeries.type.ts";
 export * from "./comicPages.type.ts";
 export * from "./comicThumbnails.type.ts";
 export * from "./comicMetadataBatch.type.ts";
+export * from "./comicHistory.type.ts";
 
 // Re-export auth types
 export * from "./auth.type.ts";
