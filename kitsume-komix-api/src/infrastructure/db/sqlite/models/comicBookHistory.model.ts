@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { getClient } from "../client.ts";
 
@@ -6,7 +6,7 @@ import { comicBookHistoryTable } from "#infrastructure/db/sqlite/schemas/index.t
 
 import { dbLogger } from "#logger/loggers.ts";
 
-import type { ComicBookHistory, NewComicBookHistory } from "#types/index.ts";
+import type { ComicBookHistory, NewComicBookHistory, BatchComicBookHistory } from "#types/index.ts";
 
 /**
  * Record a new comic book history entry.
@@ -95,6 +95,49 @@ export const updateComicBookHistory = async (
     return id;
   } catch (error) {
     dbLogger.error("Error updating comic book history:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Bulk fetch comic book history records for a user across multiple comic book IDs.
+ * @param userId The ID of the user to fetch history for.
+ * @param comicBookIds The list of comic book IDs to fetch history records for.
+ * @returns 
+ */
+export const getComicBooksHistoryByUserIdBulk = async (
+  userId: number,
+  comicBookIds: number[],
+): Promise<BatchComicBookHistory> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .select()
+      .from(comicBookHistoryTable)
+      .where(
+        and(
+          eq(comicBookHistoryTable.userId, userId),
+          inArray(comicBookHistoryTable.comicBookId, (comicBookIds)),
+        ),
+      )
+      .all();
+
+    // Transform the result into a record keyed by comicBookId for easy lookup
+    const historyRecord: BatchComicBookHistory = {};
+    result.forEach((history) => {
+      if (history.comicBookId) {
+        historyRecord[history.comicBookId] = history;
+      }
+    });
+
+    return historyRecord;
+  } catch (error) {
+    dbLogger.error("Error fetching comic book history in bulk:" + error);
     throw error;
   }
 };
