@@ -25,6 +25,7 @@ export {
   compileEntireComicBooksMetadataAndAdditionalComicBookInfo,
   updateComicBookMetadata,
   updateComicBookMetadataBulk,
+  assembleComicBookMetadataBatch,
 } from "./comic-metadata.service.ts";
 
 export {
@@ -35,7 +36,7 @@ export {
 export {
   checkComicReadByUser,
   setComicReadByUser,
-  attachReadStatusToComicBooksForUser,
+  assembleComicBookReadStatusBatch,
 } from "./comic-reading.service.ts";
 
 export {
@@ -43,6 +44,7 @@ export {
   getComicThumbnailByComicIdThumbnailId,
   deleteComicsThumbnailById,
   createCustomThumbnail,
+  assembleComicBookThumbnailsBatch,
 } from "./comic-thumbnails.service.ts";
 
 export {
