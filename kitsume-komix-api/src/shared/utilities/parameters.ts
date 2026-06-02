@@ -25,6 +25,7 @@ import {
 
 export const VALIDATE_COMIC_KEY = "comics"
 export const VALIDATE_COMIC_SERIES_KEY = "comicSeries"
+export const VALIDATE_COMIC_READLISTS_KEY = "comicReadlists";
 
 // ============================================================================
 // PARAMETER VALIDATION FUNCTIONS
@@ -173,6 +174,16 @@ export function validateAndBuildQueryParams(
   queryData: QueryDataMultiFilter,
   dataType: typeof VALIDATE_COMIC_SERIES_KEY,
 ): RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>;
+
+export function validateAndBuildQueryParams(
+  queryData: QueryData,
+  dataType: typeof VALIDATE_COMIC_READLISTS_KEY,
+): RequestParametersValidated<ComicReadlistsSortField, ComicReadlistsFilterField>;
+
+export function validateAndBuildQueryParams(
+  queryData: QueryDataMultiFilter,
+  dataType: typeof VALIDATE_COMIC_READLISTS_KEY,
+): RequestParametersValidated<ComicReadlistsSortField, ComicReadlistsFilterField>;
 
 export function validateAndBuildQueryParams(
   queryData: QueryData,
