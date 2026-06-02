@@ -1,12 +1,21 @@
 import { apiLogger } from "#logger/loggers.ts";
+
+import { fetchComicBooksWithRelatedMetadata } from "#modules/comics/index.ts";
 import {
   deleteComicStoryArcById,
   getComicStoryArcById,
   getComicStoryArcsFilteringSorting,
   insertComicStoryArc,
 } from "#infrastructure/db/sqlite/models/comicStoryArcs.model.ts";
+import { getComicBooksWithMetadataFilteringSorting } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 
 import {
+  validateAndBuildQueryParams,
+  validatePagination,
+  VALIDATE_COMIC_KEY
+} from "#utilities/parameters.ts";
+
+import type {
   ComicReadlistsFilterField,
   ComicReadlistsSortField,
   ComicStoryArc,
@@ -18,6 +27,14 @@ import {
   //
   RequestParametersValidated,
   RequestSortParametersValidated,
+  ComicBook,
+  ComicSortField,
+  ComicFilterField,
+  QueryDataMultiFilter,
+  ComicBookFilterItem,
+  ComicStoryArcWithComicIds,
+  ComicBookWithMetadata,
+  ComicStoryArcWithComicBooks
 } from "#types/index.ts";
 
 export const fetchComicStoryArcs = async (
@@ -25,7 +42,8 @@ export const fetchComicStoryArcs = async (
     ComicReadlistsSortField,
     ComicReadlistsFilterField
   >,
-) => {
+  userId: number
+): Promise<ComicStoryArcWithComicBooks[]> => {
   const serviceDataPagination: RequestPaginationParametersValidated =
     queryData.pagination;
   const serviceDataFilter:
@@ -35,7 +53,7 @@ export const fetchComicStoryArcs = async (
     ComicReadlistsSortField
   > = queryData.sort;
 
-  const comicStoryArcs = await getComicStoryArcsFilteringSorting({
+  const comicStoryArcs: ComicStoryArc[] = await getComicStoryArcsFilteringSorting({
     filters: [serviceDataFilter] as ComicStoryArcFilterItem[],
     sort: {
       property: serviceDataSort.sortProperty,
@@ -46,7 +64,48 @@ export const fetchComicStoryArcs = async (
     limit: serviceDataPagination.pageSize + 1,
   });
 
-  return comicStoryArcs;
+  const comicStoryArcsFormatted: ComicStoryArcWithComicBooks[] = [];
+
+  for (const arc of comicStoryArcs) {
+    // we need to fetch the comic in the story arc
+    const serviceParametersDataForComicsInStoryArc: QueryDataMultiFilter = {
+      page: 0,
+      pageSize: 9999, // we want to fetch all comics in the story arc, so we set a very high page size
+      sort: "storyArcPosition",
+      sortDirection: "asc",
+      filter: "comicStoryArcId",
+      filterProperty: arc.id.toString(),
+    }
+    
+    const subServiceData: RequestParametersValidated< ComicSortField, ComicFilterField > = validateAndBuildQueryParams(serviceParametersDataForComicsInStoryArc, VALIDATE_COMIC_KEY);
+
+    const comicBooksInStoryArc: ComicBookWithMetadata[] = await fetchComicBooksWithRelatedMetadata(subServiceData, userId);
+
+    // we specifically want the total count of comics
+    const totalCountOfComicsInStoryArc = comicBooksInStoryArc.length;
+
+    // calculate the total size of the readlist/story arc
+    const totalSizeOfStoryArc = comicBooksInStoryArc.reduce((totalSize, comicBook) => {
+      return totalSize + (comicBook.fileSize || 0);
+    }, 0);
+
+    const totalBookBeingReadInStoryArc = comicBooksInStoryArc.filter((comicBook) => comicBook.lastReadPage).length;
+
+    const totalBooksTheUserHasReadInStoryArc = comicBooksInStoryArc.filter((comicBook) => comicBook.read).length;
+
+    comicStoryArcsFormatted.push({
+      ...arc,
+      comicBooks: comicBooksInStoryArc,
+      totalNumberOfComics: totalCountOfComicsInStoryArc,
+      totalSizeOfStoryArc: totalSizeOfStoryArc,
+      numberOfComicsBeingReadByUser: totalBookBeingReadInStoryArc,
+      numberOfComicsReadByUser: totalBooksTheUserHasReadInStoryArc
+    });
+  }
+
+  
+
+  return comicStoryArcsFormatted;
 };
 
 export const fetchComicStoryArcById = async (
