@@ -1,4 +1,7 @@
-import { ComicStoryArc } from "./database.types.ts";
+import type { z } from "zod";
+import type { ReadListSchema } from "#zod/schemas/data/comicReadlists.schema.ts";
+
+import type { ComicStoryArc } from "./database.types.ts";
 import type {
   ComicReadlistsFilterField,
   ComicReadlistsSortField,
@@ -29,3 +32,5 @@ export type ComicStoryArcsFilteringAndSortingParams = {
   offset?: number;
   limit?: number;
 };
+
+export type ComicStoryArcWithComicBooks = z.infer<typeof ReadListSchema>;
