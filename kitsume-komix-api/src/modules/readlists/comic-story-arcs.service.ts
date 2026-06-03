@@ -7,7 +7,6 @@ import {
   getComicStoryArcsFilteringSorting,
   insertComicStoryArc,
 } from "#infrastructure/db/sqlite/models/comicStoryArcs.model.ts";
-import { getComicBooksWithMetadataFilteringSorting } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 
 import {
   validateAndBuildQueryParams,
@@ -102,8 +101,6 @@ export const fetchComicStoryArcs = async (
       numberOfComicsReadByUser: totalBooksTheUserHasReadInStoryArc
     });
   }
-
-  
 
   return comicStoryArcsFormatted;
 };
