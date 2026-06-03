@@ -115,6 +115,19 @@ export const QueryableDomainFieldConfig = {
 			"updatedAt",
 		]),
 	},
+	comicSeriesGroups: {
+		filter: asNonEmptyTuple([
+			"id",
+			"name",
+			"description",
+		]),
+		sort: asNonEmptyTuple([
+			"id",
+			"name",
+			"createdAt",
+			"updatedAt",
+		]),
+	},
 } as const;
 
 export type QueryableDomain = keyof typeof QueryableDomainFieldConfig;
