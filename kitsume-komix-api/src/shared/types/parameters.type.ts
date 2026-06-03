@@ -20,3 +20,6 @@ export type ComicSeriesFilterField = ExtractFilterField<"comicSeries">;
 
 export type ComicReadlistsSortField = ExtractSortField<"comicReadlists">;
 export type ComicReadlistsFilterField = ExtractFilterField<"comicReadlists">;
+
+export type ComicSeriesGroupsSortField = ExtractSortField<"comicSeriesGroups">;
+export type ComicSeriesGroupsFilterField = ExtractFilterField<"comicSeriesGroups">;

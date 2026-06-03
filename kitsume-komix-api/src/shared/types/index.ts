@@ -18,6 +18,7 @@ export * from "./user.type.ts";
 export * from "./comicLibrary.type.ts";
 export * from "./comicBook.type.ts";
 export * from "./comicStoryArcs.type.ts";
+export * from "./comicSeriesGroup.type.ts";
 export * from "./comicSeries.type.ts";
 export * from "./comicPages.type.ts";
 export * from "./comicThumbnails.type.ts";
