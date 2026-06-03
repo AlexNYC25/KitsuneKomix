@@ -11,6 +11,8 @@ import type {
   RequestPaginationParametersValidated,
   RequestParametersValidated,
   SortOrder,
+  ComicSeriesGroupsFilterField,
+  ComicSeriesGroupsSortField
 } from "#types/index.ts";
 
 import {
@@ -26,6 +28,7 @@ import {
 export const VALIDATE_COMIC_KEY = "comics"
 export const VALIDATE_COMIC_SERIES_KEY = "comicSeries"
 export const VALIDATE_COMIC_READLISTS_KEY = "comicReadlists";
+export const VALIDATE_COMIC_SERIES_GROUP_KEY = "comicSeriesGroups";
 
 // ============================================================================
 // PARAMETER VALIDATION FUNCTIONS
@@ -184,6 +187,16 @@ export function validateAndBuildQueryParams(
   queryData: QueryDataMultiFilter,
   dataType: typeof VALIDATE_COMIC_READLISTS_KEY,
 ): RequestParametersValidated<ComicReadlistsSortField, ComicReadlistsFilterField>;
+
+export function validateAndBuildQueryParams(
+  queryData: QueryData,
+  dataType: typeof VALIDATE_COMIC_SERIES_GROUP_KEY,
+): RequestParametersValidated<ComicSeriesGroupsSortField, ComicSeriesGroupsFilterField>;
+
+export function validateAndBuildQueryParams(
+  queryData: QueryDataMultiFilter,
+  dataType: typeof VALIDATE_COMIC_SERIES_GROUP_KEY,
+): RequestParametersValidated<ComicSeriesGroupsSortField, ComicSeriesGroupsFilterField>;
 
 export function validateAndBuildQueryParams(
   queryData: QueryData,
