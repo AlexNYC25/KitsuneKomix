@@ -36,17 +36,14 @@ const addFilteringToQuery = <T extends SQLiteSelect>(
 
   switch (filterProperty) {
     case "id":
-      query.where(eq(comicStoryArcsTable.id, Number(filterValue)));
-      break;
+      return query.where(eq(comicStoryArcsTable.id, Number(filterValue)));
     case "name":
-      query.where(ilike(comicStoryArcsTable.name, `%${filterValue}%`));
-      break;
+      return query.where(ilike(comicStoryArcsTable.name, `%${filterValue}%`));
     case "description":
-      query.where(ilike(comicStoryArcsTable.description, `%${filterValue}%`));
-      break;
+      return query.where(ilike(comicStoryArcsTable.description, `%${filterValue}%`));
+    default:
+      return query; // If filter property is not recognized, return the original query without modification
   }
-
-  return query;
 };
 
 /**
@@ -66,20 +63,16 @@ const addSortingToQuery = <T extends SQLiteSelect>(
 
   switch (sortProperty) {
     case "id":
-      query.orderBy(direction(comicStoryArcsTable.id));
-      break;
+      return query.orderBy(direction(comicStoryArcsTable.id));
     case "name":
-      query.orderBy(direction(comicStoryArcsTable.name));
-      break;
+      return query.orderBy(direction(comicStoryArcsTable.name));
     case "createdAt":
-      query.orderBy(direction(comicStoryArcsTable.createdAt));
-      break;
+      return query.orderBy(direction(comicStoryArcsTable.createdAt));
     case "updatedAt":
-      query.orderBy(direction(comicStoryArcsTable.updatedAt));
-      break;
+      return query.orderBy(direction(comicStoryArcsTable.updatedAt));
+    default:
+      return query; // If sort property is not recognized, return the original query without modification
   }
-
-  return query;
 };
 
 /**
@@ -131,7 +124,9 @@ export const getComicStoryArcsFilteringSorting = async (
     }
 
     if (serviceDetails.filters && serviceDetails.filters.length > 0) {
-      query = addFilteringToQuery(serviceDetails.filters[0], query);
+      for (const filter of serviceDetails.filters) {
+        query = addFilteringToQuery(filter, query);
+      }
     }
 
     return await query;
