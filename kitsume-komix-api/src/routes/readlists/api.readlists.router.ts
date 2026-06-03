@@ -1,8 +1,9 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod"
-import camelcasekeys from "camelcase-keys";
 
 import { requireAuth } from "#modules/auth/middleware/authChecks.ts";
+
+import { fetchComicStoryArcs } from "#modules/readlists/comic-story-arcs.service.ts";
 
 import {
   ComicStoryArcMultipleResponseSchema,
@@ -12,6 +13,7 @@ import {
 } from "#zod/schemas/response.schema.ts";
 import {
   AddReadlistSchema,
+  PaginationSortMultiFilterComicQuerySchema,
   PaginationSortFilterQuerySchema,
   ParamComicBookIdSchema,
   ParamIdSchema,
@@ -20,7 +22,14 @@ import {
 import type {
   AppEnv,
   QueryData,
+  QueryDataMultiFilter,
+  ComicReadlistsSortField,
+  ComicReadlistsFilterField,
+  RequestParametersValidated,
+  ComicStoryArcWithComicBooks
 } from "#types/index.ts";
+
+import { validateAndBuildQueryParams, VALIDATE_COMIC_READLISTS_KEY } from "#utilities/parameters.ts";
 
 const app = new OpenAPIHono<AppEnv>();
 
@@ -43,13 +52,13 @@ app.openapi(
     tags: ["Readlists"],
     middleware: [requireAuth],
     request: {
-      query: PaginationSortFilterQuerySchema,
+      query: PaginationSortMultiFilterComicQuerySchema,
     },
     responses: {
       200: {
         content: {
           "application/json": {
-            schema: ComicStoryArcMultipleResponseSchema,
+            schema: ReadlistsResponseSchema,
           },
         },
         description: "Readlists retrieved successfully",
@@ -81,41 +90,30 @@ app.openapi(
     },
   }),
   async (c) => {
-    const userId = c.get("userId")!;
+    const queryData: QueryDataMultiFilter = c.req.valid("query");
+    const userId: number = c.get("userId")!;
 
-    // Extract and construct pagination parameters
-    const query = c.req.valid("query");
-    const paginationParams: QueryData = {
-      page: query.page,
-      pageSize: query.pageSize,
-    };
+    const serviceData: RequestParametersValidated< ComicReadlistsSortField, ComicReadlistsFilterField > = validateAndBuildQueryParams(queryData, VALIDATE_COMIC_READLISTS_KEY);
 
-    /*
-    // Construct filter parameters
-    const filterParams: RequestFilterParameters = {
-      filterProperty: query.filterProperty,
-      filter: query.filter,
-    };
+    try {
+      const readlists: ComicStoryArcWithComicBooks[] = await fetchComicStoryArcs(serviceData, userId);
 
-    // Construct sort parameters
-    const sortParams: RequestSortParameters = {
-      sortProperty: query.sort,
-      sortOrder: query.sortDirection,
-    };
-    */
-
-    //const readlists = await fetchAllComicStoryArcs(paginationParams, filterParams, sortParams);
-
-    const readlists = null; //TODO: implement readlist fetching logic
-
-    if (!readlists) {
+      return c.json({
+        data: readlists,
+        meta: {
+          count: readlists.length,
+          hasNextPage: false,
+          currentPage: 1,
+          pageSize: 9999
+        },
+      }, 200);
+    } catch (error) {
+      console.error("Error fetching readlists:", error);
       return c.json(
-        { message: "Error fetching readlists" },
+        { message: "Error fetching readlists", error: String(error) },
         500,
       );
     }
-
-    return c.json(camelcasekeys(readlists, { deep: true }), 200);
   },
 );
 
@@ -130,7 +128,7 @@ app.openapi(
     path: "/{id}",
     summary: "Get a readlist by ID",
     tags: ["Readlists"],
-    middlware: [requireAuth],
+    middleware: [requireAuth],
     request: { params: ParamIdSchema },
     responses: {
       200: {
@@ -314,65 +312,6 @@ app.openapi(
     }
     //TODO: implement readlist addition logic
     return c.json({ message: "Readlist addition not implemented yet" }, 501);
-  },
-);
-
-/**
- * GET /api/readlists/comic-book/{comicBookId}
- *
- * Get all readlists containing a specific comic book.
- */
-app.openapi(
-  createRoute({
-    method: "get",
-    path: "/comic-book/{comicBookId}",
-    summary: "Get readlists containing a specific comic book",
-    tags: ["Readlists"],
-    middleware: [requireAuth],
-    request: { params: ParamComicBookIdSchema },
-    responses: {
-      200: {
-        content: {
-          "application/json": {
-            schema: ReadlistsResponseSchema,
-          },
-        },
-        description: "Readlists retrieved successfully",
-      },
-      400: {
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-        description: "Invalid comic book ID",
-      },
-      401: {
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-        description: "Unauthorized",
-      },
-      501: {
-        content: { "application/json": { schema: MessageResponseSchema } },
-        description: "Not implemented",
-      },
-    },
-  }),
-  (c) => {
-    const { comicBookId } = c.req.valid("param");
-
-    const userId = c.get("userId")!;
-
-    return c.json(
-      {
-        message:
-          `Readlists for comic book ID ${comicBookId} not implemented yet`,
-      },
-      501,
-    );
   },
 );
 
