@@ -71,7 +71,6 @@ export const QueryableDomainFieldConfig = {
 			"createdAt",
 			"updatedAt",
       "storyArcPosition",
-      "seriesGroupPosition",
 		]),
 	},
 	comicSeries: {
@@ -93,6 +92,7 @@ export const QueryableDomainFieldConfig = {
 			"lettererId",
 			"editorId",
 			"coverArtistId",
+			"seriesGroupId",
 		]),
 		sort: asNonEmptyTuple([
 			"id",
@@ -100,6 +100,7 @@ export const QueryableDomainFieldConfig = {
 			"createdAt",
 			"updatedAt",
 			"publicationDate",
+			"seriesGroupPosition",
 		]),
 	},
 	comicReadlists: {
