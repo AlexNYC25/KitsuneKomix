@@ -1,5 +1,6 @@
-import { and, asc, desc, eq, ilike, inArray, sql, SQL } from "drizzle-orm";
-import { SQLiteSelect } from "drizzle-orm/sqlite-core";
+import { and, asc, desc, eq, ilike, inArray, sql } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
+import type { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
@@ -21,6 +22,7 @@ import {
   comicLibrariesTable,
   comicSeriesBooksTable,
   comicSeriesTable,
+  comicBookSeriesGroupsTable
 } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
@@ -167,6 +169,16 @@ const buildFilterCondition = (
           .innerJoin(comicBookCoverArtistsTable, eq(comicSeriesBooksTable.comicBookId, comicBookCoverArtistsTable.comicBookId))
           .where(eq(comicBookCoverArtistsTable.comicCoverArtistId, Number(filterValue))),
       );
+    case "seriesGroupId":
+      return inArray(
+        comicSeriesTable.id,
+        db
+          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
+          .from(comicSeriesBooksTable)
+          .innerJoin(comicBookSeriesGroupsTable, eq(comicSeriesBooksTable.comicBookId, comicBookSeriesGroupsTable.comicBookId))
+          .where(eq(comicBookSeriesGroupsTable.comicSeriesGroupId, Number(filterValue)))
+      
+    );
     default:
       return undefined;
   }
@@ -211,6 +223,18 @@ const addSortingToQuery = <T extends SQLiteSelect>(
             WHERE csb.comic_series_id = ${comicSeriesTable.id}
             ORDER BY CAST(cb.issue_number AS REAL), cb.issue_number ASC
             LIMIT 1
+          )`,
+        ),
+      );
+      break;
+    case "seriesGroupPosition":
+      query.orderBy(
+        direction(
+          sql`(
+            SELECT MIN(cbsg.position)
+            FROM comic_series_books csb
+            JOIN comic_book_series_groups cbsg ON csb.comic_book_id = cbsg.comic_book_id
+            WHERE csb.comic_series_id = ${comicSeriesTable.id}
           )`,
         ),
       );
