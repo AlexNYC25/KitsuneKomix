@@ -1,13 +1,146 @@
-import { eq } from "drizzle-orm";
+import { asc, desc, eq, ilike } from "drizzle-orm";
+import type { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
 import {
   comicBookSeriesGroupsTable,
   comicSeriesGroupsTable,
+  comicBooksTable
 } from "#infrastructure/db/sqlite/schemas/index.ts";
 
-import type { ComicSeriesGroup } from "#types/index.ts";
+import type { 
+  ComicSeriesGroup,
+  ComicSeriesGroupsFilterItem,
+  ComicSeriesGroupsSortField,
+  ComicSeriesGroupsFilteringAndSortingParams
+} from "#types/index.ts";
+
+import {
+  env
+} from "#config/env.ts";
+
+/**
+ * Exclusive dynamic filtering function for comic series groups.
+ * Filters series groups based on allowed filter properties and values.
+ * @param filter Filter object with property and value to filter by
+ * @param query The current query object to apply the filter to
+ * @returns The modified query object with the filter applied
+ */
+const addFilteringToQuery = <T extends SQLiteSelect>(
+  filter: ComicSeriesGroupsFilterItem,
+  query: T
+): T => {
+  const { filterProperty, filterValue } = filter;
+
+  switch (filterProperty) {
+    case "id":
+      return query.where(eq(comicSeriesGroupsTable.id, Number(filterValue)));
+    case "name":
+      return query.where(ilike(comicSeriesGroupsTable.name, `%${filterValue}%`));
+    case "description":
+      return query.where(ilike(comicSeriesGroupsTable.description, `%${filterValue}%`));
+    default:
+      return query; // If filter property is not recognized, return the original query without modification
+  }
+}
+
+/**
+ * Exclusive dynamic sorting function for comic story arcs.
+ * Sorts series groups based on allowed sort properties and directions.
+ * @param sortProperty The field to sort by
+ * @param sortDirection Sort direction, either "asc" or "desc"
+ * @param query The query object to apply the sorting to
+ * @returns The modified query object with the sorting applied
+ */
+const addSortingToQuery = <T extends SQLiteSelect>(
+  sortProperty: ComicSeriesGroupsSortField,
+  sortDirection: string,
+  query: T
+): T => {
+  const direction = sortDirection === "asc" ? asc : desc;
+
+  switch (sortProperty) {
+    case "id":
+      return query.orderBy(direction(comicSeriesGroupsTable.id));
+    case "name":
+      return query.orderBy(direction(comicSeriesGroupsTable.name));
+    case "createdAt":
+      return query.orderBy(direction(comicSeriesGroupsTable.createdAt));
+    case "updatedAt":
+      return query.orderBy(direction(comicSeriesGroupsTable.updatedAt));
+    default:
+      return query; // If sort property is not recognized, return the original query without modification
+  }
+}
+
+/**
+ * Gets comic collections/series groups with optional filtering and sorting.
+ * @param serviceDetails Filtering and sorting parameters 
+ * @returns 
+ */
+export const getComicSeriesGroupsFilteringSorting = async (
+  serviceDetails: ComicSeriesGroupsFilteringAndSortingParams
+): Promise<ComicSeriesGroup[]> => {
+  const { db, client } = getClient();
+  
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  const offset = serviceDetails.offset ?? 0;
+  const limit = serviceDetails.limit ?? env.PAGE_SIZE;
+
+  try {
+    let query = db.select(
+      {
+        id: comicSeriesGroupsTable.id,
+        name: comicSeriesGroupsTable.name,
+        description: comicSeriesGroupsTable.description,
+        createdAt: comicSeriesGroupsTable.createdAt,
+        updatedAt: comicSeriesGroupsTable.updatedAt,
+      }
+    ).from(comicSeriesGroupsTable)
+    .leftJoin(
+      comicBookSeriesGroupsTable,
+      eq(
+        comicSeriesGroupsTable.id,
+        comicBookSeriesGroupsTable.comicSeriesGroupId
+      )
+    )
+    .leftJoin(
+      comicBooksTable,
+      eq(
+        comicBookSeriesGroupsTable.comicBookId,
+        comicBooksTable.id
+      )
+    )
+    .groupBy(comicSeriesGroupsTable.id)
+    .offset(offset)
+    .limit(limit)
+    .$dynamic();
+
+    if (serviceDetails.sort?.property && serviceDetails.sort?.order) {
+      query = addSortingToQuery(
+        serviceDetails.sort.property,
+        serviceDetails.sort.order,
+        query
+      );
+    }
+
+    if (serviceDetails.filters && serviceDetails.filters.length > 0) {
+      for (const filter of serviceDetails.filters) {
+        query = addFilteringToQuery(filter, query);
+      }
+    }
+
+    return await query;
+  } catch (error) {
+    dbLogger.error("Error fetching comic series groups with filtering and sorting:" + error);
+    throw new Error("Failed to fetch comic series groups.");
+  }
+
+}
 
 /**
  * Inserts a new comic series group into the database
