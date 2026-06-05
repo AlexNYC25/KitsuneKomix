@@ -2,7 +2,7 @@
 import { getComicSeriesGroupsFilteringSorting } from "#infrastructure/db/sqlite/models/comicSeriesGroups.model.ts";
 import { getComicSeriesWithMetadataFilteringSorting } from "#infrastructure/db/sqlite/models/comicSeries.model.ts";
 
-import { fetchComicSeries } from "#modules/series/index.ts"; 
+import { fetchComicSeriesWithRelatedMetadata } from "#modules/series/index.ts"; 
 
 import {
   validateAndBuildQueryParams,
@@ -67,7 +67,7 @@ export const fetchComicSeriesGroups = async (
 
     const subServiceData: RequestParametersValidated< ComicSeriesSortField, ComicSeriesFilterField> = validateAndBuildQueryParams(serviceParametersDataForComicInSeriesGroup, VALIDATE_COMIC_SERIES_KEY);
 
-    const comicsSeriesInGroup: ComicSeriesWithMetadata[] = await fetchComicSeries(subServiceData, userId);
+    const comicsSeriesInGroup: ComicSeriesWithMetadata[] = await fetchComicSeriesWithRelatedMetadata(subServiceData, userId);
 
     // TODO: calculate totalSizeOfCollection, numberOfComicSeriesWithComicsReadByUser, numberOfComicSeriesWithComicsBeingReadByUser
     const finalGroupWithComics: ComicSeriesGroupWithComicBooks = {

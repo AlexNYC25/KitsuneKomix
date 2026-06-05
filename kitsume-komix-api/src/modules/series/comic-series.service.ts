@@ -35,6 +35,7 @@ import { dedupeById } from "#utilities/standardize.ts";
  * This includes the total number of comic books in each series, the total file size of all comic books in the series,
  * @param queryData - The validated query parameters for pagination, sorting, and filtering.
  * @returns A promise that resolves to an array of ComicSeries objects with related metadata
+ * 
  *
  * used by
  * - GET /api/comic-series/ (with pagination, sorting, and filtering)
@@ -43,11 +44,8 @@ import { dedupeById } from "#utilities/standardize.ts";
  * - GET /api/comic-series/updated
  * - GET /api/comic-series/{id}
  */
-export const fetchComicSeries = async (
-  queryData: RequestParametersValidated<
-    ComicSeriesSortField,
-    ComicSeriesFilterField
-  >,
+export const fetchComicSeriesWithRelatedMetadata = async (
+  queryData: RequestParametersValidated<ComicSeriesSortField, ComicSeriesFilterField>,
   userId: number
 ): Promise<ComicSeriesWithMetadata[]> => {
   try {
@@ -440,7 +438,7 @@ export const compileEntireSeriesMetadataAndAdditionalSeriesInfo = async (userId:
     filter: undefined,
   };
 
-  const allSeriesWithMetadata: ComicSeriesWithMetadata[] = await fetchComicSeries(queryData, userId);
+  const allSeriesWithMetadata: ComicSeriesWithMetadata[] = await fetchComicSeriesWithRelatedMetadata(queryData, userId);
 
   const completeLibraryCredits = {};
 
