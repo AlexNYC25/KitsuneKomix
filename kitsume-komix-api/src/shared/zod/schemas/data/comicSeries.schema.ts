@@ -24,7 +24,6 @@ export const ComicSeriesMetaData = z.object({
     example: [1990, 1991, 1992],
   }).optional(),
   credits: MetadataExpandedSchema.optional(),
-  comicBooks: z.array(ComicBookSchema).optional(),
 }).openapi({
   title: "ComicSeriesMetaData",
   description: "Metadata for a comic series, including total comic books, total size, and an optional thumbnail URL.",
