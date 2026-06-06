@@ -16,6 +16,7 @@
     "npm:camelcase-keys@^10.0.2": "10.0.2",
     "npm:chokidar@^4.0.3": "4.0.3",
     "npm:comic-metadata-tool@^1.3.3": "1.3.3",
+    "npm:drizzle-dbml-generator@0.10": "0.10.0_drizzle-orm@0.45.2__@libsql+client@0.15.15",
     "npm:drizzle-kit@~0.31.10": "0.31.10",
     "npm:drizzle-orm@0.45.2": "0.45.2_@libsql+client@0.15.15",
     "npm:drizzle-zod@~0.8.3": "0.8.3_drizzle-orm@0.45.2__@libsql+client@0.15.15_zod@4.4.3_@libsql+client@0.15.15",
@@ -917,6 +918,12 @@
     "detect-libc@2.1.2": {
       "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="
     },
+    "drizzle-dbml-generator@0.10.0_drizzle-orm@0.45.2__@libsql+client@0.15.15": {
+      "integrity": "sha512-cMZq9E3U3RlmE0uBeXyc6oWJ0royOkC6HiTlc9LDeMe+W87poZTzKoNYUyAxZrs4Q1RQtob+cGKiefV4ZoI8HA==",
+      "dependencies": [
+        "drizzle-orm"
+      ]
+    },
     "drizzle-kit@0.31.10": {
       "integrity": "sha512-7OZcmQUrdGI+DUNNsKBn1aW8qSoKuTH7d0mYgSP8bAzdFzKoovxEFnoGQp2dVs82EOJeYycqRtciopszwUf8bw==",
       "dependencies": [
@@ -1512,6 +1519,7 @@
       "npm:camelcase-keys@^10.0.2",
       "npm:chokidar@^4.0.3",
       "npm:comic-metadata-tool@^1.3.3",
+      "npm:drizzle-dbml-generator@0.10",
       "npm:drizzle-kit@~0.31.10",
       "npm:drizzle-orm@0.45.2",
       "npm:drizzle-zod@~0.8.3",
