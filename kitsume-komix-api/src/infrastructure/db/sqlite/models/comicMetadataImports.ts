@@ -80,7 +80,3 @@ export {
   getStoryArcsByComicBookId,
   unlinkStoryArcsToComicBook,
 } from "#infrastructure/db/sqlite/models/comicStoryArcs.model.ts";
-export {
-  getSeriesGroupsByComicBookId,
-  unlinkSeriesGroupsToComicBook,
-} from "#infrastructure/db/sqlite/models/comicSeriesGroups.model.ts";

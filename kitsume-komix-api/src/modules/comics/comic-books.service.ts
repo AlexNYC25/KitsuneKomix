@@ -33,7 +33,6 @@ import {
   getTeamsByComicBookId,
   getLocationsByComicBookId,
   getStoryArcsByComicBookId,
-  getSeriesGroupsByComicBookId,
 } from "#infrastructure/db/sqlite/models/comicMetadataImports.ts";
 
 import type {
@@ -315,7 +314,6 @@ const attachMetadataToComicBook = async (
     teams: await getTeamsByComicBookId(comic.id),
     locations: await getLocationsByComicBookId(comic.id),
     storyArcs: await getStoryArcsByComicBookId(comic.id),
-    seriesGroups: await getSeriesGroupsByComicBookId(comic.id),
     read: false, // default value; actual read status should be attached separately based on user
     lastReadPage: undefined, // default value; actual last read page should be attached separately based on user
   };

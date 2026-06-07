@@ -61,10 +61,6 @@ import {
 	insertComicStoryArc,
 	linkStoryArcToComicBook,
 } from "#db/sqlite/models/comicStoryArcs.model.ts";
-import {
-	insertComicSeriesGroup,
-	linkSeriesGroupToComicBook,
-} from "#db/sqlite/models/comicSeriesGroups.model.ts";
 
 import { insertComicPage } from "#db/sqlite/models/comicPages.model.ts";
 import { insertComicBookCover } from "#db/sqlite/models/comicBookCovers.model.ts";
@@ -569,12 +565,6 @@ export const saveComicBookMetadata = async (job: { comicId: number; filePath: st
 				values: standardizedMetadata.storyArcs,
 				insert: insertComicStoryArc,
 				link: linkStoryArcToComicBook,
-			},
-			{
-				label: "series group",
-				values: standardizedMetadata.seriesGroups,
-				insert: insertComicSeriesGroup,
-				link: linkSeriesGroupToComicBook,
 			},
 		];
 

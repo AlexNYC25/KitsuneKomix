@@ -60,8 +60,6 @@ import {
   unlinkLocationsToComicBook,
   getStoryArcsByComicBookId,
   unlinkStoryArcsToComicBook,
-  getSeriesGroupsByComicBookId,
-  unlinkSeriesGroupsToComicBook,
 } from "#infrastructure/db/sqlite/models/comicMetadataImports.ts";
 
 import { dedupeById } from "#utilities/standardize.ts";
@@ -121,7 +119,6 @@ export const fetchAComicsAssociatedMetadataById = async (
       teams: await getTeamsByComicBookId(id),
       locations: await getLocationsByComicBookId(id),
       storyArcs: await getStoryArcsByComicBookId(id),
-      seriesGroups: await getSeriesGroupsByComicBookId(id),
     };
 
     return {
@@ -214,9 +211,6 @@ export const updateComicBookMetadata = async (
               break;
             case "storyArcs":
               await unlinkStoryArcsToComicBook(comicId);
-              break;
-            case "seriesGroups":
-              await unlinkSeriesGroupsToComicBook(comicId);
               break;
           }
         } catch (error) {
