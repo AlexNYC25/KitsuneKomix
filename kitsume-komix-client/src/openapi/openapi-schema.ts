@@ -2073,14 +2073,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
+                    /** @description The specific property to sort comic series by */
+                    sort?: "id" | "name" | "createdAt" | "updatedAt" | "publicationDate" | "seriesGroupPosition";
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
+                    filterProperty?: ("id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId" | "seriesGroupId") | ("id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId" | "seriesGroupId")[];
                 };
                 header?: never;
                 path?: never;
@@ -2238,79 +2238,6 @@ export interface paths {
                                         updatedAt: string;
                                     }[];
                                 };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencilers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                    /**
-                                     * Format: uri
-                                     * @description URL to the primary thumbnail image for the comic book
-                                     * @example https://example.com/image/thumbnails/cover123.jpg
-                                     */
-                                    thumbnailUrl?: string;
-                                }[];
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -2393,14 +2320,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
+                    /** @description The specific property to sort comic series by */
+                    sort?: "id" | "name" | "createdAt" | "updatedAt" | "publicationDate" | "seriesGroupPosition";
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
+                    filterProperty?: ("id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId" | "seriesGroupId") | ("id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId" | "seriesGroupId")[];
                 };
                 header?: never;
                 path?: never;
@@ -2558,79 +2485,6 @@ export interface paths {
                                         updatedAt: string;
                                     }[];
                                 };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencilers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                    /**
-                                     * Format: uri
-                                     * @description URL to the primary thumbnail image for the comic book
-                                     * @example https://example.com/image/thumbnails/cover123.jpg
-                                     */
-                                    thumbnailUrl?: string;
-                                }[];
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -2713,14 +2567,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
+                    /** @description The specific property to sort comic series by */
+                    sort?: "id" | "name" | "createdAt" | "updatedAt" | "publicationDate" | "seriesGroupPosition";
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s) for comic series. Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId";
+                    filterProperty?: ("id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId" | "seriesGroupId") | ("id" | "name" | "description" | "libraryId" | "letter" | "year" | "genreId" | "characterId" | "teamId" | "locationId" | "writerId" | "pencilerId" | "publisherId" | "coloristId" | "lettererId" | "editorId" | "coverArtistId" | "seriesGroupId")[];
                 };
                 header?: never;
                 path?: never;
@@ -2878,79 +2732,6 @@ export interface paths {
                                         updatedAt: string;
                                     }[];
                                 };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencilers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                    /**
-                                     * Format: uri
-                                     * @description URL to the primary thumbnail image for the comic book
-                                     * @example https://example.com/image/thumbnails/cover123.jpg
-                                     */
-                                    thumbnailUrl?: string;
-                                }[];
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -3383,79 +3164,6 @@ export interface paths {
                                         updatedAt: string;
                                     }[];
                                 };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencilers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                    /**
-                                     * Format: uri
-                                     * @description URL to the primary thumbnail image for the comic book
-                                     * @example https://example.com/image/thumbnails/cover123.jpg
-                                     */
-                                    thumbnailUrl?: string;
-                                }[];
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -3707,79 +3415,6 @@ export interface paths {
                                         updatedAt: string;
                                     }[];
                                 };
-                                comicBooks?: {
-                                    id: number;
-                                    libraryId: number;
-                                    filePath: string;
-                                    hash: string;
-                                    title: string | null;
-                                    series: string | null;
-                                    issueNumber: string | null;
-                                    count: number | null;
-                                    volume: string | null;
-                                    alternateSeries: string | null;
-                                    alternateIssueNumber: string | null;
-                                    alternateCount: number | null;
-                                    pageCount: number | null;
-                                    fileSize: number | null;
-                                    summary: string | null;
-                                    notes: string | null;
-                                    year: number | null;
-                                    month: number | null;
-                                    day: number | null;
-                                    publisher: string | null;
-                                    publicationDate: string | null;
-                                    scanInfo: string | null;
-                                    language: string | null;
-                                    format: string | null;
-                                    blackAndWhite: number | null;
-                                    manga: number | null;
-                                    readingDirection: string | null;
-                                    review: string | null;
-                                    ageRating: string | null;
-                                    communityRating: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                    /**
-                                     * ComicSeriesMetadata
-                                     * @description Metadata for a comic series
-                                     */
-                                    metadata?: {
-                                        writers?: string;
-                                        pencilers?: string;
-                                        inkers?: string;
-                                        colorists?: string;
-                                        letterers?: string;
-                                        editors?: string;
-                                        coverArtists?: string;
-                                        publishers?: string;
-                                        imprints?: string;
-                                        genres?: string;
-                                        characters?: string;
-                                        teams?: string;
-                                        locations?: string;
-                                        storyArcs?: string;
-                                        seriesGroups?: string;
-                                    };
-                                    thumbnails?: {
-                                        id: number;
-                                        comicBookId: number;
-                                        comicBookCoverId: number | null;
-                                        filePath: string;
-                                        thumbnailType: string;
-                                        name: string | null;
-                                        description: string | null;
-                                        uploadedBy: number | null;
-                                        createdAt: string;
-                                        updatedAt: string;
-                                    }[];
-                                    /**
-                                     * Format: uri
-                                     * @description URL to the primary thumbnail image for the comic book
-                                     * @example https://example.com/image/thumbnails/cover123.jpg
-                                     */
-                                    thumbnailUrl?: string;
-                                }[];
                             }[];
                             meta: {
                                 /** @default 0 */
@@ -4443,14 +4078,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
+                    /** @description The specific property to sort comic books by */
+                    sort?: "title" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "storyArcPosition";
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s). Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "seriesId" | "hash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId";
+                    filterProperty?: ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId") | ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId")[];
                 };
                 header?: never;
                 path?: never;
@@ -4631,14 +4266,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
+                    /** @description The specific property to sort comic books by */
+                    sort?: "title" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "storyArcPosition";
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s). Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "seriesId" | "hash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId";
+                    filterProperty?: ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId") | ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId")[];
                 };
                 header?: never;
                 path?: never;
@@ -4819,14 +4454,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
+                    /** @description The specific property to sort comic books by */
+                    sort?: "title" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "storyArcPosition";
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
                     /** @description Filter value(s). Repeat the key for multiple filters. */
                     filter?: string | string[];
                     /** @description Filter property name(s). Must be paired with a matching filter value. */
-                    filterProperty?: "id" | "seriesId" | "hash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId";
+                    filterProperty?: ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId") | ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId")[];
                 };
                 header?: never;
                 path?: never;
@@ -5517,187 +5152,6 @@ export interface paths {
                 };
                 /** @description Random comic book not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Internal Server Error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/comic-books/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get comic books by letter
-         * @description Retrieve comic books filtered by their first letter with pagination
-         */
-        get: {
-            parameters: {
-                query: {
-                    /** @description Page number for pagination (default is 1) */
-                    page?: number;
-                    /** @description Number of items per page (default is 20, max is 100) */
-                    pageSize?: number;
-                    letter: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Comic books retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            data: {
-                                id: number;
-                                libraryId: number;
-                                filePath: string;
-                                hash: string;
-                                title: string | null;
-                                series: string | null;
-                                issueNumber: string | null;
-                                count: number | null;
-                                volume: string | null;
-                                alternateSeries: string | null;
-                                alternateIssueNumber: string | null;
-                                alternateCount: number | null;
-                                pageCount: number | null;
-                                fileSize: number | null;
-                                summary: string | null;
-                                notes: string | null;
-                                year: number | null;
-                                month: number | null;
-                                day: number | null;
-                                publisher: string | null;
-                                publicationDate: string | null;
-                                scanInfo: string | null;
-                                language: string | null;
-                                format: string | null;
-                                blackAndWhite: number | null;
-                                manga: number | null;
-                                readingDirection: string | null;
-                                review: string | null;
-                                ageRating: string | null;
-                                communityRating: number | null;
-                                createdAt: string;
-                                updatedAt: string;
-                                /**
-                                 * ComicSeriesMetadata
-                                 * @description Metadata for a comic series
-                                 */
-                                metadata?: {
-                                    writers?: string;
-                                    pencilers?: string;
-                                    inkers?: string;
-                                    colorists?: string;
-                                    letterers?: string;
-                                    editors?: string;
-                                    coverArtists?: string;
-                                    publishers?: string;
-                                    imprints?: string;
-                                    genres?: string;
-                                    characters?: string;
-                                    teams?: string;
-                                    locations?: string;
-                                    storyArcs?: string;
-                                    seriesGroups?: string;
-                                };
-                                thumbnails?: {
-                                    id: number;
-                                    comicBookId: number;
-                                    comicBookCoverId: number | null;
-                                    filePath: string;
-                                    thumbnailType: string;
-                                    name: string | null;
-                                    description: string | null;
-                                    uploadedBy: number | null;
-                                    createdAt: string;
-                                    updatedAt: string;
-                                }[];
-                                /**
-                                 * Format: uri
-                                 * @description URL to the primary thumbnail image for the comic book
-                                 * @example https://example.com/image/thumbnails/cover123.jpg
-                                 */
-                                thumbnailUrl?: string;
-                            }[];
-                            meta: {
-                                /** @default 0 */
-                                count: number;
-                                /** @default false */
-                                hasNextPage: boolean;
-                                /** @default 1 */
-                                currentPage: number;
-                                /** @default 1 */
-                                pageSize: number;
-                                filterProperty?: string;
-                                filterValue?: string;
-                                filters?: {
-                                    filterProperty: string;
-                                    filterValue: string;
-                                }[];
-                                sortProperty?: string;
-                                /** @enum {string} */
-                                sortOrder?: "asc" | "desc";
-                                timestamp: string;
-                            };
-                        };
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8000,14 +7454,14 @@ export interface paths {
                     page?: number;
                     /** @description Number of items per page (default is 20, max is 100) */
                     pageSize?: number;
-                    /** @description The specific property to sort by */
-                    sort?: string;
+                    /** @description The specific property to sort comic books by */
+                    sort?: "title" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "storyArcPosition";
                     /** @description Sort direction */
                     sortDirection?: "asc" | "desc";
-                    /** @description Filter value to search by */
-                    filter?: string;
-                    /** @description Property used for filter */
-                    filterProperty?: string;
+                    /** @description Filter value(s). Repeat the key for multiple filters. */
+                    filter?: string | string[];
+                    /** @description Filter property name(s). Must be paired with a matching filter value. */
+                    filterProperty?: ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId") | ("id" | "seriesId" | "hash" | "duplicateHash" | "title" | "series" | "issueNumber" | "volume" | "alternateSeries" | "alternateIssueNumber" | "fileSize" | "summary" | "notes" | "year" | "month" | "day" | "date" | "publisher" | "publicationDate" | "scanInfo" | "language" | "format" | "blackAndWhite" | "manga" | "readingDirection" | "review" | "ageRating" | "communityRating" | "createdAt" | "updatedAt" | "listLetter" | "libraryId" | "storyArcId" | "seriesGroupId")[];
                 };
                 header?: never;
                 path?: never;
@@ -8028,7 +7482,186 @@ export interface paths {
                                 description: string | null;
                                 createdAt: string;
                                 updatedAt: string;
+                                /** @default 0 */
+                                totalNumberOfComics: number;
+                                /** @default 0 */
+                                totalSizeOfStoryArc: number;
+                                /** @default 0 */
+                                numberOfComicsReadByUser: number;
+                                /** @default 0 */
+                                numberOfComicsBeingReadByUser: number;
+                                comicBooks: {
+                                    id: number;
+                                    libraryId: number;
+                                    filePath: string;
+                                    hash: string;
+                                    title: string | null;
+                                    series: string | null;
+                                    issueNumber: string | null;
+                                    count: number | null;
+                                    volume: string | null;
+                                    alternateSeries: string | null;
+                                    alternateIssueNumber: string | null;
+                                    alternateCount: number | null;
+                                    pageCount: number | null;
+                                    fileSize: number | null;
+                                    summary: string | null;
+                                    notes: string | null;
+                                    year: number | null;
+                                    month: number | null;
+                                    day: number | null;
+                                    publisher: string | null;
+                                    publicationDate: string | null;
+                                    scanInfo: string | null;
+                                    language: string | null;
+                                    format: string | null;
+                                    blackAndWhite: number | null;
+                                    manga: number | null;
+                                    readingDirection: string | null;
+                                    review: string | null;
+                                    ageRating: string | null;
+                                    communityRating: number | null;
+                                    createdAt: string;
+                                    updatedAt: string;
+                                    writers?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    pencilers?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    inkers?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    letterers?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    editors?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    colorists?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    coverArtists?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    publishers?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    imprints?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    genres?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    characters?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    locations?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    teams?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    storyArcs?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    seriesGroups?: {
+                                        id: number;
+                                        name: string;
+                                        description: string | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    thumbnails?: {
+                                        id: number;
+                                        comicBookId: number;
+                                        comicBookCoverId: number | null;
+                                        filePath: string;
+                                        thumbnailType: string;
+                                        name: string | null;
+                                        description: string | null;
+                                        uploadedBy: number | null;
+                                        createdAt: string;
+                                        updatedAt: string;
+                                    }[];
+                                    /**
+                                     * Format: uri
+                                     * @description URL to the primary thumbnail image for the comic book
+                                     * @example https://example.com/image/thumbnails/cover123.jpg
+                                     */
+                                    thumbnailUrl?: string;
+                                    /**
+                                     * @description Indicates whether the comic book has been marked as read by the user
+                                     * @example true
+                                     */
+                                    read: boolean;
+                                    /**
+                                     * @description The last page number that the user read in the comic book
+                                     * @example 42
+                                     */
+                                    lastReadPage?: number;
+                                }[];
                             }[];
+                            /**
+                             * PaginationMeta
+                             * @description Metadata for paginated responses
+                             */
                             meta: {
                                 /** @default 0 */
                                 count: number;
@@ -8038,15 +7671,6 @@ export interface paths {
                                 currentPage: number;
                                 /** @default 1 */
                                 pageSize: number;
-                                filterProperty?: string;
-                                filterValue?: string;
-                                filters?: {
-                                    filterProperty: string;
-                                    filterValue: string;
-                                }[];
-                                sortProperty?: string;
-                                /** @enum {string} */
-                                sortOrder?: "asc" | "desc";
                             };
                         };
                     };
@@ -8345,88 +7969,6 @@ export interface paths {
                 };
             };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/readlists/comic-book/{comicBookId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get readlists containing a specific comic book */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    comicBookId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Readlists retrieved successfully */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @example 1 */
-                            id: number;
-                            /** @example My Readlist */
-                            name: string;
-                        }[];
-                    };
-                };
-                /** @description Invalid comic book ID */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                            errors?: {
-                                [key: string]: Record<string, never>;
-                            };
-                        };
-                    };
-                };
-                /** @description Not implemented */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            message: string;
-                        };
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
