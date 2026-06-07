@@ -29,8 +29,6 @@ import {
   comicLocationsTable,
   comicBookStoryArcsTable,
   comicStoryArcsTable,
-  comicBookSeriesGroupsTable,
-  comicSeriesGroupsTable,
 } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
@@ -76,7 +74,7 @@ export const getMetadataForComicBooksBatch = async (
     result[id] = {};
   });
 
-  const [writers, pencilers, inkers, letterers, editors, colorists, coverArtists, publishers, imprints, genres, characters, teams, locations, storyArcs, seriesGroups] = await Promise.all([
+  const [writers, pencilers, inkers, letterers, editors, colorists, coverArtists, publishers, imprints, genres, characters, teams, locations, storyArcs] = await Promise.all([
     db
       .select({ id: comicWritersTable.id, name: comicWritersTable.name, description: comicWritersTable.description, createdAt: comicWritersTable.createdAt, updatedAt: comicWritersTable.updatedAt, comicBookId: comicBookWritersTable.comicBookId })
       .from(comicWritersTable)
@@ -161,11 +159,6 @@ export const getMetadataForComicBooksBatch = async (
       .innerJoin(comicBookStoryArcsTable, eq(comicStoryArcsTable.id, comicBookStoryArcsTable.comicStoryArcId))
       .where(inArray(comicBookStoryArcsTable.comicBookId, comicBookIds)),
 
-    db
-      .select({ id: comicSeriesGroupsTable.id, name: comicSeriesGroupsTable.name, description: comicSeriesGroupsTable.description, createdAt: comicSeriesGroupsTable.createdAt, updatedAt: comicSeriesGroupsTable.updatedAt, comicBookId: comicBookSeriesGroupsTable.comicBookId })
-      .from(comicSeriesGroupsTable)
-      .innerJoin(comicBookSeriesGroupsTable, eq(comicSeriesGroupsTable.id, comicBookSeriesGroupsTable.comicSeriesGroupId))
-      .where(inArray(comicBookSeriesGroupsTable.comicBookId, comicBookIds)),
   ]);
 
   writers.forEach((row) => {
@@ -280,13 +273,7 @@ export const getMetadataForComicBooksBatch = async (
     }
   });
 
-  seriesGroups.forEach((row) => {
-    if (result[row.comicBookId]) {
-      result[row.comicBookId].seriesGroups = result[row.comicBookId].seriesGroups || [];
-      const { comicBookId, ...data } = row;
-      result[row.comicBookId].seriesGroups!.push(data);
-    }
-  });
+
 
   return result;
 };
