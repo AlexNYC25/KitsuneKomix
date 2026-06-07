@@ -22,7 +22,6 @@ import {
   comicLibrariesTable,
   comicSeriesBooksTable,
   comicSeriesTable,
-  comicBookSeriesGroupsTable
 } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 import type {
@@ -169,16 +168,6 @@ const buildFilterCondition = (
           .innerJoin(comicBookCoverArtistsTable, eq(comicSeriesBooksTable.comicBookId, comicBookCoverArtistsTable.comicBookId))
           .where(eq(comicBookCoverArtistsTable.comicCoverArtistId, Number(filterValue))),
       );
-    case "seriesGroupId":
-      return inArray(
-        comicSeriesTable.id,
-        db
-          .select({ comicSeriesId: comicSeriesBooksTable.comicSeriesId })
-          .from(comicSeriesBooksTable)
-          .innerJoin(comicBookSeriesGroupsTable, eq(comicSeriesBooksTable.comicBookId, comicBookSeriesGroupsTable.comicBookId))
-          .where(eq(comicBookSeriesGroupsTable.comicSeriesGroupId, Number(filterValue)))
-      
-    );
     default:
       return undefined;
   }

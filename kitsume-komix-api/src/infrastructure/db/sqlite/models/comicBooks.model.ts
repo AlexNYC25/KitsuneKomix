@@ -15,7 +15,6 @@ import {
   comicBookLetterersTable,
   comicBookPencilersTable,
   comicBookPublishersTable,
-  comicBookSeriesGroupsTable,
   comicBooksTable,
   comicBookStoryArcsTable,
   comicBookTeamsTable,
@@ -249,9 +248,6 @@ const addSortingToQuery = <T extends SQLiteSelect>(
     case "storyArcPosition":
       query.orderBy(direction(comicBookStoryArcsTable.position));
       break;
-    case "seriesGroupPosition":
-      query.orderBy(direction(comicBookSeriesGroupsTable.position));
-      
   }
 
   return query;
@@ -365,10 +361,6 @@ export const getComicBooksWithMetadataFilteringSorting = async (
       .leftJoin(
         comicBookStoryArcsTable,
         eq(comicBooksTable.id, comicBookStoryArcsTable.comicBookId),
-      )
-      .leftJoin(
-        comicBookSeriesGroupsTable,
-        eq(comicBooksTable.id, comicBookSeriesGroupsTable.comicBookId),
       )
       .leftJoin(
         comicBookTeamsTable,

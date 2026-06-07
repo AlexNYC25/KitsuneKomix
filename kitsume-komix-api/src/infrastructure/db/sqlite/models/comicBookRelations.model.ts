@@ -14,7 +14,6 @@ import {
   comicBookLocationsTable,
   comicBookPencilersTable,
   comicBookPublishersTable,
-  comicBookSeriesGroupsTable,
   comicBookStoryArcsTable,
   comicBookTeamsTable,
   comicBookWritersTable,
@@ -267,9 +266,6 @@ export const removeAllComicBookRelations = async (
       ),
       db.delete(comicBookStoryArcsTable).where(
         eq(comicBookStoryArcsTable.comicBookId, comicBookId),
-      ),
-      db.delete(comicBookSeriesGroupsTable).where(
-        eq(comicBookSeriesGroupsTable.comicBookId, comicBookId),
       ),
     ]);
   } catch (error) {
