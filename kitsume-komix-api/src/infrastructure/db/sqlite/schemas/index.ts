@@ -44,7 +44,22 @@ export * from "./mapping/comicBookPublishers.table.ts";
 export * from "./mapping/comicBookLocations.table.ts";
 export * from "./mapping/comicBookStoryArcs.table.ts";
 export * from "./mapping/comicBookTeams.table.ts";
-export * from "./mapping/comicBookSeriesGroups.table.ts";
+export * from "./mapping/comicBookSeriesGroups.table.ts"; // TOBE REMOVED
+
+export * from "./mapping/comicSeriesCharacters.table.ts";
+export * from "./mapping/comicSeriesColorists.table.ts";
+export * from "./mapping/comicSeriesCoverArtists.table.ts";
+export * from "./mapping/comicSeriesEditors.table.ts";
+export * from "./mapping/comicSeriesLetterers.table.ts";
+export * from "./mapping/comicSeriesPencilers.table.ts";
+export * from "./mapping/comicSeriesInkers.table.ts";
+export * from "./mapping/comicSeriesWriters.table.ts";
+export * from "./mapping/comicSeriesGenres.table.ts";
+export * from "./mapping/comicSeriesImprints.table.ts";
+export * from "./mapping/comicSeriesPublishers.table.ts";
+export * from "./mapping/comicSeriesLocations.table.ts";
+export * from "./mapping/comicSeriesTeams.table.ts";
+export * from "./mapping/comicSeriesGroups.table.ts";
 
 export * from "./mapping/comicLibrariesSeries.table.ts";
 export * from "./mapping/comicSeriesBooks.table.ts";
