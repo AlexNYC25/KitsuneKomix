@@ -1,0 +1,498 @@
+table app_settings {
+  id integer [pk, not null, increment]
+  key text [not null, unique]
+  value text [not null]
+  adminOnly integer [not null, default: 0]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_characters {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicCharacterId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_colorists {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicColoristId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_cover_artists {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicCoverArtistId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_covers {
+  id integer [pk, not null, increment]
+  comicPageId integer [not null]
+  filePath text [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_editors {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicEditorId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_genres {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicGenreId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_history {
+  id integer [pk, not null, increment]
+  userId integer [not null]
+  comicBookId integer [not null]
+  read integer [not null, default: 0]
+  lastReadPage integer [default: 0]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_imprints {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicImprintId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_inkers {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicInkerId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_letterers {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicLettererId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_locations {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicLocationId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_pencilers {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicPencilerId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_publishers {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicPublisherId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_series_groups {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicSeriesGroupId integer [not null]
+  position integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_story_arcs {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicStoryArcId integer [not null]
+  position integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_teams {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicTeamId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_thumbnails {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicBookCoverId integer
+  filePath text [not null]
+  thumbnailType text [not null, default: 'generated']
+  name text
+  description text
+  uploadedBy integer
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_book_writers {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  comicWriterId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_books {
+  id integer [pk, not null, increment]
+  libraryId integer [not null]
+  filePath text [not null, unique]
+  hash text [not null]
+  title text
+  series text
+  issueNumber text
+  count integer
+  volume text
+  alternateSeries text
+  alternateIssueNumber text
+  alternateCount integer
+  pageCount integer
+  fileSize integer
+  summary text
+  notes text
+  year integer
+  month integer
+  day integer
+  publisher text
+  publicationDate text
+  scanInfo text
+  language text
+  format text
+  blackAndWhite integer
+  manga integer
+  readingDirection text
+  review text
+  ageRating text
+  communityRating integer
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_characters {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_colorists {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_cover_artists {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_editors {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_genres {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_imprints {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_inkers {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_letterers {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_libraries_series {
+  id integer [pk, not null, increment]
+  libraryId integer [not null]
+  comicSeriesId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_libraries {
+  id integer [pk, not null, increment]
+  name text [not null]
+  path text [not null]
+  description text
+  enabled integer [not null, default: 1]
+  changedAt text [not null, default: `CURRENT_TIMESTAMP`]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_locations {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_pages {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  filePath text [not null]
+  pageNumber integer [not null]
+  type text [not null]
+  doublePage integer [not null, default: 0]
+  length integer
+  width integer
+  hash text [not null]
+  fileSize integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_pencilers {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_publishers {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_series_books {
+  id integer [pk, not null, increment]
+  comicSeriesId integer [not null]
+  comicBookId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_series_groups {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_series {
+  id integer [pk, not null, increment]
+  name text [not null]
+  description text
+  folderPath text [not null, unique]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_story_arcs {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_teams {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_web_links {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  url text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_writers {
+  id integer [pk, not null, increment]
+  name text [not null, unique]
+  description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table refresh_tokens {
+  id integer [pk, not null, increment]
+  userId integer [not null]
+  tokenId text [not null, unique]
+  expiresAt text [not null]
+  revoked integer [not null, default: 0]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table user_comic_libraries {
+  id integer [pk, not null, increment]
+  userId integer [not null]
+  libraryId integer [not null]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table users {
+  id integer [pk, not null, increment]
+  username text [not null, unique]
+  email text [not null, unique]
+  firstName text
+  lastName text
+  passwordHash text [not null]
+  admin integer [not null, default: 0]
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+ref comic_book_characters_comicBookId_comic_books_id_fk: comic_book_characters.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_characters_comicCharacterId_comic_characters_id_fk: comic_book_characters.comicCharacterId > comic_characters.id [delete: cascade, update: no action]
+
+ref comic_book_colorists_comicBookId_comic_books_id_fk: comic_book_colorists.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_colorists_comicColoristId_comic_colorists_id_fk: comic_book_colorists.comicColoristId > comic_colorists.id [delete: cascade, update: no action]
+
+ref comic_book_cover_artists_comicBookId_comic_books_id_fk: comic_book_cover_artists.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_cover_artists_comicCoverArtistId_comic_cover_artists_id_fk: comic_book_cover_artists.comicCoverArtistId > comic_cover_artists.id [delete: cascade, update: no action]
+
+ref comic_book_covers_comicPageId_comic_pages_id_fk: comic_book_covers.comicPageId > comic_pages.id [delete: cascade, update: no action]
+
+ref comic_book_editors_comicBookId_comic_books_id_fk: comic_book_editors.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_editors_comicEditorId_comic_editors_id_fk: comic_book_editors.comicEditorId > comic_editors.id [delete: cascade, update: no action]
+
+ref comic_book_genres_comicBookId_comic_books_id_fk: comic_book_genres.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_genres_comicGenreId_comic_genres_id_fk: comic_book_genres.comicGenreId > comic_genres.id [delete: cascade, update: no action]
+
+ref comic_book_history_userId_users_id_fk: comic_book_history.userId > users.id [delete: cascade, update: no action]
+
+ref comic_book_history_comicBookId_comic_books_id_fk: comic_book_history.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_imprints_comicBookId_comic_books_id_fk: comic_book_imprints.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_imprints_comicImprintId_comic_imprints_id_fk: comic_book_imprints.comicImprintId > comic_imprints.id [delete: cascade, update: no action]
+
+ref comic_book_inkers_comicBookId_comic_books_id_fk: comic_book_inkers.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_inkers_comicInkerId_comic_inkers_id_fk: comic_book_inkers.comicInkerId > comic_inkers.id [delete: cascade, update: no action]
+
+ref comic_book_letterers_comicBookId_comic_books_id_fk: comic_book_letterers.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_letterers_comicLettererId_comic_letterers_id_fk: comic_book_letterers.comicLettererId > comic_letterers.id [delete: cascade, update: no action]
+
+ref comic_book_locations_comicBookId_comic_books_id_fk: comic_book_locations.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_locations_comicLocationId_comic_locations_id_fk: comic_book_locations.comicLocationId > comic_locations.id [delete: cascade, update: no action]
+
+ref comic_book_pencilers_comicBookId_comic_books_id_fk: comic_book_pencilers.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_pencilers_comicPencilerId_comic_pencilers_id_fk: comic_book_pencilers.comicPencilerId > comic_pencilers.id [delete: cascade, update: no action]
+
+ref comic_book_publishers_comicBookId_comic_books_id_fk: comic_book_publishers.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_publishers_comicPublisherId_comic_publishers_id_fk: comic_book_publishers.comicPublisherId > comic_publishers.id [delete: cascade, update: no action]
+
+ref comic_book_series_groups_comicBookId_comic_books_id_fk: comic_book_series_groups.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_series_groups_comicSeriesGroupId_comic_series_groups_id_fk: comic_book_series_groups.comicSeriesGroupId > comic_series_groups.id [delete: cascade, update: no action]
+
+ref comic_book_story_arcs_comicBookId_comic_books_id_fk: comic_book_story_arcs.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_story_arcs_comicStoryArcId_comic_story_arcs_id_fk: comic_book_story_arcs.comicStoryArcId > comic_story_arcs.id [delete: cascade, update: no action]
+
+ref comic_book_teams_comicBookId_comic_books_id_fk: comic_book_teams.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_teams_comicTeamId_comic_teams_id_fk: comic_book_teams.comicTeamId > comic_teams.id [delete: cascade, update: no action]
+
+ref comic_book_thumbnails_comicBookId_comic_books_id_fk: comic_book_thumbnails.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_thumbnails_comicBookCoverId_comic_book_covers_id_fk: comic_book_thumbnails.comicBookCoverId > comic_book_covers.id [delete: cascade, update: no action]
+
+ref comic_book_thumbnails_uploadedBy_users_id_fk: comic_book_thumbnails.uploadedBy > users.id [delete: set null, update: no action]
+
+ref comic_book_writers_comicBookId_comic_books_id_fk: comic_book_writers.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_book_writers_comicWriterId_comic_writers_id_fk: comic_book_writers.comicWriterId > comic_writers.id [delete: cascade, update: no action]
+
+ref comic_books_libraryId_comic_libraries_id_fk: comic_books.libraryId > comic_libraries.id [delete: cascade, update: no action]
+
+ref comic_libraries_series_libraryId_comic_libraries_id_fk: comic_libraries_series.libraryId > comic_libraries.id [delete: cascade, update: no action]
+
+ref comic_libraries_series_comicSeriesId_comic_series_id_fk: comic_libraries_series.comicSeriesId > comic_series.id [delete: cascade, update: no action]
+
+ref comic_pages_comicBookId_comic_books_id_fk: comic_pages.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_series_books_comicSeriesId_comic_series_id_fk: comic_series_books.comicSeriesId > comic_series.id [delete: cascade, update: no action]
+
+ref comic_series_books_comicBookId_comic_books_id_fk: comic_series_books.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref comic_web_links_comicBookId_comic_books_id_fk: comic_web_links.comicBookId > comic_books.id [delete: cascade, update: no action]
+
+ref refresh_tokens_userId_users_id_fk: refresh_tokens.userId > users.id [delete: cascade, update: no action]
+
+ref user_comic_libraries_userId_users_id_fk: user_comic_libraries.userId > users.id [delete: cascade, update: no action]
+
+ref user_comic_libraries_libraryId_comic_libraries_id_fk: user_comic_libraries.libraryId > comic_libraries.id [delete: cascade, update: no action]
