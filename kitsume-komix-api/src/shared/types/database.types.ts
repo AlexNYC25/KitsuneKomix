@@ -13,7 +13,6 @@ import type {
   comicBookLocationsTable,
   comicBookPencilersTable,
   comicBookPublishersTable,
-  comicBookSeriesGroupsTable,
   comicBooksTable,
   comicBookStoryArcsTable,
   comicBookTeamsTable,
@@ -196,9 +195,3 @@ export type NewComicBookStoryArc = InferInsertModel<
   typeof comicBookStoryArcsTable
 >;
 
-export type ComicBookSeriesGroup = InferSelectModel<
-  typeof comicBookSeriesGroupsTable
->;
-export type NewComicBookSeriesGroup = InferInsertModel<
-  typeof comicBookSeriesGroupsTable
->;

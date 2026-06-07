@@ -13,7 +13,6 @@ import {
   comicBookLocationsTable,
   comicBookPencilersTable,
   comicBookPublishersTable,
-  comicBookSeriesGroupsTable,
   comicBooksTable,
   comicBookStoryArcsTable,
   comicBookTeamsTable,
@@ -110,10 +109,6 @@ export const ComicBookPencilerSelectSchema = createSelectSchema(
 
 export const ComicBookPublisherSelectSchema = createSelectSchema(
   comicBookPublishersTable,
-);
-
-export const ComicBookSeriesGroupSelectSchema = createSelectSchema(
-  comicBookSeriesGroupsTable,
 );
 
 export const ComicBookStoryArcSelectSchema = createSelectSchema(
