@@ -6,6 +6,7 @@
     "#root/": "./",
     "#infrastructure/": "./src/infrastructure/",
     "#db/": "./src/infrastructure/db/",
+    "#docs": "./docs",
     "#logger/": "./src/infrastructure/logger/",
     "#app/": "./src/app/",
     "#zod/": "./src/shared/zod/",
