@@ -5,10 +5,12 @@ import { env } from "#config/env.ts";
 import { initLogger } from "#logger/loggers.ts";
 
 import { runMigrations } from "#infrastructure/db/scripts/migrate.ts";
+import { generateDbml } from "#infrastructure/db/scripts/dbml.ts";
 import { setUpAppSettings } from "#infrastructure/db/scripts/seed.ts";
 
 await initLogger();
 await runMigrations();
+generateDbml();
 await setUpAppSettings();
 await startWatcher();
 
