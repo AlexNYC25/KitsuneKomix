@@ -69,3 +69,16 @@ export type WorkerComicFileMetadataResult = {
   comicData: NewComicBook;
   standardizedMetadata?: StandardizedComicMetadata;
 };
+
+
+/**
+ * Configuration for the Worker Manager
+ */
+export type WorkerManagerConfig = {
+  /** How often to poll for new jobs (milliseconds) */
+  pollInterval?: number;
+  /** Maximum number of jobs to fetch per poll */
+  batchSize?: number;
+  /** Number of worker instances to use for parallel processing */
+  concurrency?: number;
+};
