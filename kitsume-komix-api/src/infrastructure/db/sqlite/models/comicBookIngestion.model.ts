@@ -2,24 +2,7 @@ import { eq, and, isNull, or } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { comicBookIngestionTable } from "../schemas/tables/comicBookIngestion.table.ts";
 
-export type IngestionState =
-  | "FILE_DETECTED"
-  | "METADATA_EXTRACTION"
-  | "METADATA_CANDIDATES_CREATED"
-  | "METADATA_ENTITIES_RESOLVED"
-  | "COMIC_LINKS_BUILT"
-  | "COMIC_INGESTION_COMPLETED"
-  | "FAILED";
-
-export type ComicBookIngestionRecord = {
-  id: number;
-  comicBookId: number;
-  metadata: string | null;
-  state: IngestionState | null;
-  errorMessage: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+import type { IngestionState, ComicBookIngestionRecord } from "#types/index.ts";
 
 export class ComicBookIngestionModel {
   /**

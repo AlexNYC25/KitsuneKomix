@@ -1,6 +1,5 @@
 import { StandardizedComicMetadata } from "#types/index.ts";
 import { ComicBook, NewComicBook } from "./database.types.ts";
-import type { ComicBookIngestionRecord } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
 
 
 /**
@@ -106,3 +105,22 @@ export interface JobHandler {
    */
   handle(record: ComicBookIngestionRecord): Promise<JobHandlerResult>;
 }
+
+export type IngestionState =
+  | "FILE_DETECTED"
+  | "METADATA_EXTRACTION"
+  | "METADATA_CANDIDATES_CREATED"
+  | "METADATA_ENTITIES_RESOLVED"
+  | "COMIC_LINKS_BUILT"
+  | "COMIC_INGESTION_COMPLETED"
+  | "FAILED";
+
+export type ComicBookIngestionRecord = {
+  id: number;
+  comicBookId: number;
+  metadata: string | null;
+  state: IngestionState | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
