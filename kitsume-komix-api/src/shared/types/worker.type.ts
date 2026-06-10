@@ -1,5 +1,7 @@
 import { StandardizedComicMetadata } from "#types/index.ts";
 import { ComicBook, NewComicBook } from "./database.types.ts";
+import type { ComicBookIngestionRecord } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
+
 
 /**
  * Type representing the job data for jobs realted to processing comic files
@@ -82,3 +84,25 @@ export type WorkerManagerConfig = {
   /** Number of worker instances to use for parallel processing */
   concurrency?: number;
 };
+
+
+/**
+ * Result of a job handler execution
+ */
+export type JobHandlerResult = {
+  success: boolean;
+  errorMessage?: string;
+  data?: Record<string, unknown>;
+};
+
+/**
+ * Base interface for all job handlers
+ */
+export interface JobHandler {
+  /**
+   * Execute the handler logic
+   * @param record The ingestion record to process
+   * @returns A result indicating success or failure
+   */
+  handle(record: ComicBookIngestionRecord): Promise<JobHandlerResult>;
+}

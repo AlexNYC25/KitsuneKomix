@@ -1,6 +1,9 @@
 // Re-export all app types
 export * from "./app.type.ts";
 
+// Re-export all queue types
+export * from "./queue.type.ts";
+
 // Re-export all database types
 export * from "./database.types.ts";
 
