@@ -8,6 +8,9 @@ export * from "./tables/comicSeriesGroups.table.ts";
 export * from "./tables/users.table.ts";
 export * from "./tables/refreshTokens.table.ts";
 
+export * from "./tables/comicBookIngestion.table.ts";
+export * from "./tables/comicMetadataCandidates.table.ts";
+
 export * from "./tables/comicBookThumbnails.table.ts";
 export * from "./tables/comicBookCovers.table.ts";
 export * from "./tables/comicPages.table.ts";
