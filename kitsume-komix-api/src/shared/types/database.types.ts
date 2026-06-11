@@ -37,6 +37,8 @@ import type {
   comicTeamsTable,
   comicWritersTable,
   usersTable,
+  comicBookIngestionTable,
+  comicMetadataCandidatesTable,
 } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 // Inferred types from Drizzle schema
@@ -45,6 +47,11 @@ export type NewUser = InferInsertModel<typeof usersTable>;
 
 export type AppSetting = InferSelectModel<typeof appSettingsTable>;
 export type NewAppSetting = InferInsertModel<typeof appSettingsTable>;
+
+export type ComicBookIngestion = InferSelectModel<typeof comicBookIngestionTable>;
+export type NewComicBookIngestion = InferInsertModel<typeof comicBookIngestionTable>;
+
+export type ComicMetadataCandidate = InferSelectModel<typeof comicMetadataCandidatesTable>;
 
 export type ComicLibrary = InferSelectModel<typeof comicLibrariesTable>;
 export type NewComicLibrary = InferInsertModel<typeof comicLibrariesTable>;
