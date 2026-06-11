@@ -73,6 +73,16 @@ table comic_book_imprints {
   updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
 }
 
+table comic_book_ingestion {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  metadata text
+  state text
+  errorMessage text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
 table comic_book_inkers {
   id integer [pk, not null, increment]
   comicBookId integer [not null]
@@ -282,6 +292,18 @@ table comic_locations {
   id integer [pk, not null, increment]
   name text [not null, unique]
   description text
+  createdAt text [not null, default: `CURRENT_TIMESTAMP`]
+  updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+table comic_metadata_candidates {
+  id integer [pk, not null, increment]
+  comicBookId integer [not null]
+  type text [not null]
+  value text [not null]
+  normalizedValue text [not null]
+  status text [not null, default: 'pending']
+  resolvedId integer
   createdAt text [not null, default: `CURRENT_TIMESTAMP`]
   updatedAt text [not null, default: `CURRENT_TIMESTAMP`]
 }
@@ -547,6 +569,8 @@ ref comic_book_history_comicBookId_comic_books_id_fk: comic_book_history.comicBo
 ref comic_book_imprints_comicBookId_comic_books_id_fk: comic_book_imprints.comicBookId > comic_books.id [delete: cascade, update: no action]
 
 ref comic_book_imprints_comicImprintId_comic_imprints_id_fk: comic_book_imprints.comicImprintId > comic_imprints.id [delete: cascade, update: no action]
+
+ref comic_book_ingestion_comicBookId_comic_books_id_fk: comic_book_ingestion.comicBookId > comic_books.id [delete: cascade, update: no action]
 
 ref comic_book_inkers_comicBookId_comic_books_id_fk: comic_book_inkers.comicBookId > comic_books.id [delete: cascade, update: no action]
 
