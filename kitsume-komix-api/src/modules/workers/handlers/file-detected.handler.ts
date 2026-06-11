@@ -1,12 +1,13 @@
 import { queueLogger } from "#logger/loggers.ts";
 
-import { ComicBookIngestionModel } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
+import { updateIngestionRecordState } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
 import { getLibraryContainingPath } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { getComicBookByFilePath, insertComicBookReturningComicBook } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 
 import { calculateFileHash } from "#utilities/hash.ts";
 import { getFileNameFromPath, getFileSize } from "#utilities/file.ts";
 
-import type { NewComicBook, JobHandler, JobHandlerResult, ComicBookIngestionRecord } from "#types/index.ts";
+import type { NewComicBook, JobHandler, JobHandlerResult, ComicBookIngestion } from "#types/index.ts";
 
 /**
  * Handles the FILE_DETECTED stage of comic ingestion.
@@ -19,85 +20,34 @@ import type { NewComicBook, JobHandler, JobHandlerResult, ComicBookIngestionReco
  * - Move to METADATA_EXTRACTION state
  */
 export class FileDetectedHandler implements JobHandler {
-  async handle(record: ComicBookIngestionRecord): Promise<JobHandlerResult> {
+  async handle(record: ComicBookIngestion): Promise<JobHandlerResult> {
     try {
-      // Get metadata from ingestion record
-      const metadata = ComicBookIngestionModel.getMetadata(record);
-      const filePath = metadata?.filePath as string | undefined;
+      // We want to double check the comic at the file path belongs to a valid library (i.e. enabled) before doing any processing
+      const validLibrary = await getLibraryContainingPath(record.filePath);
 
-      if (!filePath) {
+      if (!validLibrary) {
         return {
           success: false,
-          errorMessage: "No file path found in ingestion metadata",
+          errorMessage: `No library found for file path: ${record.filePath}`,
         };
       }
 
-      queueLogger.info(`[FileDetectedHandler] Processing file: ${filePath}`);
+      const fileHash = await calculateFileHash(record.filePath);
+      const fileName = getFileNameFromPath(record.filePath);
+      const fileSize = await getFileSize(record.filePath);
 
-      // Calculate file hash
-      const fileHash = await calculateFileHash(filePath);
-      const fileName = getFileNameFromPath(filePath);
-      const fileSize = await getFileSize(filePath);
+      const currentComicRecord = await getComicBookByFilePath(record.filePath);
 
-      // Find the library that contains this file
-      const library = await getLibraryContainingPath(filePath);
-      if (!library) {
-        return {
-          success: false,
-          errorMessage: `No library found for file path: ${filePath}`,
-        };
-      }
-
-      // Check if comic book already exists
-      const { db } = await import("#infrastructure/db/sqlite/client.ts").then(m => ({
-        db: m.getClient().db
-      }));
-      
-      if (!db) {
-        throw new Error("Database client is not initialized");
-      }
-
-      const { comicBooksTable } = await import("#infrastructure/db/sqlite/schemas/index.ts");
-      const { eq } = await import("drizzle-orm");
-      
-      const [existingComic] = await db
-        .select()
-        .from(comicBooksTable)
-        .where(eq(comicBooksTable.filePath, filePath));
-
-      let comicBookId: number;
-
-      if (existingComic) {
-        // Comic exists - check if hash changed
-        if (existingComic.hash === fileHash) {
-          queueLogger.info(
-            `[FileDetectedHandler] Comic already exists with same hash, skipping: ${filePath}`
-          );
-          
-          // Move directly to completed state
-          await ComicBookIngestionModel.updateState(
-            record.id,
-            "COMIC_INGESTION_COMPLETED",
-            { filePath, comicBookId: existingComic.id, reason: "unchanged" }
-          );
-
-          return {
-            success: true,
-            data: { comicBookId: existingComic.id, unchanged: true },
-          };
-        }
-
-        // Hash changed - will need to reprocess
+      // If no existing comic record is found, then we insert a new record into the comic books table to start with
+      // And the enqueue the next state to populate the metadata
+      if (!currentComicRecord) {
         queueLogger.info(
-          `[FileDetectedHandler] Comic hash changed, will reprocess: ${filePath}`
+          `[FileDetectedHandler] No existing comic record found for file, will create new: ${record.filePath}`
         );
-        comicBookId = existingComic.id;
-        
-      } else {
-        // Create new comic book record with minimal information
+
         const newComicBook: NewComicBook = {
-          libraryId: library.id,
-          filePath,
+          libraryId: validLibrary.id,
+          filePath: record.filePath,
           hash: fileHash,
           title: fileName, // Temporary - will be updated with metadata
           series: "Unknown Series", // Temporary
@@ -105,34 +55,64 @@ export class FileDetectedHandler implements JobHandler {
           fileSize,
         };
 
-        const [inserted] = await db
-          .insert(comicBooksTable)
-          .values(newComicBook)
-          .returning();
+        const insertedComic = await insertComicBookReturningComicBook(newComicBook);
 
-        comicBookId = inserted.id;
-        queueLogger.info(
-          `[FileDetectedHandler] Created new comic book record with ID: ${comicBookId}`
+        const newStateRecord: Partial<ComicBookIngestion> = {
+          state: "METADATA_EXTRACTION",
+        };
+
+        await updateIngestionRecordState(
+          record.id,
+          newStateRecord
         );
+
+        return {
+          success: true,
+          data: { comicBookId: insertedComic.id, filePath: record.filePath, fileHash },
+        };
       }
 
-      // Update ingestion record to next state
-      await ComicBookIngestionModel.updateState(
-        record.id,
-        "METADATA_EXTRACTION",
-        { 
-          filePath, 
-          comicBookId,
-          fileHash,
-          fileName,
-          fileSize,
-          libraryId: library.id,
-        }
-      );
+      // If the file hash matches the existing record, we can skip processing and move directly to completed state
+      if (currentComicRecord && currentComicRecord.hash === fileHash) {
+        const newStateRecord: Partial<ComicBookIngestion> = {
+          state: "COMIC_INGESTION_COMPLETED",
+        };
+
+        await updateIngestionRecordState(
+          record.id,
+          newStateRecord
+        );
+
+        return {
+          success: true,
+          data: { comicBookId: currentComicRecord.id, filePath: record.filePath, fileHash, alreadyCompleted: true },
+        };
+      }
+
+      // If the file hash has changed then we need to reprocess the comic - (i.e. check if the metadata has changes and update the comic record accordingly)
+      if (currentComicRecord && currentComicRecord.hash !== fileHash) {
+        queueLogger.info(
+          `[FileDetectedHandler] Comic already exists but hash changed, will reprocess: ${record.filePath}`
+        );
+
+        const newStateRecord: Partial<ComicBookIngestion> = {
+          state: "METADATA_EXTRACTION",
+        };
+
+        await updateIngestionRecordState(
+          record.id,
+          newStateRecord
+        );
+
+        return {
+          success: true,
+          data: { comicBookId: currentComicRecord.id, filePath: record.filePath, fileHash },
+        };
+      }
 
       return {
-        success: true,
-        data: { comicBookId, filePath, fileHash },
+        success: false,
+        data: { comicBookId: currentComicRecord.id, filePath: record.filePath, fileHash },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
