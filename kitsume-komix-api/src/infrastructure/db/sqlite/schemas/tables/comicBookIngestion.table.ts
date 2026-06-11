@@ -8,6 +8,7 @@ export const comicBookIngestionTable = sqliteTable("comic_book_ingestion", {
   comicBookId: int().notNull().references(() => comicBooksTable.id, {
     onDelete: "cascade",
   }),
+  filePath: text().notNull(),
   metadata: text(), // JSON string containing metadata extracted during ingestion
   state: text(),
   errorMessage: text(),
