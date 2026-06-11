@@ -465,6 +465,33 @@ export const insertComicBook = async (
 };
 
 /**
+ * Inserts a new comic book into the database and returns the full comic book record after insertion
+ * @param comicBook The comic book data to insert
+ * @returns The full comic book record of the newly inserted comic book
+ */
+export const insertComicBookReturningComicBook = async (
+  comicBook: NewComicBook,
+): Promise<ComicBook> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const insertQuery: ComicBook[] = await db
+      .insert(comicBooksTable)
+      .values(comicBook)
+      .returning();
+
+    return insertQuery[0];
+  } catch (error) {
+    dbLogger.error("Error inserting comic book:" + error);
+    throw error;
+  }
+}
+
+/**
  * Gets the comic book by its ID
  * @param id Id of the comic book
  * @returns The comic book object or null if not found
