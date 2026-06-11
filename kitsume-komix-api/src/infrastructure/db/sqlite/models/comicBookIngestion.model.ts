@@ -2,7 +2,9 @@ import { eq, and, isNull, or } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { comicBookIngestionTable } from "../schemas/tables/comicBookIngestion.table.ts";
 
-import type { IngestionState, ComicBookIngestionRecord } from "#types/index.ts";
+import type { IngestionState, ComicBookIngestionRecord, ComicBookIngestion } from "#types/index.ts";
+
+import { dbLogger } from "#logger/loggers.ts";
 
 export class ComicBookIngestionModel {
   /**
@@ -171,5 +173,55 @@ export class ComicBookIngestionModel {
     } catch {
       return null;
     }
+  }
+}
+
+/**
+ * Update ingestion record state with error handling and logging, returns the updated record
+ * 
+ * @param id The id of the record to update
+ * @param updates The actual changes to be made in the type of a partial ComicBookIngestion
+ */
+export const updateIngestionRecordState = async (id: number, updates: Partial<ComicBookIngestion> ): Promise<ComicBookIngestion> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const updateData: Record<string, unknown> = {};
+
+    if (updates.state) {
+      updateData.state = updates.state;
+    }
+
+    if (updates.metadata) {
+      updateData.metadata = JSON.stringify(updates.metadata);
+    }
+
+    if (updates.errorMessage) {
+      updateData.errorMessage = updates.errorMessage;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw new Error("No valid fields to update");
+    }
+
+    updateData.updatedAt = new Date().toISOString();
+
+    const [result] = await db
+      .update(comicBookIngestionTable)
+      .set(updateData)
+      .where(eq(comicBookIngestionTable.id, id))
+      .returning();
+
+    return result as ComicBookIngestion;
+  } catch (error) {
+    dbLogger.error(
+      `Error updating ingestion record state for record ID ${id}: ${error instanceof Error ? error.message : String(error)}`
+    );
+
+    throw error;
   }
 }
