@@ -1,4 +1,4 @@
-import { StandardizedComicMetadata } from "#types/index.ts";
+import { StandardizedComicMetadata, ComicBookIngestion } from "#types/index.ts";
 import { ComicBook, NewComicBook } from "./database.types.ts";
 
 
@@ -103,7 +103,7 @@ export interface JobHandler {
    * @param record The ingestion record to process
    * @returns A result indicating success or failure
    */
-  handle(record: ComicBookIngestionRecord): Promise<JobHandlerResult>;
+  handle(record: ComicBookIngestion): Promise<JobHandlerResult>;
 }
 
 export type IngestionState =
