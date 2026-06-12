@@ -1,17 +1,17 @@
 import { apiLogger } from "#logger/loggers.ts";
 import {
-  CoMet,
-  ComicInfo,
-  MetadataCompiled,
+  type CoMet,
+  type ComicInfo,
+  type MetadataCompiled,
   readComicFileMetadata,
 } from "comic-metadata-tool";
 
 import { getFileSize } from "#utilities/file.ts";
 
-import { getLibraryContainingPath } from "#db/sqlite/models/comicLibraries.model.ts";
+import { getLibraryContainingPath } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
 
-import { StandardizedComicMetadata } from "#types/index.ts";
-import { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
+import type { StandardizedComicMetadata } from "#types/index.ts";
+import type { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
 
 import { env } from "#config/env.ts";
 
@@ -224,21 +224,12 @@ const standardizeFromCoMet = (comet: CoMet): StandardizedComicMetadata => {
  * @param fileMetadata Optional standardized metadata.
  * @returns A new comic book object ready for insertion.
  */
-export const combineMetadataWithParsedFileDetails = async (
-  workerData: WorkerDataForBuildingComicInsertion,
+export const combineMetadataWithParsedFileDetails = (
   fileDetails: ComicFileDetails,
   fileMetadata?: StandardizedComicMetadata,
-): Promise<NewComicBook> => {
-  const libraryId: number | null = (await getLibraryContainingPath(workerData.filePath))?.id || null;
+): Partial<NewComicBook> => {
 
-  if (!libraryId) {
-    throw new Error(`No library found containing the path: ${workerData.filePath}`);
-  }
-
-  const comicData: NewComicBook = {
-    libraryId: libraryId,
-    filePath: workerData.filePath,
-    hash: workerData.fileHash,
+  const comicData: Partial<NewComicBook> = {
     title: fileMetadata?.title || null,
     series: fileMetadata?.series || fileDetails.series || null,
     issueNumber: fileMetadata?.issueNumber || fileDetails.issue ||
@@ -249,7 +240,6 @@ export const combineMetadataWithParsedFileDetails = async (
     alternateIssueNumber: fileMetadata?.alternateNumber || null,
     alternateCount: fileMetadata?.alternateCount || null,
     pageCount: fileMetadata?.pageCount || null,
-    fileSize: await getFileSize(workerData.filePath),
     summary: fileMetadata?.summary || null,
     notes: fileMetadata?.notes || null,
     year: fileMetadata?.year || Number(fileDetails.year) || null,
