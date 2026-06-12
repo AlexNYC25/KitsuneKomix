@@ -1,11 +1,13 @@
 import { queueLogger } from "#logger/loggers.ts";
 
-import { ComicBookIngestionModel } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
+import { updateIngestionRecordState } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
+import { updateComicBook } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
 
-import { standardizeMetadata } from "#utilities/metadata.ts";
+import { standardizeMetadata, combineMetadataWithParsedFileDetails } from "#utilities/metadata.ts";
 import { getComicFileRawDetails } from "#utilities/comic-parser.ts";
+import { fileExists } from "#utilities/file.ts";
 
-import type { StandardizedComicMetadata, JobHandler, JobHandlerResult, ComicBookIngestionRecord} from "#types/index.ts";
+import type { StandardizedComicMetadata, JobHandler, JobHandlerResult, ComicBookIngestion, ComicFileDetails, NewComicBook} from "#types/index.ts";
 
 
 /**
@@ -18,63 +20,73 @@ import type { StandardizedComicMetadata, JobHandler, JobHandlerResult, ComicBook
  * - Move to METADATA_CANDIDATES_CREATED state
  */
 export class MetadataExtractionHandler implements JobHandler {
-  async handle(record: ComicBookIngestionRecord): Promise<JobHandlerResult> {
+  async handle(record: ComicBookIngestion): Promise<JobHandlerResult> {
     try {
-      const metadata = ComicBookIngestionModel.getMetadata(record);
-      const filePath = metadata?.filePath as string | undefined;
-      const comicBookId = metadata?.comicBookId as number | undefined;
+      const fileExistsResult: boolean = await fileExists(record.filePath);
 
-      if (!filePath || !comicBookId) {
+      if (!fileExistsResult) {
         return {
           success: false,
-          errorMessage: "Missing file path or comic book ID in metadata",
+          errorMessage: `File not found at path: ${record.filePath}`,
+        };
+      }
+
+      // Parse filename for additional details
+      const fileNameMetadata: ComicFileDetails = getComicFileRawDetails(record.filePath);
+
+      // Extract standardized metadata from comic file
+      const standardizedMetadata: StandardizedComicMetadata | undefined =
+        await standardizeMetadata(record.filePath);
+
+      if (standardizedMetadata) {
+        queueLogger.info(
+          `[MetadataExtractionHandler] Successfully extracted embedded metadata for file: ${record.filePath}`
+        );
+
+        const newStateRecord: Partial<ComicBookIngestion> = {
+          state: "METADATA_CANDIDATES_CREATED",
+          metadata: JSON.stringify(standardizedMetadata),
+        };
+        const _ingestionRecord: ComicBookIngestion = await updateIngestionRecordState(record.id, newStateRecord)
+
+      } else {
+        queueLogger.warn(
+          `[MetadataExtractionHandler] No embedded metadata found for file: ${record.filePath}`
+        );
+
+        const newStateRecord: Partial<ComicBookIngestion> = {
+          state: "COMIC_INGESTION_COMPLETED",
+        };
+
+        const _ingestionRecord: ComicBookIngestion = await updateIngestionRecordState(
+          record.id,
+          newStateRecord
+        );
+      }
+
+    
+      const comicRecord: Partial<NewComicBook> = combineMetadataWithParsedFileDetails(fileNameMetadata, standardizedMetadata);
+      
+      const updatedComicBookRecord: boolean = await updateComicBook(record.comicBookId, comicRecord);
+
+
+      if (!updatedComicBookRecord) {
+        queueLogger.error(
+          `[MetadataExtractionHandler] Failed to update comic book record with extracted metadata for comicBookId: ${record.comicBookId}`
+        );
+
+        return {
+          success: false,
+          errorMessage: `Failed to update comic book record with extracted metadata for comicBookId: ${record.comicBookId}`,
         };
       }
 
       queueLogger.info(
-        `[MetadataExtractionHandler] Extracting metadata for: ${filePath}`
-      );
-
-      // Extract standardized metadata from comic file
-      const standardizedMetadata: StandardizedComicMetadata | undefined =
-        await standardizeMetadata(filePath);
-
-      // Parse filename for additional details
-      const fileNameMetadata = getComicFileRawDetails(filePath);
-
-      // Combine metadata sources
-      const extractedMetadata = {
-        standardized: standardizedMetadata || null,
-        fileName: fileNameMetadata,
-        extractedAt: new Date().toISOString(),
-      };
-
-      if (standardizedMetadata) {
-        queueLogger.info(
-          `[MetadataExtractionHandler] Successfully extracted metadata from file`
-        );
-      } else {
-        queueLogger.warn(
-          `[MetadataExtractionHandler] No embedded metadata found, using filename only`
-        );
-      }
-
-      // Update ingestion record with extracted metadata
-      await ComicBookIngestionModel.updateState(
-        record.id,
-        "METADATA_CANDIDATES_CREATED",
-        {
-          ...metadata,
-          extractedMetadata,
-        }
+        `[MetadataExtractionHandler] Updated comic book record with extracted metadata for comicBookId: ${record.comicBookId}`
       );
 
       return {
         success: true,
-        data: {
-          hasEmbeddedMetadata: !!standardizedMetadata,
-          extractedMetadata,
-        },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
