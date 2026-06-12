@@ -39,6 +39,23 @@ export async function directoryExists(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * Checks if a file exists at the given path
+ * @param path Path to the file to check
+ * @returns Promise<boolean> - true if the the file exists, false otherwise
+ */
+export async function fileExists(path: string): Promise<boolean> {
+  try {
+    const stat = await Deno.stat(path);
+    return stat.isFile;
+  } catch (err) {
+    if (err instanceof Deno.errors.NotFound) {
+      return false;
+    }
+    throw err;
+  }
+}
+
 export async function getFileSize(filePath: string): Promise<number> {
   try {
     const stat = await Deno.stat(filePath);
