@@ -22,7 +22,7 @@ export interface StandardizedComicMetadata {
   alternateSeries?: string;
   alternateNumber?: string;
   alternateCount?: number;
-  pageCount: number;
+  pageCount?: number;
   summary?: string;
   notes?: string;
   year?: number;
