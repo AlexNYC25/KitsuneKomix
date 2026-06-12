@@ -54,8 +54,17 @@ export class MetadataExtractionHandler implements JobHandler {
           `[MetadataExtractionHandler] No embedded metadata found for file: ${record.filePath}`
         );
 
+        const standardizedMetadataFromFileName: StandardizedComicMetadata = {
+          series: fileNameMetadata.series,
+          issueNumber: fileNameMetadata.issue,
+          volume: fileNameMetadata.volume,
+          year: Number(fileNameMetadata.year),
+          count: Number(fileNameMetadata.count),
+        }
+
         const newStateRecord: Partial<ComicBookIngestion> = {
-          state: "COMIC_INGESTION_COMPLETED",
+          state: "METADATA_CANDIDATES_CREATED",
+          metadata: JSON.stringify(standardizedMetadataFromFileName),
         };
 
         const _ingestionRecord: ComicBookIngestion = await updateIngestionRecordState(
