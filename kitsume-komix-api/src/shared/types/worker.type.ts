@@ -124,3 +124,22 @@ export type ComicBookIngestionRecord = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type MetadataCandidateType =
+  | "title"
+  | "series"
+  | "publisher"
+  | "writer"
+  | "artist"
+  | "penciler"
+  | "inker"
+  | "colorist"
+  | "letterer"
+  | "cover_artist"
+  | "editor"
+  | "character"
+  | "team"
+  | "location"
+  | "story_arc";
+
+export type MetadataCandidateStatus = "pending" | "accepted" | "rejected";
