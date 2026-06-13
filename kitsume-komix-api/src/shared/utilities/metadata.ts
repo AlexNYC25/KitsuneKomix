@@ -11,7 +11,7 @@ import { getFileSize } from "#utilities/file.ts";
 import { getLibraryContainingPath } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
 
 import type { StandardizedComicMetadata } from "#types/index.ts";
-import type { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion } from "#types/index.ts";
+import type { ComicFileDetails, NewComicBook, WorkerDataForBuildingComicInsertion, NewComicMetadataCandidate, MetadataCandidateType } from "#types/index.ts";
 
 import { env } from "#config/env.ts";
 
@@ -305,3 +305,193 @@ export const removeMetadataFromCache = async (
 ): Promise<boolean> => {
   return metadataCache.delete(filePath);
 };
+
+/**
+ * Converts a standardized metadata object into an array of metadata candidates for database insertion.
+ * @param metadata The standardized metadata to convert into candidates.
+ * @param comicBookId The ID of the comic book these candidates are associated with.
+ * @returns An array of metadata candidates ready for insertion into the database.
+ */
+export const convertStandardizedMetadataToCandidates = (
+  metadata: StandardizedComicMetadata,
+  comicBookId: number
+): NewComicMetadataCandidate[] => {
+
+  const candidates: NewComicMetadataCandidate[] = [];
+
+  if (metadata.series) {
+    candidates.push({
+      comicBookId,
+      type: "series",
+      value: metadata.series,
+      normalizedValue: metadata.series.toLowerCase().trim(),
+    });
+  }
+
+  if (metadata.genres) {
+    for (const genre of metadata.genres) {
+      candidates.push({
+        comicBookId,
+        type: "genre",
+        value: genre,
+        normalizedValue: genre.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.publisher) {
+    for (const publisher of metadata.publisher) {
+      candidates.push({
+        comicBookId,
+        type: "publisher",
+        value: publisher,
+        normalizedValue: publisher.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.imprint) {
+    for (const imprint of metadata.imprint) {
+      candidates.push({
+        comicBookId,
+        type: "imprint",
+        value: imprint,
+        normalizedValue: imprint.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.writers) {
+    for (const writer of metadata.writers) {
+      candidates.push({
+        comicBookId,
+        type: "writer",
+        value: writer,
+        normalizedValue: writer.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.pencilers) {
+    for (const penciler of metadata.pencilers) {
+      candidates.push({
+        comicBookId,
+        type: "penciler",
+        value: penciler,
+        normalizedValue: penciler.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.inkers) {
+    for (const inker of metadata.inkers) {
+      candidates.push({
+        comicBookId,
+        type: "inker",
+        value: inker,
+        normalizedValue: inker.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.colorists) {
+    for (const colorist of metadata.colorists) {
+      candidates.push({
+        comicBookId,
+        type: "colorist",
+        value: colorist,
+        normalizedValue: colorist.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.letterers) {
+    for (const letterer of metadata.letterers) {
+      candidates.push({
+        comicBookId,
+        type: "letterer",
+        value: letterer,
+        normalizedValue: letterer.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.editors) {
+    for (const editor of metadata.editors) {
+      candidates.push({
+        comicBookId,
+        type: "editor",
+        value: editor,
+        normalizedValue: editor.toLowerCase().trim(),
+      });
+    }
+  }
+  
+  if (metadata.coverArtists) {
+    for (const coverArtist of metadata.coverArtists) {
+      candidates.push({
+        comicBookId,
+        type: "cover_artist",
+        value: coverArtist,
+        normalizedValue: coverArtist.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.characters) {
+    for (const character of metadata.characters) {
+      candidates.push({
+        comicBookId,
+        type: "character",
+        value: character,
+        normalizedValue: character.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.teams) {
+    for (const team of metadata.teams) {
+      candidates.push({
+        comicBookId,
+        type: "team",
+        value: team,
+        normalizedValue: team.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.locations) {
+    for (const location of metadata.locations) {
+      candidates.push({
+        comicBookId,
+        type: "location",
+        value: location,
+        normalizedValue: location.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.storyArcs) {
+    for (const storyArc of metadata.storyArcs) {
+      candidates.push({
+        comicBookId,
+        type: "story_arc",
+        value: storyArc,
+        normalizedValue: storyArc.toLowerCase().trim(),
+      });
+    }
+  }
+
+  if (metadata.seriesGroups) {
+    for (const seriesGroup of metadata.seriesGroups) {
+      candidates.push({
+        comicBookId,
+        type: "series_group",
+        value: seriesGroup,
+        normalizedValue: seriesGroup.toLowerCase().trim(),
+      });
+    }
+  }
+
+  return candidates;
+}
