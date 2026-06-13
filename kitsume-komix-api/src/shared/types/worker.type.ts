@@ -126,7 +126,6 @@ export type ComicBookIngestionRecord = {
 };
 
 export type MetadataCandidateType =
-  | "title"
   | "series"
   | "genre"
   | "publisher"
