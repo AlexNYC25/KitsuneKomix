@@ -2,7 +2,8 @@ import { eq, and } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { comicMetadataCandidatesTable } from "../schemas/tables/comicMetadataCandidates.table.ts";
 
-import type { MetadataCandidateType, MetadataCandidateStatus, ComicMetadataCandidate } from "#types/index.ts";
+import type { MetadataCandidateType, MetadataCandidateStatus, ComicMetadataCandidate, NewComicMetadataCandidate } from "#types/index.ts";
+import { dbLogger } from "#root/src/infrastructure/logger/loggers.ts";
 
 export class ComicMetadataCandidatesModel {
   /**
@@ -160,5 +161,41 @@ export class ComicMetadataCandidatesModel {
     await db
       .delete(comicMetadataCandidatesTable)
       .where(eq(comicMetadataCandidatesTable.comicBookId, comicBookId));
+  }
+}
+
+/**
+ * The bulk insertion function for comic metadata candidates. This is used to insert multiple candidates at once, such as after metadata extraction from a comic book file.
+ * 
+ * @param candidates The array of new comic metadata candidates to insert
+ * @returns The array of insert records of the type ComicMetadataCandidate corresponding to the 
+ */
+export const insertComicMetadataCandidates = async (
+  candidates: NewComicMetadataCandidate[]
+): Promise<ComicMetadataCandidate[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const insertedCandidates: ComicMetadataCandidate[] = await db
+      .insert(comicMetadataCandidatesTable)
+      .values(
+        candidates.map((candidate) => ({
+          comicBookId: candidate.comicBookId,
+          type: candidate.type,
+          value: candidate.value,
+          normalizedValue: candidate.value.toLowerCase().trim(),
+          status: "pending" as const,
+        }))
+      )
+      .returning();
+
+    return insertedCandidates;
+  } catch (error) {
+    dbLogger.error(`Error inserting comic metadata candidates: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
   }
 }
