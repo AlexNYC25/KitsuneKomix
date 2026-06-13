@@ -52,6 +52,7 @@ export type ComicBookIngestion = InferSelectModel<typeof comicBookIngestionTable
 export type NewComicBookIngestion = InferInsertModel<typeof comicBookIngestionTable>;
 
 export type ComicMetadataCandidate = InferSelectModel<typeof comicMetadataCandidatesTable>;
+export type NewComicMetadataCandidate = InferInsertModel<typeof comicMetadataCandidatesTable>;
 
 export type ComicLibrary = InferSelectModel<typeof comicLibrariesTable>;
 export type NewComicLibrary = InferInsertModel<typeof comicLibrariesTable>;
