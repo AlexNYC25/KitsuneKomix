@@ -128,9 +128,10 @@ export type ComicBookIngestionRecord = {
 export type MetadataCandidateType =
   | "title"
   | "series"
+  | "genre"
   | "publisher"
+  | "imprint"
   | "writer"
-  | "artist"
   | "penciler"
   | "inker"
   | "colorist"
@@ -140,6 +141,7 @@ export type MetadataCandidateType =
   | "character"
   | "team"
   | "location"
-  | "story_arc";
+  | "story_arc"
+  | "series_group";
 
 export type MetadataCandidateStatus = "pending" | "accepted" | "rejected";
