@@ -2,36 +2,7 @@ import { eq, and } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { comicMetadataCandidatesTable } from "../schemas/tables/comicMetadataCandidates.table.ts";
 
-export type MetadataCandidateType =
-  | "title"
-  | "series"
-  | "publisher"
-  | "writer"
-  | "artist"
-  | "penciler"
-  | "inker"
-  | "colorist"
-  | "letterer"
-  | "cover_artist"
-  | "editor"
-  | "character"
-  | "team"
-  | "location"
-  | "story_arc";
-
-export type MetadataCandidateStatus = "pending" | "accepted" | "rejected";
-
-export type ComicMetadataCandidateRecord = {
-  id: number;
-  comicBookId: number;
-  type: string;
-  value: string;
-  normalizedValue: string;
-  status: MetadataCandidateStatus;
-  resolvedId: number | null;
-  createdAt: string;
-  updatedAt: string;
-};
+import type { MetadataCandidateType, MetadataCandidateStatus, ComicMetadataCandidate } from "#types/index.ts";
 
 export class ComicMetadataCandidatesModel {
   /**
@@ -81,7 +52,7 @@ export class ComicMetadataCandidatesModel {
     if (!db) {
       throw new Error("Database client is not initialized");
     }
-    
+
     const values = candidates.map((c) => ({
       comicBookId: c.comicBookId,
       type: c.type,
@@ -101,7 +72,7 @@ export class ComicMetadataCandidatesModel {
   /**
    * Get all candidates for a comic book
    */
-  static async getByComicBookId(comicBookId: number): Promise<ComicMetadataCandidateRecord[]> {
+  static async getByComicBookId(comicBookId: number): Promise<ComicMetadataCandidate[]> {
     const { db } = getClient();
 
     if (!db) {
@@ -113,7 +84,7 @@ export class ComicMetadataCandidatesModel {
       .from(comicMetadataCandidatesTable)
       .where(eq(comicMetadataCandidatesTable.comicBookId, comicBookId));
 
-    return candidates as ComicMetadataCandidateRecord[];
+    return candidates as ComicMetadataCandidate[];
   }
 
   /**
@@ -121,7 +92,7 @@ export class ComicMetadataCandidatesModel {
    */
   static async getPendingByComicBookId(
     comicBookId: number
-  ): Promise<ComicMetadataCandidateRecord[]> {
+  ): Promise<ComicMetadataCandidate[]> {
     const { db } = getClient();
 
     if (!db) {
@@ -138,7 +109,7 @@ export class ComicMetadataCandidatesModel {
         )
       );
 
-    return candidates as ComicMetadataCandidateRecord[];
+    return candidates as ComicMetadataCandidate[];
   }
 
   /**
