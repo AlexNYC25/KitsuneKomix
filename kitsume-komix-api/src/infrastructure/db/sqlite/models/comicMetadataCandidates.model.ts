@@ -199,3 +199,84 @@ export const insertComicMetadataCandidates = async (
     throw error;
   }
 }
+
+/**
+ * Retrieve all metadata candidates for a given comic book ID. This is used during the metadata resolution stage to fetch the candidates that need to be resolved to actual entities.
+ * @param comicBookId The ID of the comic book for which to retrieve metadata candidates
+ * @returns An array of ComicMetadataCandidate records associated with the specified comic book ID
+ * @throws An error if the database query fails or if the database client is not initialized
+ */
+export const getComicMetadataCandidatesByComicBookId = async (
+  comicBookId: number,
+  status: MetadataCandidateStatus = "pending"
+): Promise<ComicMetadataCandidate[]> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const candidates = await db
+      .select()
+      .from(comicMetadataCandidatesTable)
+      .where(
+        and(
+          eq(comicMetadataCandidatesTable.comicBookId, comicBookId),
+          eq(comicMetadataCandidatesTable.status, status)
+        )
+      );
+      
+
+    return candidates as ComicMetadataCandidate[];
+  } catch (error) {
+    dbLogger.error(`Error fetching comic metadata candidates for comicBookId ${comicBookId}: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
+/**
+ * 
+ * @param id The id of the Comic Metadata Candidate record to update
+ * @param status The New status for the candidate record
+ * @param resolvedId The resolved id of the candidate to set in that record row
+ * @returns The updated ComicMetadataCandidate record after the status update has been applied
+ * @throws An error if the database query fails or if the database client is not initialized
+ */
+export const updatedComicMetadataCandidateStatus = async (
+  id: number,
+  status: MetadataCandidateStatus,
+  resolvedId?: number
+): Promise<ComicMetadataCandidate> => {
+  const { db, client } = getClient();
+
+  if (!db || !client) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const updateData: Partial<{
+      status: MetadataCandidateStatus;
+      resolvedId: number;
+      updatedAt: string;
+    }> = {
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (resolvedId !== undefined) {
+      updateData.resolvedId = resolvedId;
+    }
+
+    const [result] = await db
+      .update(comicMetadataCandidatesTable)
+      .set(updateData)
+      .where(eq(comicMetadataCandidatesTable.id, id))
+      .returning();
+
+    return result as ComicMetadataCandidate;
+  } catch (error) {
+    dbLogger.error(`Error updating comic metadata candidate ID ${id} status to ${status}: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
