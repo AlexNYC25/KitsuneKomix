@@ -1,11 +1,11 @@
 import { queueLogger } from "#logger/loggers.ts";
-import { ComicBookIngestionModel } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
-import { 
-  ComicMetadataCandidatesModel,
-  type MetadataCandidateType 
-} from "#infrastructure/db/sqlite/models/comicMetadataCandidates.model.ts";
 
-import type { StandardizedComicMetadata, JobHandler, JobHandlerResult, ComicBookIngestionRecord} from "#types/index.ts";
+import { updateIngestionRecordState } from "#infrastructure/db/sqlite/models/comicBookIngestion.model.ts";
+import { insertComicMetadataCandidates } from "#infrastructure/db/sqlite/models/comicMetadataCandidates.model.ts";
+
+import { convertStandardizedMetadataToCandidates } from "#utilities/metadata.ts";
+
+import type { StandardizedComicMetadata, JobHandler, JobHandlerResult, ComicBookIngestion, ComicMetadataCandidate, NewComicMetadataCandidate} from "#types/index.ts";
 
 /**
  * Handles the METADATA_CANDIDATES_CREATED stage of comic ingestion.
@@ -17,114 +17,39 @@ import type { StandardizedComicMetadata, JobHandler, JobHandlerResult, ComicBook
  * - Move to METADATA_ENTITIES_RESOLVED state
  */
 export class MetadataCandidatesCreationHandler implements JobHandler {
-  async handle(record: ComicBookIngestionRecord): Promise<JobHandlerResult> {
+  async handle(record: ComicBookIngestion): Promise<JobHandlerResult> {
     try {
-      const metadata = ComicBookIngestionModel.getMetadata(record);
-      const comicBookId = metadata?.comicBookId as number | undefined;
-      const extractedMetadata = metadata?.extractedMetadata as {
-        standardized: StandardizedComicMetadata | null;
-        fileName: Record<string, unknown>;
-      } | undefined;
+      const metadataObject: StandardizedComicMetadata | undefined = record.metadata ? JSON.parse(record.metadata) : undefined;
 
-      if (!comicBookId) {
+      if (!metadataObject) {
         return {
           success: false,
-          errorMessage: "Missing comic book ID in metadata",
+          errorMessage: "No metadata found in record",
         };
       }
 
+      const candidatesForInsertions: NewComicMetadataCandidate[] = convertStandardizedMetadataToCandidates(metadataObject, record.id);
+
+      const insertedCandidates: ComicMetadataCandidate[] = await insertComicMetadataCandidates(candidatesForInsertions);
+
       queueLogger.info(
-        `[MetadataCandidatesCreationHandler] Creating candidates for comic ID: ${comicBookId}`
+        `[MetadataCandidatesCreationHandler] Inserted ${insertedCandidates.length} metadata candidates for record ID: ${record.id}`
       );
 
-      const standardized = extractedMetadata?.standardized;
-      const fileName = extractedMetadata?.fileName;
-
-      // Collect all metadata values into candidates
-      const candidates: Array<{
-        comicBookId: number;
-        type: MetadataCandidateType;
-        value: string;
-      }> = [];
-
-      // Helper to add candidates
-      const addCandidates = (
-        type: MetadataCandidateType,
-        values: string[] | string | undefined
-      ) => {
-        if (!values) return;
-        const valueArray = Array.isArray(values) ? values : [values];
-        
-        for (const value of valueArray) {
-          if (value && value.trim()) {
-            candidates.push({
-              comicBookId,
-              type,
-              value: value.trim(),
-            });
-          }
-        }
+      // Update ingestion record to next state
+      const newStateRecord: Partial<ComicBookIngestion> = {
+        state: "METADATA_ENTITIES_RESOLVED",
       };
 
-      // Extract candidates from standardized metadata
-      if (standardized) {
-        addCandidates("title", standardized.title);
-        addCandidates("series", standardized.series);
-        addCandidates("publisher", standardized.publisher);
-        addCandidates("writer", standardized.writers);
-        addCandidates("artist", standardized.pencilers); // Map pencilers to artists
-        addCandidates("penciler", standardized.pencilers);
-        addCandidates("inker", standardized.inkers);
-        addCandidates("colorist", standardized.colorists);
-        addCandidates("letterer", standardized.letterers);
-        addCandidates("cover_artist", standardized.coverArtists);
-        addCandidates("editor", standardized.editors);
-        addCandidates("character", standardized.characters);
-        addCandidates("team", standardized.teams);
-        addCandidates("location", standardized.locations);
-        addCandidates("story_arc", standardized.storyArcs);
-      }
-
-      // Extract candidates from filename parsing
-      if (fileName) {
-        const fileNameSeries = fileName.series as string | undefined;
-        const fileNameTitle = fileName.title as string | undefined;
-        
-        if (fileNameSeries && fileNameSeries !== "Unknown Series") {
-          addCandidates("series", fileNameSeries);
-        }
-        
-        if (fileNameTitle) {
-          addCandidates("title", fileNameTitle);
-        }
-      }
-
-      // Bulk create candidates
-      if (candidates.length > 0) {
-        await ComicMetadataCandidatesModel.createMany(candidates);
-        queueLogger.info(
-          `[MetadataCandidatesCreationHandler] Created ${candidates.length} candidates`
-        );
-      } else {
-        queueLogger.warn(
-          `[MetadataCandidatesCreationHandler] No metadata candidates to create`
-        );
-      }
-
-      // Update ingestion record to next state
-      await ComicBookIngestionModel.updateState(
+      const _ingestionRecord: ComicBookIngestion = await updateIngestionRecordState(
         record.id,
-        "METADATA_ENTITIES_RESOLVED",
-        {
-          ...metadata,
-          candidatesCount: candidates.length,
-        }
+        newStateRecord
       );
 
       return {
         success: true,
         data: {
-          candidatesCreated: candidates.length,
+          candidatesCreated: insertedCandidates.length,
         },
       };
     } catch (error) {
