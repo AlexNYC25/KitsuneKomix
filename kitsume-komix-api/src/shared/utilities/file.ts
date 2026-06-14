@@ -77,3 +77,8 @@ export const isHiddenPath = (path: string): boolean => {
 export const getFileNameFromPath = (filePath: string): string => {
   return basename(filePath);
 };
+
+export const getFolderPathFromFilePath = (filePath: string): string => {
+  const folderPath = filePath.substring(0, filePath.lastIndexOf("/"));
+  return folderPath;
+};
