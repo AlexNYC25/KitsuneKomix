@@ -10,6 +10,7 @@ import type { ComicLetterer } from "#types/index.ts";
  * Inserts a new comic letterer into the database or returns the ID of an existing letterer with the same name
  * @param name The name of the letterer to insert
  * @returns The ID of the newly inserted letterer or the ID of the existing letterer with the same name
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicLetterer = async (name: string): Promise<number> => {
   const { db, client } = getClient();

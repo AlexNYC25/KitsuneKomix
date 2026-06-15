@@ -11,6 +11,7 @@ import type { ComicPenciler } from "#types/index.ts";
  * @param name The name of the penciler
  * @param description Optional description of the penciler
  * @returns The ID of the newly inserted or existing penciler
+ * @throws Error if there is an issue with the database operation
  */
 export const insertComicPenciler = async (
   name: string,

@@ -10,6 +10,7 @@ import type { ComicWriter } from "#types/index.ts";
  * Inserts a new comic writer into the database
  * @param name The name of the writer
  * @returns The ID of the newly inserted or existing writer
+ * @throws Error if there is an issue with the database operation
  */
 export const insertComicWriter = async (name: string): Promise<number> => {
   const { db, client } = getClient();
