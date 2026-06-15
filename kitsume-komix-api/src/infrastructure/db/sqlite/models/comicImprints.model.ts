@@ -10,6 +10,7 @@ import type { ComicImprint } from "#types/index.ts";
  * Inserts a new comic imprint into the database or returns the ID of an existing imprint with the same name
  * @param name The name of the imprint to insert
  * @returns The ID of the newly inserted imprint or the ID of the existing imprint with the same name
+ * @throws An error if there is an issue with the database operation
  */
 export const insertComicImprint = async (name: string): Promise<number> => {
   const { db, client } = getClient();

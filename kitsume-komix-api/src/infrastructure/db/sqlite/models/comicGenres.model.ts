@@ -10,6 +10,7 @@ import { comicBookGenresTable, comicGenresTable } from "#infrastructure/db/sqlit
  * Inserts a new comic genre into the database or returns the ID of an existing genre with the same name
  * @param genreName The name of the genre to insert
  * @returns The ID of the newly inserted genre or the ID of the existing genre with the same name
+ * @throws An error if there is an issue with the database operation 
  */
 export const insertComicGenre = async (genreName: string): Promise<number> => {
   const { db, client } = getClient();

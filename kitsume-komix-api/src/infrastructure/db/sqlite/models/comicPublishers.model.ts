@@ -10,6 +10,7 @@ import type { ComicPublisher } from "#types/index.ts";
  * Inserts a new comic publisher into the database
  * @param name The name of the publisher
  * @returns The ID of the newly inserted or existing publisher
+ * @throws An error if there is an issue with the database operation
  */
 export const insertComicPublisher = async (name: string): Promise<number> => {
   const { db, client } = getClient();
