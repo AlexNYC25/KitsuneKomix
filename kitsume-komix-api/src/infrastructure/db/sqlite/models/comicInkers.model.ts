@@ -4,12 +4,13 @@ import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
 import { comicBookInkersTable, comicInkersTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
-import { ComicInker } from "#types/index.ts";
+import type { ComicInker } from "#types/index.ts";
 
 /**
  * Inserts a new comic inker into the database or returns the ID of an existing inker with the same name
  * @param name The name of the inker to insert
  * @returns The ID of the newly inserted inker or the ID of the existing inker with the same name
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicInker = async (name: string): Promise<number> => {
   const { db, client } = getClient();

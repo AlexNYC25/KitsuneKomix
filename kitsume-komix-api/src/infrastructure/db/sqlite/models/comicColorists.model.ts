@@ -3,13 +3,14 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
 
-import { ComicColorist } from "#types/index.ts";
+import type { ComicColorist } from "#types/index.ts";
 import { comicBookColoristsTable, comicColoristsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Inserts a new comic colorist into the database or returns the ID of an existing colorist with the same name
  * @param name The name of the colorist to insert
  * @returns The ID of the newly inserted colorist or the ID of the existing colorist with the same name
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicColorist = async (name: string): Promise<number> => {
   const { db, client } = getClient();
