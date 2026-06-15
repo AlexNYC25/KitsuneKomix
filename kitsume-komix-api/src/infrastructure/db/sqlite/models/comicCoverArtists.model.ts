@@ -3,7 +3,7 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
 
-import { ComicCoverArtist } from "#types/index.ts";
+import type { ComicCoverArtist } from "#types/index.ts";
 import {
   comicBookCoverArtistsTable,
   comicCoverArtistsTable,
@@ -13,6 +13,7 @@ import {
  * Inserts a new comic cover artist into the database or returns the ID of an existing cover artist with the same name
  * @param name The name of the cover artist to insert
  * @returns The ID of the newly inserted cover artist or the ID of the existing cover artist with the same name
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicCoverArtist = async (name: string): Promise<number> => {
   const { db, client } = getClient();

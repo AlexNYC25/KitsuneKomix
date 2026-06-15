@@ -10,6 +10,7 @@ import type { ComicCharacter } from "#types/index.ts";
  * Inserts a new comic character into the database or returns the ID of an existing character with the same name
  * @param name The name of the character to insert
  * @returns The ID of the newly inserted character or the ID of the existing character with the same name
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicCharacter = async (name: string): Promise<number> => {
   const { db, client } = getClient();

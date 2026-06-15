@@ -10,6 +10,7 @@ import type { ComicTeam } from "#types/index.ts";
  * Inserts a new comic team into the database
  * @param name The name of the team
  * @returns The ID of the newly inserted or existing team
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicTeam = async (name: string): Promise<number> => {
   const { db, client } = getClient();

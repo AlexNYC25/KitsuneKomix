@@ -10,6 +10,7 @@ import type { ComicLocation } from "#types/index.ts";
  * Inserts a new comic location into the database or returns the ID of an existing location with the same name
  * @param name The name of the location to insert
  * @returns The ID of the newly inserted location or the ID of the existing location with the same name
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicLocation = async (name: string): Promise<number> => {
   const { db, client } = getClient();

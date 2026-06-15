@@ -3,13 +3,14 @@ import { eq, ilike } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { dbLogger } from "#logger/loggers.ts";
 
-import { ComicEditor } from "#types/index.ts";
+import type { ComicEditor } from "#types/index.ts";
 import { comicBookEditorsTable, comicEditorsTable } from "#infrastructure/db/sqlite/schemas/index.ts";
 
 /**
  * Inserts a new comic editor into the database or returns the ID of an existing editor with the same name
  * @param name The name of the editor to insert
  * @returns The ID of the newly inserted editor or the ID of the existing editor with the same name
+ * @throws Error if there is an issue with the database operation, such as a connection error or query error
  */
 export const insertComicEditor = async (name: string): Promise<number> => {
   const { db, client } = getClient();
