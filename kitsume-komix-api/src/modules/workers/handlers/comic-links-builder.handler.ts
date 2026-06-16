@@ -27,12 +27,9 @@ import type { JobHandler, JobHandlerResult, ComicBookIngestion, ComicMetadataCan
  * 
  * Responsibilities:
  * - Link the comic book to resolved entities (writers, artists, series, etc.)
- * - Update the comic book record with final metadata
  * - Create relationship records in junction tables
- * - Move to COMIC_INGESTION_COMPLETED state
+ * - Move to COMIC_METADATA_AGGREGATED state
  * 
- * NOTE: This is a placeholder implementation. Full linking logic
- * will be added incrementally as entity types are implemented.
  */
 export class ComicLinksBuilderHandler implements JobHandler {
   async handle(record: ComicBookIngestion): Promise<JobHandlerResult> {
@@ -113,7 +110,7 @@ export class ComicLinksBuilderHandler implements JobHandler {
 
 
       const newStateRecord: Partial<ComicBookIngestion> = {
-        state: "COMIC_INGESTION_COMPLETED",
+        state: "COMIC_METADATA_AGGREGATED",
       };
 
       const _ingestionRecord: ComicBookIngestion =
