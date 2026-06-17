@@ -7,9 +7,10 @@ import {
   MetadataCandidatesCreationHandler,
   MetadataEntitiesResolutionHandler,
   ComicLinksBuilderHandler,
+  ComicMetadataAggregatedHandler,
 } from "./handlers/index.ts";
 
-import type { ComicBookIngestionRecord, IngestionState, JobHandler, JobHandlerResult } from "#types/index.ts";
+import type { ComicBookIngestionRecord, IngestionState, JobHandler, JobHandlerResult, ComicBookIngestion } from "#types/index.ts";
 
 /**
  * Worker class that processes ingestion jobs.
@@ -31,6 +32,7 @@ export class IngestionWorker {
       ["METADATA_CANDIDATES_CREATED", new MetadataCandidatesCreationHandler()],
       ["METADATA_ENTITIES_RESOLVED", new MetadataEntitiesResolutionHandler()],
       ["COMIC_LINKS_BUILT", new ComicLinksBuilderHandler()],
+      ["COMIC_METADATA_AGGREGATED", new ComicMetadataAggregatedHandler()]
     ]);
   }
 
@@ -40,8 +42,8 @@ export class IngestionWorker {
    * @param record The ingestion record to process
    * @returns The result of the handler execution
    */
-  async processJob(record: ComicBookIngestionRecord): Promise<JobHandlerResult> {
-    const state = record.state;
+  async processJob(record: ComicBookIngestion): Promise<JobHandlerResult> {
+    const state: IngestionState = record.state as IngestionState;
 
     if (!state) {
       queueLogger.error(`[Worker] Record ${record.id} has no state`);
