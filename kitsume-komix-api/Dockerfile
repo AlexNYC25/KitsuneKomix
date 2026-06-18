@@ -2,9 +2,7 @@
 FROM denoland/deno:debian AS base
 WORKDIR /app
 
-USER root
-
-# Install extra packages including gosu for user switching
+# Install runtime utilities (gosu for user switching in entrypoint)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
@@ -12,26 +10,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     gnupg \
     git \
-    gosu && \
-    rm -rf /var/lib/apt/lists/*
-
-USER deno
+    gosu \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy manifest files
 COPY deno.json* ./
 
 # ========== Dependencies ==========
 FROM base AS deps
-# Cache dependencies (lockfile optional)
-# Adjust "main.ts" if your entry is elsewhere
-RUN deno cache main.ts || true
+
+ENV DENO_DIR=/deno-dir
+RUN deno cache main.ts
 
 # ========== Development ==========
 FROM base AS dev
-WORKDIR /app
 
-# Create necessary directories and set permissions
-USER root
+# Create writable directories and fix ownership
 RUN mkdir -p /app/node_modules /app/cache /app/comics /app/config && \
     chown -R deno:deno /app
 
@@ -39,34 +33,22 @@ RUN mkdir -p /app/node_modules /app/cache /app/comics /app/config && \
 COPY --chown=root:root docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-USER deno
-
-# Install dev dependencies if needed
+# Copy source
 COPY --chown=deno:deno . .
 
-# Mount volumes in compose for hot reload
 EXPOSE 8001
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["deno", "task", "dev"]
 
-# ========== Builder (optional bundle step) ==========
-FROM base AS builder
-WORKDIR /app
-COPY . .
-RUN deno cache main.ts
-# Example: bundle the app for smaller prod image
-# RUN deno bundle main.ts build/app.bundle.js
-
 # ========== Production ==========
 FROM base AS prod
-WORKDIR /app
 
-# Copy cached deps
-COPY --from=deps /deno-dir /deno-dir
+# Pull cached dependencies from deps stage
 ENV DENO_DIR=/deno-dir
+COPY --from=deps /deno-dir /deno-dir
 
 # Copy source
 COPY . .
 
-EXPOSE 3000
-CMD ["deno", "run", "--allow-run=unzip,7z,7za", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "--allow-ffi", "--allow-sys", "main.ts"]
+EXPOSE 8001
+CMD ["deno", "task", "start"]
