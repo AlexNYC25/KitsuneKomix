@@ -4,7 +4,6 @@ import { runMigrations } from "#infrastructure/db/scripts/migrate.ts";
 import { setUpAppSettings } from "#infrastructure/db/scripts/seed.ts";
 
 // Import the new SQLite-based ingestion worker
-import { startWorker } from "#modules/workers/index.ts";
 
 // NOTE: Old BullMQ/Redis workers are kept for reference but not imported
 // import "#infrastructure/queue/workers/comicBook.worker.ts";
@@ -16,7 +15,6 @@ await runMigrations();
 await setUpAppSettings();
 
 // Start the new SQLite-based ingestion worker
-await startWorker();
 
 // The worker manager's polling loop will keep the process alive
 // Signal handlers are already set up in worker.ts module

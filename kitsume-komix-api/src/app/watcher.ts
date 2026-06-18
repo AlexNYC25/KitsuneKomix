@@ -2,7 +2,6 @@ import chokidar, { type FSWatcher } from "chokidar";
 
 import { apiLogger } from "#logger/loggers.ts";
 import { getAllComicLibraries } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
-import { orchestrateFile } from "#infrastructure/queue/orchestrators/comic.orchestrator.ts";
 
 import { isHiddenPath } from "#utilities/file.ts";
 
@@ -131,7 +130,7 @@ const handleTrackedFile = async (path: string, action: "add" | "change") => {
   }
 
   try {
-    await orchestrateFile(path);
+    // handle file addition or change events for tracked paths
   } catch (error) {
     logWatcherError(`Error handling ${action} event for ${path}`, error);
   }

@@ -158,7 +158,6 @@ export const HealthCheckResponseSchema = z.object({
   }).optional(),
   details: z.object({
     sqlite: z.enum(["ok", "failed"]),
-    redis: z.enum(["ok", "failed"]),
   }).optional(),
 }).openapi({
   title: "HealthCheckResponse",

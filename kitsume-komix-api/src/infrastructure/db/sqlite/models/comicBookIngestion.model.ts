@@ -2,7 +2,7 @@ import { eq, and, isNull, or } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { comicBookIngestionTable } from "../schemas/tables/comicBookIngestion.table.ts";
 
-import type { IngestionState, ComicBookIngestionRecord, ComicBookIngestion } from "#types/index.ts";
+import type { ComicBookIngestion } from "#types/index.ts";
 
 import { dbLogger } from "#logger/loggers.ts";
 
@@ -10,28 +10,13 @@ export class ComicBookIngestionModel {
   /**
    * Create a new ingestion record
    */
-  static async create(comicBookId: number, state: IngestionState = "FILE_DETECTED") {
-    const { db } = getClient();
-    if (!db) {
-      throw new Error("Database client is not initialized");
-    }
 
-    const [result] = await db
-      .insert(comicBookIngestionTable)
-      .values({
-        comicBookId,
-        state,
-      })
-      .returning();
-    
-    return result;
-  }
-
+  
   /**
    * Get pending jobs (jobs that need processing)
    * Returns jobs in order of creation
    */
-  static async getPendingJobs(limit = 10): Promise<ComicBookIngestionRecord[]> {
+  static async getPendingJobs(limit = 10): Promise<any[]> {
     const { db } = getClient();
     if (!db) {
       throw new Error("Database client is not initialized");
@@ -55,13 +40,13 @@ export class ComicBookIngestionModel {
       .limit(limit)
       .orderBy(comicBookIngestionTable.createdAt);
 
-    return jobs as ComicBookIngestionRecord[];
+    return jobs as any[];
   }
 
   /**
    * Get a specific ingestion record by ID
    */
-  static async getById(id: number): Promise<ComicBookIngestionRecord | undefined> {
+  static async getById(id: number): Promise<any | undefined> {
     const { db } = getClient();
     if (!db) {
       throw new Error("Database client is not initialized");
@@ -72,13 +57,13 @@ export class ComicBookIngestionModel {
       .from(comicBookIngestionTable)
       .where(eq(comicBookIngestionTable.id, id));
 
-    return result as ComicBookIngestionRecord | undefined;
+    return result as any | undefined;
   }
 
   /**
    * Get ingestion record by comic book ID
    */
-  static async getByComicBookId(comicBookId: number): Promise<ComicBookIngestionRecord | undefined> {
+  static async getByComicBookId(comicBookId: number): Promise<any | undefined> {
     const { db } = getClient();
     if (!db) {
       throw new Error("Database client is not initialized");
@@ -89,7 +74,7 @@ export class ComicBookIngestionModel {
       .from(comicBookIngestionTable)
       .where(eq(comicBookIngestionTable.comicBookId, comicBookId));
 
-    return result as ComicBookIngestionRecord | undefined;
+    return result as any | undefined;
   }
 
   /**
@@ -97,7 +82,7 @@ export class ComicBookIngestionModel {
    */
   static async updateState(
     id: number,
-    state: IngestionState,
+    state: any,
     metadata?: Record<string, unknown>
   ) {
     const { db } = getClient();
@@ -106,7 +91,7 @@ export class ComicBookIngestionModel {
     }
 
     const updateData: Partial<{
-      state: IngestionState;
+      state: any;
       metadata: string;
       updatedAt: string;
     }> = {
@@ -166,7 +151,7 @@ export class ComicBookIngestionModel {
   /**
    * Get metadata for a job (parsed from JSON)
    */
-  static getMetadata(record: ComicBookIngestionRecord): Record<string, unknown> | null {
+  static getMetadata(record: any): Record<string, unknown> | null {
     if (!record.metadata) return null;
     try {
       return JSON.parse(record.metadata);

@@ -2,13 +2,11 @@
 export * from "./app.type.ts";
 
 // Re-export all queue types
-export * from "./queue.type.ts";
 
 // Re-export all database types
 export * from "./database.types.ts";
 
 // Re-export types related to workers
-export * from "./worker.type.ts";
 
 export * from "./comicParser.type.ts";
 

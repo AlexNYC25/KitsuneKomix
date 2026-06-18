@@ -2,7 +2,7 @@ import { eq, and } from "drizzle-orm";
 import { getClient } from "../client.ts";
 import { comicMetadataCandidatesTable } from "../schemas/tables/comicMetadataCandidates.table.ts";
 
-import type { MetadataCandidateType, MetadataCandidateStatus, ComicMetadataCandidate, NewComicMetadataCandidate } from "#types/index.ts";
+import type { ComicMetadataCandidate, NewComicMetadataCandidate } from "#types/index.ts";
 import { dbLogger } from "#root/src/infrastructure/logger/loggers.ts";
 
 export class ComicMetadataCandidatesModel {
@@ -11,7 +11,7 @@ export class ComicMetadataCandidatesModel {
    */
   static async create(
     comicBookId: number,
-    type: MetadataCandidateType,
+    type: any,
     value: string
   ) {
     const { db } = getClient();
@@ -42,7 +42,7 @@ export class ComicMetadataCandidatesModel {
   static async createMany(
     candidates: Array<{
       comicBookId: number;
-      type: MetadataCandidateType;
+      type: any;
       value: string;
     }>
   ) {
@@ -118,7 +118,7 @@ export class ComicMetadataCandidatesModel {
    */
   static async updateStatus(
     id: number,
-    status: MetadataCandidateStatus,
+    status: any,
     resolvedId?: number
   ) {
     const { db } = getClient();
@@ -128,7 +128,7 @@ export class ComicMetadataCandidatesModel {
     }
 
     const updateData: Partial<{
-      status: MetadataCandidateStatus;
+      status: any;
       resolvedId: number;
       updatedAt: string;
     }> = {
@@ -208,7 +208,7 @@ export const insertComicMetadataCandidates = async (
  */
 export const getComicMetadataCandidatesByComicBookId = async (
   comicBookId: number,
-  status: MetadataCandidateStatus = "pending"
+  status: any = "pending"
 ): Promise<ComicMetadataCandidate[]> => {
   const { db, client } = getClient();
 
@@ -243,9 +243,9 @@ export const getComicMetadataCandidatesByComicBookId = async (
  * @returns The updated ComicMetadataCandidate record after the status update has been applied
  * @throws An error if the database query fails or if the database client is not initialized
  */
-export const updatedComicMetadataCandidateStatus = async (
+export const updatedComicany = async (
   id: number,
-  status: MetadataCandidateStatus,
+  status: any,
   resolvedId?: number
 ): Promise<ComicMetadataCandidate> => {
   const { db, client } = getClient();
@@ -256,7 +256,7 @@ export const updatedComicMetadataCandidateStatus = async (
 
   try {
     const updateData: Partial<{
-      status: MetadataCandidateStatus;
+      status: any;
       resolvedId: number;
       updatedAt: string;
     }> = {

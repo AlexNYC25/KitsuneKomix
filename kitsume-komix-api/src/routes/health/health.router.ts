@@ -4,7 +4,6 @@ import { HealthCheckResponseSchema } from "#zod/schemas/response.schema.ts";
 
 import { appMeta } from "#config/appMeta.ts";
 
-import { testRedisConnection } from "#db/redis/client.ts";
 import { testSQLiteConnection } from "#db/sqlite/client.ts";
 
 const healthRouter = new OpenAPIHono();
@@ -30,17 +29,14 @@ healthRouter.openapi(
     // Check SQLite connection
     const sqliteHealthy = await testSQLiteConnection();
 
-    // Check Redis connection
-    const redisHealthy = await testRedisConnection();
 
-    if (!sqliteHealthy || !redisHealthy) {
+    if (!sqliteHealthy ) {
       return c.json(
         {
           message: "Health check failed",
           status: "error" as const,
           details: {
             sqlite: (sqliteHealthy ? "ok" : "failed") as "ok" | "failed",
-            redis: (redisHealthy ? "ok" : "failed") as "ok" | "failed",
           },
         },
         503,
