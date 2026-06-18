@@ -1,18 +1,4 @@
 services:
-  redis:
-    image: redis:8.2.1-alpine
-    container_name: kitsune_redis
-    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    restart: unless-stopped
-    networks:
-      - kitsune_network
 
   api:
     build:
@@ -33,13 +19,8 @@ services:
       ENV: development
       PORT: 8001
       HOST: 0.0.0.0
-      REDIS_HOST: "redis"
-      REDIS_PORT: 6379
       JWT_SECRET: "your_jwt_secret"
       JWT_REFRESH_SECRET: "your_jwt_secret"
-    depends_on:
-      redis:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 5s
@@ -68,13 +49,8 @@ services:
       ENV: development
       PORT: 8001
       HOST: 0.0.0.0
-      REDIS_HOST: "redis"
-      REDIS_PORT: 6379
       JWT_SECRET: "your_jwt_secret"
       JWT_REFRESH_SECRET: "your_jwt_secret"
-    depends_on:
-      redis:
-        condition: service_healthy
     restart: unless-stopped
     networks:
       - kitsune_network
@@ -105,7 +81,6 @@ services:
       - kitsune_network
 
 volumes:
-  redis_data:
   client_node_modules:
   api_node_modules:
   api_denocache:
