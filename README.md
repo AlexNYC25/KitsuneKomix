@@ -48,8 +48,8 @@ Work in progress...
 ## Development
 
 ### Repository Structure
-- `kitsume-komix-api/`: Contains the source code for the KitsuneKomix API and the background worker responsible for scanning and processing comic books.
-- `kitsume-komix-client/`: Contains the source code for the KitsuneKomix Client.
+- `kitsune-komix-api/`: Contains the source code for the KitsuneKomix API and the background worker responsible for scanning and processing comic books.
+- `kitsune-komix-client/`: Contains the source code for the KitsuneKomix Client.
 
 ### Major Technologies Used
 
@@ -85,8 +85,8 @@ Comprehensive documentation for both the KitsuneKomix API and Client can be foun
 component. This includes specific setup guides, reference materials, and development guidelines.
 
 #### KitsuneKomix API Documentation
-- [Development Guide](./kitsume-komix-api/docs/development.md)
+- [Development Guide](./kitsune-komix-api/docs/development.md)
 
 #### KitsuneKomix Client Documentation
-- [Development Guide](./kitsume-komix-client/docs/development.md)
+- [Development Guide](./kitsune-komix-client/docs/development.md)
 

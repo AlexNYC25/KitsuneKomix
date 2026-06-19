@@ -1,7 +1,7 @@
 # KitsuneKomix Client -- Codebase Improvement Plan
 
 > Generated: May 2026
-> Scope: `kitsume-komix-client/src/`
+> Scope: `kitsune-komix-client/src/`
 
 ---
 

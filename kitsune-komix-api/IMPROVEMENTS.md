@@ -1,7 +1,7 @@
 # KitsuneKomix API -- Codebase Improvement Plan
 
 > Generated: May 2026
-> Scope: `kitsume-komix-api/`
+> Scope: `kitsune-komix-api/`
 > Stack: Deno, Hono, Drizzle ORM, SQLite, Redis, BullMQ
 
 ---

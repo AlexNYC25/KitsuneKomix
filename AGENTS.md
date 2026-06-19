@@ -6,8 +6,8 @@
 ## STRUCTURE
 ```
 ./
-├── kitsume-komix-api/          # Deno backend — Hono REST API, SQLite (Drizzle ORM), BullMQ queue
-├── kitsume-komix-client/       # Vue 3 frontend — Pinia stores, Vite build, Vitest tests
+├── kitsune-komix-api/          # Deno backend — Hono REST API, SQLite (Drizzle ORM), BullMQ queue
+├── kitsune-komix-client/       # Vue 3 frontend — Pinia stores, Vite build, Vitest tests
 ├── docker-compose.yml          # Orchestrates Redis + API + Worker + Client
 └── AGENTS.md                   # ← You are here
 ```
@@ -16,21 +16,21 @@
 
 | Task | Go To | Notes |
 |------|-------|-------|
-| API entry | `kitsume-komix-api/main.ts` | Hono app bootstrap, middleware, routes |
-| Worker entry | `kitsume-komix-api/worker.ts` | BullMQ background processor |
-| API routes | `kitsume-komix-api/src/routes/*/` | 13 route modules (comics, auth, users, etc.) |
-| Business logic | `kitsume-komix-api/src/modules/*/` | 7 service modules |
-| DB models | `kitsume-komix-api/src/infrastructure/db/sqlite/models/` | 30 Drizzle model files |
-| DB schemas | `kitsume-komix-api/src/infrastructure/db/sqlite/schemas/` | Table definitions + mappings |
-| Queue jobs | `kitsume-komix-api/src/infrastructure/queue/jobs/` | BullMQ job definitions |
-| Queue workers | `kitsume-komix-api/src/infrastructure/queue/workers/` | BullMQ worker processors |
-| Client entry | `kitsume-komix-client/src/main.ts` | Vue app init (Pinia, Router, PrimeVue) |
-| Vue components | `kitsume-komix-client/src/components/` | 12+ components (reader, nav, forms) |
-| Pinia stores | `kitsume-komix-client/src/stores/` | 6 stores (auth, comics, libraries, etc.) |
-| Pages/routes | `kitsume-komix-client/src/pages/` | 5 page components |
-| Client utilities | `kitsume-komix-client/src/utilities/` | 7 helpers (apiClient, formatting, etc.) |
-| Shared types | `kitsume-komix-api/src/shared/types/` | 18 type definitions |
-| Zod schemas | `kitsume-komix-api/src/shared/zod/` | API request validation + OpenAPI docs |
+| API entry | `kitsune-komix-api/main.ts` | Hono app bootstrap, middleware, routes |
+| Worker entry | `kitsune-komix-api/worker.ts` | BullMQ background processor |
+| API routes | `kitsune-komix-api/src/routes/*/` | 13 route modules (comics, auth, users, etc.) |
+| Business logic | `kitsune-komix-api/src/modules/*/` | 7 service modules |
+| DB models | `kitsune-komix-api/src/infrastructure/db/sqlite/models/` | 30 Drizzle model files |
+| DB schemas | `kitsune-komix-api/src/infrastructure/db/sqlite/schemas/` | Table definitions + mappings |
+| Queue jobs | `kitsune-komix-api/src/infrastructure/queue/jobs/` | BullMQ job definitions |
+| Queue workers | `kitsune-komix-api/src/infrastructure/queue/workers/` | BullMQ worker processors |
+| Client entry | `kitsune-komix-client/src/main.ts` | Vue app init (Pinia, Router, PrimeVue) |
+| Vue components | `kitsune-komix-client/src/components/` | 12+ components (reader, nav, forms) |
+| Pinia stores | `kitsune-komix-client/src/stores/` | 6 stores (auth, comics, libraries, etc.) |
+| Pages/routes | `kitsune-komix-client/src/pages/` | 5 page components |
+| Client utilities | `kitsune-komix-client/src/utilities/` | 7 helpers (apiClient, formatting, etc.) |
+| Shared types | `kitsune-komix-api/src/shared/types/` | 18 type definitions |
+| Zod schemas | `kitsune-komix-api/src/shared/zod/` | API request validation + OpenAPI docs |
 
 ## CONVENTIONS
 
@@ -40,7 +40,7 @@
 - **Routes:** Organised by domain in `src/routes/<domain>/api.<domain>.router.ts`. Pattern: one route file per domain.
 - **Modules:** Business logic in `src/modules/<domain>/<domain>.service.ts`. Thin routers delegate to services.
 - **DB:** Drizzle ORM with SQLite. Models in `src/infrastructure/db/sqlite/models/`. Schema migrations in `drizzle/`.
-- **Tests:** Client uses Vitest (`pnpm test:unit`). API tests in `kitsume-komix-api/tests/`. No CI pipeline yet.
+- **Tests:** Client uses Vitest (`pnpm test:unit`). API tests in `kitsune-komix-api/tests/`. No CI pipeline yet.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 - **Node API imports in Deno code** — files.service.ts uses `node:path`. Use Deno's `@std/path` instead.
@@ -61,13 +61,13 @@
 docker-compose up --build
 
 # Client only
-cd kitsume-komix-client && pnpm dev      # Dev server on :5173
-cd kitsume-komix-client && pnpm lint      # ESLint
-cd kitsume-komix-client && pnpm format    # Prettier
-cd kitsume-komix-client && pnpm test:unit # Vitest
+cd kitsune-komix-client && pnpm dev      # Dev server on :5173
+cd kitsune-komix-client && pnpm lint      # ESLint
+cd kitsune-komix-client && pnpm format    # Prettier
+cd kitsune-komix-client && pnpm test:unit # Vitest
 
 # API only
-cd kitsume-komix-api && deno task start   # Dev on :8001
+cd kitsune-komix-api && deno task start   # Dev on :8001
 ```
 
 ## NOTES / GOTCHAS

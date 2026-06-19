@@ -2,7 +2,7 @@ services:
 
   api:
     build:
-      context: ./kitsume-komix-api
+      context: ./kitsune-komix-api
       dockerfile: ./Dockerfile
       target: dev
     container_name: kitsunekomix_api
@@ -13,7 +13,7 @@ services:
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/cache
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/comics
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/config:/app/config
-      - ./kitsume-komix-api:/app  # For hot-reload in dev
+      - ./kitsune-komix-api:/app  # For hot-reload in dev
       - api_node_modules:/app/node_modules  # Use separate volume for API
     environment:
       ENV: development
@@ -33,7 +33,7 @@ services:
 
   worker:
     build:
-      context: ./kitsume-komix-api
+      context: ./kitsune-komix-api
       dockerfile: ./Dockerfile
       target: dev
     container_name: kitsunekomix_worker
@@ -43,7 +43,7 @@ services:
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/cache
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/comics
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/config:/app/config
-      - ./kitsume-komix-api:/app
+      - ./kitsune-komix-api:/app
       - api_node_modules:/app/node_modules
     environment:
       ENV: development
@@ -57,7 +57,7 @@ services:
 
   client:
     build:
-      context: ./kitsume-komix-client
+      context: ./kitsune-komix-client
       target: dev
     container_name: kitsunekomix_client
     environment:
@@ -69,7 +69,7 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       API_URL: http://localhost:8001
     volumes:
-      - ./kitsume-komix-client:/app
+      - ./kitsune-komix-client:/app
       - client_node_modules:/app/node_modules
     ports:
       - "5173:5173"

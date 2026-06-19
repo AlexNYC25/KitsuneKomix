@@ -252,7 +252,7 @@ const response = await apiClient.POST('/series', {
 ### Development
 ```bash
 # Start both API and Client
-cd kitsume-komix-client
+cd kitsune-komix-client
 pnpm dev
 ```
 

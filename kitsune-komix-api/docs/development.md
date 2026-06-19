@@ -7,7 +7,7 @@ Comprised of a Deno runtime that when started, initializes both the REST API ser
 At the start of the application, the main entry point `main.ts` under the `kitsune-komix-api/` directory initializes both services:
 
 ```plaintext
-kitsume-komix-api/
+kitsune-komix-api/
 ├── api/
 │   ├── middlewares/           # Middleware functions for request processing
 │   ├── routes/                # API route definitions
@@ -70,35 +70,35 @@ We use SQLite as the database for KitsuneKomix API, for easy local data storage 
 For the actual connector to the database, we use the libsql library to connect to the SQLite database file and execute queries, then we pass the 
 connection to the libsql prisma client to allow Prisma to interact with the database.
 
-Note the connection to the SQLite database connection is initialized and shared globally in the `kitsume-komix-api/db/sqlite/client.ts` file.
+Note the connection to the SQLite database connection is initialized and shared globally in the `kitsune-komix-api/db/sqlite/client.ts` file.
 
 Prisma is used as the ORM to interact with the SQLite database, providing type-safe database queries and schema migrations.
 
-The primary config file is located at `kitsume-komix-api/drizzle.config.ts`, which defines the location of the SQLite database file and other Prisma settings.
+The primary config file is located at `kitsune-komix-api/drizzle.config.ts`, which defines the location of the SQLite database file and other Prisma settings.
 
-With the actual schema defined in the `kitsume-komix-api/db/sqlite/schema.ts` file using Drizzle ORM's schema definition syntax.
+With the actual schema defined in the `kitsune-komix-api/db/sqlite/schema.ts` file using Drizzle ORM's schema definition syntax.
 
 To make changes to the database schema, we need to update the schema file and then run the migration command to generate the migration files that will
-be located in the `kitsume-komix-api/drizzle/` directory. On the following start up of the application, Prisma will automatically apply any pending migrations to the database.
+be located in the `kitsune-komix-api/drizzle/` directory. On the following start up of the application, Prisma will automatically apply any pending migrations to the database.
 
 ```bash
     deno run db:generate
 ```
 
 #### Documenting the Database Schema
-The database schema is documented using the `kitsume-komix-api/docs/dbml` file, which provides an overview of the tables, columns, and relationships in the database, using 
+The database schema is documented using the `kitsune-komix-api/docs/dbml` file, which provides an overview of the tables, columns, and relationships in the database, using 
 DBML (Database Markup Language) syntax.
 
 On every change to the database schema, the DBML file should be updated to reflect the changes made.
 
 #### Organizing queries
-To keep database queries organized and maintainable, we define query functions in separate files under the `kitsume-komix-api/db/sqlite/models/` directory.
+To keep database queries organized and maintainable, we define query functions in separate files under the `kitsune-komix-api/db/sqlite/models/` directory.
 Where for every table in the database, we have a corresponding model file that defines functions for common queries related to that table.
 
 For example, we have:
-- `kitsume-komix-api/db/sqlite/models/comicBooks.model.ts` for queries related to the `comicBooks` table.
-- `kitsume-komix-api/db/sqlite/models/comicSeries.model.ts` for queries related to the `comicSeries` table.
-- `kitsume-komix-api/db/sqlite/models/comicColorists.model.ts` for queries related to the `comicColorists` table.
+- `kitsune-komix-api/db/sqlite/models/comicBooks.model.ts` for queries related to the `comicBooks` table.
+- `kitsune-komix-api/db/sqlite/models/comicSeries.model.ts` for queries related to the `comicSeries` table.
+- `kitsune-komix-api/db/sqlite/models/comicColorists.model.ts` for queries related to the `comicColorists` table.
 
 Each model file exports functions for creating, reading, updating, and deleting records in the corresponding table, as well as any complex queries needed for that resource.
 In general if we have complex queries that span multiple tables or involve joins, we should define that query in the model file for the primary table being queried.

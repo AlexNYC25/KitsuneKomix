@@ -9,7 +9,7 @@ RESTful API server with BullMQ background workers. Entry points: `main.ts` (HTTP
 ## STRUCTURE
 
 ```
-kitsume-komix-api/src/
+kitsune-komix-api/src/
 ├── app/           # App init: api.ts, watcher.ts, queues.ts
 ├── config/        # env.ts, appMeta.ts, queues.ts
 ├── infrastructure/  # DB (SQLite/Drizzle), logger, queue (BullMQ)

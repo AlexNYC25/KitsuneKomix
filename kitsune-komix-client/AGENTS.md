@@ -9,7 +9,7 @@ Vite-powered SPA with auto-type-generation from API OpenAPI endpoint. Entry: `sr
 ## STRUCTURE
 
 ```
-kitsume-komix-client/src/
+kitsune-komix-client/src/
 ├── components/    # Reusable Vue components (13 + subdirs)
 │   ├── forms/     # Admin form dialogs (5)
 │   ├── Settings/  # Settings page components (3)

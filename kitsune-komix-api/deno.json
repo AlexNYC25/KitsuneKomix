@@ -1,5 +1,5 @@
 {
-  "name": "kitsume-komix-api",
+  "name": "kitsune-komix-api",
   "version": "0.0.2",
   "description": "Kitsune Komix REST API service",
   "imports": {
