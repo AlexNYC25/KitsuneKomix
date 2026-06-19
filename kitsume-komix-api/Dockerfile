@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# ========== Honker extension (native build) ========== # → target/release/libhonker_ext.{dylib,so}
+# ========== Honker extension (SQLite loadable cdylib) ==========
 FROM rust-base AS honker
 
 WORKDIR /build
@@ -36,6 +36,8 @@ RUN git clone https://github.com/russellromney/honker && \
 
 # ========== Dependencies ==========
 FROM rust-base AS deps
+COPY main.ts worker.ts ./
+COPY src/ src/
 
 ENV DENO_DIR=/deno-dir
 RUN deno cache main.ts
@@ -47,8 +49,8 @@ FROM rust-base AS dev
 RUN mkdir -p /app/node_modules /app/cache /app/comics /app/config && \
     chown -R deno:deno /app
 
-# Copy honker binary
-COPY --from=honker /build/honker/target/release/honker-extension /usr/local/bin/
+# Copy honker SQLite extension
+COPY --from=honker /build/honker/target/release/libhonker_ext.so /usr/local/lib/libhonker_ext.so
 
 # Copy entrypoint script
 COPY --chown=root:root docker-entrypoint.sh /usr/local/bin/
@@ -68,8 +70,8 @@ FROM base AS prod
 ENV DENO_DIR=/deno-dir
 COPY --from=deps /deno-dir /deno-dir
 
-# Copy honker binary
-COPY --from=honker /build/honker/target/release/honker-extension /usr/local/bin/
+# Copy honker SQLite extension
+COPY --from=honker /build/honker/target/release/libhonker_ext.so /usr/local/lib/libhonker_ext.so
 
 # Copy source
 COPY . .
