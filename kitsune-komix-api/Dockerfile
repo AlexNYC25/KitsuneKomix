@@ -21,7 +21,7 @@ FROM denoland/deno:debian AS base
 
 WORKDIR /app
 
-COPY --from=honker /build/honker/target/release/libhonker_ext.so /app/
+COPY --from=honker /build/honker/target/release/ /honker/
 COPY --from=deno-modules /build/node_modules /app/node_modules
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
