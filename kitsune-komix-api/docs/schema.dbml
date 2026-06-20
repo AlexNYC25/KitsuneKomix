@@ -76,6 +76,7 @@ table comic_book_imprints {
 table comic_book_ingestion {
   id integer [pk, not null, increment]
   comicBookId integer [not null]
+  filePath text [not null]
   metadata text
   state text
   errorMessage text
