@@ -5,10 +5,6 @@ export const envSchema = z.object({
   PORT: z.string().transform((val) => parseInt(val, 10)).default(8000),
   CLIENT_URL: z.url().default("http://localhost:5173"),
 
-  // Redis settings
-  REDIS_HOST: z.string().default("redis"),
-  REDIS_PORT: z.string().transform((val) => parseInt(val, 10)).default(6379),
-
   // Logger level
   LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
 
