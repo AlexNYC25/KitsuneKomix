@@ -16,7 +16,7 @@ services:
       - ./kitsune-komix-api:/app  # For hot-reload in dev
       - api_node_modules:/app/node_modules  # Use separate volume for API
     environment:
-      ENV: development
+      MODE: development
       PORT: 8001
       HOST: 0.0.0.0
       JWT_SECRET: "your_jwt_secret"
@@ -46,7 +46,7 @@ services:
       - ./kitsune-komix-api:/app
       - api_node_modules:/app/node_modules  # Use separate volume for API
     environment:
-      ENV: development
+      MODE: development
       PORT: 8001
       HOST: 0.0.0.0
       JWT_SECRET: "your_jwt_secret"
@@ -61,13 +61,7 @@ services:
       target: dev
     container_name: kitsunekomix_client
     environment:
-      # In dev, browser hits API on the host port mapping:
-      VITE_API_BASE_URL: http://localhost:3000
-      # For OpenAPI schema generation inside Docker, use the service name
-      OPENAPI_URL: http://api:8001
-      # Helpful for file watching on macOS/docker
-      CHOKIDAR_USEPOLLING: "true"
-      API_URL: http://localhost:8001
+      API_URL: http://localhost:8001      
     volumes:
       - ./kitsune-komix-client:/app
       - client_node_modules:/app/node_modules
