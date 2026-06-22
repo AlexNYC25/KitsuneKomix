@@ -1,4 +1,1 @@
-
-import type { ComicBookHistory } from "#types/index.ts";
-
-export type BatchComicBookHistory = Record<number, ComicBookHistory>;
+export type { BatchComicBookHistory } from "#database/types/index.ts";

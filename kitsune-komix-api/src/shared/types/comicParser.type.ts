@@ -1,11 +1,1 @@
-
-export type ComicSeriesDetails = {
-  series: string;
-  volume?: string;
-  count?: string;
-  year?: string;
-};
-
-export type ComicFileDetails = ComicSeriesDetails & {
-  issue: string;
-};
+export type { ComicSeriesDetails, ComicFileDetails } from "#database/types/index.ts";
