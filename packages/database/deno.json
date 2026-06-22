@@ -1,0 +1,14 @@
+{
+  "name": "kitsune-komix-database",
+  "version": "0.0.1",
+  "description": "Shared database layer for Kitsune Komix (models, schemas, migrations)",
+  "imports": {
+    "@libsql/client": "npm:@libsql/client@^0.15.15",
+    "@std/path": "jsr:@std/path@^1.1.5",
+    "drizzle-orm": "npm:drizzle-orm@0.45.2",
+    "drizzle-dbml-generator": "npm:drizzle-dbml-generator@^0.10.0",
+    "zod": "npm:zod@^4.4.3",
+    "pino": "npm:pino@^9.14.0"
+  },
+  "nodeModulesDir": "auto"
+}
