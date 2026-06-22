@@ -1,1 +1,0 @@
-ALTER TABLE `comic_books` RENAME COLUMN "languge" TO "language";
