@@ -48,9 +48,9 @@ FROM base AS development
 
 WORKDIR /app
 
-RUN mkdir -p /app/comics && \
-    mkdir -p /app/config && \
-    mkdir -p /app/cache 
+RUN mkdir -p /app/data/comics && \
+    mkdir -p /app/data/config && \
+    mkdir -p /app/data/cache 
 
 COPY . .
 
