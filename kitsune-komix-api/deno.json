@@ -4,8 +4,8 @@
   "description": "Kitsune Komix REST API service",
   "imports": {
     "#root/": "./",
+    "#database/": "../packages/database/src/",
     "#infrastructure/": "./src/infrastructure/",
-    "#db/": "./src/infrastructure/db/",
     "#docs": "./docs",
     "#logger/": "./src/infrastructure/logger/",
     "#app/": "./src/app/",
