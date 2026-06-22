@@ -8,7 +8,7 @@ import {
 
 import { getFileSize } from "#utilities/file.ts";
 
-import { getLibraryContainingPath } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { getLibraryContainingPath } from "#database/models/comicLibraries.model.ts";
 
 import type { StandardizedComicMetadata } from "#types/index.ts";
 import type { ComicFileDetails, NewComicBook, NewComicMetadataCandidate, } from "#types/index.ts";

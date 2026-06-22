@@ -1,7 +1,7 @@
 import { initLogger } from "#logger/loggers.ts";
 
-import { runMigrations } from "#infrastructure/db/scripts/migrate.ts";
-import { setUpAppSettings } from "#infrastructure/db/scripts/seed.ts";
+import { runMigrations } from "#database/scripts/migrate.ts";
+import { setUpAppSettings } from "#database/scripts/seed.ts";
 
 // Import the new SQLite-based ingestion worker
 

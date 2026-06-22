@@ -6,7 +6,7 @@ import { requireAdmin, requireAuth } from "#modules/auth/middleware/authChecks.t
 import { getComicLibrariesAvailableToUser } from "#modules/libraries/index.ts";
 import { listFoldersInDirectoryService } from "#modules/files/index.ts";
 
-import { createComicLibrary, deleteComicLibrary, updateComicLibrary } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { createComicLibrary, deleteComicLibrary, updateComicLibrary } from "#database/models/comicLibraries.model.ts";
 
 import {
   ErrorResponseSchema,

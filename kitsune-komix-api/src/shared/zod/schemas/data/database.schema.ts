@@ -37,7 +37,7 @@ import {
   comicTeamsTable,
   comicWritersTable,
   usersTable,
-} from "#infrastructure/db/sqlite/schemas/index.ts";
+} from "#database/schemas/index.ts";
 
 // Inferred schemas from Drizzle schema
 export const UserSelectSchema = createSelectSchema(usersTable);

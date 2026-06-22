@@ -3,7 +3,7 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { apiLogger } from "#logger/loggers.ts";
 import { requireAdmin, requireAuth } from "#modules/auth/middleware/authChecks.ts";
 
-import { purgeAllData } from "#infrastructure/db/sqlite/models/admin.model.ts";
+import { purgeAllData } from "#database/models/admin.model.ts";
 
 import { MessageResponseSchema } from "#zod/schemas/response.schema.ts";
 

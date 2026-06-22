@@ -12,10 +12,10 @@ import {
   getComicBooksWithMetadataFilteringSorting,
   getComicDuplicates,
   getRandomBook,
-} from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
+} from "#database/models/comicBooks.model.ts";
 import {
   getThumbnailsByComicBookId
-} from "#infrastructure/db/sqlite/models/comicBookThumbnails.model.ts";
+} from "#database/models/comicBookThumbnails.model.ts";
 import { getFileNameFromPath } from "#utilities/file.ts";
 
 import {
@@ -33,7 +33,7 @@ import {
   getTeamsByComicBookId,
   getLocationsByComicBookId,
   getStoryArcsByComicBookId,
-} from "#infrastructure/db/sqlite/models/comicMetadataImports.ts";
+} from "#database/models/comicMetadataImports.ts";
 
 import type {
   ComicBook,

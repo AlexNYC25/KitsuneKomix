@@ -1,11 +1,11 @@
-import { getClient } from "#infrastructure/db/sqlite/client.ts";
-import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
+import { getClient } from "#database/client.ts";
+import { getComicBookById as dbGetComicBookById } from "#database/models/comicBooks.model.ts";
 import {
   getComicBookHistoryByUserAndComic,
   insertComicBookHistory,
   updateComicBookHistory,
   getComicBooksHistoryByUserIdBulk
-} from "#infrastructure/db/sqlite/models/comicBookHistory.model.ts";
+} from "#database/models/comicBookHistory.model.ts";
 
 import type {
   ComicBook,

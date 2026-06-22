@@ -1,7 +1,7 @@
 import { apiLogger } from "#logger/loggers.ts";
 import { env } from "#config/env.ts";
-import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
-import { getComicPagesByComicBookId } from "#infrastructure/db/sqlite/models/comicPages.model.ts";
+import { getComicBookById as dbGetComicBookById } from "#database/models/comicBooks.model.ts";
+import { getComicPagesByComicBookId } from "#database/models/comicPages.model.ts";
 
 import {
   extractComicBookByStreaming,

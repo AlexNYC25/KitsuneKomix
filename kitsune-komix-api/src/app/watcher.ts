@@ -1,7 +1,7 @@
 import chokidar, { type FSWatcher } from "chokidar";
 
 import { apiLogger } from "#logger/loggers.ts";
-import { getAllComicLibraries } from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+import { getAllComicLibraries } from "#database/models/comicLibraries.model.ts";
 
 import { isHiddenPath } from "#utilities/file.ts";
 

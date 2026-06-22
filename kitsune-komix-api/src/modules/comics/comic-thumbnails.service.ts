@@ -1,14 +1,14 @@
 import { apiLogger } from "#logger/loggers.ts";
 import { env } from "#config/env.ts";
-import { getClient } from "#infrastructure/db/sqlite/client.ts";
-import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
+import { getClient } from "#database/client.ts";
+import { getComicBookById as dbGetComicBookById } from "#database/models/comicBooks.model.ts";
 import {
   deleteComicBookThumbnail,
   getComicThumbnailById,
   getThumbnailsByComicBookId,
   insertCustomComicBookThumbnail,
   getComicBooksThumbnailsByComicBookIdsBatch
-} from "#infrastructure/db/sqlite/models/comicBookThumbnails.model.ts";
+} from "#database/models/comicBookThumbnails.model.ts";
 
 import { getFileNameFromPath } from "#utilities/file.ts";
 

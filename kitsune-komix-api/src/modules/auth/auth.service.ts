@@ -1,14 +1,14 @@
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
-import { getUserByEmail, getUserById } from "#infrastructure/db/sqlite/models/users.model.ts";
+import { getUserByEmail, getUserById } from "#database/models/users.model.ts";
 import {
   cleanupExpiredTokens,
   getValidRefreshToken,
   revokeAllUserRefreshTokens,
   revokeRefreshToken,
   storeRefreshToken,
-} from "#infrastructure/db/sqlite/models/refreshTokens.model.ts";
+} from "#database/models/refreshTokens.model.ts";
 
 import { generateTokenPair, verifyRefreshToken } from "./jwt.service.ts";
 

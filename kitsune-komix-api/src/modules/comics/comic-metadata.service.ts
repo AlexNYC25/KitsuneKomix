@@ -1,9 +1,9 @@
 import { apiLogger } from "#logger/loggers.ts";
-import { getClient } from "#infrastructure/db/sqlite/client.ts";
+import { getClient } from "#database/client.ts";
 
 import { fetchComicBooksWithRelatedMetadata } from "./comic-books.service.ts";
 
-import { getMetadataForComicBooksBatch } from "#infrastructure/db/sqlite/models/comicMetadataBatch.model.ts";
+import { getMetadataForComicBooksBatch } from "#database/models/comicMetadataBatch.model.ts";
 
 import {
   getWritersByComicBookId,
@@ -60,7 +60,7 @@ import {
   unlinkLocationsToComicBook,
   getStoryArcsByComicBookId,
   unlinkStoryArcsToComicBook,
-} from "#infrastructure/db/sqlite/models/comicMetadataImports.ts";
+} from "#database/models/comicMetadataImports.ts";
 
 import { dedupeById } from "#utilities/standardize.ts";
 

@@ -3,14 +3,14 @@ import {
   getAllComicLibraries,
   getUsersAssignedToLibrary,
   getUsersComicLibraries,
-} from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+} from "#database/models/comicLibraries.model.ts";
 import {
   getComicSeriesWithMetadataFilteringSorting,
-} from "#infrastructure/db/sqlite/models/comicSeries.model.ts";
-import { getUserById } from "#infrastructure/db/sqlite/models/users.model.ts";
+} from "#database/models/comicSeries.model.ts";
+import { getUserById } from "#database/models/users.model.ts";
 
 import type { ComicBookFilterItem, ComicLibrary, ComicSeries, ComicSeriesFilteringAndSortingParams, ComicSeriesFilterItem, ComicBookFilteringAndSortingParams, ComicBook, User, LibraryCompiledInfo } from "#types/index.ts";
-import { getComicBooksWithMetadataFilteringSorting } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
+import { getComicBooksWithMetadataFilteringSorting } from "#database/models/comicBooks.model.ts";
 
 /**
  * Get the comic libraries that are available to a user.

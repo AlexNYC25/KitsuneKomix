@@ -1,6 +1,6 @@
 import {
   getComicSeriesWithMetadataFilteringSorting,
-} from "#infrastructure/db/sqlite/models/comicSeries.model.ts";
+} from "#database/models/comicSeries.model.ts";
 
 import {
   attachThumbnailToComicBook,

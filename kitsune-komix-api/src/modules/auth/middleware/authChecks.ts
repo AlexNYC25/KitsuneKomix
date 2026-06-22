@@ -2,7 +2,7 @@ import type { Context, Next } from "hono";
 
 import { apiLogger } from "#logger/loggers.ts";
 
-import { getValidRefreshToken } from "#infrastructure/db/sqlite/models/refreshTokens.model.ts";
+import { getValidRefreshToken } from "#database/models/refreshTokens.model.ts";
 
 
 import { getTokenFromCookie, verifyAccessToken, verifyRefreshToken } from "#modules/auth/index.ts";

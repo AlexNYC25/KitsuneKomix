@@ -1,11 +1,11 @@
 import { apiLogger } from "#logger/loggers.ts";
-import { getClient } from "#infrastructure/db/sqlite/client.ts";
-import { getComicBookById as dbGetComicBookById } from "#infrastructure/db/sqlite/models/comicBooks.model.ts";
+import { getClient } from "#database/client.ts";
+import { getComicBookById as dbGetComicBookById } from "#database/models/comicBooks.model.ts";
 import {
   getComicBooksInSeries,
   getSeriesIdFromComicBook,
-} from "#infrastructure/db/sqlite/models/comicSeries.model.ts";
-import { getStoryArcsByComicBookId } from "#infrastructure/db/sqlite/models/comicStoryArcs.model.ts";
+} from "#database/models/comicSeries.model.ts";
+import { getStoryArcsByComicBookId } from "#database/models/comicStoryArcs.model.ts";
 
 import type {
   ComicBook,

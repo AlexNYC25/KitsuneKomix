@@ -6,7 +6,7 @@ import {
   getComicStoryArcById,
   getComicStoryArcsFilteringSorting,
   insertComicStoryArc,
-} from "#infrastructure/db/sqlite/models/comicStoryArcs.model.ts";
+} from "#database/models/comicStoryArcs.model.ts";
 
 import {
   validateAndBuildQueryParams,

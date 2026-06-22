@@ -4,9 +4,9 @@ import { startWatcher } from "#app/watcher.ts";
 import { env } from "#config/env.ts";
 import { initLogger } from "#logger/loggers.ts";
 
-import { runMigrations } from "#infrastructure/db/scripts/migrate.ts";
-import { generateDbml } from "#infrastructure/db/scripts/dbml.ts";
-import { setUpAppSettings } from "#infrastructure/db/scripts/seed.ts";
+import { runMigrations } from "#database/scripts/migrate.ts";
+import { generateDbml } from "#database/scripts/dbml.ts";
+import { setUpAppSettings } from "#database/scripts/seed.ts";
 
 await initLogger();
 await runMigrations();

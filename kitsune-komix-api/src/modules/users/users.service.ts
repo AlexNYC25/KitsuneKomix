@@ -6,18 +6,18 @@ import {
   getUserById,
   getAllUsers,
   updateUser
-} from "#infrastructure/db/sqlite/models/users.model.ts";
+} from "#database/models/users.model.ts";
 import {
   assignLibraryToUser,
   getComicLibraryById,
   unassignLibraryFromUser
-} from "#infrastructure/db/sqlite/models/comicLibraries.model.ts";
+} from "#database/models/comicLibraries.model.ts";
 
 import { hashPassword } from "#utilities/hash.ts";
 
 import type { User, UserRegistrationInput, UserEditInput, LibraryAssignmentsInput } from "#types/index.ts";
 
-import { getSetting, setSetting } from "#infrastructure/db/sqlite/models/appSettings.model.ts";
+import { getSetting, setSetting } from "#database/models/appSettings.model.ts";
 
 /**
  * Checks whether initial application setup has been completed.
