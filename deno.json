@@ -4,7 +4,11 @@
     "./packages/database",
     "./services/api"
   ],
+  "exports": {
+
+  },
   "tasks": {
-    "api": "deno run --watch --allow-net services/api/main.ts"
+    "api": "deno run --watch --allow-net services/api/main.ts",
+    "test": "deno test /app/services/api --allow-read"
   }
 }
