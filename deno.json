@@ -1,0 +1,10 @@
+{
+  "name": "Kitsune Komix",
+  "workspace": [
+    "./packages/database",
+    "./services/api"
+  ],
+  "tasks": {
+    "api": "deno run --watch --allow-net services/api/main.ts"
+  }
+}
