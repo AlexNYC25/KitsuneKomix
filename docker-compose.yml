@@ -1,0 +1,18 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./services/api/Dockerfile
+      target: api
+    container_name: kistune_komix_api
+    ports:
+      - "8001:8000"
+    environment:
+      MODE: development
+    restart: unless-stopped
+    networks:
+      - kitsune_network
+
+networks:
+  kitsune_network:
+    driver: bridge
