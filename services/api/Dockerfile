@@ -23,9 +23,7 @@ COPY --from=deno-modules /deno-dir /deno-dir
 
 COPY packages ./packages
 
-
-##### Deno production app runner stage. #####
-FROM base AS api
+FROM base AS prepped
 
 WORKDIR /app
 
@@ -34,6 +32,13 @@ RUN mkdir -p /app/data/comics && \
     mkdir -p /app/data/cache 
 
 COPY . .
+
+FROM prepped AS test
+
+RUN deno task test
+
+##### Deno production app runner stage. #####
+FROM prepped AS api
 
 EXPOSE 8000
 CMD ["deno", "task", "api"]
