@@ -7,6 +7,7 @@
   "exports": {
 
   },
+  "nodeModulesDir": "auto",
   "tasks": {
     "api": "deno run --watch --allow-net --allow-read --allow-write --allow-env services/api/main.ts",
     "test": "deno test /app/services/api --allow-read --allow-write --allow-env"
