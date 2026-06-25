@@ -12,6 +12,8 @@ FROM denoland/deno:alpine AS deno-modules
 WORKDIR /build
 
 COPY deno.json deno.lock* ./
+COPY packages/database/deno.json ./packages/database/deno.json
+COPY services/api/deno.json ./services/api/deno.json
 
 RUN deno install
 
@@ -20,6 +22,8 @@ FROM denoland/deno:debian AS base
 
 COPY --from=honker /build/honker/target/release/ /honker/
 COPY --from=deno-modules /deno-dir /deno-dir
+COPY --from=deno-modules /build/node_modules /app/node_modules
+COPY --from=deno-modules /build/deno.lock /app/deno.lock
 
 COPY packages ./packages
 
