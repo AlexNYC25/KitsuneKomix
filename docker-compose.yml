@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: ./services/api/Dockerfile
       target: api
-    container_name: kistune_komix_api
+    container_name: kitsune_komix_api
     ports:
       - "8001:8000"
     environment:
