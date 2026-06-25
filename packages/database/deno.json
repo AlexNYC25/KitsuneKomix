@@ -3,5 +3,11 @@
   "version": "0.0.1",
   "exports": {
     ".": "./mod.ts"
+  },
+  "imports": {
+    "@libsql/client": "npm:@libsql/client@^0.17.4",
+    "drizzle-kit": "npm:drizzle-kit@^0.31.10",
+    "drizzle-orm": "npm:drizzle-orm@^0.45.2",
+    "zod": "npm:zod@^4.4.3"
   }
 }
