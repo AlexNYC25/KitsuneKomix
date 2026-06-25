@@ -709,6 +709,8 @@
     "members": {
       "packages/database": {
         "dependencies": [
+          "jsr:@std/fs@^1.0.24",
+          "jsr:@std/path@^1.1.5",
           "npm:@libsql/client@~0.17.4",
           "npm:drizzle-kit@~0.31.10",
           "npm:drizzle-orm@~0.45.2",
