@@ -7,6 +7,10 @@ services:
     container_name: kitsune_komix_api
     ports:
       - "8001:8000"
+    volumes:
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/data/cache
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/data/comics
+      - /Users/alexismontes/Documents/KitsuneKomix_Volumes/config:/app/data/config
     environment:
       MODE: development
     restart: unless-stopped
