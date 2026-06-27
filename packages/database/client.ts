@@ -4,21 +4,33 @@ import { createClient } from "@libsql/client"
 import { env } from "./config/env.ts"
 import { dbLogger } from "./loggers/index.ts";
 import { generateSqlFilePath } from "./utilities/db-file.ts"
+import { installHonkerExtension } from "./setup/install-honker.ts";
 
 let client: ReturnType<typeof createClient> | null = null;
 let db: ReturnType<typeof drizzle> | null = null;
+let honkerInstalled: boolean = false; 
 
 /**
  * Pulls up the global client and db connection if it already exists if not creates them
  * and saves it for future use
  * @returns client and db objects
  */
-export const getClient = () => {
+export const getClient = async () => {
   if (!client) {
     const sqlitePath = generateSqlFilePath(env.CONFIG_DIRECTORY);
     client = createClient({ url: `file:${sqlitePath}` });
     db = drizzle(client, { casing: "snake_case" });
     dbLogger.info("SQLite client created")
+
+    if (!honkerInstalled) {
+      try {
+        await installHonkerExtension();
+      } catch (error) {
+        throw error;
+      }
+      
+      honkerInstalled = true;
+    }
   }
   return { client, db };
 };
@@ -41,7 +53,7 @@ export const reconnect = () => {
  */
 export const testSQLiteConnection: () => Promise<boolean> = async () => {
   try {
-    const { client } = getClient();
+    const { client } = await getClient();
     await client.execute("SELECT 1");
     return true;
   } catch (error) {
