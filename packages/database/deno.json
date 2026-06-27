@@ -6,9 +6,10 @@
   },
   "imports": {
     "#schemas/": "./shared/schemas/",
-    "@libsql/client": "npm:@libsql/client@^0.17.4",
     "@std/fs": "jsr:@std/fs@^1.0.24",
     "@std/path": "jsr:@std/path@^1.1.5",
+    "@types/better-sqlite3": "npm:@types/better-sqlite3@^7.6.13",
+    "better-sqlite3": "npm:better-sqlite3@^12.11.1",
     "drizzle-kit": "npm:drizzle-kit@^0.31.10",
     "drizzle-orm": "npm:drizzle-orm@^0.45.2",
     "pino": "npm:pino@^10.3.1",
