@@ -1,4 +1,4 @@
-import { add } from "kitsune-komix-database";
+import { getClient } from "kitsune-komix-database";
 
 export function handler(req: Request): Response {
   const url = new URL(req.url);
@@ -10,7 +10,7 @@ export function handler(req: Request): Response {
     });
   }
 
-  return new Response("<h1>Welcome to Deno!</h1> " + add(1,1), {
+  return new Response("<h1>Welcome to Deno!</h1> ", {
     headers: { "content-type": "text/html" },
   });
 }
