@@ -7,7 +7,7 @@ RUN git clone https://github.com/russellromney/honker && \
     cargo build --release -p honker-extension
 
 ##### Build stage for the deno imports. #####
-FROM denoland/deno:alpine AS deno-modules
+FROM denoland/deno:debian AS deno-modules
 
 WORKDIR /build
 
