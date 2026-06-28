@@ -1,3 +1,4 @@
-import { apiSchema } from "#schemas/config/api.schema.ts"
+import { apiSchema } from "@schemas/config/api.schema.ts"
 
-export const env = apiSchema.parse(Deno.env.toObject());
+
+export const env = apiSchema.parse(process.env);

@@ -1,21 +1,19 @@
-import { assertEquals } from "@std/assert/equals";
+import { expect, test } from "bun:test"
 
 import { testSQLiteConnection, generateSqlFilePath, env } from "kitsune-komix-database";
 
-Deno.test("Database package can be pinged", async () => {
+test("Database package can be pinged", async () => {
   const sqliteConnectionWorks: boolean = await testSQLiteConnection();
 
-  assertEquals(sqliteConnectionWorks, true, "Something is wrong with the db connection set up and cannot be pinged with a select test")
+  expect(sqliteConnectionWorks).toBe(true)
 })
 
-Deno.test("Database File exists", async () => {
+test("Database File exists", async () => {
   const sqlitePath = await generateSqlFilePath(env.CONFIG_DIRECTORY);
 
-  try {
-    await Deno.lstat(sqlitePath);
-  } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
-      await Deno.writeTextFile(sqlitePath, "")
-    }
+  const file = Bun.file(sqlitePath);
+  const exists = await file.exists();
+  if (!exists) {
+    await Bun.write(sqlitePath, "")
   }
-}) 
+})

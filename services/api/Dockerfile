@@ -6,24 +6,23 @@ RUN git clone https://github.com/russellromney/honker && \
     cd honker && \
     cargo build --release -p honker-extension
 
-##### Build stage for the deno imports. #####
-FROM denoland/deno:debian AS deno-modules
+##### Build stage for the Bun imports. #####
+FROM oven/bun:debian AS bun-modules
 
 WORKDIR /build
 
-COPY deno.json deno.lock* ./
-COPY packages/database/deno.json ./packages/database/deno.json
-COPY services/api/deno.json ./services/api/deno.json
+COPY package.json bun.lock* ./
+COPY packages/database/package.json ./packages/database/package.json
+COPY services/api/package.json ./services/api/package.json
 
-RUN deno install
+RUN bun install
 
-##### Base Deno image with the built honker extension and deno modules. #####
+##### Base Bun image with the built honker extension and Bun modules. #####
 FROM denoland/deno:debian AS base
 
 COPY --from=honker /build/honker/target/release/ /honker/
-COPY --from=deno-modules /deno-dir /deno-dir
-COPY --from=deno-modules /build/node_modules /app/node_modules
-COPY --from=deno-modules /build/deno.lock /app/deno.lock
+COPY --from=bun-modules /build/node_modules /app/node_modules
+COPY --from=bun-modules /build/bun.lock /app/bun.lock
 
 COPY packages ./packages
 
@@ -39,11 +38,11 @@ COPY . .
 
 FROM prepped AS test
 
-RUN deno task test
+RUN bun test
 
-##### Deno production app runner stage. #####
+##### Bun production app runner stage. #####
 FROM prepped AS api
 
 EXPOSE 8000
-CMD ["deno", "task", "api"]
+CMD ["bun", "run", "api"]
 

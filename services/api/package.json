@@ -1,0 +1,14 @@
+{
+  "name": "api",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "#schemas/": "./shared/schemas/",
+    "zod": "^4.4.3"
+  }
+}

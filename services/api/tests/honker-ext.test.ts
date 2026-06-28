@@ -1,17 +1,17 @@
-import { assertEquals } from "@std/assert"
-import { exists } from "@std/fs/exists"
+import { expect, test } from "bun:test"
+import { existsSync } from "node:fs"
 
 import { enqueue } from "kitsune-komix-database";
 
-Deno.test("Extension exists", async () => {
+test("Extension exists", async () => {
   const path: string = "/honker/libhonker_ext.so"
 
-  const doesTheBinaryExtensionFileExist: boolean = await exists(path)
+  const doesTheBinaryExtensionFileExist: boolean = existsSync(path)
 
-  assertEquals(doesTheBinaryExtensionFileExist, true, "The Honker Extension file does not exist, check the dockerfile/local build")
+  expect(doesTheBinaryExtensionFileExist).toBe(true)
 })
 
-Deno.test("Honker enqueue action works", async () => {
+test("Honker enqueue action works", async () => {
   const queueOptions = {
     name: "test",
     maxAttempts: 3
@@ -21,6 +21,6 @@ Deno.test("Honker enqueue action works", async () => {
     delay: undefined,
     priority: undefined
   }
-  
+
   enqueue(queueOptions, queueItemOptions, "TEST")
 })
