@@ -1,7 +1,7 @@
 {
   "name": "Kitsune Komix",
-  "workspace": [
-    "./packages/database",
+  "workspaces": [
+    "./packages/*",
     "./services/api"
   ],
   "module": "index.ts",

@@ -8,7 +8,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "#schemas/": "./shared/schemas/",
+    "kitsune-komix-database": "workspace:*",
     "zod": "^4.4.3"
   }
 }

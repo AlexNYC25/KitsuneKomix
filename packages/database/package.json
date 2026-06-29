@@ -1,6 +1,7 @@
 {
-  "name": "database",
+  "name": "kitsune-komix-database",
   "private": true,
+  "main": "./mod.ts",
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/bun": "latest",
