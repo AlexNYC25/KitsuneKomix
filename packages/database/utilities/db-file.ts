@@ -1,5 +1,5 @@
-import { join } from "@std/path"
-import { exists } from "@std/fs/exists"
+import { join } from "node:path"
+import { existsSync, mkdirSync } from "node:fs";
 
 /**
  * Generates the folder path for the app's database sqlite file
@@ -7,10 +7,10 @@ import { exists } from "@std/fs/exists"
  * @returns A file path string representing the location of the sqlite file
  */
 export const generateSqlFilePath = async (folderPath: string) => {
-  const isRealFolder = await exists(folderPath, { isDirectory: true});
+  const isRealFolder = existsSync(folderPath);
 
   if (!isRealFolder) {
-    await Deno.mkdir(folderPath);
+    mkdirSync(folderPath, { recursive: true});
   }
 
   const sqlFilePathInFolder = join(folderPath, "database.sqlite");

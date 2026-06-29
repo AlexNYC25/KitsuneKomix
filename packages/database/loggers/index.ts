@@ -1,5 +1,6 @@
 import pino from "pino";
-import { join } from "@std/path";
+import { join } from "node:path"
+import { mkdir } from "node:fs/promises";
 
 import { env } from "../config/env.ts";
 
@@ -7,12 +8,15 @@ const configLocation = env.CONFIG_DIRECTORY;
 const logsDir = join(configLocation, "logs");
 const dbLogFile = join(logsDir, "db.log")
 
-await Deno.mkdir(logsDir, { recursive: true });
-const file = await Deno.open(dbLogFile, { create: true, write: true });
-file.close();
+await mkdir(logsDir, { recursive: true });
+const fileExists: boolean = await Bun.file(dbLogFile).exists();
+
+if (!fileExists) {
+  await Bun.write(dbLogFile, "");
+}
 
 export const initDbLogger = async (): Promise<void> => {
-  await Deno.mkdir(logsDir, { recursive: true });
+  await mkdir(logsDir, { recursive: true });
 };
 
 export const dbLogger = pino({
