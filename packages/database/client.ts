@@ -1,12 +1,13 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/bun-sqlite';
 
 import { env } from "./config/env.ts"
 import { dbLogger } from "./loggers/index.ts";
 import { generateSqlFilePath } from "./utilities/db-file.ts"
-import { installHonkerExtension } from "./setup/install-honker.ts";
 
 let db: ReturnType<typeof drizzle> | null = null;
-let honkerInstalled: boolean = false; 
+
+// TODO: Handle edge case where macOS uses a proprietary build of sqlite that has additional hoops for extensions
+// https://bun.com/docs/runtime/sqlite#loadextension
 
 /**
  * Pulls up the global db connection if it already exists if not creates it
@@ -18,17 +19,10 @@ export const getClient = async () => {
     const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
     db = drizzle(sqlitePath, { casing: "snake_case" });
 
-    dbLogger.info("SQLite client created")
+    db.$client.loadExtension('/honker/libhonker_ext.so')
+    db.$client.prepare('SELECT honker_bootstrap()').run();
 
-    if (!honkerInstalled) {
-      try {
-        installHonkerExtension(db.$client);
-      } catch (error) {
-        throw error;
-      }
-      
-      honkerInstalled = true;
-    }
+    dbLogger.info("SQLite client created")
   }
   return db;
 };
@@ -51,9 +45,9 @@ export const reconnect = async () => {
 export const testSQLiteConnection: () => Promise<boolean> = async () => {
   try {
     const db = await getClient();
-    const results = db.all("SELECT 1");
+    const result = db.$client.query("select 'Hello world' as message;").get();
 
-    if (results.length > 1) {
+    if (result.message) {
       return true;
     }
 
@@ -63,9 +57,9 @@ export const testSQLiteConnection: () => Promise<boolean> = async () => {
     reconnect();
     try {
       const db = await getClient();
-      const results = db.all("SELECT 1");
+      const result = db.$client.query("select 'Hello world' as message;").get();
 
-      if (results.length > 1) {
+      if (result.message) {
         return true;
       }
 
