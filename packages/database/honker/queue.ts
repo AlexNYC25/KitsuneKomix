@@ -15,7 +15,7 @@ export const enqueue = async (
   queueItemOptions: QueueItemOptions,
   payload: string
 ) => {
-  const { db } = await getClient();
+  const db = await getClient();
 
   const row = db?.run(`SELECT honker_enqueue(
     '${queueOptions.name}',
