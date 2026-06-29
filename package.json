@@ -12,5 +12,9 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "scripts": {
+    "api": "bun run --watch services/api/main.ts",
+    "test": "bun test"
   }
 }
