@@ -18,7 +18,7 @@ COPY services/api/package.json ./services/api/package.json
 RUN bun install
 
 ##### Base Bun image with the built honker extension and Bun modules. #####
-FROM denoland/deno:debian AS base
+FROM oven/bun:debian AS base
 
 COPY --from=honker /build/honker/target/release/ /honker/
 COPY --from=bun-modules /build/node_modules /app/node_modules
