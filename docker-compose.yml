@@ -6,7 +6,7 @@ services:
       target: api
     container_name: kitsune_komix_api
     ports:
-      - "8001:8000"
+      - "8001:8001"
     volumes:
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/data/cache
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/data/comics
