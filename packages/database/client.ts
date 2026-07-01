@@ -17,10 +17,7 @@ let db: ReturnType<typeof drizzle> | null = null;
 export const getClient = async () => {
   if (!db) {
     const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
-    db = drizzle(sqlitePath, { casing: "snake_case" });
-
-    db.$client.loadExtension('/honker/libhonker_ext.so')
-    db.$client.prepare('SELECT honker_bootstrap()').run();
+    db = drizzle(sqlitePath);
 
     dbLogger.info("SQLite client created")
   }
@@ -34,7 +31,7 @@ export const getClient = async () => {
 export const reconnect = async () => {
   const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
   
-  db = drizzle(sqlitePath, { casing: "snake_case" });
+  db = drizzle(sqlitePath);
   dbLogger.info("SQLite client reconnected");
 };
 
@@ -45,9 +42,9 @@ export const reconnect = async () => {
 export const testSQLiteConnection: () => Promise<boolean> = async () => {
   try {
     const db = await getClient();
-    const result = db.$client.query("select 'Hello world' as message;").get();
+    const result = db.$client.query("select 'Hello world' as message;").get() as {message: string};
 
-    if (result.message) {
+    if (result?.message) {
       return true;
     }
 
@@ -57,7 +54,7 @@ export const testSQLiteConnection: () => Promise<boolean> = async () => {
     reconnect();
     try {
       const db = await getClient();
-      const result = db.$client.query("select 'Hello world' as message;").get();
+      const result = db.$client.query("select 'Hello world' as message;").get() as {message: string};
 
       if (result.message) {
         return true;
