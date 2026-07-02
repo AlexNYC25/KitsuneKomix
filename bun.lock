@@ -14,6 +14,7 @@
     "packages/database": {
       "name": "kitsune-komix-database",
       "dependencies": {
+        "@russellthehippo/honker-bun": "^0.2.2",
         "drizzle-orm": "^1.0.0-rc.4",
         "pino": "^10.3.1",
         "zod": "^4.4.3",
@@ -98,6 +99,8 @@
     "@js-temporal/polyfill": ["@js-temporal/polyfill@0.5.1", "", { "dependencies": { "jsbi": "^4.3.0" } }, "sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ=="],
 
     "@pinojs/redact": ["@pinojs/redact@0.4.0", "", {}, "sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg=="],
+
+    "@russellthehippo/honker-bun": ["@russellthehippo/honker-bun@0.2.2", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-dWVTIg3ab31TuZI3Ky7/9Oui7wTbgqXlw90jhFmRVcCiGdtDWmPNuR5zrJQYGg6yYZfm6UkwsdxCcJHotkbdMQ=="],
 
     "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
 
