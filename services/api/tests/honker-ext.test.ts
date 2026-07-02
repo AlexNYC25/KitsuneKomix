@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
 import { existsSync } from "node:fs"
 
-import { enqueue } from "kitsune-komix-database";
+import { getTempQueue } from "kitsune-komix-database";
 
 test("Extension exists", async () => {
   const path: string = "/honker/libhonker_ext.so"
@@ -12,15 +12,23 @@ test("Extension exists", async () => {
 })
 
 test("Honker enqueue action works", async () => {
-  const queueOptions = {
-    name: "test",
-    maxAttempts: 3
-  }
+  const tempQueue = await getTempQueue();
 
-  const queueItemOptions = {
-    delay: undefined,
-    priority: undefined
-  }
+  tempQueue.enqueue({message: "test"})
 
-  enqueue(queueOptions, queueItemOptions, "TEST")
+  const job = tempQueue.claimOne("test-worker")
+
+  expect(job).toBeTruthy()
+
+  const payload = job?.payload as {message: string}
+
+  expect(payload).toBeDefined()
+
+  expect(payload.message).toBe("test")
+
+  job?.ack()
+
+  const newJob = tempQueue.claimOne("test-worker")
+
+  expect(newJob).toBe(null)
 })
