@@ -4,7 +4,7 @@ import { env } from "../config/env.ts"
 import { queueLogger } from "../loggers/index.ts";
 import { generateSqlFilePath } from "../utilities/db-file.ts"
 
-export const tempQueue = async () => {
+export const getTempQueue = async () => {
   const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
   const honkerPath: string = "/honker/libhonker_ext.so"
 
