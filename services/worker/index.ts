@@ -1,1 +1,3 @@
-console.log("Hello via Bun!");
+import { WatchManager } from "./watcher/manager";
+
+const workerWatcher = new WatchManager();
