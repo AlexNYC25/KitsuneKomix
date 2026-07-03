@@ -2,7 +2,8 @@
   "name": "Kitsune Komix",
   "workspaces": [
     "./packages/*",
-    "./services/api"
+    "./services/api",
+    "./services/watcher"
   ],
   "module": "index.ts",
   "type": "module",
