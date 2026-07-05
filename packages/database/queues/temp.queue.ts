@@ -1,7 +1,7 @@
 import { open } from "@russellthehippo/honker-bun"
 
 import { env } from "../config/env.ts"
-import { queueLogger } from "../loggers/index.ts";
+import { QueueNames } from "../config/queues.ts"
 import { generateSqlFilePath } from "../utilities/db-file.ts"
 
 export const getTempQueue = async () => {
@@ -10,7 +10,7 @@ export const getTempQueue = async () => {
 
   const db = open(sqlitePath, honkerPath);
 
-  const q = db.queue("temp");
+  const q = db.queue(QueueNames.TEMP);
 
   return q;
 }
