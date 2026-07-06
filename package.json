@@ -3,7 +3,8 @@
   "workspaces": [
     "./packages/*",
     "./services/api",
-    "./services/watcher"
+    "./services/watcher",
+    "./services/worker"
   ],
   "module": "index.ts",
   "type": "module",

@@ -41,7 +41,7 @@
       },
     },
     "services/watcher": {
-      "name": "worker",
+      "name": "watcher",
       "dependencies": {
         "@russellthehippo/honker-bun": "^0.2.2",
         "chokidar": "^5.0.0",
@@ -52,6 +52,16 @@
         "@types/bun": "latest",
       },
       "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
+    "services/worker": {
+      "name": "worker",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "kitsune-komix-database": "workspace:*",
         "typescript": "^5",
       },
     },
@@ -173,7 +183,9 @@
 
     "undici-types": ["undici-types@8.3.0", "", {}, "sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ=="],
 
-    "worker": ["worker@workspace:services/watcher"],
+    "watcher": ["watcher@workspace:services/watcher"],
+
+    "worker": ["worker@workspace:services/worker"],
 
     "zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
 
