@@ -1,9 +1,13 @@
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
 
+import { comicBooksTable } from "./comicBooks.table.ts";
+
 export const comicMetadataCandidatesTable = sqliteTable("comic_metadata_candidates", {
   id: int().primaryKey({ autoIncrement: true }),
-  comicBookId: int().notNull(),
+  comicBookId: int().notNull().references(() => comicBooksTable.id, {
+		onDelete: "cascade",
+	}),
   type: text().notNull(), // e.g., "title", "author", "publisher", etc.
   value: text().notNull(),
   normalizedValue: text().notNull(), // For easier searching and matching
