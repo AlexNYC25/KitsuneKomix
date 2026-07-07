@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm/sql";
 import { comicSeriesTable } from "../tables/comicSeries.table.ts";
 import { comicSeriesGroupsTable } from "../tables/comicSeriesGroups.table.ts";
 
-export const comicSeriesSeriesGroupsTable = snakeCase.table(
+export const comicSeriesGroupsAggregateTable = snakeCase.table(
   "comic_series_series_groups",
   {
     id: int().primaryKey({ autoIncrement: true }),
