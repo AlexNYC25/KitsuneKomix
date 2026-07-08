@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm/sql";
 
 import { comicPagesTable } from "./comicPages.table.ts";
 
-export const comicBookCovers = snakeCase.table("comic_book_covers", {
+export const comicBookCoversTable = snakeCase.table("comic_book_covers", {
   id: int().primaryKey({ autoIncrement: true }),
   comicPageId: int().notNull().references(() => comicPagesTable.id, {
     onDelete: "cascade",
