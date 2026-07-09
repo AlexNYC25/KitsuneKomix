@@ -4,7 +4,9 @@ import { env } from "../config/env.ts"
 import { dbLogger } from "../loggers/index.ts";
 import { generateSqlFilePath } from "../utilities/db-file.ts"
 
-let db: ReturnType<typeof drizzle> | null = null;
+import type { DrizzleType } from "../shared/types/index.ts";
+
+let db: DrizzleType | null = null;
 
 // TODO: Handle edge case where macOS uses a proprietary build of sqlite that has additional hoops for extensions
 // https://bun.com/docs/runtime/sqlite#loadextension
