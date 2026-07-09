@@ -5,5 +5,7 @@ export const dbSchema = z.object({
 
   HONKER_LIB_PATH: z.string().default("/honker/libhonker_ext.so"),
 
-  LOG_LEVEL: z.string().default("info")
+  LOG_LEVEL: z.string().default("info"),
+
+  PAGE_SIZE: z.number().default(20),
 })
