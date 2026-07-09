@@ -1,7 +1,9 @@
 # Runtime data and mounted volumes
 cache/*
 logs/*
-config/*.sqlite
+# DB files are ephemeral (created at runtime by migrations)
+# Don't exclude them from build context, but don't copy host dev DBs
+# config/*.sqlite
 config/logs/*
 
 # Comics (mounted as volume)
