@@ -2,7 +2,7 @@ import { int, snakeCase, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
 
 import { comicBooksTable } from "./comicBooks.table.ts";
-import { comicBookCovers } from "./comicBookCovers.table.ts";
+import { comicBookCoversTable } from "./comicBookCovers.table.ts";
 import { usersTable } from "./users.table.ts";
 
 export const comicBookThumbnailsTable = snakeCase.table("comic_book_thumbnails", {
@@ -10,7 +10,7 @@ export const comicBookThumbnailsTable = snakeCase.table("comic_book_thumbnails",
   comicBookId: int().notNull().references(() => comicBooksTable.id, {
     onDelete: "cascade",
   }),
-  comicBookCoverId: int().references(() => comicBookCovers.id, {
+  comicBookCoverId: int().references(() => comicBookCoversTable.id, {
     onDelete: "cascade",
   }),
   filePath: text().notNull(),
