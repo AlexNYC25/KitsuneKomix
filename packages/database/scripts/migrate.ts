@@ -1,9 +1,10 @@
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import { join } from "node:path";
-import { stat, mkdir } from "node:fs/promises"
+import { stat, mkdir } from "node:fs/promises";
 
 import { dbLogger } from "../loggers/index.ts";
 import { getClient } from "../drizzle/client.ts";
+import { env } from "../config/env.ts";
 
 export async function runMigrations() {
   dbLogger.info("Starting database migrations...");
@@ -14,32 +15,27 @@ export async function runMigrations() {
     throw new Error("Database client is not initialized.");
   }
 
-  // Ensure config directory exists
-  const configDir = join(process.cwd(), "config");
   try {
-    await stat(configDir);
+    await mkdir(env.CONFIG_DIRECTORY, { recursive: true });
   } catch {
-    await mkdir(configDir, { recursive: true });
+    // directory already exists
+  }
+
+  const migrationsPath = join(import.meta.dirname!, "..", "drizzle");
+  dbLogger.info(`Looking for migrations in: ${migrationsPath}`);
+
+  try {
+    await stat(migrationsPath);
+    dbLogger.info("Migrations directory found");
+  } catch {
+    throw new Error(`Migrations directory not found at: ${migrationsPath}`);
   }
 
   try {
-    const migrationsPath = join(import.meta.dirname!, "..", "drizzle");
-    dbLogger.info(`Looking for migrations in: ${migrationsPath}`);
-
-    // Check if migrations directory exists
-    try {
-      await stat(migrationsPath);
-      dbLogger.info("Migrations directory found");
-    } catch {
-      throw new Error(`Migrations directory not found at: ${migrationsPath}`);
-    }
-
     migrate(db, { migrationsFolder: migrationsPath });
     dbLogger.info("Migrations completed successfully!");
   } catch (error) {
     dbLogger.error(`Migration failed: ${error}`);
     throw error;
-  } finally {
-    db.$client.close();
   }
 }
