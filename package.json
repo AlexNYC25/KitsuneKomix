@@ -2,9 +2,7 @@
   "name": "Kitsune Komix",
   "workspaces": [
     "./packages/*",
-    "./services/api",
-    "./services/watcher",
-    "./services/worker"
+    "./services/*"
   ],
   "module": "index.ts",
   "type": "module",
@@ -16,7 +14,13 @@
     "typescript": "^5"
   },
   "scripts": {
-    "api": "bun run --watch services/api/main.ts",
-    "test": "bun test"
+    "dev": "bun --watch launcher.ts",
+    "start": "bun launcher.ts",
+    "api": "bun services/api/main.ts",
+    "watcher": "bun services/watcher/index.ts",
+    "worker": "bun services/worker/index.ts",
+    "db:push": "bun --cwd packages/database run push",
+    "db:migrate": "bun --cwd packages/database run migrate",
+    "db:generate": "bun --cwd packages/database run generate"
   }
 }
