@@ -1,8 +1,12 @@
+import type { drizzle } from "drizzle-orm/bun-sqlite";
+
 // Re-export Drizzle-inferred types
 export * from "./database.types.ts";
 
 // Re-export Honker-inferred types
 export * from "./queue.type.ts";
+
+export type DrizzleType = ReturnType<typeof drizzle>;
 
 // ── Sort / Filter field types (simplified — no Zod dependency) ──
 export type ComicSortField = string;
