@@ -8,4 +8,6 @@ export const dbSchema = z.object({
   LOG_LEVEL: z.string().default("info"),
 
   PAGE_SIZE: z.number().default(20),
+
+  DB_FILE_NAME: z.string().default("database.sqlite")
 })
