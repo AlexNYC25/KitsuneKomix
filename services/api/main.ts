@@ -1,4 +1,5 @@
-import { getClient, runMigrations } from "kitsune-komix-database";
+import { getClient, getQueueClient, runMigrations } from "kitsune-komix-database";
+
 const server = Bun.serve({
   port: 8001,
   routes: {
@@ -6,9 +7,10 @@ const server = Bun.serve({
   }
 });
 
-const dbClient = await getClient();
+const honkerDb = await getQueueClient();
 
 await runMigrations()
 
+const dbClient = await getClient();
 
 console.log(`Listening on ${server.url}`);
