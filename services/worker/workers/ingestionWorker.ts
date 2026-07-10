@@ -18,6 +18,7 @@ export class IngestionWorker {
   }
     
   async start() {
+    console.log("ingestion worker has started")
     while (true) {
       const job: QueueJob | null = await this.dequeue();
 
