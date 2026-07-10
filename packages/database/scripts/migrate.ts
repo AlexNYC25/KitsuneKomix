@@ -17,11 +17,12 @@ export async function runMigrations() {
 
   try {
     await mkdir(env.CONFIG_DIRECTORY, { recursive: true });
-  } catch {
+  } catch (error) {
     // directory already exists
+    dbLogger.error("There wan error making the config directory")
   }
 
-  const migrationsPath = join(import.meta.dirname!, "..", "drizzle");
+  const migrationsPath = join(import.meta.dirname!, "..", "drizzle_migrations");
   dbLogger.info(`Looking for migrations in: ${migrationsPath}`);
 
   try {
