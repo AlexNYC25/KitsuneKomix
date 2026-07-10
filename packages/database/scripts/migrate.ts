@@ -5,11 +5,12 @@ import { stat, mkdir } from "node:fs/promises";
 import { dbLogger } from "../loggers/index.ts";
 import { getClient } from "../drizzle/client.ts";
 import { env } from "../config/env.ts";
+import type { DrizzleType } from "../shared/types/index.ts";
 
 export async function runMigrations() {
   dbLogger.info("Starting database migrations...");
 
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database client is not initialized.");
@@ -22,7 +23,7 @@ export async function runMigrations() {
     dbLogger.error("There wan error making the config directory")
   }
 
-  const migrationsPath = join(import.meta.dirname!, "..", "drizzle_migrations");
+  const migrationsPath: string = join(import.meta.dirname!, "..", "drizzle_migrations");
   dbLogger.info(`Looking for migrations in: ${migrationsPath}`);
 
   try {

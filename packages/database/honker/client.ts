@@ -1,4 +1,4 @@
-import { open } from "@russellthehippo/honker-bun";
+import { open, type Database } from "@russellthehippo/honker-bun";
 
 import { env } from "../config/env.ts"
 import { generateSqlFilePath } from "../utilities/db-file.ts"
@@ -9,7 +9,7 @@ export const getQueueClient = async () => {
   if(!queue) {
     const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
 
-    const db = open(sqlitePath, "/honker/libhonker_ext.so")
+    const db: Database = open(sqlitePath, "/honker/libhonker_ext.so")
 
     queue = db;
   }

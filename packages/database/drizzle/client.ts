@@ -23,6 +23,7 @@ export const getClient = async () => {
 
     dbLogger.info("SQLite client created")
   }
+
   return db;
 };
 
@@ -43,8 +44,8 @@ export const reconnect = async () => {
  */
 export const testSQLiteConnection: () => Promise<boolean> = async () => {
   try {
-    const db = await getClient();
-    const result = db.$client.query("select 'Hello world' as message;").get() as {message: string};
+    const db: DrizzleType | null = await getClient();
+    const result: {message: string} = db.$client.query("select 'Hello world' as message;").get() as {message: string};
 
     if (result?.message) {
       return true;
@@ -55,8 +56,8 @@ export const testSQLiteConnection: () => Promise<boolean> = async () => {
     dbLogger.error("SQLite connection test failed, attempting reconnect: " + error);
     reconnect();
     try {
-      const db = await getClient();
-      const result = db.$client.query("select 'Hello world' as message;").get() as {message: string};
+      const db: DrizzleType | null = await getClient();
+      const result: {message: string} = db.$client.query("select 'Hello world' as message;").get() as {message: string};
 
       if (result.message) {
         return true;

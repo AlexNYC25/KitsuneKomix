@@ -4,7 +4,7 @@ import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
 import { usersTable } from "../schemas/index.ts";
 
-import type { NewUser, User, UserEditInput } from "../shared/types/index.ts";
+import type { NewUser, User, UserEditInput, DrizzleType } from "../shared/types/index.ts";
 
 /**
  * Creates a new user in the database
@@ -12,7 +12,7 @@ import type { NewUser, User, UserEditInput } from "../shared/types/index.ts";
  * @returns The ID of the newly created user
  */
 export const createUser = async (userData: NewUser): Promise<number> => {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -41,7 +41,7 @@ export const createUser = async (userData: NewUser): Promise<number> => {
  * @returns The User object, or null if not found
  */
 export const getUserById = async (id: number): Promise<User | null> => {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -72,7 +72,7 @@ export const getUserById = async (id: number): Promise<User | null> => {
  * @returns The User object, or null if not found
  */
 export const getUserByEmail = async (email: string): Promise<User | null> => {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -105,7 +105,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 export const getUserByUsername = async (
   username: string,
 ): Promise<User | null> => {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -135,7 +135,7 @@ export const getUserByUsername = async (
  * @returns An array of all User objects
  */
 export const getAllUsers = async (): Promise<User[]> => {
-  const db = await getClient()
+  const db: DrizzleType = await getClient()
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -163,7 +163,7 @@ export const updateUser = async (
   id: number,
   updates: UserEditInput
 ): Promise<boolean> => {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");

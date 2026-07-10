@@ -3,7 +3,7 @@ import { and, eq, gte, lt } from "drizzle-orm";
 import { getClient } from "../drizzle/client.ts";
 import { refreshTokensTable } from "../schemas/index.ts";
 
-import type { CreateRefreshTokenInput, RefreshToken } from "../shared/types/index.ts";
+import type { CreateRefreshTokenInput, RefreshToken, DrizzleType } from "../shared/types/index.ts";
 
 /**
  * Stores a new refresh token in the database
@@ -13,7 +13,7 @@ import type { CreateRefreshTokenInput, RefreshToken } from "../shared/types/inde
 export async function storeRefreshToken(
   tokenData: CreateRefreshTokenInput,
 ): Promise<number> {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -39,7 +39,7 @@ export async function storeRefreshToken(
 export async function getValidRefreshToken(
   tokenId: string,
 ): Promise<RefreshToken | null> {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
   const currentTime: string = new Date().toISOString();
 
   if (!db) {
@@ -71,7 +71,7 @@ export async function getValidRefreshToken(
  * @returns True if a token was revoked, false otherwise
  */
 export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -97,7 +97,7 @@ export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
 export async function revokeAllUserRefreshTokens(
   userId: number,
 ): Promise<number> {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
 
   if (!db) {
     throw new Error("Database is not initialized.");
@@ -120,7 +120,7 @@ export async function revokeAllUserRefreshTokens(
  * @returns The number of tokens deleted
  */
 export async function cleanupExpiredTokens(): Promise<number> {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
   const currentTime: string = new Date().toISOString();
 
   if (!db) {
@@ -148,7 +148,7 @@ export async function cleanupExpiredTokens(): Promise<number> {
 export async function getUserActiveRefreshTokens(
   userId: number,
 ): Promise<RefreshToken[]> {
-  const db = await getClient();
+  const db: DrizzleType = await getClient();
   const currentTime: string = new Date().toISOString();
 
   if (!db) {

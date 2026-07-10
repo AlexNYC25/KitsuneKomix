@@ -1,4 +1,4 @@
-import { open } from "@russellthehippo/honker-bun"
+import { open, type Database, type Queue } from "@russellthehippo/honker-bun"
 
 import { env } from "../config/env.ts"
 import { QueueNames } from "../config/queues.ts"
@@ -8,9 +8,9 @@ export const getIngestionDiscoveryQueue = async () => {
   const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
   const honkerPath: string = env.HONKER_LIB_PATH
 
-  const db = open(sqlitePath, honkerPath);
+  const db: Database = open(sqlitePath, honkerPath);
 
-  const q = db.queue(QueueNames.INGESTION_DISCOVERY);
+  const q: Queue = db.queue(QueueNames.INGESTION_DISCOVERY);
 
   return q;
 }

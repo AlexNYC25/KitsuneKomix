@@ -4,11 +4,11 @@ import { mkdir } from "node:fs/promises";
 
 import { env } from "../config/env.ts";
 
-const configLocation = env.CONFIG_DIRECTORY;
-const logsDir = join(configLocation, "logs");
+const configLocation: string = env.CONFIG_DIRECTORY;
+const logsDir: string = join(configLocation, "logs");
 
-const dbLogFile = join(logsDir, "db.log")
-const queueLogFile = join(logsDir, "queue.log")
+const dbLogFile: string = join(logsDir, "db.log")
+const queueLogFile: string = join(logsDir, "queue.log")
 
 await mkdir(logsDir, { recursive: true });
 const dbFileExists: boolean = await Bun.file(dbLogFile).exists();
