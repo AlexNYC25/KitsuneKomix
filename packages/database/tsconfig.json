@@ -26,8 +26,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "paths": {
-      "@schemas/*": ["./shared/schemas/*"]
-    }
   }
 }
