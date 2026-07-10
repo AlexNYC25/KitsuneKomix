@@ -1,4 +1,4 @@
-##### Rust build stage for honker extension ##### 
+##### Rust build stage for honker extension #####
 FROM rust:1.96 AS honker
 
 WORKDIR /build
@@ -15,8 +15,8 @@ WORKDIR /build
 COPY package.json bun.lock* ./
 COPY packages/database/package.json ./packages/database/package.json
 COPY services/api/package.json ./services/api/package.json
-COPY services/watcher/package.json ./service/watcher/package.json
-COPY services/worker/package.json ./service/worker/package.json
+COPY services/watcher/package.json ./services/watcher/package.json
+COPY services/worker/package.json ./services/worker/package.json
 
 RUN bun install
 
@@ -33,11 +33,11 @@ FROM base AS prepped
 
 WORKDIR /app
 
+COPY . .
+
 RUN mkdir -p /app/data/comics && \
     mkdir -p /app/data/config && \
-    mkdir -p /app/data/cache 
-
-COPY . .
+    mkdir -p /app/data/cache
 
 FROM prepped AS test
 
@@ -47,4 +47,4 @@ RUN bun test
 FROM prepped AS api
 
 EXPOSE 8000
-CMD ["bun", "run", "start"]
+CMD ["bun", "run", "dev"]
