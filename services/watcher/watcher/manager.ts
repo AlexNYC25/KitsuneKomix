@@ -7,6 +7,8 @@ import {
   type QueueType
 } from "kitsune-komix-database"
 
+import { watcherLogger } from "../loggers/index.ts";
+
 export class WatchManager {
   private watcher = chokidar.watch([], {
     persistent:true,
@@ -68,6 +70,8 @@ export class WatchManager {
 
     if (toAdd.length) {
       this.watcher.add(toAdd)
+
+      watcherLogger.debug("Found new directories to keep an eye on: " + toAdd.length)
 
       toAdd.forEach(d => this.watched.add(d))
     }
