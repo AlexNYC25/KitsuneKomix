@@ -1,3 +1,3 @@
-import { workerSchema } from "@schemas/config/worker.schema.ts"
+import { envSchema } from "kitsune-komix-schemas";
 
-export const env = workerSchema.parse(process.env)
+export const env = envSchema.parse(process.env)

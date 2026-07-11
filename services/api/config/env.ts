@@ -1,4 +1,3 @@
-import { apiSchema } from "@schemas/config/api.schema.ts"
+import { envSchema } from "kitsune-komix-schemas";
 
-
-export const env = apiSchema.parse(process.env);
+export const env = envSchema.parse(process.env);

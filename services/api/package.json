@@ -8,6 +8,11 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "kitsune-komix-schemas": "workspace:*",
+    "@hono/swagger-ui": "^0.6.1",
+    "@hono/zod-openapi": "^1.4.0",
+    "@hono/zod-validator": "^0.8.0",
+    "bcrypt": "^6.0.0",
     "kitsune-komix-database": "workspace:*",
     "zod": "^4.4.3"
   }

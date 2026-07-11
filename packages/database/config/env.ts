@@ -1,3 +1,3 @@
-import {dbSchema} from "../shared/schemas/db.schema"
+import { envSchema } from "kitsune-komix-schemas";
 
-export const env = dbSchema.parse(process.env);
+export const env = envSchema.parse(process.env);
