@@ -3,6 +3,8 @@ export * from "./honker/client.ts"
 
 export * from "./schemas/index.ts"
 
+export * from "./schemas/index.ts"
+
 export * from "./queues/temp.queue.ts"
 export * from "./queues/ingestionDiscovery.queue.ts"
 export * from "./queues/fileModified.queue.ts"
