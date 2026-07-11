@@ -1,8 +1,7 @@
 {
-  "name": "schemas",
-  "module": "index.ts",
-  "type": "module",
+  "name": "kitsune-komix-schemas",
   "private": true,
+  "main": "./mod.ts",
   "devDependencies": {
     "@types/bun": "latest"
   },
