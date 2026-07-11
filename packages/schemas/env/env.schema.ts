@@ -17,4 +17,6 @@ export const envSchema = z.object({
 
   PAGE_SIZE: z.number().default(20),
 
+  LIBRARY_SCAN_INTERVAL: z.number().default(3_000)
+
 })
