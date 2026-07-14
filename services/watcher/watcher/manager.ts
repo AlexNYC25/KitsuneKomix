@@ -1,9 +1,7 @@
 import chokidar from "chokidar"
 
 import { 
-  getIngestionDiscoveryQueue,
-  getFileModifiedQueue,
-  getFileRemovedQueue,
+  getQueue,
   type QueueType
 } from "kitsune-komix-database"
 
@@ -35,7 +33,7 @@ export class WatchManager {
     console.log("new file", path)
     
     if (!this.discoveryQueue) {
-      this.discoveryQueue = await getIngestionDiscoveryQueue();
+      this.discoveryQueue = await getQueue("INGESTION_DISCOVERY");
     }
 
     this.discoveryQueue.enqueue({ path })
@@ -45,7 +43,7 @@ export class WatchManager {
     console.log("file changed", path)
 
     if (!this.fileModifiedQueue) {
-      this.fileModifiedQueue = await getFileModifiedQueue();
+      this.fileModifiedQueue = await getQueue("FILE_MODIFIED");
     }
 
     this.fileModifiedQueue.enqueue({ path })
@@ -55,7 +53,7 @@ export class WatchManager {
     console.log("removed", path)
 
     if (!this.fileRemovedQueue) {
-      this.fileRemovedQueue = await getFileRemovedQueue();
+      this.fileRemovedQueue = await getQueue("FILE_REMOVED");
     }
 
     this.fileRemovedQueue.enqueue({ path })

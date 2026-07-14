@@ -1,5 +1,5 @@
 import { 
-  getIngestionDiscoveryQueue, 
+  getQueue,
   type QueueJob, 
   type QueueType 
 } from "kitsune-komix-database"
@@ -9,7 +9,7 @@ export class IngestionWorker {
 
   async dequeue() {
     if (!this.queue) {
-      this.queue = await getIngestionDiscoveryQueue();
+      this.queue = await getQueue("INGESTION_DISCOVERY");
     }
 
     const job: QueueJob | null = this.queue.claimOne("ingestion_worker");
@@ -32,7 +32,8 @@ export class IngestionWorker {
     }
   }
 
-  async processJob(job: any) {
-
+  async processJob(job: QueueJob) {
+    console.log(job.payload)
+    job.ack()
   }
 }
