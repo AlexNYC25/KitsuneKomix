@@ -93,6 +93,7 @@
       },
       "peerDependencies": {
         "kitsune-komix-database": "workspace:*",
+        "kitsune-komix-schemas": "workspace:*",
         "typescript": "^5",
       },
     },
