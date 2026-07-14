@@ -5,10 +5,7 @@ export * from "./schemas/index.ts"
 
 export * from "./models/index.ts"
 
-export * from "./queues/temp.queue.ts"
-export * from "./queues/ingestionDiscovery.queue.ts"
-export * from "./queues/fileModified.queue.ts"
-export * from "./queues/fileRemoved.queue.ts"
+export * from "./queues/getQueue.ts"
 
 export * from "./config/env.ts"
 export * from "./config/queues.ts"
