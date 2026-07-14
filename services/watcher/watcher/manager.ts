@@ -1,9 +1,13 @@
 import chokidar from "chokidar"
+import { z } from "zod"
 
 import { 
   getQueue,
   type QueueType
 } from "kitsune-komix-database"
+import {
+  initialIngestionPayloadSchema
+} from "kitsune-komix-schemas"
 
 import { watcherLogger } from "../loggers/index.ts";
 
@@ -36,7 +40,9 @@ export class WatchManager {
       this.discoveryQueue = await getQueue("INGESTION_DISCOVERY");
     }
 
-    this.discoveryQueue.enqueue({ path })
+    const newFilePayload: z.infer<typeof initialIngestionPayloadSchema> = { filePath: path }
+
+    this.discoveryQueue.enqueue(newFilePayload)
   }
 
   private onFileChanged = async (path: string) => {
