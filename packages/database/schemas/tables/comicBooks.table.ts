@@ -14,10 +14,11 @@ export const comicBooksTable = snakeCase.table("comic_books", {
   series: text(),
   issueNumber: text(), // NOTE: This is a string because some publishers use letters in their issue numbers (e.g., "1A", "1B", "1C", etc.) or other weirdness like fractions
   count: int(),
-  volume: text(),
+  volumeNumber: text(),
   alternateSeries: text(),
   alternateIssueNumber: text(),
   alternateCount: int(),
+  alternateVolumeNumber: text(),
   pageCount: int(),
   fileSize: int(),
   summary: text(),
