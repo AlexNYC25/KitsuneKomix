@@ -57,7 +57,6 @@ export const createComicLibrary = async (
  * Retrieves all comic libraries from the database
  * @returns An array of all ComicLibrary objects
  * 
- * TODO: Verify
  */
 export const getAllComicLibraries = async (): Promise<ComicLibrary[]> => {
   const db = await getClient();
