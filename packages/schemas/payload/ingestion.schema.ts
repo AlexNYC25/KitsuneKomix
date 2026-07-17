@@ -6,3 +6,11 @@ import { z } from "zod";
 export const initialIngestionPayloadSchema = z.object({
   filePath: z.string()
 })
+
+/**
+ * The Initial payload after validating the file belongs to a library
+ * i.e. the comic file is located in a library registered in the database
+ */
+export const comicFileWithValidatedLibrarySchema = initialIngestionPayloadSchema.extend({
+  libraryId: z.int()
+})
