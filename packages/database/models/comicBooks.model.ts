@@ -81,8 +81,8 @@ const addFilteringToQuery = <T extends SQLiteSelect>(
     case "issueNumber":
       query.where(eq(comicBooksTable.issueNumber, filterValue));
       break;
-    case "volume":
-      query.where(eq(comicBooksTable.volume, filterValue));
+    case "volumeNumber":
+      query.where(eq(comicBooksTable.volumeNumber, filterValue));
       break;
     case "alternateSeries":
       query.where(ilike(comicBooksTable.alternateSeries, `%${filterValue}%`));
@@ -181,8 +181,8 @@ const addSortingToQuery = <T extends SQLiteSelect>(
     case "issueNumber":
       query.orderBy(direction(comicBooksTable.issueNumber));
       break;
-    case "volume":
-      query.orderBy(direction(comicBooksTable.volume));
+    case "volumeNumber":
+      query.orderBy(direction(comicBooksTable.volumeNumber));
       break;
     case "alternateSeries":
       query.orderBy(direction(comicBooksTable.alternateSeries));
@@ -277,10 +277,11 @@ export const getComicBooksWithMetadataFilteringSorting = async (
         series: comicBooksTable.series,
         issueNumber: comicBooksTable.issueNumber,
         count: comicBooksTable.count,
-        volume: comicBooksTable.volume,
+        volumeNumber: comicBooksTable.volumeNumber,
         alternateSeries: comicBooksTable.alternateSeries,
         alternateIssueNumber: comicBooksTable.alternateIssueNumber,
         alternateCount: comicBooksTable.alternateCount,
+        alternateVolumeNumber: comicBooksTable.alternateVolumeNumber,
         pageCount: comicBooksTable.pageCount,
         fileSize: comicBooksTable.fileSize,
         summary: comicBooksTable.summary,
@@ -569,7 +570,7 @@ export const updateComicBook = async (
       updateData.issueNumber = updates.issueNumber;
     }
     if (updates.count !== undefined) updateData.count = updates.count;
-    if (updates.volume !== undefined) updateData.volume = updates.volume;
+    if (updates.volumeNumber !== undefined) updateData.volumeNumber = updates.volumeNumber;
     if (updates.alternateSeries !== undefined) {
       updateData.alternateSeries = updates.alternateSeries;
     }
