@@ -6,7 +6,7 @@ const tokenPatterns = [
   },
   {
     type: "ISSUE_COUNT",
-    regex: /\((of|Of)\s\d{2}\)/
+    regex: /\(of\s\d{2}\)/i
   },
   {
     type: "VOLUME",
@@ -14,7 +14,7 @@ const tokenPatterns = [
   },
   {
     type: "FORMAT",
-    regex: /\((Digital|Scan|C2C)\)/gi
+    regex: /\((Digital|Scan|C2C)\)/i
   },
   {
     type: "TAG",
@@ -60,14 +60,14 @@ export const consumeYear = (fileName: string) => {
 
     return {
       year: parseInt(rawMatchYear),
-      updatedString: fileName.replace(match.toString(), "")
+      updatedString: fileName.replace(match.toString().trim(), "")
     }
 
   }
 
   return {
     year: undefined,
-    updatedString: fileName
+    updatedString: fileName.trim()
   }
 }
 
@@ -91,26 +91,90 @@ export const consumeIssueCount = (fileName: string) => {
   }
 
   for (const match of matches) {
-    const rawMatchCount = match.replace("(", "").replace(")", "").replace("of", "").replace("Of", "").trim()
+    const rawMatchCount = match.toLowerCase().replace("(", "").replace(")", "").replace("of", "").trim()
 
     return {
       totalIssueCount: parseInt(rawMatchCount),
-      updatedString: fileName.replace(match.toString(), "")
+      updatedString: fileName.replace(match.toString().trim(), "")
     }
 
   }
 
   return {
     totalIssueCount: undefined,
-    updatedString: fileName
+    updatedString: fileName.trim()
+  }
+}
+
+export const consumeFormat = (fileName: string) => {
+  const formatPattern = tokenPatterns.find(i => i.type == "FORMAT")
+
+  if (formatPattern == undefined) {
+    return {
+      format: undefined,
+      updatedString: fileName
+    }
+  }
+
+  const matches: RegExpMatchArray | null = fileName.match(formatPattern.regex)
+
+  if (matches == null ) {
+    return {
+      format: undefined,
+      updatedString: fileName
+    }
+  }
+
+  for (const match of matches) {
+    const rawMatchCount = match.toLowerCase().replace("(", "").replace(")", "").trim()
+
+    return {
+      format: rawMatchCount,
+      updatedString: fileName.replace(match.toString().trim(), "")
+    }
+
+  }
+
+  return {
+    format: undefined,
+    updatedString: fileName.trim()
   }
 }
 
 export const consumeTags = (fileName: string) => {
+  const tagCountPattern = tokenPatterns.find(i => i.type == "TAG")
 
-}
+  if (tagCountPattern == undefined) {
+    return {
+      tags: [],
+      updatedString: fileName
+    }
+  }
 
-export const consumeFormat = (fileName: string) => {
+  const matches: RegExpMatchArray | null = fileName.match(tagCountPattern.regex)
+
+  if (!matches) {
+    return {
+      tags: [],
+      updatedString: fileName.trim()
+    }
+  }
+
+  const tags = []
+
+  let finalName = fileName
+
+  for (const match of matches) {
+    tags.push(match.toString().trim().replace("(", "").replace(")", ""))
+
+    finalName = finalName.replace(match.toString().trim(), "")
+  }
+
+  return {
+    tags,
+    updatedString: finalName.trim()
+  }
+
 }
 
 export const consumeVolume = (fileName: string) => {
@@ -134,10 +198,19 @@ export const parseComicNameForDetails = (fileName: string): comicNameParserResul
   const issueCountInfo = consumeIssueCount(fileName)
   fileName = issueCountInfo.updatedString
 
+  const formatInfo = consumeFormat(fileName)
+  fileName = formatInfo.updatedString
+
+  const tagsInfo = consumeTags(fileName)
+  fileName = tagsInfo.updatedString
+
 
   return {
     year: yearInfo?.year || undefined,
     count: issueCountInfo?.totalIssueCount || undefined,
+    format: formatInfo?.format || undefined,
+    tags: tagsInfo.tags || undefined,
+    seriesName: fileName
   } as comicNameParserResult
   
 }
