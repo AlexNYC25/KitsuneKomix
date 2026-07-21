@@ -14,7 +14,7 @@ const tokenPatterns = [
   },
   {
     type: "VOLUME",
-    regex: /\(?(volume|v)\s?\d{0,3}\)?/ig
+    regex: /\(?(volume|vol|v)\s?\d{0,3}\)?/ig
   },
   {
     type: "FORMAT",
@@ -26,7 +26,7 @@ const tokenPatterns = [
   },
   {
     type: "ISSUE",
-    regex: /^#\d+/
+    regex: /(#\d+|[0]\d+|d{3,4})$/g
   },
 ]
 
@@ -246,7 +246,37 @@ export const consumeVolume = (fileName: string) => {
 }
 
 export const consumeIssue = (fileName: string) => {
+  const issuePattern = tokenPatterns.find(i => i.type == "ISSUE")
 
+  if (issuePattern == undefined) {
+    return {
+      issue: undefined,
+      updatedString: fileName
+    }
+  }
+  
+  const matches: RegExpMatchArray | null = fileName.match(issuePattern.regex)
+
+  if (!matches) {
+    return {
+      issue: undefined,
+      updatedString: fileName
+    }
+  }
+
+  for (const match of matches) {
+    const rawMatchCount = match.toLowerCase().replace("#", "").trim()
+
+    return {
+      issue: rawMatchCount,
+      updatedString: fileName.replace(match.toString().trim(), "").trim()
+    }
+
+  }
+  return {
+    issue: undefined,
+    updatedString: fileName
+  }
 }
 
 export const parseComicNameForDetails = (fileName: string): comicNameParserResult | any => {
@@ -268,8 +298,12 @@ export const parseComicNameForDetails = (fileName: string): comicNameParserResul
   const tagsInfo = consumeTags(fileName)
   fileName = tagsInfo.updatedString
 
+  const issueInfo = consumeIssue(fileName)
+  fileName = issueInfo.updatedString
+
 
   return {
+    issue: issueInfo.issue || undefined,
     year: yearInfo?.year || undefined,
     volume: volumeInfo?.volume || undefined,
     count: issueCountInfo?.totalIssueCount || undefined,
