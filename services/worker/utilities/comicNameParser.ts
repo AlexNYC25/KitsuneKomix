@@ -26,7 +26,7 @@ const tokenPatterns = [
   },
   {
     type: "ISSUE",
-    regex: /(#\d+|[0]\d+|d{3,4})$/g
+    regex: /(#\d+|[0]\d+|\d{4})$/g
   },
 ]
 
@@ -156,7 +156,7 @@ export const consumeFormat = (fileName: string) => {
 
     return {
       format: rawMatchCount,
-      updatedString: fileName.replace(match.toString().trim(), "")
+      updatedString: fileName.replace(match.toString().trim(), "").trim()
     }
 
   }
@@ -193,7 +193,7 @@ export const consumeTags = (fileName: string) => {
   for (const match of matches) {
     tags.push(match.toString().trim().replace("(", "").replace(")", ""))
 
-    finalName = finalName.replace(match.toString().trim(), "")
+    finalName = finalName.replace(match.toString().trim(), "").trim()
   }
 
   return {
@@ -268,7 +268,7 @@ export const consumeIssue = (fileName: string) => {
     const rawMatchCount = match.toLowerCase().replace("#", "").trim()
 
     return {
-      issue: rawMatchCount,
+      issue: rawMatchCount.replace(/^0/, ''),
       updatedString: fileName.replace(match.toString().trim(), "").trim()
     }
 
