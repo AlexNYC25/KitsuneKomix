@@ -41,7 +41,7 @@ type comicNameParserResult = {
 }
 
 export const removeFileExt = (fileName: string) => {
-  const extPattern = tokenPatterns.find(i => (i.type === "YEAR"))
+  const extPattern = tokenPatterns.find(i => (i.type === "FILE_EXT"))
 
   if (!extPattern) {
     return fileName
@@ -50,13 +50,11 @@ export const removeFileExt = (fileName: string) => {
   const matches: RegExpMatchArray | null = fileName.match(extPattern.regex)
 
   if (matches == null) {
-    
-    fileName
-    
+    return fileName  
   }
 
   for (const match of matches) {
-    const newFileName = match.toLowerCase().replace(match.toString(), "")
+    const newFileName = fileName.replace(match.toString(), "")
 
     return newFileName
   }
