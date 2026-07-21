@@ -1,6 +1,10 @@
 
 const tokenPatterns = [
   {
+    type: "FILE_EXT",
+    regex: /[.][a-z]{2,3}/
+  },
+  {
     type: "YEAR",
     regex: /\((19|20)\d{2}\)/
   },
@@ -10,7 +14,7 @@ const tokenPatterns = [
   },
   {
     type: "VOLUME",
-    regex: /^v\d+/i
+    regex: /\(?(volume|v)\s?\d{0,3}\)?/ig
   },
   {
     type: "FORMAT",
@@ -29,11 +33,35 @@ const tokenPatterns = [
 type comicNameParserResult = {
   seriesName: string | undefined,
   issue: string | undefined,
-  volume: string | undefined,
+  volume: number | undefined,
   count: number | undefined,
   year: number | undefined,
   format: string | undefined,
   tags: string[]
+}
+
+export const removeFileExt = (fileName: string) => {
+  const extPattern = tokenPatterns.find(i => (i.type === "YEAR"))
+
+  if (!extPattern) {
+    return fileName
+  }
+
+  const matches: RegExpMatchArray | null = fileName.match(extPattern.regex)
+
+  if (matches == null) {
+    
+    fileName
+    
+  }
+
+  for (const match of matches) {
+    const newFileName = match.toLowerCase().replace(match.toString(), "")
+
+    return newFileName
+  }
+
+  return fileName
 }
 
 export const consumeYear = (fileName: string) => {
@@ -156,7 +184,7 @@ export const consumeTags = (fileName: string) => {
   if (!matches) {
     return {
       tags: [],
-      updatedString: fileName.trim()
+      updatedString: fileName
     }
   }
 
@@ -178,19 +206,54 @@ export const consumeTags = (fileName: string) => {
 }
 
 export const consumeVolume = (fileName: string) => {
+  const volumePattern = tokenPatterns.find(i => i.type == "VOLUME")
 
+  if (volumePattern == undefined) {
+    return {
+      volume: undefined,
+      updatedString: fileName
+    }
+  }
+
+  const matches: RegExpMatchArray | null = fileName.match(volumePattern.regex)
+
+  if (!matches) {
+    return {
+      volume: undefined,
+      updatedString: fileName
+    }
+  }
+
+  for (const match of matches) {
+    const rawMatchCount = match.toLowerCase().replace("(", "").replace(")", "").replace("volume", "").replace("vol", "").replace("v", "").trim()
+
+    if (!Number.isInteger(parseInt(rawMatchCount))){
+      return {
+        volume: undefined,
+        updatedString: fileName
+      }
+    }
+
+    return {
+      volume: parseInt(rawMatchCount),
+      updatedString: fileName.replace(match.toString().trim(), "")
+    }
+
+  }
+
+  return {
+    volume: undefined,
+    updatedString: fileName.trim()
+  }
 }
 
 export const consumeIssue = (fileName: string) => {
 
 }
 
-
-export const tokenizeComicFileName = (fileName: string) => {
-
-}
-
 export const parseComicNameForDetails = (fileName: string): comicNameParserResult | any => {
+
+  fileName = removeFileExt(fileName)
   
   const yearInfo = consumeYear(fileName)
   fileName = yearInfo.updatedString
@@ -201,12 +264,16 @@ export const parseComicNameForDetails = (fileName: string): comicNameParserResul
   const formatInfo = consumeFormat(fileName)
   fileName = formatInfo.updatedString
 
+  const volumeInfo = consumeVolume(fileName)
+  fileName = volumeInfo.updatedString
+
   const tagsInfo = consumeTags(fileName)
   fileName = tagsInfo.updatedString
 
 
   return {
     year: yearInfo?.year || undefined,
+    volume: volumeInfo?.volume || undefined,
     count: issueCountInfo?.totalIssueCount || undefined,
     format: formatInfo?.format || undefined,
     tags: tagsInfo.tags || undefined,
