@@ -14,7 +14,7 @@ const tokenPatterns = [
   },
   {
     type: "VOLUME",
-    regex: /\(?(volume|vol|v)\s?\d{0,3}\)?/ig
+    regex: /\(?(volume|vol|v)\s?\d{0,3}\)?/i
   },
   {
     type: "FORMAT",
@@ -30,6 +30,36 @@ const tokenPatterns = [
   },
 ]
 
+type ComicYearParserResult = {
+  year: number | undefined,
+  updatedString: string
+}
+
+type ComicIssueCountParserResult = {
+  totalIssueCount: number | undefined,
+  updatedString: string
+}
+
+type ComicFormatParserResult = {
+  format: string| undefined,
+  updatedString: string
+}
+
+type ComicIssueParserResult = {
+  issue: string | undefined
+  updatedString: string
+}
+
+type ComicVolumeParserResult = {
+  volume: number | undefined,
+  updatedString: string
+}
+
+type ComicTagsParserResult = {
+  tags: string[];
+  updatedString: string;
+}
+
 type comicNameParserResult = {
   seriesName: string | undefined,
   issue: string | undefined,
@@ -40,150 +70,150 @@ type comicNameParserResult = {
   tags: string[]
 }
 
-export const removeFileExt = (fileName: string) => {
-  const extPattern = tokenPatterns.find(i => (i.type === "FILE_EXT"))
+const lookUpRegex = (patternType: string): RegExp | undefined => {
+  const tokenRegexPattern = tokenPatterns.find(i => i.type === patternType)
+
+  if (tokenRegexPattern) {
+    return tokenRegexPattern.regex
+  }
+
+  return undefined;
+}
+
+/**
+ * Removed the extension from the file name
+ * @param fileName The file name of the comic book file
+ * @returns Modified string without file extension or falls back to the original string
+ */
+export const removeFileExt = (fileName: string): string => {
+  const extPattern: RegExp | undefined = lookUpRegex("FILE_EXT")
 
   if (!extPattern) {
     return fileName
   }
 
-  const matches: RegExpMatchArray | null = fileName.match(extPattern.regex)
+  const match: RegExpMatchArray | null = fileName.match(extPattern)
 
-  if (matches == null) {
+  if (match == null) {
     return fileName  
   }
 
-  for (const match of matches) {
-    const newFileName = fileName.replace(match.toString(), "")
+  const newFileName: string = fileName.replace(match[0].toString(), "")
 
-    return newFileName
-  }
-
-  return fileName
+  return newFileName
 }
 
-export const consumeYear = (fileName: string) => {
-  const yearTokenPattern = tokenPatterns.find(i => (i.type === "YEAR"))
+/**
+ * Parses and remove the year integer value from the file name string
+ * @param fileName The file name of the comic book file
+ * @returns An ComicYearParserResult with the parsed year value and the updated string with the updated string without the year token
+ */
+export const consumeYear = (fileName: string) : ComicYearParserResult => {
+  const yearPattern: RegExp | undefined = lookUpRegex("YEAR")
 
-  if (yearTokenPattern == undefined) {
-    return {
-      year: undefined,
-      updatedString: fileName
-    }
+  const defaultReturn: ComicYearParserResult = {
+    updatedString: fileName
+  } as ComicYearParserResult
+
+  if (yearPattern == undefined) {
+    return defaultReturn
   }
 
-  const matches: RegExpMatchArray | null = fileName.match(yearTokenPattern.regex)
+  const match: RegExpMatchArray | null = fileName.match(yearPattern)
 
-  if (matches == null) {
-    return {
-      year: undefined,
-      updatedString: fileName
-    }
+  if (!match) {
+    return defaultReturn
   }
 
-  for (const match of matches) {
-    const rawMatchYear = match.replace("(", "").replace(")", "")
-
-    return {
-      year: parseInt(rawMatchYear),
-      updatedString: fileName.replace(match.toString().trim(), "")
-    }
-
-  }
+  const rawMatchYear: string = match[0].replace("(", "").replace(")", "")
 
   return {
-    year: undefined,
-    updatedString: fileName.trim()
+    year: parseInt(rawMatchYear),
+    updatedString: fileName.replace(match[0].toString(), "").trim()
   }
 }
 
-export const consumeIssueCount = (fileName: string) => {
-  const issueCountPattern = tokenPatterns.find(i => i.type == "ISSUE_COUNT")
+/**
+ * Parses and remove the issue count from the file name string
+ * @param fileName The file name of the comic book file
+ * @returns An ComicIssueCountParserResult
+ */
+export const consumeIssueCount = (fileName: string): ComicIssueCountParserResult => {
+  const extPattern: RegExp | undefined = lookUpRegex("ISSUE_COUNT")
 
-  if (issueCountPattern == undefined) {
-    return {
-      totalIssueCount: undefined,
-      updatedString: fileName
-    }
+  const defaultReturn = {
+    updatedString: fileName
+  } as ComicIssueCountParserResult
+
+  if (extPattern == undefined) {
+    return defaultReturn
   }
 
-  const matches: RegExpMatchArray | null = fileName.match(issueCountPattern.regex)
+  const match: RegExpMatchArray | null = fileName.match(extPattern)
 
-  if (matches == null ) {
-    return {
-      totalIssueCount: undefined,
-      updatedString: fileName
-    }
+  if (!match) {
+    return defaultReturn
   }
 
-  for (const match of matches) {
-    const rawMatchCount = match.toLowerCase().replace("(", "").replace(")", "").replace("of", "").trim()
-
-    return {
-      totalIssueCount: parseInt(rawMatchCount),
-      updatedString: fileName.replace(match.toString().trim(), "")
-    }
-
-  }
+  const rawMatchCount: string = match[0].toLowerCase().replace("(", "").replace(")", "").replace("of", "")
 
   return {
-    totalIssueCount: undefined,
-    updatedString: fileName.trim()
+    totalIssueCount: parseInt(rawMatchCount),
+    updatedString: fileName.replace(match[0].toString(), "").trim()
   }
 }
 
-export const consumeFormat = (fileName: string) => {
-  const formatPattern = tokenPatterns.find(i => i.type == "FORMAT")
+/**
+ * Parses and remove the format from the file name string
+ * @param fileName The file name of the comic book file
+ * @returns An ComicFormatParserResult
+ */
+export const consumeFormat = (fileName: string): ComicFormatParserResult => {
+  const extPattern: RegExp | undefined = lookUpRegex("FORMAT")
 
-  if (formatPattern == undefined) {
-    return {
-      format: undefined,
-      updatedString: fileName
-    }
+  const defaultReturn = {
+    updatedString: fileName
+  } as ComicFormatParserResult
+
+  if (!extPattern) {
+    return defaultReturn
   }
 
-  const matches: RegExpMatchArray | null = fileName.match(formatPattern.regex)
+  const match: RegExpMatchArray | null = fileName.match(extPattern)
 
-  if (matches == null ) {
-    return {
-      format: undefined,
-      updatedString: fileName
-    }
+  if (!match) {
+    return defaultReturn
   }
 
-  for (const match of matches) {
-    const rawMatchCount = match.toLowerCase().replace("(", "").replace(")", "").trim()
-
-    return {
-      format: rawMatchCount,
-      updatedString: fileName.replace(match.toString().trim(), "").trim()
-    }
-
-  }
+  const rawMatchCount: string = match[0].toLowerCase().replace("(", "").replace(")", "")
 
   return {
-    format: undefined,
-    updatedString: fileName.trim()
+    format: rawMatchCount,
+    updatedString: fileName.replace(match[0].toString(), "").trim()
   }
 }
 
-export const consumeTags = (fileName: string) => {
-  const tagCountPattern = tokenPatterns.find(i => i.type == "TAG")
+/**
+ * 
+ * @param fileName The file name of the comic book file
+ * @returns 
+ */
+export const consumeTags = (fileName: string): ComicTagsParserResult => {
+  const extPattern: RegExp | undefined = lookUpRegex("TAG")
 
-  if (tagCountPattern == undefined) {
-    return {
-      tags: [],
-      updatedString: fileName
-    }
+  const defaultReturn = {
+    tags: [],
+    updatedString: fileName
   }
 
-  const matches: RegExpMatchArray | null = fileName.match(tagCountPattern.regex)
+  if (!extPattern) {
+    return defaultReturn
+  }
+
+  const matches: RegExpMatchArray | null = fileName.match(extPattern)
 
   if (!matches) {
-    return {
-      tags: [],
-      updatedString: fileName
-    }
+    return defaultReturn
   }
 
   const tags = []
@@ -193,7 +223,7 @@ export const consumeTags = (fileName: string) => {
   for (const match of matches) {
     tags.push(match.toString().trim().replace("(", "").replace(")", ""))
 
-    finalName = finalName.replace(match.toString().trim(), "").trim()
+    finalName = finalName.replace(match.toString(), "").trim()
   }
 
   return {
@@ -203,80 +233,55 @@ export const consumeTags = (fileName: string) => {
 
 }
 
-export const consumeVolume = (fileName: string) => {
-  const volumePattern = tokenPatterns.find(i => i.type == "VOLUME")
+export const consumeVolume = (fileName: string): ComicVolumeParserResult => {
+  const volumePattern = lookUpRegex("VOLUME")
 
-  if (volumePattern == undefined) {
-    return {
-      volume: undefined,
-      updatedString: fileName
-    }
+  const defaultReturn = {
+    updatedString: fileName
+  } as ComicVolumeParserResult
+
+  if (!volumePattern) {
+    return defaultReturn
   }
 
-  const matches: RegExpMatchArray | null = fileName.match(volumePattern.regex)
+  const match: RegExpMatchArray | null = fileName.match(volumePattern)
 
-  if (!matches) {
-    return {
-      volume: undefined,
-      updatedString: fileName
-    }
+  if (!match) {
+    return defaultReturn
   }
 
-  for (const match of matches) {
-    const rawMatchCount = match.toLowerCase().replace("(", "").replace(")", "").replace("volume", "").replace("vol", "").replace("v", "").trim()
-
-    if (!Number.isInteger(parseInt(rawMatchCount))){
-      return {
-        volume: undefined,
-        updatedString: fileName
-      }
-    }
-
-    return {
-      volume: parseInt(rawMatchCount),
-      updatedString: fileName.replace(match.toString().trim(), "")
-    }
-
-  }
+  const rawMatchCount = match[0].toLowerCase().replace("(", "").replace(")", "").replace("volume", "").replace("vol", "").replace("v", "").trim()
 
   return {
-    volume: undefined,
-    updatedString: fileName.trim()
+    volume: parseInt(rawMatchCount),
+    updatedString: fileName.replace(match[0].toString().trim(), "")
   }
 }
 
-export const consumeIssue = (fileName: string) => {
-  const issuePattern = tokenPatterns.find(i => i.type == "ISSUE")
+export const consumeIssue = (fileName: string): ComicIssueParserResult => {
+  const issuePattern = lookUpRegex("ISSUE")
 
-  if (issuePattern == undefined) {
-    return {
-      issue: undefined,
-      updatedString: fileName
-    }
+  const defaultReturn = {
+    updatedString: fileName
+  } as ComicIssueParserResult
+
+  if (!issuePattern) {
+    return defaultReturn
   }
   
-  const matches: RegExpMatchArray | null = fileName.match(issuePattern.regex)
+  const match: RegExpMatchArray | null = fileName.match(issuePattern)
 
-  if (!matches) {
-    return {
-      issue: undefined,
-      updatedString: fileName
-    }
+  if (!match) {
+    return defaultReturn
   }
 
-  for (const match of matches) {
-    const rawMatchCount = match.toLowerCase().replace("#", "").trim()
+  const rawMatchCount = match[0].toLowerCase().replace("#", "").trim()
 
-    return {
-      issue: rawMatchCount.replace(/^0/, ''),
-      updatedString: fileName.replace(match.toString().trim(), "").trim()
-    }
-
-  }
   return {
-    issue: undefined,
-    updatedString: fileName
+    issue: rawMatchCount.replace(/^0/, ''),
+    updatedString: fileName.replace(match[0].toString().trim(), "").trim()
   }
+
 }
 
 export const parseComicNameForDetails = (fileName: string): comicNameParserResult | any => {
@@ -303,7 +308,7 @@ export const parseComicNameForDetails = (fileName: string): comicNameParserResul
 
 
   return {
-    issue: issueInfo.issue || undefined,
+    issue: issueInfo?.issue || undefined,
     year: yearInfo?.year || undefined,
     volume: volumeInfo?.volume || undefined,
     count: issueCountInfo?.totalIssueCount || undefined,
