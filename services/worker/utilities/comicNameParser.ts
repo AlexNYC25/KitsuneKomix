@@ -55,7 +55,7 @@ const lookUpRegex = (patternType: string): RegExp | undefined => {
  * @param fileName The file name of the comic book file
  * @returns Modified string without file extension or falls back to the original string
  */
-export const removeFileExt = (fileName: string): string => {
+const removeFileExt = (fileName: string): string => {
   const extPattern: RegExp | undefined = lookUpRegex("FILE_EXT")
 
   if (!extPattern) {
@@ -78,7 +78,7 @@ export const removeFileExt = (fileName: string): string => {
  * @param fileName The file name of the comic book file
  * @returns An ComicYearParserResult with the parsed year value and the updated string with the updated string without the year token
  */
-export const consumeYear = (fileName: string) : ComicYearParserResult => {
+const consumeYear = (fileName: string) : ComicYearParserResult => {
   const yearPattern: RegExp | undefined = lookUpRegex("YEAR")
 
   const defaultReturn: ComicYearParserResult = {
@@ -109,7 +109,7 @@ export const consumeYear = (fileName: string) : ComicYearParserResult => {
  * @param fileName The file name of the comic book file
  * @returns An ComicIssueCountParserResult
  */
-export const consumeIssueCount = (fileName: string): ComicIssueCountParserResult => {
+const consumeIssueCount = (fileName: string): ComicIssueCountParserResult => {
   const extPattern: RegExp | undefined = lookUpRegex("ISSUE_COUNT")
 
   const defaultReturn = {
@@ -171,7 +171,7 @@ export const consumeFormat = (fileName: string): ComicFormatParserResult => {
  * @param fileName The file name of the comic book file
  * @returns An ComicTagsParserResult object
  */
-export const consumeTags = (fileName: string): ComicTagsParserResult => {
+const consumeTags = (fileName: string): ComicTagsParserResult => {
   const extPattern: RegExp | undefined = lookUpRegex("TAG")
 
   const defaultReturn = {
@@ -211,7 +211,7 @@ export const consumeTags = (fileName: string): ComicTagsParserResult => {
  * @param fileName The file name of the comic book file
  * @returns An ComicVolumeParserResult object
  */
-export const consumeVolume = (fileName: string): ComicVolumeParserResult => {
+const consumeVolume = (fileName: string): ComicVolumeParserResult => {
   const volumePattern: RegExp | undefined = lookUpRegex("VOLUME")
 
   const defaultReturn = {
@@ -249,7 +249,7 @@ export const consumeVolume = (fileName: string): ComicVolumeParserResult => {
  * @param fileName The file name of the comic book file
  * @returns An ComicIssueParserResult object
  */
-export const consumeIssue = (fileName: string): ComicIssueParserResult => {
+const consumeIssue = (fileName: string): ComicIssueParserResult => {
   const issuePattern: RegExp | undefined = lookUpRegex("ISSUE")
 
   const defaultReturn = {
