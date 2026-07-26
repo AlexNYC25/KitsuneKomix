@@ -37,3 +37,28 @@ export type ComicNameParserResult = {
   format: string | undefined,
   tags: string[]
 }
+
+export type List7zzFileOutput = {
+  date: string,
+  time: string,
+  attr: string,
+  size: string,
+  compressed: string,
+  name: string
+}
+
+export interface ArchiveEntry {
+  path: string,
+  size: number,
+}
+
+export interface ArchiveManifest {
+  type: string,
+  archiveSize: number,
+
+  files: ArchiveEntry[]
+}
+
+export interface ArchiveReader {
+  getManifest(filePath: string): Promise<ArchiveManifest>
+}
