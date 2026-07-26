@@ -22,5 +22,9 @@ export const parseListOutput = (output: string): List7zzFileOutput[] => {
     parsedLines.push({ date, time, attr, size, compressed, name } as List7zzFileOutput)
   }
 
+  parsedLines.sort((a: List7zzFileOutput, b: List7zzFileOutput) => {
+    return a.name.localeCompare(b.name)
+  }) 
+
   return parsedLines
 }
