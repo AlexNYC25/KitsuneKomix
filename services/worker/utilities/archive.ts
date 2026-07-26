@@ -2,6 +2,7 @@ import type { ArchiveEntry, ArchiveManifest, List7zzFileOutput } from "../shared
 
 import { list } from "./7zz.wraper";
 import { parseListOutput } from "./7zzParser";
+import { generateHashForFile } from "./hash"
 
 const imageFileExtensions = ["jpeg", "png", "webp", "gif", "svg"]
 
@@ -53,15 +54,19 @@ export const getArchivesManifest = async (filePath: string): Promise<ArchiveMani
 
   const parsedOutput: List7zzFileOutput[] = parseListOutput(listOutput)
 
+
   const pages: ArchiveEntry[] = filterPages(parsedOutput)
 
   const archiveSize: number = fileInfo.size
 
   const type: string = filePath.split(".").at(-1) || "unknown";
+  
+  const fileHash: bigint | number = await generateHashForFile(filePath)
 
   const manifest: ArchiveManifest = {
     type: type,
     archiveSize: archiveSize,
+    hash: fileHash,
 
     files: pages
   }

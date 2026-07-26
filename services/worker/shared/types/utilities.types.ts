@@ -55,6 +55,7 @@ export interface ArchiveEntry {
 export interface ArchiveManifest {
   type: string,
   archiveSize: number,
+  hash: number | bigint | undefined
 
   files: ArchiveEntry[]
 }
