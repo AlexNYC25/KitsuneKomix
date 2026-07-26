@@ -281,7 +281,7 @@ const consumeIssue = (fileName: string): ComicIssueParserResult => {
  * @param fileName The file name of the comic book file
  * @returns An ComicNameParserResult object
  */
-export const parseComicNameForDetails = (fileName: string): ComicNameParserResult | any => {
+export const parseComicNameForDetails = (fileName: string): ComicNameParserResult => {
 
   fileName = removeFileExt(fileName)
   
