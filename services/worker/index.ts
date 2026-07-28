@@ -1,4 +1,4 @@
-import { IngestionWorker } from "./workers/ingestionWorker";
+import { IngestionWorker } from "./workers/ingestion.worker";
 
 const ingestionWorker = new IngestionWorker();
 
