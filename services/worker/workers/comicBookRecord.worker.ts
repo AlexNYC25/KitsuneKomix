@@ -69,14 +69,15 @@ export class ComicBookRecordWorker {
         filePath: currentPayload.filePath,
         libraryId: currentPayload.libraryId,
         hash: archiveManifest?.hash?.toString() ?? "",
-        pageCount: archiveManifest?.files.length,
         year: detailsFromFileName?.year,
+        series: detailsFromFileName?.seriesName,
         issueNumber: detailsFromFileName?.issue,
         count: detailsFromFileName?.count,
         volumeNumber: detailsFromFileName?.volume?.toString(),
-        series: detailsFromFileName?.seriesName,
+        pageCount: archiveManifest?.files.length,
+        fileSize: archiveManifest?.archiveSize,
+        
         format: detailsFromFileName?.format,
-        fileSize: archiveManifest?.archiveSize
       }
 
       const comicBookInsertionResultId: number = await insertComicBook(newComicBookRecordData)
