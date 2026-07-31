@@ -25,7 +25,7 @@ import type {
 } from "../shared/types/index.ts"
 
 /**
- * Exclusive dynamic filtering function specifcally for getComicBooksWithMetadataFilteringSorting
+ * Exclusive dynamic filtering function specifically for getComicBooksWithMetadataFilteringSorting
  * This is necessary as the filtering can be applied to any of the fields in the comic book table and we need to dynamically apply it to the query builder.
  * @param filter
  * @param query
