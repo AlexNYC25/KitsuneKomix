@@ -14,3 +14,7 @@ export const initialIngestionPayloadSchema = z.object({
 export const comicFileWithValidatedLibrarySchema = initialIngestionPayloadSchema.extend({
   libraryId: z.int()
 })
+
+export const comicFileRecordedForSeriesProcessingSchema = initialIngestionPayloadSchema.extend({
+  comicBookId: z.int()
+})
