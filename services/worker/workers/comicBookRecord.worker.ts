@@ -19,7 +19,8 @@ import {
 } from "../utilities/archive"
 
 import type {
-  IngestionToComicBookRecordPayload
+  IngestionToComicBookRecordPayload,
+  IngestionToComicSeriesMappingPayload
 } from "../shared/types/payload.types"
 
 import type {
@@ -29,6 +30,7 @@ import type {
 
 export class ComicBookRecordWorker {
   queue: null | QueueType = null;
+  nextQueue: null | QueueType = null;
 
   async dequeue() {
     if (!this.queue) {
@@ -59,7 +61,7 @@ export class ComicBookRecordWorker {
     // create basic initial record for the comic book table
     const currentPayload: IngestionToComicBookRecordPayload = job.payload as IngestionToComicBookRecordPayload
 
-    // TODO: deal with parsed tags?
+    // NOTE: Tags values are not currently used
     const detailsFromFileName: ComicNameParserResult = parseComicNameForDetails(currentPayload.filePath)
 
     const archiveManifest: ArchiveManifest | undefined = await getArchivesManifest(currentPayload.filePath)
@@ -76,13 +78,22 @@ export class ComicBookRecordWorker {
         volumeNumber: detailsFromFileName?.volume?.toString(),
         pageCount: archiveManifest?.files.length,
         fileSize: archiveManifest?.archiveSize,
-        
         format: detailsFromFileName?.format,
       }
 
-      const comicBookInsertionResultId: number = await insertComicBook(newComicBookRecordData)
+      const comicBookInsertionResultId: number = await insertComicBook(newComicBookRecordData)      
+
+      if(!this.nextQueue) {
+        this.nextQueue = await getQueue("BOOK_SERIES_MAPPING");
+      }
 
       // Create next payload
+      const nextJobPayload: IngestionToComicSeriesMappingPayload = {
+        ...currentPayload,
+        comicBookId: comicBookInsertionResultId
+      }
+
+      this.nextQueue.enqueue(nextJobPayload)
 
     } catch {
       workerLogger.error("There was an error parsing and inserting the initial comic book record")
