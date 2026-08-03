@@ -1,0 +1,17 @@
+{
+  "name": "worker",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "kitsune-komix-database": "workspace:*",
+    "kitsune-komix-schemas": "workspace:*",
+    "typescript": "^5"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "7zip-bin-full": "^26.2.1"
+  }
+}

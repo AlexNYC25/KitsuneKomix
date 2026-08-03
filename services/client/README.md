@@ -1,10 +1,4 @@
-# kitsunekomix
-
-A Comic book media server to serve your comics when you want them to your devices
-
-Currently being rewritten in Bun for better library compatibility
-
-## Dev instructions
+# client
 
 To install dependencies:
 

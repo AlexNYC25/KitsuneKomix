@@ -1,0 +1,216 @@
+import { eq } from "drizzle-orm";
+
+import { getClient } from "../drizzle/client.ts";
+import { dbLogger } from "../loggers/index.ts";
+import { usersTable } from "../schemas/index.ts";
+
+import type { NewUser, User, UserEditInput, DrizzleType } from "../shared/types/index.ts";
+
+/**
+ * Creates a new user in the database
+ * @param userData The user data including username, email, and password hash
+ * @returns The ID of the newly created user
+ */
+export const createUser = async (userData: NewUser): Promise<number> => {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: { id: number }[] = await db
+      .insert(usersTable)
+      .values(userData)
+      .returning({ id: usersTable.id });
+    
+    if (!result[0]) {
+      throw new Error("No record returned when inserting user.");
+    }
+
+    return result[0].id;
+  } catch (error) {
+    dbLogger.error("Error creating user:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves a user by their ID
+ * @param id The user ID
+ * @returns The User object, or null if not found
+ */
+export const getUserById = async (id: number): Promise<User | null> => {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: User[] = await db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.id, id),
+      );
+
+    if (!result[0]) {
+			throw new Error("No record returned when fetching setting.");
+		}
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    dbLogger.error("Error fetching user by ID:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves a user by their email address
+ * @param email The email address of the user
+ * @returns The User object, or null if not found
+ */
+export const getUserByEmail = async (email: string): Promise<User | null> => {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: User[] = await db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.email, email),
+      );
+
+    if (!result[0]) {
+			throw new Error("No record returned when fetching setting.");
+		}
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    dbLogger.error("Error fetching user by email:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves a user by their username
+ * @param username The username of the user
+ * @returns The User object, or null if not found
+ */
+export const getUserByUsername = async (
+  username: string,
+): Promise<User | null> => {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: User[] = await db
+      .select()
+      .from(usersTable)
+      .where(
+        eq(usersTable.username, username),
+      );
+
+    if (!result[0]) {
+			throw new Error("No record returned when fetching setting.");
+		}
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    dbLogger.error("Error fetching user by username:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves all users from the database
+ * @returns An array of all User objects
+ */
+export const getAllUsers = async (): Promise<User[]> => {
+  const db: DrizzleType = await getClient()
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: User[] = await db
+      .select()
+      .from(usersTable);
+
+    return result;
+  } catch (error) {
+    dbLogger.error("Error fetching all users:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Updates an existing user with new data
+ * @param id The ID of the user to update
+ * @param updates Partial user data to update (username, email, password, name fields, admin status)
+ * @returns True if the update was successful, false otherwise
+ */
+export const updateUser = async (
+  id: number,
+  updates: UserEditInput
+): Promise<boolean> => {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const updateData: Record<string, unknown> = {};
+    if (updates.email !== undefined) updateData.email = updates.email;
+    if (updates.password !== undefined) updateData.passwordHash = updates.password;
+    if (updates.admin !== undefined) updateData.admin = updates.admin;
+
+    const result: { id: number }[] = await db
+      .update(usersTable)
+      .set(updateData)
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
+
+    return result.length > 0;
+  } catch (error) {
+    dbLogger.error("Error updating user:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes a user by ID.
+ * @param id The ID of the user to delete.
+ * @returns True if the user was deleted, false otherwise.
+ */
+export const deleteUser = async (id: number): Promise<boolean> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: {
+      id: number;
+    }[] = await db
+      .delete(usersTable)
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
+
+    return result.length > 0;
+  } catch (error) {
+    dbLogger.error("Error deleting user:" + error);
+    throw error;
+  }
+};

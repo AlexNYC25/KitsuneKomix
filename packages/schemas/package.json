@@ -1,0 +1,14 @@
+{
+  "name": "kitsune-komix-schemas",
+  "private": true,
+  "main": "./mod.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}
