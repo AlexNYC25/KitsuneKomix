@@ -57,6 +57,8 @@ export interface ArchiveManifest {
   archiveSize: number,
   hash: number | bigint | undefined
 
+  metadataExists: boolean
+
   files: ArchiveEntry[]
 }
 

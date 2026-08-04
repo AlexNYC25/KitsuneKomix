@@ -36,6 +36,28 @@ const filterPages = (archiveEntries: List7zzFileOutput[]): ArchiveEntry[] => {
 }
 
 /**
+ * Checks if the archive contains metadata files (ComicInfo.xml or CoMet.xml)
+ * @param archiveEntries The full list of all entries in the archive
+ * @returns boolean indicating if metadata files exist in the archive
+ */
+const metadataExists = (archiveEntries: List7zzFileOutput[]): boolean => {
+  
+  for (const entry of archiveEntries) {
+    const fileName: string | undefined = entry.name.split("/").at(-1)
+
+    if (!fileName || !fileName.includes(".")) {
+      continue
+    }
+
+    if (fileName === "ComicInfo.xml" || fileName === "CoMet.xml") {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
  * Parses an archive file and returns a manifest with the pages listed in the file as well as some basic info
  * about the archive + pages
  * @param filePath Path to a archive file
@@ -57,6 +79,8 @@ export const getArchivesManifest = async (filePath: string): Promise<ArchiveMani
 
   const pages: ArchiveEntry[] = filterPages(parsedOutput)
 
+  const metadataFileInArchive: boolean = metadataExists(parsedOutput)
+
   const archiveSize: number = fileInfo.size
 
   const type: string = filePath.split(".").at(-1) || "unknown";
@@ -67,6 +91,8 @@ export const getArchivesManifest = async (filePath: string): Promise<ArchiveMani
     type: type,
     archiveSize: archiveSize,
     hash: fileHash,
+
+    metadataExists: metadataFileInArchive,
 
     files: pages
   }
