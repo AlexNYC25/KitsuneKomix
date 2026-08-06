@@ -4,8 +4,17 @@ import {
   type QueueType 
 } from "kitsune-komix-database"
 
+import {
+  workerLogger
+} from "../loggers/index"
+
+import type {
+  IngestionToComicSeriesMappingPayload
+} from "../shared/types/payload.types"
+
 export class ComicBookSeriesMappingWorker {
   queue: null | QueueType = null;
+  nextQueue: null | QueueType = null;
 
   async dequeue() {
     if (!this.queue) {
@@ -34,6 +43,14 @@ export class ComicBookSeriesMappingWorker {
 
   async processJob(job: QueueJob) {
     console.log(job.payload)
-    job.ack()
+    const currentPayload: IngestionToComicSeriesMappingPayload = job.payload as IngestionToComicSeriesMappingPayload
+
+    try {
+
+    } catch {
+      workerLogger.error("There was an error parsing and inserting the initial comic book record")
+    } finally {
+      job.ack()
+    }
   }
 }
