@@ -57,3 +57,11 @@ In the worker's process job logic:
 - Finishes the job
 
 ### ComicBookSeriesMappingWorker (In Progress)
+
+Notes:
+
+- Find the series record in the db where the comic file will belong to (create it if needed)
+- Create the mapping record for the comics to comic series
+- Optionally if we have a metadata file as part of the archive then we add a job to the appropriate queue to process the metadata
+- Create the job data to generate the comic books thumbnail data
+- Add the new job data payload the the next queue
