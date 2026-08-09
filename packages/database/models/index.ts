@@ -7,3 +7,4 @@ export * from "./refreshTokens.model.ts"
 
 export * from "./comicLibraries.model.ts"
 export * from "./comicBooks.model.ts"
+export * from "./comicSeries.model.ts"
