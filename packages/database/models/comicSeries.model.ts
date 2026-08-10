@@ -11,6 +11,7 @@ import {
 import type {
   ComicBook,
   NewComicBook,
+  ComicSeries,
 } from "../shared/types/index.ts"
 
 
@@ -49,3 +50,18 @@ export const addComicBookToSeries = async (
     throw error;
   }
 };
+
+export const findComicSeriesByFolderPath = async (folderPath: string): Promise<ComicSeries | null> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    
+  } catch (error) {
+    dbLogger.error("Error finding comic series by folder path:" + error);
+    throw error;
+  }
+}
