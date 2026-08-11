@@ -8,6 +8,10 @@ import {
   workerLogger
 } from "../loggers/index"
 
+import {
+  addComicBookToSeries
+} from "kitsune-komix-database"
+
 import type {
   IngestionToComicSeriesMappingPayload
 } from "../shared/types/payload.types"
@@ -46,6 +50,7 @@ export class ComicBookSeriesMappingWorker {
     const currentPayload: IngestionToComicSeriesMappingPayload = job.payload as IngestionToComicSeriesMappingPayload
 
     try {
+      const comicBookId: number = currentPayload.comicBookId
 
     } catch {
       workerLogger.error("There was an error parsing and inserting the initial comic book record")
