@@ -88,6 +88,7 @@ export class ComicBookRecordWorker {
       }
 
       // Create next payload
+      // TODO: Update to include boolean flag for if the comic book file has a metadata file as part of it
       const nextJobPayload: IngestionToComicSeriesMappingPayload = {
         ...currentPayload,
         comicBookId: comicBookInsertionResultId
