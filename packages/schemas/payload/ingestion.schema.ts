@@ -16,5 +16,6 @@ export const comicFileWithValidatedLibrarySchema = initialIngestionPayloadSchema
 })
 
 export const comicFileRecordedForSeriesProcessingSchema = initialIngestionPayloadSchema.extend({
-  comicBookId: z.int()
+  comicBookId: z.int(),
+  metadataFileExists: z.boolean().optional()
 })
