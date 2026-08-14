@@ -66,6 +66,8 @@ export class ComicBookRecordWorker {
 
     const archiveManifest: ArchiveManifest | undefined = await getArchivesManifest(currentPayload.filePath)
 
+    const metadataFileExists: boolean = archiveManifest?.metadataExists ?? false
+
     try {
       const newComicBookRecordData: NewComicBook = {
         filePath: currentPayload.filePath,
