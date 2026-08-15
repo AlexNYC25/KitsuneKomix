@@ -93,7 +93,8 @@ export class ComicBookRecordWorker {
       // TODO: Update to include boolean flag for if the comic book file has a metadata file as part of it
       const nextJobPayload: IngestionToComicSeriesMappingPayload = {
         ...currentPayload,
-        comicBookId: comicBookInsertionResultId
+        comicBookId: comicBookInsertionResultId,
+        metadataFileExists: metadataFileExists
       }
 
       this.nextQueue.enqueue(nextJobPayload)
