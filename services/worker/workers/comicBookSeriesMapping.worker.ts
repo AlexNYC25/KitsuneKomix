@@ -58,6 +58,11 @@ export class ComicBookSeriesMappingWorker {
         // TODO: Create a new series and add the comic book to it
         workerLogger.error("Could not find a matching series for the comic book")
       }
+
+      if (currentPayload.metadataFileExists) {
+        // parse the metadata file add it to the payload and send it to the first worker
+        // in the metadata sub pipeline
+      }
       
 
     } catch {
