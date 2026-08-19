@@ -18,6 +18,7 @@ import type {
 
 export class ComicBookSeriesMappingWorker {
   queue: null | QueueType = null;
+  secondQueue: null | QueueType = null;
   nextQueue: null | QueueType = null;
 
   async dequeue() {
