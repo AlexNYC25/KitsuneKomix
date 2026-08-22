@@ -18,6 +18,7 @@ import type {
 
 export class ComicBookSeriesMappingWorker {
   queue: null | QueueType = null;
+  // update the constructor to accept an optional queue for testing purposes
   optionalQueue: null | QueueType = null;
   nextQueue: null | QueueType = null;
 
