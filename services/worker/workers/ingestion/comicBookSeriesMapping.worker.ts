@@ -1,5 +1,6 @@
 import { 
   getQueue,
+  type ComicSeries,
   type QueueJob, 
   type QueueType 
 } from "kitsune-komix-database"
@@ -9,18 +10,21 @@ import {
 } from "../../loggers/index"
 
 import {
-  addComicBookToSeries
+  addComicBookToSeries,
+  findComicSeriesByFolderPath,
+  getParentDirectory
 } from "kitsune-komix-database"
 
 import type {
-  IngestionToComicSeriesMappingPayload
+  IngestionToComicSeriesMappingPayload,
+  IngestionToSecondaryPipelinePayload
 } from "../../shared/types/payload.types"
 
 export class ComicBookSeriesMappingWorker {
   queue: null | QueueType = null;
   // update the constructor to accept an optional queue for testing purposes
-  optionalQueue: null | QueueType = null;
-  nextQueue: null | QueueType = null;
+  metadataQueue: null | QueueType = null;
+  pagesQueue: null | QueueType = null;
 
   async dequeue() {
     if (!this.queue) {
@@ -52,7 +56,9 @@ export class ComicBookSeriesMappingWorker {
     const currentPayload: IngestionToComicSeriesMappingPayload = job.payload as IngestionToComicSeriesMappingPayload
 
     try {
-      const comicSeriesId: number | null = null // TODO: Implement logic to find the series ID based on the comic book details
+      const comicSeriesDirectory: string = getParentDirectory(currentPayload.filePath)
+      const comicSeries: ComicSeries | null = await findComicSeriesByFolderPath(comicSeriesDirectory)
+      const comicSeriesId: number | undefined = comicSeries ? comicSeries.id : undefined
 
       if (comicSeriesId) {
         await addComicBookToSeries(comicSeriesId, currentPayload.comicBookId)
@@ -62,9 +68,32 @@ export class ComicBookSeriesMappingWorker {
       }
 
       if (currentPayload.metadataFileExists) {
-        // parse the metadata file add it to the payload and send it to the first worker
-        // in the metadata sub pipeline
+        const secondaryPayload: IngestionToSecondaryPipelinePayload = {
+          filePath: currentPayload.filePath,
+          comicBookId: currentPayload.comicBookId,
+          metadataFileExists: currentPayload.metadataFileExists,
+          seriesId: comicSeriesId,
+        }
+
+        if (!this.metadataQueue) {
+          this.metadataQueue = await getQueue("COMICINFO_EXTRACTION");
+        }
+
+        this.metadataQueue.enqueue(secondaryPayload)
       }
+
+      const pagesPayload: IngestionToSecondaryPipelinePayload = {
+        filePath: currentPayload.filePath,
+        comicBookId: currentPayload.comicBookId,
+        metadataFileExists: currentPayload.metadataFileExists,
+        seriesId: comicSeriesId,
+      }
+
+      if (!this.pagesQueue) {
+        this.pagesQueue = await getQueue("PROCESS_COMIC_PAGES");
+      }
+
+      this.pagesQueue.enqueue(pagesPayload)
       
 
     } catch {
