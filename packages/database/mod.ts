@@ -11,6 +11,7 @@ export * from "./config/env.ts"
 export * from "./config/queues.ts"
 
 export * from "./utilities/db-file.ts"
+export * from "./utilities/path.ts"
 
 export * from "./scripts/dbml.ts"
 export * from "./scripts/migrate.ts"
