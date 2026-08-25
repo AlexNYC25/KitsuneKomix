@@ -19,3 +19,8 @@ export const comicFileRecordedForSeriesProcessingSchema = initialIngestionPayloa
   comicBookId: z.int(),
   metadataFileExists: z.boolean().optional()
 })
+
+export const comicFileInsertedSecondaryPipelineSchema = comicFileRecordedForSeriesProcessingSchema.extend({
+  seriesId: z.int().optional()
+})
+

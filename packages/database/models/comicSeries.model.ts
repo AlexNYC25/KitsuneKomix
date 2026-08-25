@@ -13,6 +13,7 @@ import type {
   ComicBook,
   NewComicBook,
   ComicSeries,
+  NewComicSeries,
 } from "../shared/types/index.ts"
 
 
@@ -69,6 +70,32 @@ export const findComicSeriesByFolderPath = async (folderPath: string): Promise<C
     return result[0] ?? null;
   } catch (error) {
     dbLogger.error("Error finding comic series by folder path:" + error);
+    throw error;
+  }
+}
+
+export const createComicSeries = async (
+  comicSeries: NewComicSeries,
+): Promise<number> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result = await db
+      .insert(comicSeriesTable)
+      .values(comicSeries)
+      .returning({ id: comicSeriesTable.id });
+
+    if (!result || result.length === 0 || !result[0]) {
+      throw new Error("Failed to create comic series");
+    }
+
+    return result[0].id;
+  } catch (error) {
+    dbLogger.error("Error creating comic series:" + error);
     throw error;
   }
 }
