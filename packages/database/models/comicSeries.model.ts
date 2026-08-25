@@ -6,6 +6,7 @@ import { env } from "../config/env.ts"
 
 import {
   comicSeriesBooksTable,
+  comicSeriesTable,
 } from "../schemas/index.ts";
 
 import type {
@@ -59,7 +60,13 @@ export const findComicSeriesByFolderPath = async (folderPath: string): Promise<C
   }
 
   try {
-    
+    const result = await db
+      .select()
+      .from(comicSeriesTable)
+      .where(eq(comicSeriesTable.folderPath, folderPath))
+      .limit(1);
+
+    return result[0] ?? null;
   } catch (error) {
     dbLogger.error("Error finding comic series by folder path:" + error);
     throw error;
