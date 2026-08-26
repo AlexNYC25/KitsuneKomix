@@ -12,7 +12,9 @@ import {
 import {
   addComicBookToSeries,
   findComicSeriesByFolderPath,
-  getParentDirectory
+  getParentDirectory,
+  createComicSeries,
+  type NewComicSeries
 } from "kitsune-komix-database"
 
 import type {
@@ -58,12 +60,17 @@ export class ComicBookSeriesMappingWorker {
     try {
       const comicSeriesDirectory: string = getParentDirectory(currentPayload.filePath)
       const comicSeries: ComicSeries | null = await findComicSeriesByFolderPath(comicSeriesDirectory)
-      const comicSeriesId: number | undefined = comicSeries ? comicSeries.id : undefined
+      let comicSeriesId: number | undefined = comicSeries ? comicSeries.id : undefined
 
       if (comicSeriesId) {
         await addComicBookToSeries(comicSeriesId, currentPayload.comicBookId)
       } else {
-        // TODO: Create a new series and add the comic book to it
+        const newSeriesRecordObject: NewComicSeries = {
+          name: currentPayload.filePath.split("/").pop() || "Unknown Series",
+          folderPath: comicSeriesDirectory
+        }
+
+        comicSeriesId = await createComicSeries(newSeriesRecordObject)
         workerLogger.error("Could not find a matching series for the comic book")
       }
 
