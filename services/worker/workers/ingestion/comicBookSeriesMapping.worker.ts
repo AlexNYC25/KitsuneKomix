@@ -24,7 +24,7 @@ import type {
 
 export class ComicBookSeriesMappingWorker {
   queue: null | QueueType = null;
-  // update the constructor to accept an optional queue for testing purposes
+  
   metadataQueue: null | QueueType = null;
   pagesQueue: null | QueueType = null;
 
@@ -54,7 +54,6 @@ export class ComicBookSeriesMappingWorker {
   }
 
   async processJob(job: QueueJob) {
-    console.log(job.payload)
     const currentPayload: IngestionToComicSeriesMappingPayload = job.payload as IngestionToComicSeriesMappingPayload
 
     try {
