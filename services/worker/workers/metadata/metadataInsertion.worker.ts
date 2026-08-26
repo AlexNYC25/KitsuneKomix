@@ -3,9 +3,12 @@ import {
   type QueueJob, 
   type QueueType 
 } from "kitsune-komix-database"
+import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
 
 export class MetadataInsertionWorker {
   queue: null | QueueType = null;
+
+  metadataQueue: null | QueueType = null;
 
   async dequeue() {
     if (!this.queue) {
@@ -33,7 +36,20 @@ export class MetadataInsertionWorker {
   }
 
   async processJob(job: QueueJob) {
-    console.log(job.payload)
-    job.ack()
+    const currentPayload = job.payload as MetadataExtractionPayload
+
+    // TODO: Insert the metadata into the database and associate it with the comic book record
+
+    try {
+      if (!this.metadataQueue) {
+        this.metadataQueue = await getQueue("COMIC_METADATA_AGGREGATION");
+      }
+
+      this.metadataQueue.enqueue(currentPayload)
+    } catch {
+
+    } finally {
+      job.ack()
+    }
   }
 }

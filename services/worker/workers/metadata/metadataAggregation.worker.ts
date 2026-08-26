@@ -3,6 +3,8 @@ import {
   type QueueJob, 
   type QueueType 
 } from "kitsune-komix-database"
+import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
+import { workerLogger } from "../../loggers";
 
 export class MetadataAggregationWorker {
   queue: null | QueueType = null;
@@ -33,7 +35,16 @@ export class MetadataAggregationWorker {
   }
 
   async processJob(job: QueueJob) {
-    console.log(job.payload)
-    job.ack()
+    const currentPayload = job.payload as MetadataExtractionPayload
+
+    try {
+      // TODO: Iterate through the keys of the metadata object, and if there were new
+      // values added to the comic books metadata, then set a process to aggregate 
+      // metadata values across all comic books in the series and update the series metadata accordingly.
+    } catch {
+      workerLogger.error("There was an error processing the metadata aggregation job for the comic book")
+    } finally {
+      job.ack();
+    }
   }
 }
