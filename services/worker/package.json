@@ -12,6 +12,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "7zip-bin-full": "^26.2.1"
+    "7zip-bin-full": "^26.2.1",
+    "comic-metadata-tool": "^1.3.3"
   }
 }
