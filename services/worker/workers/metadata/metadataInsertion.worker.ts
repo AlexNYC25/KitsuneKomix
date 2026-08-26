@@ -4,6 +4,7 @@ import {
   type QueueType 
 } from "kitsune-komix-database"
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
+import { workerLogger } from "../../loggers";
 
 export class MetadataInsertionWorker {
   queue: null | QueueType = null;
@@ -21,7 +22,7 @@ export class MetadataInsertionWorker {
   }
     
   async start() {
-    console.log("comicinfo metadata creation worker has started")
+    workerLogger.info("comicinfo metadata creation worker has started")
     while (true) {
       const job: QueueJob | null = await this.dequeue();
 

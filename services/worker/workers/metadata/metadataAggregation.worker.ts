@@ -20,7 +20,7 @@ export class MetadataAggregationWorker {
   }
     
   async start() {
-    console.log("comic metadata aggregation worker has started")
+    workerLogger.info("comic metadata aggregation worker has started")
     while (true) {
       const job: QueueJob | null = await this.dequeue();
 

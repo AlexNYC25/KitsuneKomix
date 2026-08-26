@@ -27,7 +27,7 @@ export class MetadataWorker {
   }
 
   async start() {
-    console.log("metadata worker has started")
+    workerLogger.info("metadata worker has started")
 
     while (true) {
       const job: QueueJob | null = await this.dequeue();

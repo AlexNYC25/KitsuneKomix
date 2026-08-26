@@ -39,7 +39,7 @@ export class ComicBookSeriesMappingWorker {
   }
     
   async start() {
-    console.log("comic book to series mapping worker has started")
+    workerLogger.info("comic book to series mapping worker has started")
     while (true) {
       const job: QueueJob | null = await this.dequeue();
 

@@ -43,7 +43,7 @@ export class ComicBookRecordWorker {
   }
     
   async start() {
-    console.log("comic book record worker has started")
+    workerLogger.info("comic book record worker has started")
     while (true) {
       const job: QueueJob | null = await this.dequeue();
 

@@ -3,6 +3,7 @@ import {
   type QueueJob, 
   type QueueType 
 } from "kitsune-komix-database"
+import { workerLogger } from "../../loggers";
 
 export class ComicThumbnailsWorker {
   queue: null | QueueType = null;
@@ -18,7 +19,7 @@ export class ComicThumbnailsWorker {
   }
     
   async start() {
-    console.log("comic thumbnails worker has started")
+    workerLogger.info("comic thumbnails worker has started")
     while (true) {
       const job: QueueJob | null = await this.dequeue();
 
@@ -33,7 +34,7 @@ export class ComicThumbnailsWorker {
   }
 
   async processJob(job: QueueJob) {
-    console.log(job.payload)
+    workerLogger.info(job.payload)
     job.ack()
   }
 }
