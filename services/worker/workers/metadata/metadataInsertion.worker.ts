@@ -1,7 +1,8 @@
+import type { MetadataCompiled } from "comic-metadata-tool"
 import { 
   getQueue,
   type QueueJob, 
-  type QueueType 
+  type QueueType
 } from "kitsune-komix-database"
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
 import { workerLogger } from "../../loggers";
@@ -42,6 +43,10 @@ export class MetadataInsertionWorker {
     // TODO: Insert the metadata into the database and associate it with the comic book record
 
     try {
+      const metadata: MetadataCompiled = currentPayload.metadata
+
+      // TODO: take all the idividual sources of metadata and consolidate them into a single metadata object to be inserted into the database
+
       if (!this.metadataQueue) {
         this.metadataQueue = await getQueue("COMIC_METADATA_AGGREGATION");
       }

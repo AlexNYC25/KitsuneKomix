@@ -24,7 +24,7 @@ import type {
 
 export class ComicBookSeriesMappingWorker {
   queue: null | QueueType = null;
-  
+
   metadataQueue: null | QueueType = null;
   pagesQueue: null | QueueType = null;
 
