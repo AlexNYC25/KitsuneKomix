@@ -6,6 +6,8 @@ import {
 } from "kitsune-komix-database"
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
 import { workerLogger } from "../../loggers";
+import { consolidateComicMetadata } from "../../utilities/metadataConsolidation";
+import type { ConsolidatedComicMetadata } from "../../shared/types/utilities.types";
 
 export class MetadataInsertionWorker {
   queue: null | QueueType = null;
@@ -45,13 +47,22 @@ export class MetadataInsertionWorker {
     try {
       const metadata: MetadataCompiled = currentPayload.metadata
 
-      // TODO: take all the idividual sources of metadata and consolidate them into a single metadata object to be inserted into the database
+      const consolidatedMetadata: ConsolidatedComicMetadata =
+        consolidateComicMetadata(metadata)
+
+      // TODO: Insert the consolidated metadata into the database and
+      // associate it with the comic book record
 
       if (!this.metadataQueue) {
         this.metadataQueue = await getQueue("COMIC_METADATA_AGGREGATION");
       }
 
-      this.metadataQueue.enqueue(currentPayload)
+      const nextPayload: MetadataExtractionPayload = {
+        ...currentPayload,
+        metadata: metadata,
+      }
+
+      this.metadataQueue.enqueue(nextPayload)
     } catch {
 
     } finally {
