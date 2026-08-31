@@ -22,6 +22,7 @@ import type {
  * multi-valued data together.
  *
  * Priority (highest first): ComicInfo.xml > ComicBookInfo > CoMet
+ * 
  *
  * @param metadata The compiled metadata object returned by `readComicFileMetadata`
  * @returns A single consolidated metadata object
@@ -36,6 +37,7 @@ export const consolidateComicMetadata = (
   const comicBookInfoPayload: ComicBookInfoPayload | undefined =
     comicBookInfo?.["ComicBookInfo/1.0"]
 
+  // SHOULD THESE BE UTILITIES? OR SHOULD THEY BE IN A SEPARATE FILE?
   const firstDefined = <T>(...values: (T | undefined)[]): T | undefined => {
     for (const value of values) {
       if (value !== undefined && value !== null && value !== "") {
