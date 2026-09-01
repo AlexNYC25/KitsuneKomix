@@ -6,7 +6,7 @@ import {
 } from "kitsune-komix-database"
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
 import { workerLogger } from "../../loggers";
-import { consolidateComicMetadata } from "../../utilities/metadataConsolidation";
+import { consolidateComicMetadata } from "../../utilities/metadata/metadataConsolidation";
 import type { ConsolidatedComicMetadata } from "../../shared/types/utilities.types";
 
 export class MetadataInsertionWorker {

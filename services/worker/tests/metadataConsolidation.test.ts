@@ -3,7 +3,7 @@ import {
   test,
 } from "bun:test"
 import type { MetadataCompiled } from "comic-metadata-tool"
-import { consolidateComicMetadata } from "../utilities/metadataConsolidation"
+import { consolidateComicMetadata } from "../utilities/metadata/metadataConsolidation"
 
 const makeCompiled = (overrides: Partial<MetadataCompiled>): MetadataCompiled => ({
   archiveType: "zip",
