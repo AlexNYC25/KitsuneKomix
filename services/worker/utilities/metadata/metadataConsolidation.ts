@@ -35,7 +35,7 @@ export const consolidateComicMetadata = (
   metadata: MetadataCompiled,
 ): ConsolidatedComicMetadata => {
   const { comicInfoXml, coMet } = metadata
-  const comicBookInfoPayload = comicBookInfoPayloadOf(metadata)
+  const comicBookInfoPayload: ComicBookInfoPayload | undefined = comicBookInfoPayloadOf(metadata)
 
   return {
     ...resolveIdentifiers(comicInfoXml, coMet, comicBookInfoPayload),
