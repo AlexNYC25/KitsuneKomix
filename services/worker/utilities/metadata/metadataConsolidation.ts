@@ -50,10 +50,17 @@ export const consolidateComicMetadata = (
   }
 }
 
+/**
+ * Checks the compiled metadata for a ComicBookInfo payload and returns it if found.
+ * @param metadata The compiled metadata object returned by `readComicFileMetadata`
+ * @returns The ComicBookInfo payload if found, otherwise undefined
+ */
 const comicBookInfoPayloadOf = (
   metadata: MetadataCompiled,
-): ComicBookInfoPayload | undefined =>
-  metadata.comicbookinfo?.["ComicBookInfo/1.0"]
+): ComicBookInfoPayload | undefined => {
+  // TODO: Check if this is always the same info property name, or if it can be different
+  return metadata.comicbookinfo?.["ComicBookInfo/1.0"]
+}
 
 const resolveIdentifiers = (
   comicInfoXml?: ComicInfo,
