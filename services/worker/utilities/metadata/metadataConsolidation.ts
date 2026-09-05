@@ -34,6 +34,7 @@ import {
 export const consolidateComicMetadata = (
   metadata: MetadataCompiled,
 ): ConsolidatedComicMetadata => {
+  // Extract the relevant metadata sources from the compiled metadata
   const { comicInfoXml, coMet } = metadata
   const comicBookInfoPayload: ComicBookInfoPayload | undefined = comicBookInfoPayloadOf(metadata)
 
