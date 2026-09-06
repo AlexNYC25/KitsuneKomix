@@ -230,6 +230,9 @@ export const updateComicBook = async (
     if (updates.alternateCount !== undefined) {
       updateData.alternateCount = updates.alternateCount;
     }
+    if (updates.alternateVolumeNumber !== undefined) {
+      updateData.alternateVolumeNumber = updates.alternateVolumeNumber;
+    }
     if (updates.pageCount !== undefined) {
       updateData.pageCount = updates.pageCount;
     }
