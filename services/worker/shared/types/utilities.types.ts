@@ -142,3 +142,21 @@ export interface ConsolidatedComicMetadata {
   pages: ConsolidatedPageInfo[]
   tags: string[]
 }
+
+/**
+ * A summary of the entities recorded when persisting a comic book's
+ * consolidated metadata. Each count reflects the number of entities
+ * successfully recorded for that type.
+ */
+export type ComicMetadataInsertionResult = {
+  genres: number
+  publishers: number
+  imprints: number
+  credits: number
+  characters: number
+  teams: number
+  locations: number
+  storyArcs: number
+  seriesGroups: number
+  webLinks: number
+}
