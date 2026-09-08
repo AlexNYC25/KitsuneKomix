@@ -7,7 +7,11 @@ import {
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
 import { workerLogger } from "../../loggers";
 import { consolidateComicMetadata } from "../../utilities/metadata/metadataConsolidation";
-import type { ConsolidatedComicMetadata } from "../../shared/types/utilities.types";
+import { insertComicBookMetadata } from "../../services/comicMetadata.service";
+import type {
+  ComicMetadataInsertionResult,
+  ConsolidatedComicMetadata,
+} from "../../shared/types/utilities.types";
 
 export class MetadataInsertionWorker {
   queue: null | QueueType = null;
@@ -42,16 +46,14 @@ export class MetadataInsertionWorker {
   async processJob(job: QueueJob) {
     const currentPayload = job.payload as MetadataExtractionPayload
 
-    // TODO: Insert the metadata into the database and associate it with the comic book record
-
     try {
       const metadata: MetadataCompiled = currentPayload.metadata
 
       const consolidatedMetadata: ConsolidatedComicMetadata =
         consolidateComicMetadata(metadata)
 
-      // TODO: Insert the consolidated metadata into the database and
-      // associate it with the comic book record
+      const insertionResult: ComicMetadataInsertionResult =
+        await insertComicBookMetadata(currentPayload.comicBookId, consolidatedMetadata)
 
       if (!this.metadataQueue) {
         this.metadataQueue = await getQueue("COMIC_METADATA_AGGREGATION");
@@ -63,8 +65,14 @@ export class MetadataInsertionWorker {
       }
 
       this.metadataQueue.enqueue(nextPayload)
-    } catch {
 
+      workerLogger.info(
+        `Inserted metadata for comic book ${currentPayload.comicBookId}: ${JSON.stringify(insertionResult)}`,
+      )
+    } catch (error) {
+      workerLogger.error(
+        `There was an error inserting metadata for comic book ${currentPayload.comicBookId}: ${error}`,
+      )
     } finally {
       job.ack()
     }
