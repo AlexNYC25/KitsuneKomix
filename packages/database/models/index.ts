@@ -9,6 +9,8 @@ export * from "./comicLibraries.model.ts"
 export * from "./comicBooks.model.ts"
 export * from "./comicSeries.model.ts"
 
+export * from "./comicSeriesAggregates.model.ts"
+
 export * from "./comicGenres.model.ts"
 export * from "./comicPublishers.model.ts"
 export * from "./comicCredits.model.ts"
