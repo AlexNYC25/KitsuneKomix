@@ -160,3 +160,15 @@ export type ComicMetadataInsertionResult = {
   seriesGroups: number
   webLinks: number
 }
+
+/**
+ * A summary of the entities aggregated into a comic series when recording a
+ * comic book's consolidated metadata at the series level. Each count reflects
+ * the number of entities successfully recorded for that type.
+ */
+export type SeriesAggregationResult = {
+  genres: number
+  publishers: number
+  imprints: number
+  seriesGroups: number
+}
