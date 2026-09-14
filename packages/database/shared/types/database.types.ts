@@ -23,6 +23,10 @@ import type {
   comicPublishersTable,
   comicSeriesGenresAggregateTable,
   comicSeriesPublishersAggregateTable,
+  comicSeriesGroupsAggregateTable,
+  comicSeriesCreditsAggregateTable,
+  comicSeriesContentAggregateTable,
+  comicSeriesStoryArcsAggregateTable,
   comicWebLinksTable,
   comicBookIngestionTable,
   comicMetadataCandidatesTable
@@ -96,6 +100,18 @@ export type NewComicSeriesGenreAggregate = InferInsertModel<typeof comicSeriesGe
 
 export type ComicSeriesPublisherAggregate = InferSelectModel<typeof comicSeriesPublishersAggregateTable>;
 export type NewComicSeriesPublisherAggregate = InferInsertModel<typeof comicSeriesPublishersAggregateTable>;
+
+export type ComicSeriesGroupAggregate = InferSelectModel<typeof comicSeriesGroupsAggregateTable>;
+export type NewComicSeriesGroupAggregate = InferInsertModel<typeof comicSeriesGroupsAggregateTable>;
+
+export type ComicSeriesCreditAggregate = InferSelectModel<typeof comicSeriesCreditsAggregateTable>;
+export type NewComicSeriesCreditAggregate = InferInsertModel<typeof comicSeriesCreditsAggregateTable>;
+
+export type ComicSeriesContentAggregate = InferSelectModel<typeof comicSeriesContentAggregateTable>;
+export type NewComicSeriesContentAggregate = InferInsertModel<typeof comicSeriesContentAggregateTable>;
+
+export type ComicSeriesStoryArcAggregate = InferSelectModel<typeof comicSeriesStoryArcsAggregateTable>;
+export type NewComicSeriesStoryArcAggregate = InferInsertModel<typeof comicSeriesStoryArcsAggregateTable>;
 
 export type ComicWebLink = InferSelectModel<typeof comicWebLinksTable>;
 export type NewComicWebLink = InferInsertModel<typeof comicWebLinksTable>;
