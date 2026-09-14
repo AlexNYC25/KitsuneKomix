@@ -43,6 +43,10 @@ export * from "./mapping/comicBookStoryArcs.table.ts";
 
 export * from "./mapping/comicSeriesGroupsAggregate.table.ts";
 
+export * from "./mapping/comicSeriesCreditsAggregate.table.ts";
+export * from "./mapping/comicSeriesContentAggregate.table.ts";
+export * from "./mapping/comicSeriesStoryArcsAggregate.table.ts";
+
 export * from "./tables/comicWebLinks.table.ts";
 
 export * from "./tables/comicBookIngestion.table.ts";
