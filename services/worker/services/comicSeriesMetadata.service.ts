@@ -3,6 +3,12 @@ import {
   linkGenreToSeries,
   insertPublisher,
   linkPublisherToSeries,
+  insertCredit,
+  linkCreditToSeries,
+  insertContent,
+  linkContentToSeries,
+  insertStoryArc,
+  linkStoryArcToSeries,
   insertSeriesGroup,
   linkSeriesGroupToSeries,
 } from "kitsune-komix-database"
@@ -14,8 +20,8 @@ import type {
 
 /**
  * Aggregates a comic book's consolidated metadata into its comic series by
- * recording the entities it contributes (genres, publishers, imprints, series
- * groups) in the series-level aggregate tables.
+ * recording the entities it contributes (genres, publishers, imprints, credits,
+ * content, story arcs, series groups) in the series-level aggregate tables.
  * @param seriesId The ID of the comic series the metadata belongs to
  * @param metadata The consolidated metadata to aggregate into the series
  * @returns A summary of the entities aggregated per type
@@ -28,6 +34,11 @@ export const aggregateComicBookMetadataIntoSeries = async (
     genres: 0,
     publishers: 0,
     imprints: 0,
+    credits: 0,
+    characters: 0,
+    teams: 0,
+    locations: 0,
+    storyArcs: 0,
     seriesGroups: 0,
   }
 
@@ -49,6 +60,52 @@ export const aggregateComicBookMetadataIntoSeries = async (
     const imprintId = await insertPublisher(metadata.imprint, true)
     await linkPublisherToSeries(imprintId, seriesId)
     result.imprints += 1
+  }
+
+  if (metadata.credits.length > 0) {
+    for (const credit of metadata.credits) {
+      const creditId = await insertCredit(credit.person, credit.role)
+      await linkCreditToSeries(creditId, seriesId)
+      result.credits += 1
+    }
+  }
+
+  if (metadata.characters.length > 0) {
+    for (const character of metadata.characters) {
+      const contentId = await insertContent(character, "character")
+      await linkContentToSeries(contentId, seriesId)
+      result.characters += 1
+    }
+  }
+
+  if (metadata.teams.length > 0) {
+    for (const team of metadata.teams) {
+      const contentId = await insertContent(team, "team")
+      await linkContentToSeries(contentId, seriesId)
+      result.teams += 1
+    }
+  }
+
+  if (metadata.locations.length > 0) {
+    for (const location of metadata.locations) {
+      const contentId = await insertContent(location, "location")
+      await linkContentToSeries(contentId, seriesId)
+      result.locations += 1
+    }
+  }
+
+  if (metadata.storyArcs.length > 0) {
+    for (let position = 0; position < metadata.storyArcs.length; position++) {
+      const storyArc = metadata.storyArcs[position]
+
+      if (storyArc === undefined) {
+        continue
+      }
+
+      const storyArcId = await insertStoryArc(storyArc)
+      await linkStoryArcToSeries(storyArcId, seriesId, position)
+      result.storyArcs += 1
+    }
   }
 
   if (metadata.seriesGroups.length > 0) {

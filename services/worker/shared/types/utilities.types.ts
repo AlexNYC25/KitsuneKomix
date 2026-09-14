@@ -170,5 +170,10 @@ export type SeriesAggregationResult = {
   genres: number
   publishers: number
   imprints: number
+  credits: number
+  characters: number
+  teams: number
+  locations: number
+  storyArcs: number
   seriesGroups: number
 }
