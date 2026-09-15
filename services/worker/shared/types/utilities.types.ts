@@ -177,3 +177,25 @@ export type SeriesAggregationResult = {
   storyArcs: number
   seriesGroups: number
 }
+
+/**
+ * A single image in a comic book archive that needs a thumbnail generated.
+ * `imagePath` is the path of the image as stored inside the archive; the
+ * archive itself is located via the comic book's file path.
+ */
+export interface ThumbnailCandidate {
+  comicPageId: number
+  imagePath: string
+}
+
+/**
+ * Payload for the thumbnail generation queue. Holds the list of images that
+ * need thumbnails generated for a comic book. Currently populated with just
+ * the first image alphabetically, but designed as a list so thumbnail-labeled
+ * files found in archives (when metadata exists) can be added later without
+ * reworking the payload.
+ */
+export type PageThumbnailJob = {
+  comicBookId: number
+  candidates: ThumbnailCandidate[]
+}
