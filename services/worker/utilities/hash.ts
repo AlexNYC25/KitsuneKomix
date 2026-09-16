@@ -13,3 +13,14 @@ export const generateHashForFile = async (filePath: string) => {
 
   return fileHash
 }
+
+/**
+ * Generates a hash for in-memory data using Bun native libraries for speed
+ * @param data The bytes to hash
+ * @returns a number | bigint hash value for the data
+ */
+export const generateHashForBuffer = (data: ArrayBuffer) => {
+  const fileHash: number | bigint = Bun.hash(data)
+
+  return fileHash
+}
