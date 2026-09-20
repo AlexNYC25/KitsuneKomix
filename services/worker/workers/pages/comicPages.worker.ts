@@ -5,40 +5,21 @@ import {
   type QueueJob,
   type QueueType
 } from "kitsune-komix-database"
+import { readComicFileMetadata } from "comic-metadata-tool"
 import { workerLogger } from "../../loggers";
 
 import { getArchivesManifest } from "../../utilities/archive";
 import { extractEntry } from "../../utilities/7zz.wraper";
 import { generateHashForBuffer } from "../../utilities/hash";
+import { consolidateComicMetadata } from "../../utilities/metadata/metadataConsolidation";
 
 import type { IngestionToSecondaryPipelinePayload } from "../../shared/types/payload.types";
 import type {
   ArchiveEntry,
+  ConsolidatedPageInfo,
   PageThumbnailJob,
 } from "../../shared/types/utilities.types";
-
-/**
- * Selects which images in the archive need a thumbnail generated.
- *
- * Currently returns only the first image alphabetically. When a metadata
- * object exists in the archive, this can later be expanded to also include
- * files whose stored path is labeled as a thumbnail.
- * @param files The archive's images in alphabetical order
- * @param metadataExists Whether the archive contains a metadata file
- * @returns The candidate image files
- */
-const buildThumbnailCandidates = (
-  files: ArchiveEntry[],
-  metadataExists: boolean,
-): ArchiveEntry[] => {
-  const firstFile = files[0]
-
-  if (!firstFile) {
-    return []
-  }
-
-  return [firstFile]
-}
+import { buildThumbnailCandidates } from "../../utilities/thumbnailCandidates";
 
 export class ComicPagesWorker {
   queue: null | QueueType = null;
@@ -82,7 +63,14 @@ export class ComicPagesWorker {
 
       await deleteComicPagesForBook(currentPayload.comicBookId)
 
-      const candidateFiles = buildThumbnailCandidates(manifest.files, manifest.metadataExists)
+      let metadataPages: ConsolidatedPageInfo[] = []
+
+      if (manifest.metadataExists) {
+        const metadata = await readComicFileMetadata(currentPayload.filePath)
+        metadataPages = consolidateComicMetadata(metadata).pages
+      }
+
+      const candidateFiles = buildThumbnailCandidates(manifest.files, metadataPages)
 
       const thumbnailCandidates: PageThumbnailJob["candidates"] = []
 
