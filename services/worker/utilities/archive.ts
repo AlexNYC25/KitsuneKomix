@@ -4,7 +4,7 @@ import { list } from "./7zz.wraper";
 import { parseListOutput } from "./7zzParser";
 import { generateHashForFile } from "./hash"
 
-const imageFileExtensions = ["jpeg", "png", "webp", "gif", "svg"]
+const imageFileExtensions = ["jpg", "jpeg", "png", "webp", "gif", "svg"]
 
 /**
  * Filters the entries so only pages remain and formats them into ArchiveEntry objects
