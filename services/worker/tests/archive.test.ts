@@ -15,7 +15,7 @@ test("Archive Listing", async () => {
     return
   }
 
-  expect(archiveReturn).toBeDefined()
+  expect(archiveReturn).toBeUndefined()!
   expect(archiveReturn?.archiveSize).toBeGreaterThan(0)
   expect(archiveReturn?.files.length).toBeGreaterThanOrEqual(0)
 })
