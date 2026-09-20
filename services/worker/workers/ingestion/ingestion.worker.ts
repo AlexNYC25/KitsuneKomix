@@ -47,34 +47,37 @@ export class IngestionWorker {
   async processJob(job: QueueJob) {
     const currentPayload: IngestionPayload = job.payload as IngestionPayload
 
-    const file = Bun.file(currentPayload.filePath)
+    try {
+      const file = Bun.file(currentPayload.filePath)
 
-    if (await file.exists()) {
+      if (await file.exists()) {
 
-      const libraryBookBelongsTo: ComicLibrary | null = await getLibraryContainingPath(currentPayload.filePath)
+        const libraryBookBelongsTo: ComicLibrary | null = await getLibraryContainingPath(currentPayload.filePath)
 
-      if (!libraryBookBelongsTo) {
-        workerLogger.error("The file being processed does not belong to a library registered")
-        job.fail("No Library found for the file's path location")
-        return;
+        if (!libraryBookBelongsTo) {
+          workerLogger.error("The file being processed does not belong to a library registered")
+          return;
+        }
+        
+        if(!this.nextQueue) {
+          this.nextQueue = await getQueue("BOOK_RECORD");
+        }
+
+        const nextJobPayload: IngestionToComicBookRecordPayload = {
+          ...currentPayload,
+          libraryId: libraryBookBelongsTo.id
+        }
+
+        this.nextQueue.enqueue(nextJobPayload)
+      } else {
+        // log error that the file no longer exists before we could start processing it
+        workerLogger.error("File no longer exists, did not start processing file.")
       }
-      
-      if(!this.nextQueue) {
-        this.nextQueue = await getQueue("BOOK_RECORD");
-      }
 
-      const nextJobPayload: IngestionToComicBookRecordPayload = {
-        ...currentPayload,
-        libraryId: libraryBookBelongsTo.id
-      }
-
-      this.nextQueue.enqueue(nextJobPayload)
-    } else {
-      // log error that the file no longer exists before we could start processing it
-      workerLogger.error("File no longer exists, did not start processing file.")
+    } catch (error) {
+      workerLogger.error("There was an error processing the ingestion job:" + error)
+    } finally {
+      job.ack()
     }
-
-
-    job.ack()
   }
 }
