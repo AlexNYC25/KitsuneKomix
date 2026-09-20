@@ -70,7 +70,7 @@ export class ComicBookSeriesMappingWorker {
         }
 
         comicSeriesId = await createComicSeries(newSeriesRecordObject)
-        workerLogger.error("Could not find a matching series for the comic book")
+        await addComicBookToSeries(comicSeriesId, currentPayload.comicBookId)
       }
 
       if (currentPayload.metadataFileExists) {
