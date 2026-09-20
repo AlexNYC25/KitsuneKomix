@@ -61,14 +61,14 @@ export class ComicBookRecordWorker {
     // create basic initial record for the comic book table
     const currentPayload: IngestionToComicBookRecordPayload = job.payload as IngestionToComicBookRecordPayload
 
-    // NOTE: Tags values are not currently used
-    const detailsFromFileName: ComicNameParserResult = parseComicNameForDetails(currentPayload.filePath)
-
-    const archiveManifest: ArchiveManifest | undefined = await getArchivesManifest(currentPayload.filePath)
-
-    const metadataFileExists: boolean = archiveManifest?.metadataExists ?? false
-
     try {
+      // NOTE: Tags values are not currently used
+      const detailsFromFileName: ComicNameParserResult = parseComicNameForDetails(currentPayload.filePath)
+
+      const archiveManifest: ArchiveManifest | undefined = await getArchivesManifest(currentPayload.filePath)
+
+      const metadataFileExists: boolean = archiveManifest?.metadataExists ?? false
+
       const newComicBookRecordData: NewComicBook = {
         filePath: currentPayload.filePath,
         libraryId: currentPayload.libraryId,
