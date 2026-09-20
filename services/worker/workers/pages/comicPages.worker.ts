@@ -100,7 +100,7 @@ export class ComicPagesWorker {
         const pageId = await insertComicPage({
           comicBookId: currentPayload.comicBookId,
           filePath: file.path,
-          pageNumber: position,
+          pageNumber: position + 1,
           type: "Story",
           doublePage: 0,
           hash: String(fileHash),
