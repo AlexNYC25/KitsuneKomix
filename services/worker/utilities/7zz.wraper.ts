@@ -7,6 +7,7 @@ import { path7z } from "7zip-bin-full";
  * 
  * @param filePath - the path to the archive
  * @returns - the output of the 7zz call as a string
+ * @throws If 7zz fails to list the archive
  */
 export const list = async (filePath: string): Promise<string> => {
   const processCall = Bun.spawn([
@@ -17,6 +18,13 @@ export const list = async (filePath: string): Promise<string> => {
   ])
 
   const text = await new Response(processCall.stdout).text();
+
+  const exitCode = await processCall.exited
+
+  if (exitCode !== 0) {
+    const stderr = await new Response(processCall.stderr).text()
+    throw new Error(`7zz failed to list archive ${filePath} (exit ${exitCode}): ${stderr}`)
+  }
 
   return text
 }
@@ -32,6 +40,7 @@ export const list = async (filePath: string): Promise<string> => {
  * @param filePath - the path to the archive
  * @param entryPath - the path of the entry within the archive
  * @returns - the entry's bytes as an ArrayBuffer
+ * @throws If 7zz fails to extract the entry
  */
 export const extractEntry = async (filePath: string, entryPath: string): Promise<ArrayBuffer> => {
   const processCall = Bun.spawn([
@@ -43,6 +52,13 @@ export const extractEntry = async (filePath: string, entryPath: string): Promise
   ])
 
   const arrayBuffer = await new Response(processCall.stdout).arrayBuffer();
+
+  const exitCode = await processCall.exited
+
+  if (exitCode !== 0) {
+    const stderr = await new Response(processCall.stderr).text()
+    throw new Error(`7zz failed to extract ${entryPath} from ${filePath} (exit ${exitCode}): ${stderr}`)
+  }
 
   return arrayBuffer
 }
