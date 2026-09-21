@@ -16,3 +16,7 @@ export const getQueue = async (queueName: keyof typeof QueueNames) => {
 
   return q;
 }
+
+export const getTempQueue = async () => {
+  return getQueue("TEMP");
+}
