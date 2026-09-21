@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, expect, test } from "bun:test"
+import { path7z } from "7zip-bin-full"
 
 import { extractEntry } from "../utilities/7zz.wraper"
 import { generateHashForBuffer } from "../utilities/hash"
@@ -12,7 +13,7 @@ beforeAll(async () => {
   await Bun.$`mkdir -p ${testDir}`
   await Bun.write(`${testDir}/${firstEntryPath}`, "first page bytes")
   await Bun.write(`${testDir}/${secondEntryPath}`, "second page bytes")
-  await Bun.$`cd ${testDir} && zip -q test.cbz ${firstEntryPath} ${secondEntryPath}`
+  await Bun.$`${path7z} a -tzip ${archivePath} ${firstEntryPath} ${secondEntryPath}`.cwd(testDir)
 })
 
 afterAll(async () => {
