@@ -12,7 +12,9 @@ app.use("*", honoCors);
 // Request ID middleware — generates a UUID for each request for log correlation
 app.use("*", requestUUID);
 
-
+app.get("/health", (c) => {
+  return c.json({ status: "ok" });
+});
 
 // Error middleware - last to be set
 app.onError(errorLogger);

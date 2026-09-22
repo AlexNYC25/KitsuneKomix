@@ -1,9 +1,11 @@
 import { getClient, getQueueClient, runMigrations } from "kitsune-komix-database";
 
+import api from "./hono/api.ts"
+
 const server = Bun.serve({
   port: 8001,
   routes: {
-    "/": () => new Response('Bun!'),
+    "/*": api.fetch
   }
 });
 
