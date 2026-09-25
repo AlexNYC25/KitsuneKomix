@@ -1,7 +1,6 @@
 import { cors } from "hono/cors";
 
-import { env } from "../../config/env"
-
+import { env } from "kitsune-komix-config"
 
 export const honoCors = cors({
   origin: env.CLIENT_URL,
