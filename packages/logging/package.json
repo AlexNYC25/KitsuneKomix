@@ -1,6 +1,7 @@
 {
   "name": "kitsune-komix-logging",
   "private": true,
+  "main": "./mod.ts",
   "devDependencies": {
     "@types/bun": "latest"
   },
