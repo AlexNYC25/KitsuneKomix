@@ -9,7 +9,7 @@ import {
   type QueueType 
 } from "kitsune-komix-database";
 import type { IngestionToSecondaryPipelinePayload, MetadataExtractionPayload } from "../../shared/types/payload.types";
-import { workerLogger } from "../../loggers";
+import { workerLogger } from "kitsune-komix-logging";
 
 export class MetadataWorker {
   queue: null | QueueType = null;

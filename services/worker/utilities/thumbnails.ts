@@ -1,6 +1,6 @@
 import sharp from "sharp";
 
-import { env } from "../config/env"
+import { env } from "kitsune-komix-config";
 
 /**
  * The target size for generated thumbnails. The largest side of the thumbnail

@@ -4,7 +4,7 @@ import {
   type QueueType 
 } from "kitsune-komix-database"
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
-import { workerLogger } from "../../loggers";
+import { workerLogger } from "kitsune-komix-logging";
 import { consolidateComicMetadata } from "../../utilities/metadata/metadataConsolidation";
 import { aggregateComicBookMetadataIntoSeries } from "../../services/comicSeriesMetadata.service";
 import type {

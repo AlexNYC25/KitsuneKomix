@@ -11,7 +11,7 @@ import {
   type QueueType,
 } from "kitsune-komix-database"
 
-import { workerLogger } from "../../loggers"
+import { workerLogger } from "kitsune-komix-logging"
 import { extractEntry } from "../../utilities/7zz.wraper"
 import {
   createThumbnail,

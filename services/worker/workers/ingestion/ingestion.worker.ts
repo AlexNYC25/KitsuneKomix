@@ -8,7 +8,7 @@ import {
 
 import {
   workerLogger
-} from "../../loggers/index"
+} from "kitsune-komix-logging"
 
 import type {
   IngestionPayload,

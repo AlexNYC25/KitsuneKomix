@@ -6,7 +6,7 @@ import {
   type QueueType
 } from "kitsune-komix-database"
 import { readComicFileMetadata } from "comic-metadata-tool"
-import { workerLogger } from "../../loggers";
+import { workerLogger } from "kitsune-komix-logging";
 
 import { getArchivesManifest } from "../../utilities/archive";
 import { extractEntry } from "../../utilities/7zz.wraper";
