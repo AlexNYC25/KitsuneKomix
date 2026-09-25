@@ -5,6 +5,7 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
+    "kitsune-komix-schemas": "workspace:*",
     "typescript": "^5"
   },
   "dependencies": {
