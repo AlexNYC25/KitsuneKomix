@@ -1,15 +1,3 @@
 # worker
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.3.14. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+The main logic part of the ingestion pipeline, these workers take the files found by the watcher service and preform the appropriate action(s) for each file, passing data to the next worker in the pipeline.
