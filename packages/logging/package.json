@@ -1,0 +1,14 @@
+{
+  "name": "kitsune-komix-logging",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "kitsune-komix-config": "workspace:*",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "pino": "^10.3.1"
+  }
+}
