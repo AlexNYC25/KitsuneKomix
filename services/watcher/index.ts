@@ -1,7 +1,7 @@
 
 import { getAllComicLibraries, type ComicLibrary } from "kitsune-komix-database"
+import { env } from "kitsune-komix-config";
 
-import { env } from "./config/env";
 import { WatchManager } from "./watcher/manager";
 
 const workerWatcher = new WatchManager();
