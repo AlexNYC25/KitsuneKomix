@@ -1,22 +1,11 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { factory, finalMiddlewareApply } from "./factory"
 
-import { honoCors } from "./middleware/cors"
-import { requestUUID } from "./middleware/uuid";
-import { errorLogger } from "./middleware/error"
-
-const app = new OpenAPIHono<{Variables: {requestId: string}}>();
-
-// CORS middleware must be registered BEFORE routes
-app.use("*", honoCors);
-
-// Request ID middleware — generates a UUID for each request for log correlation
-app.use("*", requestUUID);
+const app = factory(true);
 
 app.get("/health", (c) => {
   return c.json({ status: "ok" });
 });
 
-// Error middleware - last to be set
-app.onError(errorLogger);
+finalMiddlewareApply(app);
 
 export default app;
