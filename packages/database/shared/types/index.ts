@@ -133,18 +133,27 @@ export interface RefreshTokenResponse {
 
 export interface RefreshToken {
   id: number;
+  sessionId: number;
   userId: number;
-  tokenId: string;
+  clientId: number;
+  tokenHash: string;
+  familyId: string;
+  replacedByTokenId: string | null;
   expiresAt: string;
-  revoked: number;
+  revokedAt: string | null;
+  lastUsedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateRefreshTokenInput {
   userId: number;
-  tokenId: string;
+  clientId: number;
+  sessionId: number;
+  tokenHash: string;
+  familyId: string;
   expiresAt: string;
+  replacedByTokenId?: string | null;
 }
 
 // ── User-edited fields (simplified — no Zod dependency) ──

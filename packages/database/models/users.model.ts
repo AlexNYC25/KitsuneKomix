@@ -55,11 +55,7 @@ export const getUserById = async (id: number): Promise<User | null> => {
         eq(usersTable.id, id),
       );
 
-    if (!result[0]) {
-			throw new Error("No record returned when fetching setting.");
-		}
-
-    return result.length > 0 ? result[0] : null;
+    return result[0] ?? null;
   } catch (error) {
     dbLogger.error("Error fetching user by ID:" + error);
     throw error;
@@ -86,11 +82,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
         eq(usersTable.email, email),
       );
 
-    if (!result[0]) {
-			throw new Error("No record returned when fetching setting.");
-		}
-
-    return result.length > 0 ? result[0] : null;
+    return result[0] ?? null;
   } catch (error) {
     dbLogger.error("Error fetching user by email:" + error);
     throw error;
@@ -119,11 +111,7 @@ export const getUserByUsername = async (
         eq(usersTable.username, username),
       );
 
-    if (!result[0]) {
-			throw new Error("No record returned when fetching setting.");
-		}
-
-    return result.length > 0 ? result[0] : null;
+    return result[0] ?? null;
   } catch (error) {
     dbLogger.error("Error fetching user by username:" + error);
     throw error;
@@ -173,7 +161,7 @@ export const updateUser = async (
     const updateData: Record<string, unknown> = {};
     if (updates.email !== undefined) updateData.email = updates.email;
     if (updates.password !== undefined) updateData.passwordHash = updates.password;
-    if (updates.admin !== undefined) updateData.admin = updates.admin;
+    if (updates.admin !== undefined) updateData.isAdmin = updates.admin;
 
     const result: { id: number }[] = await db
       .update(usersTable)
@@ -211,6 +199,154 @@ export const deleteUser = async (id: number): Promise<boolean> => {
     return result.length > 0;
   } catch (error) {
     dbLogger.error("Error deleting user:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Records a successful login for a user by stamping the login timestamp and
+ * clearing any failed-attempt counters / lockout state.
+ * @param id The user ID
+ * @returns True if the user was updated, false otherwise
+ */
+export const recordSuccessfulLogin = async (
+  id: number,
+): Promise<boolean> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: { id: number }[] = await db
+      .update(usersTable)
+      .set({
+        lastLoginAt: new Date().toISOString(),
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      })
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
+
+    return result.length > 0;
+  } catch (error) {
+    dbLogger.error("Error recording successful login:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Increments the failed login attempt counter for a user.
+ * @param id The user ID
+ * @returns The new failed-login-attempt count
+ */
+export const recordFailedLoginAttempt = async (id: number): Promise<number> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const current: User | null = await getUserById(id);
+
+    const attempts: number = (current?.failedLoginAttempts ?? 0) + 1;
+
+    await db
+      .update(usersTable)
+      .set({ failedLoginAttempts: attempts })
+      .where(eq(usersTable.id, id));
+
+    return attempts;
+  } catch (error) {
+    dbLogger.error("Error recording failed login attempt:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Resets the failed login attempt counter for a user.
+ * @param id The user ID
+ * @returns True if the user was updated, false otherwise
+ */
+export const resetFailedLoginAttempts = async (id: number): Promise<boolean> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: { id: number }[] = await db
+      .update(usersTable)
+      .set({ failedLoginAttempts: 0 })
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
+
+    return result.length > 0;
+  } catch (error) {
+    dbLogger.error("Error resetting failed login attempts:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Locks a user account until the given timestamp.
+ * @param id The user ID
+ * @param lockedUntil ISO timestamp at which the lock expires
+ * @returns True if the user was updated, false otherwise
+ */
+export const lockUser = async (
+  id: number,
+  lockedUntil: string,
+): Promise<boolean> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: { id: number }[] = await db
+      .update(usersTable)
+      .set({ lockedUntil })
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
+
+    return result.length > 0;
+  } catch (error) {
+    dbLogger.error("Error locking user:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Updates the account status of a user (active | disabled | locked).
+ * @param id The user ID
+ * @param status The new account status
+ * @returns True if the user was updated, false otherwise
+ */
+export const setUserStatus = async (
+  id: number,
+  status: string,
+): Promise<boolean> => {
+  const db = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: { id: number }[] = await db
+      .update(usersTable)
+      .set({ status })
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
+
+    return result.length > 0;
+  } catch (error) {
+    dbLogger.error("Error updating user status:" + error);
     throw error;
   }
 };

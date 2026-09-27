@@ -1,4 +1,4 @@
-import { and, eq, gte, lt } from "drizzle-orm";
+import { and, eq, gte, isNull, lt } from "drizzle-orm";
 
 import { getClient } from "../drizzle/client.ts";
 import { refreshTokensTable } from "../schemas/index.ts";
@@ -32,12 +32,35 @@ export async function storeRefreshToken(
 }
 
 /**
- * Retrieves a valid (non-revoked, non-expired) refresh token by token ID
- * @param tokenId The token ID to search for
+ * Retrieves a refresh token by its hash regardless of state
+ * @param tokenHash The SHA-256 hash of the refresh token
+ * @returns The RefreshToken object or null if not found
+ */
+export async function getRefreshTokenByHash(
+  tokenHash: string,
+): Promise<RefreshToken | null> {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  const result: RefreshToken[] = await db
+    .select()
+    .from(refreshTokensTable)
+    .where(eq(refreshTokensTable.tokenHash, tokenHash))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+/**
+ * Retrieves a valid (non-revoked, non-expired) refresh token by its hash
+ * @param tokenHash The SHA-256 hash of the refresh token
  * @returns The valid RefreshToken object or null if not found
  */
-export async function getValidRefreshToken(
-  tokenId: string,
+export async function getValidRefreshTokenByHash(
+  tokenHash: string,
 ): Promise<RefreshToken | null> {
   const db: DrizzleType = await getClient();
   const currentTime: string = new Date().toISOString();
@@ -51,26 +74,24 @@ export async function getValidRefreshToken(
     .from(refreshTokensTable)
     .where(
       and(
-        eq(refreshTokensTable.tokenId, tokenId),
-        eq(refreshTokensTable.revoked, 0),
+        eq(refreshTokensTable.tokenHash, tokenHash),
+        isNull(refreshTokensTable.revokedAt),
         gte(refreshTokensTable.expiresAt, currentTime),
       ),
     )
     .limit(1);
 
-  if (!result[0]) {
-    return null;
-  }
-
-  return result.length > 0 ? result[0] : null;
+  return result[0] ?? null;
 }
 
 /**
- * Revokes a refresh token by setting revoked = 1
- * @param tokenId The token ID to revoke
+ * Revokes a refresh token by setting its revoked timestamp
+ * @param tokenHash The SHA-256 hash of the token to revoke
  * @returns True if a token was revoked, false otherwise
  */
-export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
+export async function revokeRefreshTokenByHash(
+  tokenHash: string,
+): Promise<boolean> {
   const db: DrizzleType = await getClient();
 
   if (!db) {
@@ -80,17 +101,46 @@ export async function revokeRefreshToken(tokenId: string): Promise<boolean> {
   const result: { id: number }[] = await db
     .update(refreshTokensTable)
     .set({
-      revoked: 1,
+      revokedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
-    .where(eq(refreshTokensTable.tokenId, tokenId))
+    .where(eq(refreshTokensTable.tokenHash, tokenHash))
     .returning({ id: refreshTokensTable.id });
 
   return result.length > 0;
 }
 
 /**
- * Revokes all refresh tokens for a specific user (useful for logout all devices)
+ * Revokes every token in a refresh token family. Used when a revoked token is
+ * presented for rotation (token reuse detection) or to sign out a device fully.
+ * @param familyId The family ID shared by a rotation chain
+ * @returns The number of tokens revoked
+ */
+export async function revokeRefreshTokenFamily(
+  familyId: string,
+): Promise<number> {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  const result: { id: number }[] = await db
+    .update(refreshTokensTable)
+    .set({
+      revokedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+    .where(
+      and(eq(refreshTokensTable.familyId, familyId), isNull(refreshTokensTable.revokedAt)),
+    )
+    .returning({ id: refreshTokensTable.id });
+
+  return result.length;
+}
+
+/**
+ * Revokes all active refresh tokens for a specific user (logout all devices)
  * @param userId The user ID whose tokens should be revoked
  * @returns The number of tokens revoked
  */
@@ -106,17 +156,70 @@ export async function revokeAllUserRefreshTokens(
   const result: { id: number }[] = await db
     .update(refreshTokensTable)
     .set({
-      revoked: 1,
+      revokedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
-    .where(eq(refreshTokensTable.userId, userId))
+    .where(
+      and(eq(refreshTokensTable.userId, userId), isNull(refreshTokensTable.revokedAt)),
+    )
     .returning({ id: refreshTokensTable.id });
 
   return result.length;
 }
 
 /**
- * Cleanup expired refresh tokens from the database
+ * Revokes all active refresh tokens belonging to a session
+ * @param sessionId The session ID whose tokens should be revoked
+ * @returns The number of tokens revoked
+ */
+export async function revokeAllSessionRefreshTokens(
+  sessionId: number,
+): Promise<number> {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  const result: { id: number }[] = await db
+    .update(refreshTokensTable)
+    .set({
+      revokedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+    .where(
+      and(eq(refreshTokensTable.sessionId, sessionId), isNull(refreshTokensTable.revokedAt)),
+    )
+    .returning({ id: refreshTokensTable.id });
+
+  return result.length;
+}
+
+/**
+ * Marks a refresh token as used (bumps last_used_at)
+ * @param tokenHash The SHA-256 hash of the refresh token
+ * @returns True if the token was updated, false otherwise
+ */
+export async function touchRefreshToken(
+  tokenHash: string,
+): Promise<boolean> {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  const result: { id: number }[] = await db
+    .update(refreshTokensTable)
+    .set({ lastUsedAt: new Date().toISOString() })
+    .where(eq(refreshTokensTable.tokenHash, tokenHash))
+    .returning({ id: refreshTokensTable.id });
+
+  return result.length > 0;
+}
+
+/**
+ * Cleanup expired or revoked refresh tokens from the database
  * @returns The number of tokens deleted
  */
 export async function cleanupExpiredTokens(): Promise<number> {
@@ -129,12 +232,7 @@ export async function cleanupExpiredTokens(): Promise<number> {
 
   const result: { id: number }[] = await db
     .delete(refreshTokensTable)
-    .where(
-      and(
-        eq(refreshTokensTable.revoked, 0),
-        lt(refreshTokensTable.expiresAt, currentTime),
-      ),
-    )
+    .where(lt(refreshTokensTable.expiresAt, currentTime))
     .returning({ id: refreshTokensTable.id });
 
   return result.length;
@@ -161,7 +259,7 @@ export async function getUserActiveRefreshTokens(
     .where(
       and(
         eq(refreshTokensTable.userId, userId),
-        eq(refreshTokensTable.revoked, 0),
+        isNull(refreshTokensTable.revokedAt),
         gte(refreshTokensTable.expiresAt, currentTime),
       ),
     );

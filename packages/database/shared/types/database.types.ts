@@ -2,7 +2,10 @@ import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type {
   appSettingsTable,
   usersTable,
+  oauthClientsTable,
+  sessionsTable,
   refreshTokensTable,
+  apiKeysTable,
   comicLibrariesTable,
   userComicLibrariesTable,
   comicSeriesTable,
@@ -38,8 +41,17 @@ export type NewAppSetting = InferInsertModel<typeof appSettingsTable>;
 export type User = typeof usersTable.$inferSelect;
 export type NewUser = InferInsertModel<typeof usersTable>;
 
+export type OauthClient = InferSelectModel<typeof oauthClientsTable>;
+export type NewOauthClient = InferInsertModel<typeof oauthClientsTable>;
+
+export type Session = InferSelectModel<typeof sessionsTable>;
+export type NewSession = InferInsertModel<typeof sessionsTable>;
+
 export type RefreshToken = InferSelectModel<typeof refreshTokensTable>;
 export type NewRefreshToken = InferInsertModel<typeof refreshTokensTable>;
+
+export type ApiKey = InferSelectModel<typeof apiKeysTable>;
+export type NewApiKey = InferInsertModel<typeof apiKeysTable>;
 
 export type ComicLibrary = InferSelectModel<typeof comicLibrariesTable>;
 export type NewComicLibrary = InferInsertModel<typeof comicLibrariesTable>;

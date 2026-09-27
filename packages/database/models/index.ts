@@ -3,7 +3,11 @@ export * from "./admin.model.ts"
 export * from "./appSettings.model.ts"
 
 export * from "./users.model.ts"
+export * from "./oauthClients.model.ts"
+export * from "./sessions.model.ts"
 export * from "./refreshTokens.model.ts"
+export * from "./apiKeys.model.ts"
+export * from "./authCleanup.model.ts"
 
 export * from "./comicLibraries.model.ts"
 export * from "./comicBooks.model.ts"
