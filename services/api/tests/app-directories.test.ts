@@ -1,7 +1,9 @@
 import { expect, test } from "bun:test"
 import { stat, mkdir } from "node:fs/promises"
 
-import { env } from "../config/env.ts"
+import { envSchema } from "kitsune-komix-schemas";
+
+const env = envSchema.parse(process.env);
 
 test("API can access app directories", async () => {
   try {
