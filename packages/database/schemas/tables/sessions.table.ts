@@ -3,33 +3,29 @@ import { sql } from "drizzle-orm/sql";
 
 import { usersTable } from "./users.table.ts";
 import { oauthClientsTable } from "./oauthClients.table.ts";
-import { sessionsTable } from "./sessions.table.ts";
 
-export const refreshTokensTable = snakeCase.table(
-  "refresh_tokens",
+export const sessionsTable = snakeCase.table(
+  "sessions",
   {
     id: int().primaryKey({ autoIncrement: true }),
-    sessionId: int().notNull().references(() => sessionsTable.id, {
-      onDelete: "cascade",
-    }),
+    sessionId: text().notNull().unique(),
     userId: int().notNull().references(() => usersTable.id, {
       onDelete: "cascade",
     }),
     clientId: int().notNull().references(() => oauthClientsTable.id, {
       onDelete: "cascade",
     }),
-    tokenHash: text().notNull().unique(),
-    familyId: text().notNull(),
-    replacedByTokenId: text(),
-    expiresAt: text().notNull(),
-    revokedAt: text(),
-    lastUsedAt: text(),
+    deviceName: text(),
+    userAgent: text(),
+    ipAddress: text(),
+    status: text().notNull().default("active"),
+    lastActivityAt: text(),
+    expiresAt: text(),
     createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
-    index("refresh_tokens_user_id_idx").on(table.userId),
-    index("refresh_tokens_session_id_idx").on(table.sessionId),
-    index("refresh_tokens_expires_at_idx").on(table.expiresAt),
+    index("sessions_user_id_idx").on(table.userId),
+    index("sessions_client_id_idx").on(table.clientId),
   ],
 );

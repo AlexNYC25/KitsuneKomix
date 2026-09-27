@@ -1,7 +1,10 @@
 export * from "./tables/appSettings.table.ts";
 
 export * from "./tables/users.table.ts";
+export * from "./tables/oauthClients.table.ts";
+export * from "./tables/sessions.table.ts";
 export * from "./tables/refreshTokens.table.ts";
+export * from "./tables/apiKeys.table.ts";
 
 export * from "./tables/comicLibraries.table.ts";
 
