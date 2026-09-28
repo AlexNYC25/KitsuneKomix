@@ -18,6 +18,15 @@ export const envSchema = z.object({
 
   PAGE_SIZE: z.number().default(20),
 
-  LIBRARY_SCAN_INTERVAL: z.number().default(3_000)
+  LIBRARY_SCAN_INTERVAL: z.number().default(3_000),
 
+  JWT_SECRET: z.string().default("dev-insecure-jwt-secret-change-me"),
+  JWT_REFRESH_SECRET: z.string().default("dev-insecure-jwt-refresh-secret-change-me"),
+  ACCESS_TOKEN_TTL_MINUTES: z.coerce.number().default(60),
+  REFRESH_TOKEN_TTL_DAYS: z.coerce.number().default(30),
+  AUTH_CLEANUP_INTERVAL_MS: z.coerce.number().default(3_600_000),
+
+  ADMIN_USERNAME: z.string().optional(),
+  ADMIN_EMAIL: z.string().optional(),
+  ADMIN_PASSWORD: z.string().optional(),
 })
