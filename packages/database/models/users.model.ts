@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
@@ -114,6 +114,32 @@ export const getUserByUsername = async (
     return result[0] ?? null;
   } catch (error) {
     dbLogger.error("Error fetching user by username:" + error);
+    throw error;
+  }
+};
+
+/**
+ * Checks whether at least one admin user exists in the database.
+ * Used to gate the initial-admin registration workflow (the first user
+ * registered while no admin exists is promoted to admin).
+ * @returns True if at least one admin user exists, false otherwise
+ */
+export const hasAdminUser = async (): Promise<boolean> => {
+  const db: DrizzleType = await getClient();
+
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
+
+  try {
+    const result: { count: number }[] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(usersTable)
+      .where(eq(usersTable.isAdmin, true));
+
+    return (result[0]?.count ?? 0) > 0;
+  } catch (error) {
+    dbLogger.error("Error checking for admin users:" + error);
     throw error;
   }
 };
