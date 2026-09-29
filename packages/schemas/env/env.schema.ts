@@ -6,6 +6,9 @@ export const envSchema = z.object({
   HOST: z.string().default("0.0.0.0"),
   CLIENT_URL: z.url().default("http://localhost:5173"), // Maybe replace with just the port and always use localhost
 
+  BETTER_AUTH_SECRET: z.string().default("dev-insecure-better-auth-secret-change-me"),
+  BETTER_AUTH_URL: z.url().default("http://localhost:8001"),
+
   COMICS_DIRECTORY: z.string().default("/app/data/comics"),
   APP_CACHE_PATH: z.string().default("/app/data/cache"),
   CONFIG_DIRECTORY: z.string().default("/app/data/config"),
