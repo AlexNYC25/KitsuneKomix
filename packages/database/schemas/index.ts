@@ -6,6 +6,11 @@ export * from "./tables/sessions.table.ts";
 export * from "./tables/refreshTokens.table.ts";
 export * from "./tables/apiKeys.table.ts";
 
+export * from "./tables/betterAuthUser.table.ts";
+export * from "./tables/betterAuthSession.table.ts";
+export * from "./tables/betterAuthAccount.table.ts";
+export * from "./tables/betterAuthVerification.table.ts";
+
 export * from "./tables/comicLibraries.table.ts";
 
 export * from "./mapping/usersComicLibraries.table.ts";

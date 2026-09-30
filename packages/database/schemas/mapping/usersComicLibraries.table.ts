@@ -1,12 +1,12 @@
 import { int, snakeCase, text } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm/sql";
 
-import { usersTable } from "../tables/users.table.ts";
+import { userTable } from "../tables/betterAuthUser.table.ts";
 import { comicLibrariesTable } from "../tables/comicLibraries.table.ts";
 
 export const userComicLibrariesTable = snakeCase.table("user_comic_libraries", {
   id: int().primaryKey({ autoIncrement: true }),
-  userId: int().notNull().references(() => usersTable.id, {
+  userId: int().notNull().references(() => userTable.id, {
     onDelete: "cascade",
   }),
   libraryId: int().notNull().references(() => comicLibrariesTable.id, {
