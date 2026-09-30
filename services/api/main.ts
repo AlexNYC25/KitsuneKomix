@@ -1,4 +1,4 @@
-import { env, getClient, getQueueClient, pruneExpiredAuthData, runMigrations, runSeed } from "kitsune-komix-database";
+import { getClient, getQueueClient, runMigrations, runSeed } from "kitsune-komix-database";
 
 import api from "./hono/api.ts"
 
@@ -21,17 +21,6 @@ await runMigrations()
 
 await runSeed()
 
-const dbClient = await getClient();
-
-// Prune expired/revoked auth records on startup and then on an interval
-await pruneExpiredAuthData().catch((error: unknown) => {
-  console.error("Initial auth data prune failed:", error);
-});
-
-setInterval(() => {
-  pruneExpiredAuthData().catch((error: unknown) => {
-    console.error("Scheduled auth data prune failed:", error);
-  });
-}, env.AUTH_CLEANUP_INTERVAL_MS).unref();
+await getClient()
 
 console.log(`Listening on ${server.url}`);
