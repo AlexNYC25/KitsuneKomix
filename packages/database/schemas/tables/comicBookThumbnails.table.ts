@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm/sql";
 
 import { comicBooksTable } from "./comicBooks.table.ts";
 import { comicBookCoversTable } from "./comicBookCovers.table.ts";
-import { usersTable } from "./users.table.ts";
+import { userTable } from "./betterAuthUser.table.ts";
 
 export const comicBookThumbnailsTable = snakeCase.table("comic_book_thumbnails", {
   id: int().primaryKey({ autoIncrement: true }),
@@ -17,7 +17,7 @@ export const comicBookThumbnailsTable = snakeCase.table("comic_book_thumbnails",
   thumbnailType: text().notNull().default("generated"), // "generated" or "custom"
   name: text(), // Optional name for custom thumbnails
   description: text(), // Optional description for custom thumbnails
-  uploadedBy: int().references(() => usersTable.id, {
+  uploadedBy: int().references(() => userTable.id, {
     onDelete: "set null",
   }), // User who uploaded custom thumbnail
   createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),

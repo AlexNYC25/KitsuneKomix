@@ -6,14 +6,14 @@ import { dbLogger } from "../loggers/index.ts";
 import {
   comicLibrariesTable,
   userComicLibrariesTable,
-  usersTable
+  userTable
 } from "../schemas/index.ts"
 
 import type {
+  AuthUser,
   ComicLibrary,
   LibraryRegistrationInput,
   LibraryUpdateInput,
-  User,
 } from "../shared/types/index.ts"
 
 /**
@@ -430,11 +430,11 @@ export const unassignLibraryFromUser = async (
  * Note: This does not count admins
  * 
  * @param libraryId - ID of the comic library
- * @returns Array of users (type User[]) assigned to the library
+ * @returns Array of users (type AuthUser[]) assigned to the library
  * 
  * TODO: Verify
  */
-export const getUsersAssignedToLibrary = async (libraryId: number): Promise<User[]> => {
+export const getUsersAssignedToLibrary = async (libraryId: number): Promise<AuthUser[]> => {
   const db = await getClient();
 
   if (!db) {
@@ -442,19 +442,19 @@ export const getUsersAssignedToLibrary = async (libraryId: number): Promise<User
   }
 
   try {
-    const result: { user: User }[] = await db
+    const result: { user: AuthUser }[] = await db
       .select(
-        { user: usersTable },
+        { user: userTable },
       )
-      .from(usersTable)
+      .from(userTable)
       .innerJoin(
         userComicLibrariesTable,
-        eq(usersTable.id, userComicLibrariesTable.userId),
+        eq(userTable.id, userComicLibrariesTable.userId),
       )
       .where(eq(userComicLibrariesTable.libraryId, libraryId))
-      .groupBy(usersTable.id);
+      .groupBy(userTable.id);
 
-    const users: User[] = result.map((row) => row.user);
+    const users: AuthUser[] = result.map((row) => row.user);
 
     return users;
   } catch (error) {

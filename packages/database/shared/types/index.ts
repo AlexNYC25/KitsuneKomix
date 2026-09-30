@@ -120,49 +120,6 @@ export type BatchMetadataResult = {
 export type BatchComicBookHistory = Record<number, import("./database.types.ts").ComicBookHistory>;
 export type BatchComicBookThumbnails = Record<number, import("./database.types.ts").ComicBookThumbnail[]>;
 
-// ── Auth / Token types (plain interfaces) ──
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface RefreshTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface RefreshToken {
-  id: number;
-  sessionId: number;
-  userId: number;
-  clientId: number;
-  tokenHash: string;
-  familyId: string;
-  replacedByTokenId: string | null;
-  expiresAt: string;
-  revokedAt: string | null;
-  lastUsedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateRefreshTokenInput {
-  userId: number;
-  clientId: number;
-  sessionId: number;
-  tokenHash: string;
-  familyId: string;
-  expiresAt: string;
-  replacedByTokenId?: string | null;
-}
-
-// ── User-edited fields (simplified — no Zod dependency) ──
-export type UserEditInput = {
-  email?: string;
-  password?: string;
-  admin?: boolean;
-};
-
 // ── Library input types (simplified — no Zod dependency) ──
 export type LibraryRegistrationInput = {
   name: string;

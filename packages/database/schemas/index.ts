@@ -1,11 +1,5 @@
 export * from "./tables/appSettings.table.ts";
 
-export * from "./tables/users.table.ts";
-export * from "./tables/oauthClients.table.ts";
-export * from "./tables/sessions.table.ts";
-export * from "./tables/refreshTokens.table.ts";
-export * from "./tables/apiKeys.table.ts";
-
 export * from "./tables/betterAuthUser.table.ts";
 export * from "./tables/betterAuthSession.table.ts";
 export * from "./tables/betterAuthAccount.table.ts";
