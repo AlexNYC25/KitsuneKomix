@@ -1,83 +1,86 @@
-import { 
-  getQueue,
-  getLibraryContainingPath,
-  type QueueJob, 
-  type QueueType, 
-  type ComicLibrary
-} from "kitsune-komix-database"
-
 import {
-  workerLogger
-} from "kitsune-komix-logging"
+	getQueue,
+	getLibraryContainingPath,
+	type QueueJob,
+	type QueueType,
+	type ComicLibrary,
+} from "kitsune-komix-database";
+
+import { workerLogger } from "kitsune-komix-logging";
 
 import type {
-  IngestionPayload,
-  IngestionToComicBookRecordPayload
-} from "../../shared/types/payload.types"
+	IngestionPayload,
+	IngestionToComicBookRecordPayload,
+} from "../../shared/types/payload.types";
 
 export class IngestionWorker {
-  queue: null | QueueType = null;
-  nextQueue: null | QueueType = null;
+	queue: null | QueueType = null;
+	nextQueue: null | QueueType = null;
 
-  async dequeue() {
-    if (!this.queue) {
-      this.queue = await getQueue("INGESTION_DISCOVERY");
-    }
+	async dequeue() {
+		if (!this.queue) {
+			this.queue = await getQueue("INGESTION_DISCOVERY");
+		}
 
-    const job: QueueJob | null = this.queue.claimOne("ingestion_worker");
+		const job: QueueJob | null = this.queue.claimOne("ingestion_worker");
 
-    return job;
-  }
-    
-  async start() {
-    workerLogger.info("ingestion worker has started")
-    while (true) {
-      const job: QueueJob | null = await this.dequeue();
+		return job;
+	}
 
-      if (!job) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+	async start() {
+		workerLogger.info("ingestion worker has started");
+		while (true) {
+			const job: QueueJob | null = await this.dequeue();
 
-        continue;
-      }
+			if (!job) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      await this.processJob(job);
-    }
-  }
+				continue;
+			}
 
-  async processJob(job: QueueJob) {
-    const currentPayload: IngestionPayload = job.payload as IngestionPayload
+			await this.processJob(job);
+		}
+	}
 
-    try {
-      const file = Bun.file(currentPayload.filePath)
+	async processJob(job: QueueJob) {
+		const currentPayload: IngestionPayload = job.payload as IngestionPayload;
 
-      if (await file.exists()) {
+		try {
+			const file = Bun.file(currentPayload.filePath);
 
-        const libraryBookBelongsTo: ComicLibrary | null = await getLibraryContainingPath(currentPayload.filePath)
+			if (await file.exists()) {
+				const libraryBookBelongsTo: ComicLibrary | null =
+					await getLibraryContainingPath(currentPayload.filePath);
 
-        if (!libraryBookBelongsTo) {
-          workerLogger.error("The file being processed does not belong to a library registered")
-          return;
-        }
-        
-        if(!this.nextQueue) {
-          this.nextQueue = await getQueue("BOOK_RECORD");
-        }
+				if (!libraryBookBelongsTo) {
+					workerLogger.error(
+						"The file being processed does not belong to a library registered",
+					);
+					return;
+				}
 
-        const nextJobPayload: IngestionToComicBookRecordPayload = {
-          ...currentPayload,
-          libraryId: libraryBookBelongsTo.id
-        }
+				if (!this.nextQueue) {
+					this.nextQueue = await getQueue("BOOK_RECORD");
+				}
 
-        this.nextQueue.enqueue(nextJobPayload)
-      } else {
-        // log error that the file no longer exists before we could start processing it
-        workerLogger.error("File no longer exists, did not start processing file.")
-      }
+				const nextJobPayload: IngestionToComicBookRecordPayload = {
+					...currentPayload,
+					libraryId: libraryBookBelongsTo.id,
+				};
 
-    } catch (error) {
-      workerLogger.error("There was an error processing the ingestion job:" + error)
-    } finally {
-      job.ack()
-    }
-  }
+				this.nextQueue.enqueue(nextJobPayload);
+			} else {
+				// log error that the file no longer exists before we could start processing it
+				workerLogger.error(
+					"File no longer exists, did not start processing file.",
+				);
+			}
+		} catch (error) {
+			workerLogger.error(
+				"There was an error processing the ingestion job:" + error,
+			);
+		} finally {
+			job.ack();
+		}
+	}
 }

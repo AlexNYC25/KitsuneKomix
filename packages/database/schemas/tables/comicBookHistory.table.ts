@@ -5,15 +5,19 @@ import { comicBooksTable } from "./comicBooks.table.ts";
 import { userTable } from "./betterAuthUser.table.ts";
 
 export const comicBookHistoryTable = snakeCase.table("comic_book_history", {
-  id: int().primaryKey({ autoIncrement: true }),
-  userId: int().notNull().references(() => userTable.id, {
-    onDelete: "cascade",
-  }),
-  comicBookId: int().notNull().references(() => comicBooksTable.id, {
-    onDelete: "cascade",
-  }),
-  read: int({mode: "boolean"}).notNull().default(false),
-  lastReadPage: int().default(0),
-  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	id: int().primaryKey({ autoIncrement: true }),
+	userId: int()
+		.notNull()
+		.references(() => userTable.id, {
+			onDelete: "cascade",
+		}),
+	comicBookId: int()
+		.notNull()
+		.references(() => comicBooksTable.id, {
+			onDelete: "cascade",
+		}),
+	read: int({ mode: "boolean" }).notNull().default(false),
+	lastReadPage: int().default(0),
+	createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });

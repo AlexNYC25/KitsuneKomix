@@ -4,148 +4,146 @@ import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
 
 import {
-  comicLibrariesTable,
-  userComicLibrariesTable,
-  userTable
-} from "../schemas/index.ts"
+	comicLibrariesTable,
+	userComicLibrariesTable,
+	userTable,
+} from "../schemas/index.ts";
 
 import type {
-  AuthUser,
-  ComicLibrary,
-  LibraryRegistrationInput,
-  LibraryUpdateInput,
-} from "../shared/types/index.ts"
+	AuthUser,
+	ComicLibrary,
+	LibraryRegistrationInput,
+	LibraryUpdateInput,
+} from "../shared/types/index.ts";
 
 /**
  * Creates a new comic library in the database
  * @param library The library registration input with name, path, and optional description
  * @returns The ID of the newly created comic library
- * 
+ *
  * TODO: Verify
  */
 export const createComicLibrary = async (
-  library: LibraryRegistrationInput,
+	library: LibraryRegistrationInput,
 ): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicLibrariesTable)
-      .values({
-        name: library.name,
-        path: library.path,
-        description: library.description ?? null
-      })
-      .returning({ id: comicLibrariesTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicLibrariesTable)
+			.values({
+				name: library.name,
+				path: library.path,
+				description: library.description ?? null,
+			})
+			.returning({ id: comicLibrariesTable.id });
 
-    if (!result[0]) {
-      throw new Error("No record returned when creating comic library.");
-    }
+		if (!result[0]) {
+			throw new Error("No record returned when creating comic library.");
+		}
 
-    return result[0].id;
-  } catch (error) {
-    dbLogger.error("Error creating comic library:" + error);
-    throw error;
-  }
+		return result[0].id;
+	} catch (error) {
+		dbLogger.error("Error creating comic library:" + error);
+		throw error;
+	}
 };
 
 /**
  * Retrieves all comic libraries from the database
  * @returns An array of all ComicLibrary objects
- * 
+ *
  */
 export const getAllComicLibraries = async (): Promise<ComicLibrary[]> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: ComicLibrary[] = await db.select().from(comicLibrariesTable);
-    return result;
-  } catch (error) {
-    dbLogger.error("Error fetching comic libraries:" + error);
-    throw error;
-  }
+	try {
+		const result: ComicLibrary[] = await db.select().from(comicLibrariesTable);
+		return result;
+	} catch (error) {
+		dbLogger.error("Error fetching comic libraries:" + error);
+		throw error;
+	}
 };
 
 /**
  * Retrieves a specific comic library by its ID
  * @param id The ID of the comic library to retrieve
  * @returns The ComicLibrary object if found, null otherwise
- * 
+ *
  * TODO: Verify
  */
 export const getComicLibraryById = async (
-  id: number,
+	id: number,
 ): Promise<ComicLibrary | null> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: ComicLibrary[] = await db
-      .select()
-      .from(comicLibrariesTable)
-      .where(
-        eq(comicLibrariesTable.id, id),
-      );
+	try {
+		const result: ComicLibrary[] = await db
+			.select()
+			.from(comicLibrariesTable)
+			.where(eq(comicLibrariesTable.id, id));
 
-    if (result.length === 0) return null;
+		if (result.length === 0) return null;
 
-    if (!result[0]) {
-      throw new Error("No record returned when fetching comic library by ID.");
-    }
+		if (!result[0]) {
+			throw new Error("No record returned when fetching comic library by ID.");
+		}
 
-    return result[0];
-  } catch (error) {
-    dbLogger.error("Error fetching comic library by ID:" + error);
-    throw error;
-  }
+		return result[0];
+	} catch (error) {
+		dbLogger.error("Error fetching comic library by ID:" + error);
+		throw error;
+	}
 };
 
 /**
  * Retrieves a comic library by its file system path
  * @param path The file system path to search for
  * @returns The ComicLibrary object if found, null otherwise
- * 
+ *
  * TODO: Verify
  */
 export const getComicLibraryByPath = async (
-  path: string,
+	path: string,
 ): Promise<ComicLibrary | null> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: ComicLibrary[] = await db
-      .select()
-      .from(comicLibrariesTable)
-      .where(
-        eq(comicLibrariesTable.path, path),
-      );
+	try {
+		const result: ComicLibrary[] = await db
+			.select()
+			.from(comicLibrariesTable)
+			.where(eq(comicLibrariesTable.path, path));
 
-    if (result.length === 0) return null;
+		if (result.length === 0) return null;
 
-    if (!result[0]) {
-      throw new Error("No record returned when fetching comic library by path.");
-    }
+		if (!result[0]) {
+			throw new Error(
+				"No record returned when fetching comic library by path.",
+			);
+		}
 
-    return result[0];
-  } catch (error) {
-    dbLogger.error("Error fetching comic library by path:" + error);
-    throw error;
-  }
+		return result[0];
+	} catch (error) {
+		dbLogger.error("Error fetching comic library by path:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -153,105 +151,105 @@ export const getComicLibraryByPath = async (
  * Searches through enabled libraries and returns the one whose path is a parent directory of the file path
  * @param filePath The file path to search for
  * @returns The ComicLibrary object containing the path, null if no library contains it
- * 
+ *
  * TODO: Verify
  */
 export const getLibraryContainingPath = async (
-  filePath: string,
+	filePath: string,
 ): Promise<ComicLibrary | null> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    // Get all enabled libraries
-    const libraries: ComicLibrary[] = await db
-      .select()
-      .from(comicLibrariesTable)
-      .where(
-        eq(comicLibrariesTable.enabled, true),
-      );
+	try {
+		// Get all enabled libraries
+		const libraries: ComicLibrary[] = await db
+			.select()
+			.from(comicLibrariesTable)
+			.where(eq(comicLibrariesTable.enabled, true));
 
-    // Find the library whose path is a parent of the file path
-    for (const library of libraries) {
-      // Normalize paths by ensuring they end with / for proper comparison
-      const libraryPath: string = library.path.endsWith("/")
-        ? library.path
-        : library.path + "/";
-      const normalizedFilePath: string = filePath.endsWith("/")
-        ? filePath
-        : filePath + "/";
+		// Find the library whose path is a parent of the file path
+		for (const library of libraries) {
+			// Normalize paths by ensuring they end with / for proper comparison
+			const libraryPath: string = library.path.endsWith("/")
+				? library.path
+				: library.path + "/";
+			const normalizedFilePath: string = filePath.endsWith("/")
+				? filePath
+				: filePath + "/";
 
-      if (normalizedFilePath.startsWith(libraryPath)) {
-        return library;
-      }
-    }
+			if (normalizedFilePath.startsWith(libraryPath)) {
+				return library;
+			}
+		}
 
-    return null;
-  } catch (error) {
-    dbLogger.error("Error finding library containing path:" + error);
-    throw error;
-  }
+		return null;
+	} catch (error) {
+		dbLogger.error("Error finding library containing path:" + error);
+		throw error;
+	}
 };
 
 /**
  * Retrieves the last changed timestamp of a comic library
  * @param id The ID of the comic library
  * @returns The timestamp string of when the library was last changed, null if not found
- * 
+ *
  * TODO: Verify
  */
 export const getComicLibraryLastChangedTime = async (
-  id: number,
+	id: number,
 ): Promise<string | null> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { updatedAt: string }[] = await db
-      .select({ updatedAt: comicLibrariesTable.updatedAt })
-      .from(comicLibrariesTable)
-      .where(eq(comicLibrariesTable.id, id));
+	try {
+		const result: { updatedAt: string }[] = await db
+			.select({ updatedAt: comicLibrariesTable.updatedAt })
+			.from(comicLibrariesTable)
+			.where(eq(comicLibrariesTable.id, id));
 
-    if (!result[0]) {
-      throw new Error("No record returned when fetching comic library changed time.");
-    }
+		if (!result[0]) {
+			throw new Error(
+				"No record returned when fetching comic library changed time.",
+			);
+		}
 
-    return result.length > 0 ? result[0].updatedAt : null;
-  } catch (error) {
-    dbLogger.error("Error fetching comic library changed time:" + error);
-    throw error;
-  }
+		return result.length > 0 ? result[0].updatedAt : null;
+	} catch (error) {
+		dbLogger.error("Error fetching comic library changed time:" + error);
+		throw error;
+	}
 };
 
 /**
  * Updates the changed timestamp of a comic library to the current time
  * @param id The ID of the comic library to update
  * @returns A promise that resolves when the timestamp has been updated
- * 
+ *
  * TODO: Verify
  */
 export const setComicLibraryChangedTime = async (id: number): Promise<void> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    await db
-      .update(comicLibrariesTable)
-      .set({ updatedAt: sql`CURRENT_TIMESTAMP` })
-      .where(eq(comicLibrariesTable.id, id));
-  } catch (error) {
-    dbLogger.error("Error updating comic library changed time:" + error);
-    throw error;
-  }
+	try {
+		await db
+			.update(comicLibrariesTable)
+			.set({ updatedAt: sql`CURRENT_TIMESTAMP` })
+			.where(eq(comicLibrariesTable.id, id));
+	} catch (error) {
+		dbLogger.error("Error updating comic library changed time:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -259,106 +257,104 @@ export const setComicLibraryChangedTime = async (id: number): Promise<void> => {
  * @param id The ID of the comic library to update
  * @param updates The fields to update (name, path, description, enabled)
  * @returns A boolean indicating whether the update was successful
- * 
+ *
  * TODO: Verify
  */
 export const updateComicLibrary = async (
-  id: number,
-  updates: LibraryUpdateInput,
+	id: number,
+	updates: LibraryUpdateInput,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const updateData: Record<string, unknown> = {};
-    if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.path !== undefined) updateData.path = updates.path;
-    if (updates.description !== undefined) {
-      updateData.description = updates.description;
-    }
-    if (updates.enabled !== undefined) {
-      updateData.enabled = updates.enabled ? true : false;
-    }
+	try {
+		const updateData: Record<string, unknown> = {};
+		if (updates.name !== undefined) updateData.name = updates.name;
+		if (updates.path !== undefined) updateData.path = updates.path;
+		if (updates.description !== undefined) {
+			updateData.description = updates.description;
+		}
+		if (updates.enabled !== undefined) {
+			updateData.enabled = updates.enabled ? true : false;
+		}
 
-    const result: { id: number }[] = await db
-      .update(comicLibrariesTable)
-      .set(updateData)
-      .where(eq(comicLibrariesTable.id, id))
-      .returning({ id: comicLibrariesTable.id });
+		const result: { id: number }[] = await db
+			.update(comicLibrariesTable)
+			.set(updateData)
+			.where(eq(comicLibrariesTable.id, id))
+			.returning({ id: comicLibrariesTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error updating comic library:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error updating comic library:" + error);
+		throw error;
+	}
 };
 
 /**
  * Deletes a comic library from the database
  * @param id The ID of the comic library to delete
  * @returns A boolean indicating whether the deletion was successful
- * 
+ *
  * TODO: Verify
  */
 export const deleteComicLibrary = async (id: number): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .delete(comicLibrariesTable)
-      .where(eq(comicLibrariesTable.id, id))
-      .returning({ id: comicLibrariesTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.delete(comicLibrariesTable)
+			.where(eq(comicLibrariesTable.id, id))
+			.returning({ id: comicLibrariesTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error deleting comic library:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error deleting comic library:" + error);
+		throw error;
+	}
 };
 
 /**
  * Get all comic libraries for a specific user.
  * @param userId - ID of the user
  * @returns Array of comic libraries (type ComicLibrary[]) associated with the user
- * 
+ *
  * TODO: Verify
  */
 export const getUsersComicLibraries = async (
-  userId: number,
+	userId: number,
 ): Promise<ComicLibrary[]> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { comicLibrary: ComicLibrary }[] = await db
-      .select(
-        { comicLibrary: comicLibrariesTable },
-      )
-      .from(comicLibrariesTable)
-      .innerJoin(
-        userComicLibrariesTable,
-        eq(comicLibrariesTable.id, userComicLibrariesTable.libraryId),
-      )
-      .where(eq(userComicLibrariesTable.userId, userId))
-      .groupBy(comicLibrariesTable.id);
+	try {
+		const result: { comicLibrary: ComicLibrary }[] = await db
+			.select({ comicLibrary: comicLibrariesTable })
+			.from(comicLibrariesTable)
+			.innerJoin(
+				userComicLibrariesTable,
+				eq(comicLibrariesTable.id, userComicLibrariesTable.libraryId),
+			)
+			.where(eq(userComicLibrariesTable.userId, userId))
+			.groupBy(comicLibrariesTable.id);
 
-    const libraries: ComicLibrary[] = result.map((row) => row.comicLibrary);
+		const libraries: ComicLibrary[] = result.map((row) => row.comicLibrary);
 
-    return libraries;
-  } catch (error) {
-    dbLogger.error("Error fetching user's comic libraries:" + error);
-    throw error;
-  }
+		return libraries;
+	} catch (error) {
+		dbLogger.error("Error fetching user's comic libraries:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -366,30 +362,28 @@ export const getUsersComicLibraries = async (
  *
  * @param userId - ID of the user
  * @param libraryId - ID of the comic library to assign
- * 
+ *
  * TODO: Verify
  */
 export const assignLibraryToUser = async (
-  userId: number,
-  libraryId: number,
+	userId: number,
+	libraryId: number,
 ): Promise<void> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    await db
-      .insert(userComicLibrariesTable)
-      .values({
-        userId: userId,
-        libraryId: libraryId,
-      });
-  } catch (error) {
-    dbLogger.error("Error assigning library to user:" + error);
-    throw error;
-  }
+	try {
+		await db.insert(userComicLibrariesTable).values({
+			userId: userId,
+			libraryId: libraryId,
+		});
+	} catch (error) {
+		dbLogger.error("Error assigning library to user:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -397,68 +391,68 @@ export const assignLibraryToUser = async (
  *
  * @param userId - ID of the user
  * @param libraryId - ID of the comic library to unassign
- * 
+ *
  * TODO: Verify
  */
 export const unassignLibraryFromUser = async (
-  userId: number,
-  libraryId: number,
+	userId: number,
+	libraryId: number,
 ): Promise<void> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    await db
-      .delete(userComicLibrariesTable)
-      .where(
-        and(
-          eq(userComicLibrariesTable.userId, userId),
-          eq(userComicLibrariesTable.libraryId, libraryId),
-        ),
-      );
-  } catch (error) {
-    dbLogger.error("Error unassigning library from user:" + error);
-    throw error;
-  }
+	try {
+		await db
+			.delete(userComicLibrariesTable)
+			.where(
+				and(
+					eq(userComicLibrariesTable.userId, userId),
+					eq(userComicLibrariesTable.libraryId, libraryId),
+				),
+			);
+	} catch (error) {
+		dbLogger.error("Error unassigning library from user:" + error);
+		throw error;
+	}
 };
 
 /**
  * Gets all users assigned to a specific comic library.
  * Note: This does not count admins
- * 
+ *
  * @param libraryId - ID of the comic library
  * @returns Array of users (type AuthUser[]) assigned to the library
- * 
+ *
  * TODO: Verify
  */
-export const getUsersAssignedToLibrary = async (libraryId: number): Promise<AuthUser[]> => {
-  const db = await getClient();
+export const getUsersAssignedToLibrary = async (
+	libraryId: number,
+): Promise<AuthUser[]> => {
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { user: AuthUser }[] = await db
-      .select(
-        { user: userTable },
-      )
-      .from(userTable)
-      .innerJoin(
-        userComicLibrariesTable,
-        eq(userTable.id, userComicLibrariesTable.userId),
-      )
-      .where(eq(userComicLibrariesTable.libraryId, libraryId))
-      .groupBy(userTable.id);
+	try {
+		const result: { user: AuthUser }[] = await db
+			.select({ user: userTable })
+			.from(userTable)
+			.innerJoin(
+				userComicLibrariesTable,
+				eq(userTable.id, userComicLibrariesTable.userId),
+			)
+			.where(eq(userComicLibrariesTable.libraryId, libraryId))
+			.groupBy(userTable.id);
 
-    const users: AuthUser[] = result.map((row) => row.user);
+		const users: AuthUser[] = result.map((row) => row.user);
 
-    return users;
-  } catch (error) {
-    dbLogger.error("Error fetching users assigned to library:" + error);
-    throw error;
-  }
+		return users;
+	} catch (error) {
+		dbLogger.error("Error fetching users assigned to library:" + error);
+		throw error;
+	}
 };

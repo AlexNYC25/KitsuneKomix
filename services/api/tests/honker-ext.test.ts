@@ -1,34 +1,34 @@
-import { expect, test } from "bun:test"
-import { existsSync } from "node:fs"
+import { expect, test } from "bun:test";
+import { existsSync } from "node:fs";
 
 import { getTempQueue } from "kitsune-komix-database";
 
 test("Extension exists", async () => {
-  const path: string = "/honker/libhonker_ext.so"
+	const path: string = "/honker/libhonker_ext.so";
 
-  const doesTheBinaryExtensionFileExist: boolean = existsSync(path)
+	const doesTheBinaryExtensionFileExist: boolean = existsSync(path);
 
-  expect(doesTheBinaryExtensionFileExist).toBe(true)
-})
+	expect(doesTheBinaryExtensionFileExist).toBe(true);
+});
 
 test("Honker enqueue action works", async () => {
-  const tempQueue = await getTempQueue();
+	const tempQueue = await getTempQueue();
 
-  tempQueue.enqueue({message: "test"})
+	tempQueue.enqueue({ message: "test" });
 
-  const job = tempQueue.claimOne("test-worker")
+	const job = tempQueue.claimOne("test-worker");
 
-  expect(job).toBeTruthy()
+	expect(job).toBeTruthy();
 
-  const payload = job?.payload as {message: string}
+	const payload = job?.payload as { message: string };
 
-  expect(payload).toBeDefined()
+	expect(payload).toBeDefined();
 
-  expect(payload.message).toBe("test")
+	expect(payload.message).toBe("test");
 
-  job?.ack()
+	job?.ack();
 
-  const newJob = tempQueue.claimOne("test-worker")
+	const newJob = tempQueue.claimOne("test-worker");
 
-  expect(newJob).toBe(null)
-})
+	expect(newJob).toBe(null);
+});

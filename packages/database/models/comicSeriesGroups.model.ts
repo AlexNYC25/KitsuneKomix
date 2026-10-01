@@ -4,8 +4,8 @@ import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
 
 import {
-  comicBookSeriesGroupsTable,
-  comicSeriesGroupsTable,
+	comicBookSeriesGroupsTable,
+	comicSeriesGroupsTable,
 } from "../schemas/index.ts";
 
 /**
@@ -16,38 +16,38 @@ import {
  * @returns The ID of the series group
  */
 export const insertSeriesGroup = async (name: string): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const insertResult: { id: number }[] = await db
-      .insert(comicSeriesGroupsTable)
-      .values({ name })
-      .onConflictDoNothing()
-      .returning({ id: comicSeriesGroupsTable.id });
+	try {
+		const insertResult: { id: number }[] = await db
+			.insert(comicSeriesGroupsTable)
+			.values({ name })
+			.onConflictDoNothing()
+			.returning({ id: comicSeriesGroupsTable.id });
 
-    if (insertResult[0]) {
-      return insertResult[0].id;
-    }
+		if (insertResult[0]) {
+			return insertResult[0].id;
+		}
 
-    const existingSeriesGroup = await db
-      .select({ id: comicSeriesGroupsTable.id })
-      .from(comicSeriesGroupsTable)
-      .where(eq(comicSeriesGroupsTable.name, name))
-      .limit(1);
+		const existingSeriesGroup = await db
+			.select({ id: comicSeriesGroupsTable.id })
+			.from(comicSeriesGroupsTable)
+			.where(eq(comicSeriesGroupsTable.name, name))
+			.limit(1);
 
-    if (!existingSeriesGroup[0]) {
-      throw new Error("Series group already exists but could not be fetched.");
-    }
+		if (!existingSeriesGroup[0]) {
+			throw new Error("Series group already exists but could not be fetched.");
+		}
 
-    return existingSeriesGroup[0].id;
-  } catch (error) {
-    dbLogger.error("Error inserting series group:" + error);
-    throw error;
-  }
+		return existingSeriesGroup[0].id;
+	} catch (error) {
+		dbLogger.error("Error inserting series group:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -60,30 +60,30 @@ export const insertSeriesGroup = async (name: string): Promise<number> => {
  * @returns A boolean indicating whether a new mapping was created
  */
 export const linkSeriesGroupToComicBook = async (
-  seriesGroupId: number,
-  comicBookId: number,
-  position: number,
+	seriesGroupId: number,
+	comicBookId: number,
+	position: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicBookSeriesGroupsTable)
-      .values({
-        comicBookId,
-        comicSeriesGroupId: seriesGroupId,
-        position,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicBookSeriesGroupsTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicBookSeriesGroupsTable)
+			.values({
+				comicBookId,
+				comicSeriesGroupId: seriesGroupId,
+				position,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicBookSeriesGroupsTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking series group to comic book:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking series group to comic book:" + error);
+		throw error;
+	}
 };

@@ -1,10 +1,14 @@
-import type { ArchiveEntry, ArchiveManifest, List7zzFileOutput } from "../shared/types/utilities.types"
+import type {
+	ArchiveEntry,
+	ArchiveManifest,
+	List7zzFileOutput,
+} from "../shared/types/utilities.types";
 
 import { list } from "./7zz.wraper";
 import { parseListOutput } from "./7zzParser";
-import { generateHashForFile } from "./hash"
+import { generateHashForFile } from "./hash";
 
-const imageFileExtensions = ["jpg", "jpeg", "png", "webp", "gif", "svg"]
+const imageFileExtensions = ["jpg", "jpeg", "png", "webp", "gif", "svg"];
 
 /**
  * Filters the entries so only pages remain and formats them into ArchiveEntry objects
@@ -12,28 +16,27 @@ const imageFileExtensions = ["jpg", "jpeg", "png", "webp", "gif", "svg"]
  * @returns ArchiveEntry[] with only image file types in the archive
  */
 const filterPages = (archiveEntries: List7zzFileOutput[]): ArchiveEntry[] => {
-  const pagesThatAreImagesPages: ArchiveEntry[] = [];
+	const pagesThatAreImagesPages: ArchiveEntry[] = [];
 
-  for (const entry of archiveEntries) {
-    const fileName: string | undefined = entry.name.split("/").at(-1)
+	for (const entry of archiveEntries) {
+		const fileName: string | undefined = entry.name.split("/").at(-1);
 
-    if (!fileName || !fileName.includes(".")) {
-      continue
-    }
+		if (!fileName || !fileName.includes(".")) {
+			continue;
+		}
 
-    const fileExt = fileName.split(".").at(-1)
+		const fileExt = fileName.split(".").at(-1);
 
-    if (fileExt && imageFileExtensions.includes(fileExt)) {
-      pagesThatAreImagesPages.push({
-        path: entry.name,
-        size: parseInt(entry.size)
-      })
-    }
+		if (fileExt && imageFileExtensions.includes(fileExt)) {
+			pagesThatAreImagesPages.push({
+				path: entry.name,
+				size: parseInt(entry.size),
+			});
+		}
+	}
 
-  }
-
-  return pagesThatAreImagesPages
-}
+	return pagesThatAreImagesPages;
+};
 
 /**
  * Checks if the archive contains metadata files (ComicInfo.xml or CoMet.xml)
@@ -41,21 +44,20 @@ const filterPages = (archiveEntries: List7zzFileOutput[]): ArchiveEntry[] => {
  * @returns boolean indicating if metadata files exist in the archive
  */
 const metadataExists = (archiveEntries: List7zzFileOutput[]): boolean => {
-  
-  for (const entry of archiveEntries) {
-    const fileName: string | undefined = entry.name.split("/").at(-1)
+	for (const entry of archiveEntries) {
+		const fileName: string | undefined = entry.name.split("/").at(-1);
 
-    if (!fileName || !fileName.includes(".")) {
-      continue
-    }
+		if (!fileName || !fileName.includes(".")) {
+			continue;
+		}
 
-    if (fileName === "ComicInfo.xml" || fileName === "CoMet.xml") {
-      return true
-    }
-  }
+		if (fileName === "ComicInfo.xml" || fileName === "CoMet.xml") {
+			return true;
+		}
+	}
 
-  return false
-}
+	return false;
+};
 
 /**
  * Parses an archive file and returns a manifest with the pages listed in the file as well as some basic info
@@ -63,39 +65,39 @@ const metadataExists = (archiveEntries: List7zzFileOutput[]): boolean => {
  * @param filePath Path to a archive file
  * @returns Either a ArchiveManifest file if the file path is to a file that exists undefined otherwise
  */
-export const getArchivesManifest = async (filePath: string): Promise<ArchiveManifest | undefined > => {
+export const getArchivesManifest = async (
+	filePath: string,
+): Promise<ArchiveManifest | undefined> => {
+	const fileInfo: Bun.BunFile = Bun.file(filePath);
+	const doesTheFileExist: boolean = await fileInfo.exists();
 
-  const fileInfo: Bun.BunFile = Bun.file(filePath)
-  const doesTheFileExist: boolean = await fileInfo.exists()
+	if (!doesTheFileExist) {
+		return undefined;
+	}
 
-  if (!doesTheFileExist) {
-    return undefined;
-  }
+	const listOutput: string = await list(filePath);
 
-  const listOutput: string = await list(filePath);
+	const parsedOutput: List7zzFileOutput[] = parseListOutput(listOutput);
 
-  const parsedOutput: List7zzFileOutput[] = parseListOutput(listOutput)
+	const pages: ArchiveEntry[] = filterPages(parsedOutput);
 
+	const metadataFileInArchive: boolean = metadataExists(parsedOutput);
 
-  const pages: ArchiveEntry[] = filterPages(parsedOutput)
+	const archiveSize: number = fileInfo.size;
 
-  const metadataFileInArchive: boolean = metadataExists(parsedOutput)
+	const type: string = filePath.split(".").at(-1) || "unknown";
 
-  const archiveSize: number = fileInfo.size
+	const fileHash: bigint | number = await generateHashForFile(filePath);
 
-  const type: string = filePath.split(".").at(-1) || "unknown";
-  
-  const fileHash: bigint | number = await generateHashForFile(filePath)
+	const manifest: ArchiveManifest = {
+		type: type,
+		archiveSize: archiveSize,
+		hash: fileHash,
 
-  const manifest: ArchiveManifest = {
-    type: type,
-    archiveSize: archiveSize,
-    hash: fileHash,
+		metadataExists: metadataFileInArchive,
 
-    metadataExists: metadataFileInArchive,
+		files: pages,
+	};
 
-    files: pages
-  }
-
-  return manifest;
-}
+	return manifest;
+};

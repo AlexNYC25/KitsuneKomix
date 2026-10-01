@@ -1,111 +1,117 @@
-import { 
-  getQueue,
-  type ComicSeries,
-  type QueueJob, 
-  type QueueType 
-} from "kitsune-komix-database"
+import {
+	getQueue,
+	type ComicSeries,
+	type QueueJob,
+	type QueueType,
+} from "kitsune-komix-database";
+
+import { workerLogger } from "kitsune-komix-logging";
 
 import {
-  workerLogger
-} from "kitsune-komix-logging"
-
-import {
-  addComicBookToSeries,
-  findComicSeriesByFolderPath,
-  getParentDirectory,
-  createComicSeries,
-  type NewComicSeries
-} from "kitsune-komix-database"
+	addComicBookToSeries,
+	findComicSeriesByFolderPath,
+	getParentDirectory,
+	createComicSeries,
+	type NewComicSeries,
+} from "kitsune-komix-database";
 
 import type {
-  IngestionToComicSeriesMappingPayload,
-  IngestionToSecondaryPipelinePayload
-} from "../../shared/types/payload.types"
+	IngestionToComicSeriesMappingPayload,
+	IngestionToSecondaryPipelinePayload,
+} from "../../shared/types/payload.types";
 
 export class ComicBookSeriesMappingWorker {
-  queue: null | QueueType = null;
+	queue: null | QueueType = null;
 
-  metadataQueue: null | QueueType = null;
-  pagesQueue: null | QueueType = null;
+	metadataQueue: null | QueueType = null;
+	pagesQueue: null | QueueType = null;
 
-  async dequeue() {
-    if (!this.queue) {
-      this.queue = await getQueue("BOOK_SERIES_MAPPING");
-    }
+	async dequeue() {
+		if (!this.queue) {
+			this.queue = await getQueue("BOOK_SERIES_MAPPING");
+		}
 
-    const job: QueueJob | null = this.queue.claimOne("book_series_mapping_worker");
+		const job: QueueJob | null = this.queue.claimOne(
+			"book_series_mapping_worker",
+		);
 
-    return job;
-  }
-    
-  async start() {
-    workerLogger.info("comic book to series mapping worker has started")
-    while (true) {
-      const job: QueueJob | null = await this.dequeue();
+		return job;
+	}
 
-      if (!job) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+	async start() {
+		workerLogger.info("comic book to series mapping worker has started");
+		while (true) {
+			const job: QueueJob | null = await this.dequeue();
 
-        continue;
-      }
+			if (!job) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      await this.processJob(job);
-    }
-  }
+				continue;
+			}
 
-  async processJob(job: QueueJob) {
-    const currentPayload: IngestionToComicSeriesMappingPayload = job.payload as IngestionToComicSeriesMappingPayload
+			await this.processJob(job);
+		}
+	}
 
-    try {
-      const comicSeriesDirectory: string = getParentDirectory(currentPayload.filePath)
-      const comicSeries: ComicSeries | null = await findComicSeriesByFolderPath(comicSeriesDirectory)
-      let comicSeriesId: number | undefined = comicSeries ? comicSeries.id : undefined
+	async processJob(job: QueueJob) {
+		const currentPayload: IngestionToComicSeriesMappingPayload =
+			job.payload as IngestionToComicSeriesMappingPayload;
 
-      if (comicSeriesId) {
-        await addComicBookToSeries(comicSeriesId, currentPayload.comicBookId)
-      } else {
-        const newSeriesRecordObject: NewComicSeries = {
-          name: currentPayload.filePath.split("/").pop() || "Unknown Series",
-          folderPath: comicSeriesDirectory
-        }
+		try {
+			const comicSeriesDirectory: string = getParentDirectory(
+				currentPayload.filePath,
+			);
+			const comicSeries: ComicSeries | null =
+				await findComicSeriesByFolderPath(comicSeriesDirectory);
+			let comicSeriesId: number | undefined = comicSeries
+				? comicSeries.id
+				: undefined;
 
-        comicSeriesId = await createComicSeries(newSeriesRecordObject)
-        await addComicBookToSeries(comicSeriesId, currentPayload.comicBookId)
-      }
+			if (comicSeriesId) {
+				await addComicBookToSeries(comicSeriesId, currentPayload.comicBookId);
+			} else {
+				const newSeriesRecordObject: NewComicSeries = {
+					name: currentPayload.filePath.split("/").pop() || "Unknown Series",
+					folderPath: comicSeriesDirectory,
+				};
 
-      if (currentPayload.metadataFileExists) {
-        const secondaryPayload: IngestionToSecondaryPipelinePayload = {
-          filePath: currentPayload.filePath,
-          comicBookId: currentPayload.comicBookId,
-          metadataFileExists: currentPayload.metadataFileExists,
-          seriesId: comicSeriesId,
-        }
+				comicSeriesId = await createComicSeries(newSeriesRecordObject);
+				await addComicBookToSeries(comicSeriesId, currentPayload.comicBookId);
+			}
 
-        if (!this.metadataQueue) {
-          this.metadataQueue = await getQueue("COMICINFO_EXTRACTION");
-        }
+			if (currentPayload.metadataFileExists) {
+				const secondaryPayload: IngestionToSecondaryPipelinePayload = {
+					filePath: currentPayload.filePath,
+					comicBookId: currentPayload.comicBookId,
+					metadataFileExists: currentPayload.metadataFileExists,
+					seriesId: comicSeriesId,
+				};
 
-        this.metadataQueue.enqueue(secondaryPayload)
-      }
+				if (!this.metadataQueue) {
+					this.metadataQueue = await getQueue("COMICINFO_EXTRACTION");
+				}
 
-      const pagesPayload: IngestionToSecondaryPipelinePayload = {
-        filePath: currentPayload.filePath,
-        comicBookId: currentPayload.comicBookId,
-        metadataFileExists: currentPayload.metadataFileExists,
-        seriesId: comicSeriesId,
-      }
+				this.metadataQueue.enqueue(secondaryPayload);
+			}
 
-      if (!this.pagesQueue) {
-        this.pagesQueue = await getQueue("PROCESS_COMIC_PAGES");
-      }
+			const pagesPayload: IngestionToSecondaryPipelinePayload = {
+				filePath: currentPayload.filePath,
+				comicBookId: currentPayload.comicBookId,
+				metadataFileExists: currentPayload.metadataFileExists,
+				seriesId: comicSeriesId,
+			};
 
-      this.pagesQueue.enqueue(pagesPayload)
-      
+			if (!this.pagesQueue) {
+				this.pagesQueue = await getQueue("PROCESS_COMIC_PAGES");
+			}
 
-    } catch {
-      workerLogger.error("There was an error parsing and inserting the initial comic book record")
-    } finally {
-      job.ack()
-    }
-  }
+			this.pagesQueue.enqueue(pagesPayload);
+		} catch {
+			workerLogger.error(
+				"There was an error parsing and inserting the initial comic book record",
+			);
+		} finally {
+			job.ack();
+		}
+	}
 }

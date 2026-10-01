@@ -13,29 +13,29 @@ import type { NewComicBookThumbnail } from "../shared/types/database.types.ts";
  * @returns The ID of the inserted thumbnail
  */
 export const insertComicBookThumbnail = async (
-  thumbnail: NewComicBookThumbnail,
+	thumbnail: NewComicBookThumbnail,
 ): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result = await db
-      .insert(comicBookThumbnailsTable)
-      .values(thumbnail)
-      .returning({ id: comicBookThumbnailsTable.id });
+	try {
+		const result = await db
+			.insert(comicBookThumbnailsTable)
+			.values(thumbnail)
+			.returning({ id: comicBookThumbnailsTable.id });
 
-    if (result[0]) {
-      return result[0].id;
-    }
+		if (result[0]) {
+			return result[0].id;
+		}
 
-    throw new Error("Insert did not return an ID.");
-  } catch (error) {
-    dbLogger.error("Error inserting comic book thumbnail:" + error);
-    throw error;
-  }
+		throw new Error("Insert did not return an ID.");
+	} catch (error) {
+		dbLogger.error("Error inserting comic book thumbnail:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -44,23 +44,23 @@ export const insertComicBookThumbnail = async (
  * @returns The number of deleted rows
  */
 export const deleteComicBookThumbnailsForBook = async (
-  comicBookId: number,
+	comicBookId: number,
 ): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result = await db
-      .delete(comicBookThumbnailsTable)
-      .where(eq(comicBookThumbnailsTable.comicBookId, comicBookId))
-      .returning({ id: comicBookThumbnailsTable.id });
+	try {
+		const result = await db
+			.delete(comicBookThumbnailsTable)
+			.where(eq(comicBookThumbnailsTable.comicBookId, comicBookId))
+			.returning({ id: comicBookThumbnailsTable.id });
 
-    return result.length;
-  } catch (error) {
-    dbLogger.error("Error deleting comic book thumbnails for book:" + error);
-    throw error;
-  }
+		return result.length;
+	} catch (error) {
+		dbLogger.error("Error deleting comic book thumbnails for book:" + error);
+		throw error;
+	}
 };

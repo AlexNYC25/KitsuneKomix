@@ -3,16 +3,21 @@ import { sql } from "drizzle-orm/sql";
 
 import { comicBooksTable } from "./comicBooks.table.ts";
 
-export const comicMetadataCandidatesTable = sqliteTable("comic_metadata_candidates", {
-  id: int().primaryKey({ autoIncrement: true }),
-  comicBookId: int().notNull().references(() => comicBooksTable.id, {
-		onDelete: "cascade",
-	}),
-  type: text().notNull(), // e.g., "title", "author", "publisher", etc.
-  value: text().notNull(),
-  normalizedValue: text().notNull(), // For easier searching and matching
-  status: text().notNull().default("pending"), // "pending", "accepted", "rejected"
-  resolvedId: int(),
-  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-});
+export const comicMetadataCandidatesTable = sqliteTable(
+	"comic_metadata_candidates",
+	{
+		id: int().primaryKey({ autoIncrement: true }),
+		comicBookId: int()
+			.notNull()
+			.references(() => comicBooksTable.id, {
+				onDelete: "cascade",
+			}),
+		type: text().notNull(), // e.g., "title", "author", "publisher", etc.
+		value: text().notNull(),
+		normalizedValue: text().notNull(), // For easier searching and matching
+		status: text().notNull().default("pending"), // "pending", "accepted", "rejected"
+		resolvedId: int(),
+		createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	},
+);

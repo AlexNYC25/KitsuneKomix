@@ -1,15 +1,15 @@
 {
-  "name": "kitsune-komix-schemas",
-  "private": true,
-  "main": "./mod.ts",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "comic-metadata-tool": "^1.3.3",
-    "zod": "^4.4.3"
-  }
+	"name": "kitsune-komix-schemas",
+	"private": true,
+	"main": "./mod.ts",
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"comic-metadata-tool": "^1.3.3",
+		"zod": "^4.4.3"
+	}
 }

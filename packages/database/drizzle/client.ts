@@ -1,9 +1,9 @@
-import { drizzle } from 'drizzle-orm/bun-sqlite';
+import { drizzle } from "drizzle-orm/bun-sqlite";
 import { Database } from "bun:sqlite";
 
-import { env } from "../config/env.ts"
+import { env } from "../config/env.ts";
 import { dbLogger } from "../loggers/index.ts";
-import { generateSqlFilePath } from "../utilities/db-file.ts"
+import { generateSqlFilePath } from "../utilities/db-file.ts";
 
 import type { DrizzleType } from "../shared/types/index.ts";
 
@@ -27,11 +27,11 @@ export const CONNECTION_PRAGMAS = (busyTimeout: number): string => `
 `;
 
 const openDatabase = (sqlitePath: string): Database => {
-  const sqlite = new Database(sqlitePath, { create: true, readwrite: true });
+	const sqlite = new Database(sqlitePath, { create: true, readwrite: true });
 
-  sqlite.exec(CONNECTION_PRAGMAS(env.SQLITE_BUSY_TIMEOUT));
+	sqlite.exec(CONNECTION_PRAGMAS(env.SQLITE_BUSY_TIMEOUT));
 
-  return sqlite;
+	return sqlite;
 };
 
 /**
@@ -40,14 +40,14 @@ const openDatabase = (sqlitePath: string): Database => {
  * @returns Drizzle db
  */
 export const getClient = async () => {
-  if (!db) {
-    const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
-    db = drizzle({ client: openDatabase(sqlitePath) });
+	if (!db) {
+		const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
+		db = drizzle({ client: openDatabase(sqlitePath) });
 
-    dbLogger.info("SQLite client created")
-  }
+		dbLogger.info("SQLite client created");
+	}
 
-  return db;
+	return db;
 };
 
 /**
@@ -56,47 +56,53 @@ export const getClient = async () => {
  * @returns the newly created Drizzle db
  */
 export const reconnect = async (): Promise<DrizzleType> => {
-  if (db) {
-    db.$client.close();
-  }
+	if (db) {
+		db.$client.close();
+	}
 
-  const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
-  
-  db = drizzle({ client: openDatabase(sqlitePath) });
-  dbLogger.info("SQLite client reconnected");
+	const sqlitePath: string = await generateSqlFilePath(env.CONFIG_DIRECTORY);
 
-  return db;
+	db = drizzle({ client: openDatabase(sqlitePath) });
+	dbLogger.info("SQLite client reconnected");
+
+	return db;
 };
 
 /**
- * Preforms a query to check if the sqlite client can 
- * @returns 
+ * Preforms a query to check if the sqlite client can
+ * @returns
  */
 export const testSQLiteConnection: () => Promise<boolean> = async () => {
-  try {
-    const db: DrizzleType | null = await getClient();
-    const result: {message: string} = db.$client.query("select 'Hello world' as message;").get() as {message: string};
+	try {
+		const db: DrizzleType | null = await getClient();
+		const result: { message: string } = db.$client
+			.query("select 'Hello world' as message;")
+			.get() as { message: string };
 
-    if (result?.message) {
-      return true;
-    }
+		if (result?.message) {
+			return true;
+		}
 
-    return false;
-  } catch (error) {
-    dbLogger.error("SQLite connection test failed, attempting reconnect: " + error);
+		return false;
+	} catch (error) {
+		dbLogger.error(
+			"SQLite connection test failed, attempting reconnect: " + error,
+		);
 
-    try {
-      const db: DrizzleType = await reconnect();
-      const result: {message: string} = db.$client.query("select 'Hello world' as message;").get() as {message: string};
+		try {
+			const db: DrizzleType = await reconnect();
+			const result: { message: string } = db.$client
+				.query("select 'Hello world' as message;")
+				.get() as { message: string };
 
-      if (result.message) {
-        return true;
-      }
+			if (result.message) {
+				return true;
+			}
 
-      return false;
-    } catch (retryError) {
-      dbLogger.error("SQLite reconnect failed: " + retryError);
-      return false;
-    }
-  }
+			return false;
+		} catch (retryError) {
+			dbLogger.error("SQLite reconnect failed: " + retryError);
+			return false;
+		}
+	}
 };

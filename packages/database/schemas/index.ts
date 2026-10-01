@@ -53,4 +53,3 @@ export * from "./tables/comicWebLinks.table.ts";
 
 export * from "./tables/comicBookIngestion.table.ts";
 export * from "./tables/comicMetadataCandidates.table.ts";
-

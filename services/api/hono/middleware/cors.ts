@@ -1,11 +1,11 @@
 import { cors } from "hono/cors";
 
-import { env } from "kitsune-komix-config"
+import { env } from "kitsune-komix-config";
 
 export const honoCors = cors({
-  origin: env.CLIENT_URL,
-  credentials: true,
-  allowMethods: ["GET", "POST", "PUT", "DELETE"],
-  allowHeaders: ["Content-Type", "Authorization"],
-  exposeHeaders: ["Content-Disposition", "Content-Length", "Content-Type"],
-})
+	origin: env.CLIENT_URL,
+	credentials: true,
+	allowMethods: ["GET", "POST", "PUT", "DELETE"],
+	allowHeaders: ["Content-Type", "Authorization"],
+	exposeHeaders: ["Content-Disposition", "Content-Length", "Content-Type"],
+});

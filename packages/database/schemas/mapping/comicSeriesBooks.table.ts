@@ -5,13 +5,17 @@ import { comicBooksTable } from "../tables/comicBooks.table.ts";
 import { comicSeriesTable } from "../tables/comicSeries.table.ts";
 
 export const comicSeriesBooksTable = snakeCase.table("comic_series_books", {
-  id: int().primaryKey({ autoIncrement: true }),
-  comicSeriesId: int().notNull().references(() => comicSeriesTable.id, {
-    onDelete: "cascade",
-  }),
-  comicBookId: int().notNull().references(() => comicBooksTable.id, {
-    onDelete: "cascade",
-  }),
-  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	id: int().primaryKey({ autoIncrement: true }),
+	comicSeriesId: int()
+		.notNull()
+		.references(() => comicSeriesTable.id, {
+			onDelete: "cascade",
+		}),
+	comicBookId: int()
+		.notNull()
+		.references(() => comicBooksTable.id, {
+			onDelete: "cascade",
+		}),
+	createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });

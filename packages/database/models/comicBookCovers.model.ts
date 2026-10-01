@@ -3,10 +3,7 @@ import { eq, inArray } from "drizzle-orm";
 import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
 
-import {
-  comicBookCoversTable,
-  comicPagesTable,
-} from "../schemas/index.ts";
+import { comicBookCoversTable, comicPagesTable } from "../schemas/index.ts";
 
 import type { NewComicBookCover } from "../shared/types/database.types.ts";
 
@@ -18,40 +15,40 @@ import type { NewComicBookCover } from "../shared/types/database.types.ts";
  * @returns The ID of the cover
  */
 export const insertComicBookCover = async (
-  cover: NewComicBookCover,
+	cover: NewComicBookCover,
 ): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const insertResult = await db
-      .insert(comicBookCoversTable)
-      .values(cover)
-      .onConflictDoNothing()
-      .returning({ id: comicBookCoversTable.id });
+	try {
+		const insertResult = await db
+			.insert(comicBookCoversTable)
+			.values(cover)
+			.onConflictDoNothing()
+			.returning({ id: comicBookCoversTable.id });
 
-    if (insertResult[0]) {
-      return insertResult[0].id;
-    }
+		if (insertResult[0]) {
+			return insertResult[0].id;
+		}
 
-    const existingCover = await db
-      .select({ id: comicBookCoversTable.id })
-      .from(comicBookCoversTable)
-      .where(eq(comicBookCoversTable.filePath, cover.filePath))
-      .limit(1);
+		const existingCover = await db
+			.select({ id: comicBookCoversTable.id })
+			.from(comicBookCoversTable)
+			.where(eq(comicBookCoversTable.filePath, cover.filePath))
+			.limit(1);
 
-    if (!existingCover[0]) {
-      throw new Error("Cover already exists but could not be fetched.");
-    }
+		if (!existingCover[0]) {
+			throw new Error("Cover already exists but could not be fetched.");
+		}
 
-    return existingCover[0].id;
-  } catch (error) {
-    dbLogger.error("Error inserting comic book cover:" + error);
-    throw error;
-  }
+		return existingCover[0].id;
+	} catch (error) {
+		dbLogger.error("Error inserting comic book cover:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -60,33 +57,28 @@ export const insertComicBookCover = async (
  * @returns The number of deleted rows
  */
 export const deleteComicBookCoversForBook = async (
-  comicBookId: number,
+	comicBookId: number,
 ): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const pageIds = db
-      .select({ id: comicPagesTable.id })
-      .from(comicPagesTable)
-      .where(eq(comicPagesTable.comicBookId, comicBookId));
+	try {
+		const pageIds = db
+			.select({ id: comicPagesTable.id })
+			.from(comicPagesTable)
+			.where(eq(comicPagesTable.comicBookId, comicBookId));
 
-    const result = await db
-      .delete(comicBookCoversTable)
-      .where(
-        inArray(
-          comicBookCoversTable.comicPageId,
-          pageIds,
-        ),
-      )
-      .returning({ id: comicBookCoversTable.id });
+		const result = await db
+			.delete(comicBookCoversTable)
+			.where(inArray(comicBookCoversTable.comicPageId, pageIds))
+			.returning({ id: comicBookCoversTable.id });
 
-    return result.length;
-  } catch (error) {
-    dbLogger.error("Error deleting comic book covers for book:" + error);
-    throw error;
-  }
+		return result.length;
+	} catch (error) {
+		dbLogger.error("Error deleting comic book covers for book:" + error);
+		throw error;
+	}
 };

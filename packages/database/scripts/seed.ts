@@ -1,4 +1,7 @@
-import {checkIfSettingExists, setSetting} from "../models/appSettings.model.ts";
+import {
+	checkIfSettingExists,
+	setSetting,
+} from "../models/appSettings.model.ts";
 
 /**
  * Initializes application settings in the database if they do not already exist.
@@ -9,7 +12,7 @@ export const setUpAppSettings = async () => {
 	if (!appHasBeenSetup) {
 		await setSetting("appSetupComplete", "false");
 	}
-}
+};
 
 /**
  * Runs all seed operations idempotently.
@@ -20,4 +23,4 @@ export const setUpAppSettings = async () => {
  */
 export const runSeed = async () => {
 	await setUpAppSettings();
-}
+};

@@ -1,4 +1,4 @@
-import type { Queue, Job} from "@russellthehippo/honker-bun"
+import type { Queue, Job } from "@russellthehippo/honker-bun";
 
 export type QueueType = Queue;
 

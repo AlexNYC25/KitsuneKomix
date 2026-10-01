@@ -4,8 +4,8 @@ import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
 
 import {
-  comicBookPublishersTable,
-  comicPublishersTable,
+	comicBookPublishersTable,
+	comicPublishersTable,
 } from "../schemas/index.ts";
 
 /**
@@ -16,41 +16,41 @@ import {
  * @returns The ID of the publisher
  */
 export const insertPublisher = async (
-  name: string,
-  imprint: boolean = false,
+	name: string,
+	imprint: boolean = false,
 ): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const insertResult: { id: number }[] = await db
-      .insert(comicPublishersTable)
-      .values({ name, imprint })
-      .onConflictDoNothing()
-      .returning({ id: comicPublishersTable.id });
+	try {
+		const insertResult: { id: number }[] = await db
+			.insert(comicPublishersTable)
+			.values({ name, imprint })
+			.onConflictDoNothing()
+			.returning({ id: comicPublishersTable.id });
 
-    if (insertResult[0]) {
-      return insertResult[0].id;
-    }
+		if (insertResult[0]) {
+			return insertResult[0].id;
+		}
 
-    const existingPublisher = await db
-      .select({ id: comicPublishersTable.id })
-      .from(comicPublishersTable)
-      .where(eq(comicPublishersTable.name, name))
-      .limit(1);
+		const existingPublisher = await db
+			.select({ id: comicPublishersTable.id })
+			.from(comicPublishersTable)
+			.where(eq(comicPublishersTable.name, name))
+			.limit(1);
 
-    if (!existingPublisher[0]) {
-      throw new Error("Publisher already exists but could not be fetched.");
-    }
+		if (!existingPublisher[0]) {
+			throw new Error("Publisher already exists but could not be fetched.");
+		}
 
-    return existingPublisher[0].id;
-  } catch (error) {
-    dbLogger.error("Error inserting publisher:" + error);
-    throw error;
-  }
+		return existingPublisher[0].id;
+	} catch (error) {
+		dbLogger.error("Error inserting publisher:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -60,28 +60,28 @@ export const insertPublisher = async (
  * @returns A boolean indicating whether a new mapping was created
  */
 export const linkPublisherToComicBook = async (
-  publisherId: number,
-  comicBookId: number,
+	publisherId: number,
+	comicBookId: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicBookPublishersTable)
-      .values({
-        comicBookId,
-        comicPublisherId: publisherId,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicBookPublishersTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicBookPublishersTable)
+			.values({
+				comicBookId,
+				comicPublisherId: publisherId,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicBookPublishersTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking publisher to comic book:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking publisher to comic book:" + error);
+		throw error;
+	}
 };

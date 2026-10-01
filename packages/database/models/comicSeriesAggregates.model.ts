@@ -2,12 +2,12 @@ import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
 
 import {
-  comicSeriesContentAggregateTable,
-  comicSeriesCreditsAggregateTable,
-  comicSeriesGenresAggregateTable,
-  comicSeriesGroupsAggregateTable,
-  comicSeriesPublishersAggregateTable,
-  comicSeriesStoryArcsAggregateTable,
+	comicSeriesContentAggregateTable,
+	comicSeriesCreditsAggregateTable,
+	comicSeriesGenresAggregateTable,
+	comicSeriesGroupsAggregateTable,
+	comicSeriesPublishersAggregateTable,
+	comicSeriesStoryArcsAggregateTable,
 } from "../schemas/index.ts";
 
 /**
@@ -17,30 +17,30 @@ import {
  * @returns A boolean indicating whether a new record was created
  */
 export const linkGenreToSeries = async (
-  genreId: number,
-  seriesId: number,
+	genreId: number,
+	seriesId: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicSeriesGenresAggregateTable)
-      .values({
-        comicSeriesId: seriesId,
-        comicGenreId: genreId,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicSeriesGenresAggregateTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicSeriesGenresAggregateTable)
+			.values({
+				comicSeriesId: seriesId,
+				comicGenreId: genreId,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicSeriesGenresAggregateTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking genre to series:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking genre to series:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -50,30 +50,30 @@ export const linkGenreToSeries = async (
  * @returns A boolean indicating whether a new record was created
  */
 export const linkPublisherToSeries = async (
-  publisherId: number,
-  seriesId: number,
+	publisherId: number,
+	seriesId: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicSeriesPublishersAggregateTable)
-      .values({
-        comicSeriesId: seriesId,
-        comicPublisherId: publisherId,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicSeriesPublishersAggregateTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicSeriesPublishersAggregateTable)
+			.values({
+				comicSeriesId: seriesId,
+				comicPublisherId: publisherId,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicSeriesPublishersAggregateTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking publisher to series:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking publisher to series:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -84,30 +84,30 @@ export const linkPublisherToSeries = async (
  * @returns A boolean indicating whether a new record was created
  */
 export const linkCreditToSeries = async (
-  creditId: number,
-  seriesId: number,
+	creditId: number,
+	seriesId: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicSeriesCreditsAggregateTable)
-      .values({
-        comicSeriesId: seriesId,
-        comicCreditId: creditId,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicSeriesCreditsAggregateTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicSeriesCreditsAggregateTable)
+			.values({
+				comicSeriesId: seriesId,
+				comicCreditId: creditId,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicSeriesCreditsAggregateTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking credit to series:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking credit to series:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -118,30 +118,30 @@ export const linkCreditToSeries = async (
  * @returns A boolean indicating whether a new record was created
  */
 export const linkContentToSeries = async (
-  contentId: number,
-  seriesId: number,
+	contentId: number,
+	seriesId: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicSeriesContentAggregateTable)
-      .values({
-        comicSeriesId: seriesId,
-        comicContentId: contentId,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicSeriesContentAggregateTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicSeriesContentAggregateTable)
+			.values({
+				comicSeriesId: seriesId,
+				comicContentId: contentId,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicSeriesContentAggregateTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking content to series:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking content to series:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -153,32 +153,32 @@ export const linkContentToSeries = async (
  * @returns A boolean indicating whether a new record was created
  */
 export const linkStoryArcToSeries = async (
-  storyArcId: number,
-  seriesId: number,
-  position: number,
+	storyArcId: number,
+	seriesId: number,
+	position: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicSeriesStoryArcsAggregateTable)
-      .values({
-        comicSeriesId: seriesId,
-        comicStoryArcId: storyArcId,
-        position,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicSeriesStoryArcsAggregateTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicSeriesStoryArcsAggregateTable)
+			.values({
+				comicSeriesId: seriesId,
+				comicStoryArcId: storyArcId,
+				position,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicSeriesStoryArcsAggregateTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking story arc to series:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking story arc to series:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -191,30 +191,30 @@ export const linkStoryArcToSeries = async (
  * @returns A boolean indicating whether a new record was created
  */
 export const linkSeriesGroupToSeries = async (
-  seriesGroupId: number,
-  seriesId: number,
-  position: number,
+	seriesGroupId: number,
+	seriesId: number,
+	position: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicSeriesGroupsAggregateTable)
-      .values({
-        comicSeriesId: seriesId,
-        comicSeriesGroupId: seriesGroupId,
-        position,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicSeriesGroupsAggregateTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicSeriesGroupsAggregateTable)
+			.values({
+				comicSeriesId: seriesId,
+				comicSeriesGroupId: seriesGroupId,
+				position,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicSeriesGroupsAggregateTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking series group to series:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking series group to series:" + error);
+		throw error;
+	}
 };

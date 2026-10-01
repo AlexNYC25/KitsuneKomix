@@ -1,74 +1,76 @@
-import { 
-  getQueue,
-  type QueueJob, 
-  type QueueType 
-} from "kitsune-komix-database"
+import {
+	getQueue,
+	type QueueJob,
+	type QueueType,
+} from "kitsune-komix-database";
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
 import { workerLogger } from "kitsune-komix-logging";
 import { consolidateComicMetadata } from "../../utilities/metadata/metadataConsolidation";
 import { aggregateComicBookMetadataIntoSeries } from "../../services/comicSeriesMetadata.service";
 import type {
-  ConsolidatedComicMetadata,
-  SeriesAggregationResult,
+	ConsolidatedComicMetadata,
+	SeriesAggregationResult,
 } from "../../shared/types/utilities.types";
 
 export class MetadataAggregationWorker {
-  queue: null | QueueType = null;
+	queue: null | QueueType = null;
 
-  async dequeue() {
-    if (!this.queue) {
-      this.queue = await getQueue("COMIC_METADATA_AGGREGATION");
-    }
+	async dequeue() {
+		if (!this.queue) {
+			this.queue = await getQueue("COMIC_METADATA_AGGREGATION");
+		}
 
-    const job: QueueJob | null = this.queue.claimOne("comic_metadata_aggregation_worker");
+		const job: QueueJob | null = this.queue.claimOne(
+			"comic_metadata_aggregation_worker",
+		);
 
-    return job;
-  }
-    
-  async start() {
-    workerLogger.info("comic metadata aggregation worker has started")
-    while (true) {
-      const job: QueueJob | null = await this.dequeue();
+		return job;
+	}
 
-      if (!job) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+	async start() {
+		workerLogger.info("comic metadata aggregation worker has started");
+		while (true) {
+			const job: QueueJob | null = await this.dequeue();
 
-        continue;
-      }
+			if (!job) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      await this.processJob(job);
-    }
-  }
+				continue;
+			}
 
-  async processJob(job: QueueJob) {
-    const currentPayload = job.payload as MetadataExtractionPayload
+			await this.processJob(job);
+		}
+	}
 
-    try {
-      if (!currentPayload.seriesId) {
-        workerLogger.info(
-          `Skipping series metadata aggregation for comic book ${currentPayload.comicBookId}: no series associated.`,
-        )
-        return
-      }
+	async processJob(job: QueueJob) {
+		const currentPayload = job.payload as MetadataExtractionPayload;
 
-      const consolidatedMetadata: ConsolidatedComicMetadata =
-        consolidateComicMetadata(currentPayload.metadata)
+		try {
+			if (!currentPayload.seriesId) {
+				workerLogger.info(
+					`Skipping series metadata aggregation for comic book ${currentPayload.comicBookId}: no series associated.`,
+				);
+				return;
+			}
 
-      const aggregationResult: SeriesAggregationResult =
-        await aggregateComicBookMetadataIntoSeries(
-          currentPayload.seriesId,
-          consolidatedMetadata,
-        )
+			const consolidatedMetadata: ConsolidatedComicMetadata =
+				consolidateComicMetadata(currentPayload.metadata);
 
-      workerLogger.info(
-        `Aggregated metadata for comic book ${currentPayload.comicBookId} into series ${currentPayload.seriesId}: ${JSON.stringify(aggregationResult)}`,
-      )
-    } catch (error) {
-      workerLogger.error(
-        `There was an error aggregating metadata for comic book ${currentPayload.comicBookId}: ${error}`,
-      )
-    } finally {
-      job.ack()
-    }
-  }
+			const aggregationResult: SeriesAggregationResult =
+				await aggregateComicBookMetadataIntoSeries(
+					currentPayload.seriesId,
+					consolidatedMetadata,
+				);
+
+			workerLogger.info(
+				`Aggregated metadata for comic book ${currentPayload.comicBookId} into series ${currentPayload.seriesId}: ${JSON.stringify(aggregationResult)}`,
+			);
+		} catch (error) {
+			workerLogger.error(
+				`There was an error aggregating metadata for comic book ${currentPayload.comicBookId}: ${error}`,
+			);
+		} finally {
+			job.ack();
+		}
+	}
 }

@@ -1,80 +1,85 @@
-import type { MetadataCompiled } from "comic-metadata-tool"
-import { 
-  getQueue,
-  type QueueJob, 
-  type QueueType
-} from "kitsune-komix-database"
+import type { MetadataCompiled } from "comic-metadata-tool";
+import {
+	getQueue,
+	type QueueJob,
+	type QueueType,
+} from "kitsune-komix-database";
 import type { MetadataExtractionPayload } from "../../shared/types/payload.types";
 import { workerLogger } from "kitsune-komix-logging";
 import { consolidateComicMetadata } from "../../utilities/metadata/metadataConsolidation";
 import { insertComicBookMetadata } from "../../services/comicMetadata.service";
 import type {
-  ComicMetadataInsertionResult,
-  ConsolidatedComicMetadata,
+	ComicMetadataInsertionResult,
+	ConsolidatedComicMetadata,
 } from "../../shared/types/utilities.types";
 
 export class MetadataInsertionWorker {
-  queue: null | QueueType = null;
+	queue: null | QueueType = null;
 
-  metadataQueue: null | QueueType = null;
+	metadataQueue: null | QueueType = null;
 
-  async dequeue() {
-    if (!this.queue) {
-      this.queue = await getQueue("COMICINFO_METADATA_CREATION");
-    }
+	async dequeue() {
+		if (!this.queue) {
+			this.queue = await getQueue("COMICINFO_METADATA_CREATION");
+		}
 
-    const job: QueueJob | null = this.queue.claimOne("comicinfo_metadata_creation_worker");
+		const job: QueueJob | null = this.queue.claimOne(
+			"comicinfo_metadata_creation_worker",
+		);
 
-    return job;
-  }
-    
-  async start() {
-    workerLogger.info("comicinfo metadata creation worker has started")
-    while (true) {
-      const job: QueueJob | null = await this.dequeue();
+		return job;
+	}
 
-      if (!job) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+	async start() {
+		workerLogger.info("comicinfo metadata creation worker has started");
+		while (true) {
+			const job: QueueJob | null = await this.dequeue();
 
-        continue;
-      }
+			if (!job) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      await this.processJob(job);
-    }
-  }
+				continue;
+			}
 
-  async processJob(job: QueueJob) {
-    const currentPayload = job.payload as MetadataExtractionPayload
+			await this.processJob(job);
+		}
+	}
 
-    try {
-      const metadata: MetadataCompiled = currentPayload.metadata
+	async processJob(job: QueueJob) {
+		const currentPayload = job.payload as MetadataExtractionPayload;
 
-      const consolidatedMetadata: ConsolidatedComicMetadata =
-        consolidateComicMetadata(metadata)
+		try {
+			const metadata: MetadataCompiled = currentPayload.metadata;
 
-      const insertionResult: ComicMetadataInsertionResult =
-        await insertComicBookMetadata(currentPayload.comicBookId, consolidatedMetadata)
+			const consolidatedMetadata: ConsolidatedComicMetadata =
+				consolidateComicMetadata(metadata);
 
-      if (!this.metadataQueue) {
-        this.metadataQueue = await getQueue("COMIC_METADATA_AGGREGATION");
-      }
+			const insertionResult: ComicMetadataInsertionResult =
+				await insertComicBookMetadata(
+					currentPayload.comicBookId,
+					consolidatedMetadata,
+				);
 
-      const nextPayload: MetadataExtractionPayload = {
-        ...currentPayload,
-        metadata: metadata,
-      }
+			if (!this.metadataQueue) {
+				this.metadataQueue = await getQueue("COMIC_METADATA_AGGREGATION");
+			}
 
-      this.metadataQueue.enqueue(nextPayload)
+			const nextPayload: MetadataExtractionPayload = {
+				...currentPayload,
+				metadata: metadata,
+			};
 
-      workerLogger.info(
-        `Inserted metadata for comic book ${currentPayload.comicBookId}: ${JSON.stringify(insertionResult)}`,
-      )
-    } catch (error) {
-      workerLogger.error(
-        `There was an error inserting metadata for comic book ${currentPayload.comicBookId}: ${error}`,
-      )
-    } finally {
-      job.ack()
-    }
-  }
+			this.metadataQueue.enqueue(nextPayload);
+
+			workerLogger.info(
+				`Inserted metadata for comic book ${currentPayload.comicBookId}: ${JSON.stringify(insertionResult)}`,
+			);
+		} catch (error) {
+			workerLogger.error(
+				`There was an error inserting metadata for comic book ${currentPayload.comicBookId}: ${error}`,
+			);
+		} finally {
+			job.ack();
+		}
+	}
 }

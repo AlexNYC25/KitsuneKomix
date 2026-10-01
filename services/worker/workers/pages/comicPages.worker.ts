@@ -1,11 +1,11 @@
 import {
-  getQueue,
-  deleteComicPagesForBook,
-  insertComicPage,
-  type QueueJob,
-  type QueueType
-} from "kitsune-komix-database"
-import { readComicFileMetadata } from "comic-metadata-tool"
+	getQueue,
+	deleteComicPagesForBook,
+	insertComicPage,
+	type QueueJob,
+	type QueueType,
+} from "kitsune-komix-database";
+import { readComicFileMetadata } from "comic-metadata-tool";
 import { workerLogger } from "kitsune-komix-logging";
 
 import { getArchivesManifest } from "../../utilities/archive";
@@ -15,113 +15,125 @@ import { consolidateComicMetadata } from "../../utilities/metadata/metadataConso
 
 import type { IngestionToSecondaryPipelinePayload } from "../../shared/types/payload.types";
 import type {
-  ArchiveEntry,
-  ConsolidatedPageInfo,
-  PageThumbnailJob,
+	ArchiveEntry,
+	ConsolidatedPageInfo,
+	PageThumbnailJob,
 } from "../../shared/types/utilities.types";
 import { buildThumbnailCandidates } from "../../utilities/thumbnailCandidates";
 
 export class ComicPagesWorker {
-  queue: null | QueueType = null;
+	queue: null | QueueType = null;
 
-  thumbnailQueue: null | QueueType = null;
+	thumbnailQueue: null | QueueType = null;
 
-  async dequeue() {
-    if (!this.queue) {
-      this.queue = await getQueue("PROCESS_COMIC_PAGES");
-    }
+	async dequeue() {
+		if (!this.queue) {
+			this.queue = await getQueue("PROCESS_COMIC_PAGES");
+		}
 
-    const job: QueueJob | null = this.queue.claimOne("process_comic_pages_worker");
+		const job: QueueJob | null = this.queue.claimOne(
+			"process_comic_pages_worker",
+		);
 
-    return job;
-  }
-    
-  async start() {
-    workerLogger.info("process comic pages worker has started")
-    while (true) {
-      const job: QueueJob | null = await this.dequeue();
+		return job;
+	}
 
-      if (!job) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+	async start() {
+		workerLogger.info("process comic pages worker has started");
+		while (true) {
+			const job: QueueJob | null = await this.dequeue();
 
-        continue;
-      }
+			if (!job) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      await this.processJob(job);
-    }
-  }
+				continue;
+			}
 
-  async processJob(job: QueueJob) {
-    const currentPayload: IngestionToSecondaryPipelinePayload = job.payload as IngestionToSecondaryPipelinePayload
+			await this.processJob(job);
+		}
+	}
 
-    try {
-      const manifest = await getArchivesManifest(currentPayload.filePath)
+	async processJob(job: QueueJob) {
+		const currentPayload: IngestionToSecondaryPipelinePayload =
+			job.payload as IngestionToSecondaryPipelinePayload;
 
-      if (!manifest) {
-        throw new Error(`Could not read archive manifest for ${currentPayload.filePath}`)
-      }
+		try {
+			const manifest = await getArchivesManifest(currentPayload.filePath);
 
-      await deleteComicPagesForBook(currentPayload.comicBookId)
+			if (!manifest) {
+				throw new Error(
+					`Could not read archive manifest for ${currentPayload.filePath}`,
+				);
+			}
 
-      let metadataPages: ConsolidatedPageInfo[] = []
+			await deleteComicPagesForBook(currentPayload.comicBookId);
 
-      if (manifest.metadataExists) {
-        const metadata = await readComicFileMetadata(currentPayload.filePath)
-        metadataPages = consolidateComicMetadata(metadata).pages
-      }
+			let metadataPages: ConsolidatedPageInfo[] = [];
 
-      const candidateFiles = buildThumbnailCandidates(manifest.files, metadataPages)
+			if (manifest.metadataExists) {
+				const metadata = await readComicFileMetadata(currentPayload.filePath);
+				metadataPages = consolidateComicMetadata(metadata).pages;
+			}
 
-      const thumbnailCandidates: PageThumbnailJob["candidates"] = []
+			const candidateFiles = buildThumbnailCandidates(
+				manifest.files,
+				metadataPages,
+			);
 
-      for (let position = 0; position < manifest.files.length; position++) {
-        const file = manifest.files[position]
+			const thumbnailCandidates: PageThumbnailJob["candidates"] = [];
 
-        if (file === undefined) {
-          continue
-        }
+			for (let position = 0; position < manifest.files.length; position++) {
+				const file = manifest.files[position];
 
-        const fileBytes: ArrayBuffer = await extractEntry(currentPayload.filePath, file.path)
+				if (file === undefined) {
+					continue;
+				}
 
-        const fileHash: number | bigint = generateHashForBuffer(fileBytes)
+				const fileBytes: ArrayBuffer = await extractEntry(
+					currentPayload.filePath,
+					file.path,
+				);
 
-        const pageId = await insertComicPage({
-          comicBookId: currentPayload.comicBookId,
-          filePath: file.path,
-          pageNumber: position + 1,
-          type: "Story",
-          doublePage: 0,
-          hash: String(fileHash),
-          fileSize: file.size,
-        })
+				const fileHash: number | bigint = generateHashForBuffer(fileBytes);
 
-        if (candidateFiles.some((candidate) => candidate.path === file.path)) {
-          thumbnailCandidates.push({
-            comicPageId: pageId,
-            imagePath: file.path,
-          })
-        }
-      }
+				const pageId = await insertComicPage({
+					comicBookId: currentPayload.comicBookId,
+					filePath: file.path,
+					pageNumber: position + 1,
+					type: "Story",
+					doublePage: 0,
+					hash: String(fileHash),
+					fileSize: file.size,
+				});
 
-      if (!this.thumbnailQueue) {
-        this.thumbnailQueue = await getQueue("GENERATE_COMIC_THUMBNAILS");
-      }
+				if (candidateFiles.some((candidate) => candidate.path === file.path)) {
+					thumbnailCandidates.push({
+						comicPageId: pageId,
+						imagePath: file.path,
+					});
+				}
+			}
 
-      const thumbnailJob: PageThumbnailJob = {
-        comicBookId: currentPayload.comicBookId,
-        candidates: thumbnailCandidates,
-      }
+			if (!this.thumbnailQueue) {
+				this.thumbnailQueue = await getQueue("GENERATE_COMIC_THUMBNAILS");
+			}
 
-      this.thumbnailQueue.enqueue(thumbnailJob)
+			const thumbnailJob: PageThumbnailJob = {
+				comicBookId: currentPayload.comicBookId,
+				candidates: thumbnailCandidates,
+			};
 
-      workerLogger.info(
-        `Processed ${manifest.files.length} pages for comic book ${currentPayload.comicBookId}; queued ${thumbnailCandidates.length} thumbnail candidate(s)`
-      )
+			this.thumbnailQueue.enqueue(thumbnailJob);
 
-    } catch (error) {
-      workerLogger.error(`There was an error processing the comic pages job: ${error}`)
-    } finally {
-      job.ack()
-    }
-  }
+			workerLogger.info(
+				`Processed ${manifest.files.length} pages for comic book ${currentPayload.comicBookId}; queued ${thumbnailCandidates.length} thumbnail candidate(s)`,
+			);
+		} catch (error) {
+			workerLogger.error(
+				`There was an error processing the comic pages job: ${error}`,
+			);
+		} finally {
+			job.ack();
+		}
+	}
 }

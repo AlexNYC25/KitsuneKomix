@@ -4,11 +4,13 @@ import { sql } from "drizzle-orm/sql";
 import { comicPagesTable } from "./comicPages.table.ts";
 
 export const comicBookCoversTable = snakeCase.table("comic_book_covers", {
-  id: int().primaryKey({ autoIncrement: true }),
-  comicPageId: int().notNull().references(() => comicPagesTable.id, {
-    onDelete: "cascade",
-  }),
-  filePath: text().notNull().unique(),
-  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	id: int().primaryKey({ autoIncrement: true }),
+	comicPageId: int()
+		.notNull()
+		.references(() => comicPagesTable.id, {
+			onDelete: "cascade",
+		}),
+	filePath: text().notNull().unique(),
+	createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });

@@ -1,4 +1,4 @@
-import { join } from "node:path"
+import { join } from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
 
 /**
@@ -6,14 +6,16 @@ import { existsSync, mkdirSync } from "node:fs";
  * @param folderPath The directory where we want to access the file
  * @returns A file path string representing the location of the sqlite file
  */
-export const generateSqlFilePath = async (folderPath: string): Promise<string> => {
-  const isRealFolder: boolean = existsSync(folderPath);
+export const generateSqlFilePath = async (
+	folderPath: string,
+): Promise<string> => {
+	const isRealFolder: boolean = existsSync(folderPath);
 
-  if (!isRealFolder) {
-    mkdirSync(folderPath, { recursive: true});
-  }
+	if (!isRealFolder) {
+		mkdirSync(folderPath, { recursive: true });
+	}
 
-  const sqlFilePathInFolder: string = join(folderPath, "database.sqlite");
+	const sqlFilePathInFolder: string = join(folderPath, "database.sqlite");
 
-  return sqlFilePathInFolder;
-}
+	return sqlFilePathInFolder;
+};

@@ -16,14 +16,15 @@ import type { DrizzleType, AppSetting } from "../shared/types/index.ts";
  * @throws {Error} Throws when the database client is not initialized or query execution fails.
  */
 export const getSetting = async (key: string): Promise<string | null> => {
-  const db: DrizzleType = await getClient();
+	const db: DrizzleType = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-		const result: AppSetting[] = await db.select()
+	try {
+		const result: AppSetting[] = await db
+			.select()
 			.from(appSettingsTable)
 			.where(eq(appSettingsTable.key, key))
 			.limit(1);
@@ -44,12 +45,11 @@ export const getSetting = async (key: string): Promise<string | null> => {
 
 		const value: string = result[0].value;
 
-  	return value;
+		return value;
 	} catch (error) {
 		dbLogger.error("Error fetching setting:" + error);
 		throw error;
 	}
-  
 };
 
 /**
@@ -66,23 +66,24 @@ export const getSetting = async (key: string): Promise<string | null> => {
 export const setSetting = async (key: string, value: string): Promise<void> => {
 	const db: DrizzleType = await getClient();
 
-	if (!db ) {
+	if (!db) {
 		throw new Error("Database is not initialized.");
 	}
 
 	try {
-		const existingSetting: AppSetting[] = await db.select()
+		const existingSetting: AppSetting[] = await db
+			.select()
 			.from(appSettingsTable)
 			.where(eq(appSettingsTable.key, key))
 			.limit(1);
 
 		if (existingSetting.length > 0) {
-			await db.update(appSettingsTable)
+			await db
+				.update(appSettingsTable)
 				.set({ value })
 				.where(eq(appSettingsTable.key, key));
 		} else {
-			await db.insert(appSettingsTable)
-				.values({ key, value });
+			await db.insert(appSettingsTable).values({ key, value });
 		}
 	} catch (error) {
 		dbLogger.error("Error setting value:" + error);
@@ -105,7 +106,8 @@ export const checkIfSettingExists = async (key: string): Promise<boolean> => {
 	}
 
 	try {
-		const existingSetting: AppSetting[] = await db.select()
+		const existingSetting: AppSetting[] = await db
+			.select()
 			.from(appSettingsTable)
 			.where(eq(appSettingsTable.key, key))
 			.limit(1);

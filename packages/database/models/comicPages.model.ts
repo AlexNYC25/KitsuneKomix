@@ -12,27 +12,27 @@ import type { NewComicPage } from "../shared/types/database.types.ts";
  * @returns The ID of the inserted page
  */
 export const insertComicPage = async (page: NewComicPage): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result = await db
-      .insert(comicPagesTable)
-      .values(page)
-      .returning({ id: comicPagesTable.id });
+	try {
+		const result = await db
+			.insert(comicPagesTable)
+			.values(page)
+			.returning({ id: comicPagesTable.id });
 
-    if (result[0]) {
-      return result[0].id;
-    }
+		if (result[0]) {
+			return result[0].id;
+		}
 
-    throw new Error("Insert did not return an ID.");
-  } catch (error) {
-    dbLogger.error("Error inserting comic page:" + error);
-    throw error;
-  }
+		throw new Error("Insert did not return an ID.");
+	} catch (error) {
+		dbLogger.error("Error inserting comic page:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -40,22 +40,24 @@ export const insertComicPage = async (page: NewComicPage): Promise<number> => {
  * @param comicBookId The ID of the comic book whose pages to delete
  * @returns The number of deleted rows
  */
-export const deleteComicPagesForBook = async (comicBookId: number): Promise<number> => {
-  const db = await getClient();
+export const deleteComicPagesForBook = async (
+	comicBookId: number,
+): Promise<number> => {
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result = await db
-      .delete(comicPagesTable)
-      .where(eq(comicPagesTable.comicBookId, comicBookId))
-      .returning({ id: comicPagesTable.id });
+	try {
+		const result = await db
+			.delete(comicPagesTable)
+			.where(eq(comicPagesTable.comicBookId, comicBookId))
+			.returning({ id: comicPagesTable.id });
 
-    return result.length;
-  } catch (error) {
-    dbLogger.error("Error deleting comic pages for book:" + error);
-    throw error;
-  }
+		return result.length;
+	} catch (error) {
+		dbLogger.error("Error deleting comic pages for book:" + error);
+		throw error;
+	}
 };

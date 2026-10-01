@@ -5,21 +5,26 @@ import { comicBooksTable } from "./comicBooks.table.ts";
 import { comicBookCoversTable } from "./comicBookCovers.table.ts";
 import { userTable } from "./betterAuthUser.table.ts";
 
-export const comicBookThumbnailsTable = snakeCase.table("comic_book_thumbnails", {
-  id: int().primaryKey({ autoIncrement: true }),
-  comicBookId: int().notNull().references(() => comicBooksTable.id, {
-    onDelete: "cascade",
-  }),
-  comicBookCoverId: int().references(() => comicBookCoversTable.id, {
-    onDelete: "cascade",
-  }),
-  filePath: text().notNull(),
-  thumbnailType: text().notNull().default("generated"), // "generated" or "custom"
-  name: text(), // Optional name for custom thumbnails
-  description: text(), // Optional description for custom thumbnails
-  uploadedBy: int().references(() => userTable.id, {
-    onDelete: "set null",
-  }), // User who uploaded custom thumbnail
-  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
-});
+export const comicBookThumbnailsTable = snakeCase.table(
+	"comic_book_thumbnails",
+	{
+		id: int().primaryKey({ autoIncrement: true }),
+		comicBookId: int()
+			.notNull()
+			.references(() => comicBooksTable.id, {
+				onDelete: "cascade",
+			}),
+		comicBookCoverId: int().references(() => comicBookCoversTable.id, {
+			onDelete: "cascade",
+		}),
+		filePath: text().notNull(),
+		thumbnailType: text().notNull().default("generated"), // "generated" or "custom"
+		name: text(), // Optional name for custom thumbnails
+		description: text(), // Optional description for custom thumbnails
+		uploadedBy: int().references(() => userTable.id, {
+			onDelete: "set null",
+		}), // User who uploaded custom thumbnail
+		createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+		updatedAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
+	},
+);

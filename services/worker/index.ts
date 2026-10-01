@@ -17,12 +17,12 @@ const comicPagesWorker = new ComicPagesWorker();
 const comicThumbnailsWorker = new ComicThumbnailsWorker();
 
 await Promise.all([
-  ingestionWorker.start(),
-  comicBookRecordWorker.start(),
-  comicBookSeriesMappingWorker.start(),
-  metadataAggregationWorker.start(),
-  metadataWorker.start(),
-  metadataInsertionWorker.start(),
-  comicPagesWorker.start(),
-  comicThumbnailsWorker.start(),
+	ingestionWorker.start(),
+	comicBookRecordWorker.start(),
+	comicBookSeriesMappingWorker.start(),
+	metadataAggregationWorker.start(),
+	metadataWorker.start(),
+	metadataInsertionWorker.start(),
+	comicPagesWorker.start(),
+	comicThumbnailsWorker.start(),
 ]);

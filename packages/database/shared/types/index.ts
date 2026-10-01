@@ -22,210 +22,220 @@ export type AllowedFilterProperties = ComicFilterField;
 
 // ── Comic Book domain types ──
 export type ComicBookFilterItem = {
-  filterProperty: AllowedFilterProperties;
-  filterValue: string;
+	filterProperty: AllowedFilterProperties;
+	filterValue: string;
 };
 
 export type ComicBookFilteringAndSortingParams = {
-  filters?: ComicBookFilterItem[];
-  sort?: {
-    property: ComicSortField;
-    order: "asc" | "desc";
-  };
-  offset?: number;
-  limit?: number;
+	filters?: ComicBookFilterItem[];
+	sort?: {
+		property: ComicSortField;
+		order: "asc" | "desc";
+	};
+	offset?: number;
+	limit?: number;
 };
 
 export type MetadataProcessor = {
-  label: string;
-  values?: string[];
-  insert: (name: string) => Promise<number>;
-  link: (entityId: number, comicId: number) => Promise<void>;
+	label: string;
+	values?: string[];
+	insert: (name: string) => Promise<number>;
+	link: (entityId: number, comicId: number) => Promise<void>;
 };
 
 // ── Comic Series domain types ──
 export type ComicSeriesFilterItem = {
-  filterProperty: ComicSeriesFilterField;
-  filterValue: string;
+	filterProperty: ComicSeriesFilterField;
+	filterValue: string;
 };
 
 export type ComicSeriesFilteringAndSortingParams = {
-  filters?: ComicSeriesFilterItem[];
-  sort?: {
-    property: ComicSeriesSortField;
-    order: "asc" | "desc";
-  };
-  offset?: number;
-  limit?: number;
+	filters?: ComicSeriesFilterItem[];
+	sort?: {
+		property: ComicSeriesSortField;
+		order: "asc" | "desc";
+	};
+	offset?: number;
+	limit?: number;
 };
 
 // ── Comic Series Group domain types ──
 export type ComicSeriesGroupsFilterItem = {
-  filterProperty: ComicSeriesGroupsFilterField;
-  filterValue: string;
+	filterProperty: ComicSeriesGroupsFilterField;
+	filterValue: string;
 };
 
 export type ComicSeriesGroupsFilteringAndSortingParams = {
-  filters?: ComicSeriesGroupsFilterItem[];
-  sort?: {
-    property: ComicSeriesGroupsSortField;
-    order: "asc" | "desc";
-  };
-  offset?: number;
-  limit?: number;
+	filters?: ComicSeriesGroupsFilterItem[];
+	sort?: {
+		property: ComicSeriesGroupsSortField;
+		order: "asc" | "desc";
+	};
+	offset?: number;
+	limit?: number;
 };
 
 // ── Comic Story Arc (readlist) types ──
 export type ComicStoryArcFilterItem = {
-  filterProperty: ComicReadlistsFilterField;
-  filterValue: string;
+	filterProperty: ComicReadlistsFilterField;
+	filterValue: string;
 };
 
 export type ComicStoryArcsFilteringAndSortingParams = {
-  filters?: ComicStoryArcFilterItem[];
-  sort?: {
-    property: ComicReadlistsSortField;
-    order: "asc" | "desc";
-  };
-  offset?: number;
-  limit?: number;
+	filters?: ComicStoryArcFilterItem[];
+	sort?: {
+		property: ComicReadlistsSortField;
+		order: "asc" | "desc";
+	};
+	offset?: number;
+	limit?: number;
 };
 
-export type ComicStoryArcWithComicIds = import("./database.types.ts").ComicBookStoryArc & { comicBookIds: number[] };
+export type ComicStoryArcWithComicIds =
+	import("./database.types.ts").ComicBookStoryArc & { comicBookIds: number[] };
 
 // ── Batch metadata types ──
 export type ComicBookMetadata = {
-  writers?: import("./database.types.ts").ComicCredit[];
-  pencilers?: import("./database.types.ts").ComicCredit[];
-  inkers?: import("./database.types.ts").ComicCredit[];
-  letterers?: import("./database.types.ts").ComicCredit[];
-  editors?: import("./database.types.ts").ComicCredit[];
-  colorists?: import("./database.types.ts").ComicCredit[];
-  coverArtists?: import("./database.types.ts").ComicCredit[];
-  publishers?: import("./database.types.ts").ComicPublisher[];
-  imprints?: import("./database.types.ts").ComicPublisher[];
-  genres?: import("./database.types.ts").ComicGenre[];
-  characters?: import("./database.types.ts").ComicContent[];
-  teams?: import("./database.types.ts").ComicContent[];
-  locations?: import("./database.types.ts").ComicContent[];
-  storyArcs?: import("./database.types.ts").ComicBookStoryArc[];
-  seriesGroups?: import("./database.types.ts").ComicSeriesGroup[];
+	writers?: import("./database.types.ts").ComicCredit[];
+	pencilers?: import("./database.types.ts").ComicCredit[];
+	inkers?: import("./database.types.ts").ComicCredit[];
+	letterers?: import("./database.types.ts").ComicCredit[];
+	editors?: import("./database.types.ts").ComicCredit[];
+	colorists?: import("./database.types.ts").ComicCredit[];
+	coverArtists?: import("./database.types.ts").ComicCredit[];
+	publishers?: import("./database.types.ts").ComicPublisher[];
+	imprints?: import("./database.types.ts").ComicPublisher[];
+	genres?: import("./database.types.ts").ComicGenre[];
+	characters?: import("./database.types.ts").ComicContent[];
+	teams?: import("./database.types.ts").ComicContent[];
+	locations?: import("./database.types.ts").ComicContent[];
+	storyArcs?: import("./database.types.ts").ComicBookStoryArc[];
+	seriesGroups?: import("./database.types.ts").ComicSeriesGroup[];
 };
 
 export type BatchMetadataResult = {
-  [comicBookId: number]: ComicBookMetadata;
+	[comicBookId: number]: ComicBookMetadata;
 };
 
 // ── Batch types ──
-export type BatchComicBookHistory = Record<number, import("./database.types.ts").ComicBookHistory>;
-export type BatchComicBookThumbnails = Record<number, import("./database.types.ts").ComicBookThumbnail[]>;
+export type BatchComicBookHistory = Record<
+	number,
+	import("./database.types.ts").ComicBookHistory
+>;
+export type BatchComicBookThumbnails = Record<
+	number,
+	import("./database.types.ts").ComicBookThumbnail[]
+>;
 
 // ── Library input types (simplified — no Zod dependency) ──
 export type LibraryRegistrationInput = {
-  name: string;
-  path: string;
-  description?: string | null;
+	name: string;
+	path: string;
+	description?: string | null;
 };
 
 export type LibraryUpdateInput = {
-  name?: string;
-  path?: string;
-  description?: string | null;
-  enabled?: boolean;
+	name?: string;
+	path?: string;
+	description?: string | null;
+	enabled?: boolean;
 };
 
 // ── Comic extraction / parser types ──
 export type ComicExtractionResult = {
-  success: boolean;
-  extractedPath: string;
-  pageCount: number;
-  pages: string[];
-  coverImagePath?: string;
-  fileSizeBytes: number;
-  error?: string;
+	success: boolean;
+	extractedPath: string;
+	pageCount: number;
+	pages: string[];
+	coverImagePath?: string;
+	fileSizeBytes: number;
+	error?: string;
 };
 
 export type ThumbnailConfig = {
-  width?: number;
-  height?: number;
-  quality?: number;
-  preserveAspectRatio?: boolean;
-  outputFormat?: "jpeg" | "png" | "webp";
+	width?: number;
+	height?: number;
+	quality?: number;
+	preserveAspectRatio?: boolean;
+	outputFormat?: "jpeg" | "png" | "webp";
 };
 
 export type ThumbnailResult = {
-  success: boolean;
-  thumbnailPath?: string;
-  originalPath: string;
-  error?: string;
-  width?: number;
-  height?: number;
-  fileSize?: number;
+	success: boolean;
+	thumbnailPath?: string;
+	originalPath: string;
+	error?: string;
+	width?: number;
+	height?: number;
+	fileSize?: number;
 };
 
 export type ComicSeriesDetails = {
-  series: string;
-  volume?: string;
-  count?: string;
-  year?: string;
+	series: string;
+	volume?: string;
+	count?: string;
+	year?: string;
 };
 
 export type ComicFileDetails = ComicSeriesDetails & {
-  issue: string;
+	issue: string;
 };
 
 export type StandardizedComicMetadataPage = {
-  image: string;
-  type: string;
-  doublePage?: boolean;
-  size?: number;
-  width?: number;
-  height?: number;
+	image: string;
+	type: string;
+	doublePage?: boolean;
+	size?: number;
+	width?: number;
+	height?: number;
 };
 
 export type StandardizedComicMetadataReadingDirection =
-  | "LeftToRight" | "RightToLeft" | "TopToBottom" | "BottomToTop";
+	| "LeftToRight"
+	| "RightToLeft"
+	| "TopToBottom"
+	| "BottomToTop";
 
 export interface StandardizedComicMetadata {
-  title?: string;
-  series: string;
-  issueNumber: string;
-  volume?: string;
-  count?: number;
-  alternateSeries?: string;
-  alternateNumber?: string;
-  alternateCount?: number;
-  pageCount?: number;
-  summary?: string;
-  notes?: string;
-  year?: number;
-  month?: number;
-  day?: number;
-  scanInfo?: string;
-  language?: string;
-  format?: string;
-  blackAndWhite?: boolean;
-  manga?: boolean;
-  readingDirection?: StandardizedComicMetadataReadingDirection;
-  review?: string;
-  writers?: string[];
-  pencilers?: string[];
-  inkers?: string[];
-  colorists?: string[];
-  letterers?: string[];
-  editors?: string[];
-  coverArtists?: string[];
-  publisher?: string[];
-  imprint?: string[];
-  genres?: string[];
-  web?: string[];
-  characters?: string[];
-  teams?: string[];
-  mainCharacterTeam?: string;
-  locations?: string[];
-  storyArcs?: string[];
-  seriesGroups?: string[];
-  ageRating?: string;
-  communityRating?: number;
-  pages?: StandardizedComicMetadataPage[];
+	title?: string;
+	series: string;
+	issueNumber: string;
+	volume?: string;
+	count?: number;
+	alternateSeries?: string;
+	alternateNumber?: string;
+	alternateCount?: number;
+	pageCount?: number;
+	summary?: string;
+	notes?: string;
+	year?: number;
+	month?: number;
+	day?: number;
+	scanInfo?: string;
+	language?: string;
+	format?: string;
+	blackAndWhite?: boolean;
+	manga?: boolean;
+	readingDirection?: StandardizedComicMetadataReadingDirection;
+	review?: string;
+	writers?: string[];
+	pencilers?: string[];
+	inkers?: string[];
+	colorists?: string[];
+	letterers?: string[];
+	editors?: string[];
+	coverArtists?: string[];
+	publisher?: string[];
+	imprint?: string[];
+	genres?: string[];
+	web?: string[];
+	characters?: string[];
+	teams?: string[];
+	mainCharacterTeam?: string;
+	locations?: string[];
+	storyArcs?: string[];
+	seriesGroups?: string[];
+	ageRating?: string;
+	communityRating?: number;
+	pages?: StandardizedComicMetadataPage[];
 }

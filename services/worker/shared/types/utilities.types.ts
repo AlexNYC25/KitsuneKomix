@@ -1,69 +1,69 @@
 export type ComicYearParserResult = {
-  year: number | undefined,
-  fileName: string
-}
+	year: number | undefined;
+	fileName: string;
+};
 
 export type ComicIssueCountParserResult = {
-  totalIssueCount: number | undefined,
-  fileName: string
-}
+	totalIssueCount: number | undefined;
+	fileName: string;
+};
 
 export type ComicFormatParserResult = {
-  format: string| undefined,
-  fileName: string
-}
+	format: string | undefined;
+	fileName: string;
+};
 
 export type ComicIssueParserResult = {
-  issue: string | undefined
-  fileName: string
-}
+	issue: string | undefined;
+	fileName: string;
+};
 
 export type ComicVolumeParserResult = {
-  volume: number | undefined,
-  fileName: string
-}
+	volume: number | undefined;
+	fileName: string;
+};
 
 export type ComicTagsParserResult = {
-  tags: string[];
-  fileName: string;
-}
+	tags: string[];
+	fileName: string;
+};
 
 export type ComicNameParserResult = {
-  seriesName: string | undefined,
-  issue: string | undefined,
-  volume: number | undefined,
-  count: number | undefined,
-  year: number | undefined,
-  format: string | undefined,
-  tags: string[]
-}
+	seriesName: string | undefined;
+	issue: string | undefined;
+	volume: number | undefined;
+	count: number | undefined;
+	year: number | undefined;
+	format: string | undefined;
+	tags: string[];
+};
 
 export type List7zzFileOutput = {
-  date: string,
-  time: string,
-  attr: string,
-  size: string,
-  compressed: string,
-  name: string
-}
+	date: string;
+	time: string;
+	attr: string;
+	size: string;
+	compressed: string;
+	name: string;
+};
 
 export interface ArchiveEntry {
-  path: string,
-  size: number,
+	path: string;
+	size: number;
 }
 
 export interface ArchiveManifest {
-  type: string,
-  archiveSize: number,
-  hash: number | bigint | undefined
+	type: string;
+	archiveSize: number;
+	hash: number | bigint | undefined;
 
-  metadataExists: boolean
+	metadataExists: boolean;
 
-  files: ArchiveEntry[]
+	files: ArchiveEntry[];
 }
 
 export interface ArchiveReader {
-  getManifest(filePath: string): Promise<ArchiveManifest>
+	getManifest(filePath: string): Promise<ArchiveManifest>;
 }
 
 /**
@@ -71,22 +71,22 @@ export interface ArchiveReader {
  * Used to gather creators from every metadata source into one list.
  */
 export interface ConsolidatedCredit {
-  person: string
-  role: string
+	person: string;
+	role: string;
 }
 
 /**
  * A normalized page entry found in a comic file.
  */
 export interface ConsolidatedPageInfo {
-  image: number
-  type?: string
-  doublePage?: boolean
-  imageSize?: number
-  key?: string
-  bookmark?: string
-  imageWidth?: number
-  imageHeight?: number
+	image: number;
+	type?: string;
+	doublePage?: boolean;
+	imageSize?: number;
+	key?: string;
+	bookmark?: string;
+	imageWidth?: number;
+	imageHeight?: number;
 }
 
 /**
@@ -98,49 +98,49 @@ export interface ConsolidatedPageInfo {
  * gathered from any source that contains them.
  */
 export interface ConsolidatedComicMetadata {
-  title: string | undefined
-  series: string | undefined
-  issueNumber: string | undefined
-  count: number | undefined
-  volumeNumber: string | undefined
+	title: string | undefined;
+	series: string | undefined;
+	issueNumber: string | undefined;
+	count: number | undefined;
+	volumeNumber: string | undefined;
 
-  alternateSeries: string | undefined
-  alternateIssueNumber: string | undefined
-  alternateCount: number | undefined
-  alternateVolumeNumber: string | undefined
+	alternateSeries: string | undefined;
+	alternateIssueNumber: string | undefined;
+	alternateCount: number | undefined;
+	alternateVolumeNumber: string | undefined;
 
-  pageCount: number | undefined
-  year: number | undefined
-  month: number | undefined
-  day: number | undefined
-  publicationDate: string | undefined
+	pageCount: number | undefined;
+	year: number | undefined;
+	month: number | undefined;
+	day: number | undefined;
+	publicationDate: string | undefined;
 
-  publisher: string | undefined
-  imprint: string | undefined
-  summary: string | undefined
-  notes: string | undefined
-  language: string | undefined
-  format: string | undefined
-  web: string | undefined
+	publisher: string | undefined;
+	imprint: string | undefined;
+	summary: string | undefined;
+	notes: string | undefined;
+	language: string | undefined;
+	format: string | undefined;
+	web: string | undefined;
 
-  blackAndWhite: boolean | string | undefined
-  manga: boolean | string | undefined
-  readingDirection: "ltr" | "rtl" | undefined
+	blackAndWhite: boolean | string | undefined;
+	manga: boolean | string | undefined;
+	readingDirection: "ltr" | "rtl" | undefined;
 
-  ageRating: string | undefined
-  communityRating: number | undefined
-  review: string | undefined
-  scanInfo: string | undefined
+	ageRating: string | undefined;
+	communityRating: number | undefined;
+	review: string | undefined;
+	scanInfo: string | undefined;
 
-  genres: string[]
-  storyArcs: string[]
-  seriesGroups: string[]
-  characters: string[]
-  teams: string[]
-  locations: string[]
-  credits: ConsolidatedCredit[]
-  pages: ConsolidatedPageInfo[]
-  tags: string[]
+	genres: string[];
+	storyArcs: string[];
+	seriesGroups: string[];
+	characters: string[];
+	teams: string[];
+	locations: string[];
+	credits: ConsolidatedCredit[];
+	pages: ConsolidatedPageInfo[];
+	tags: string[];
 }
 
 /**
@@ -149,17 +149,17 @@ export interface ConsolidatedComicMetadata {
  * successfully recorded for that type.
  */
 export type ComicMetadataInsertionResult = {
-  genres: number
-  publishers: number
-  imprints: number
-  credits: number
-  characters: number
-  teams: number
-  locations: number
-  storyArcs: number
-  seriesGroups: number
-  webLinks: number
-}
+	genres: number;
+	publishers: number;
+	imprints: number;
+	credits: number;
+	characters: number;
+	teams: number;
+	locations: number;
+	storyArcs: number;
+	seriesGroups: number;
+	webLinks: number;
+};
 
 /**
  * A summary of the entities aggregated into a comic series when recording a
@@ -167,16 +167,16 @@ export type ComicMetadataInsertionResult = {
  * the number of entities successfully recorded for that type.
  */
 export type SeriesAggregationResult = {
-  genres: number
-  publishers: number
-  imprints: number
-  credits: number
-  characters: number
-  teams: number
-  locations: number
-  storyArcs: number
-  seriesGroups: number
-}
+	genres: number;
+	publishers: number;
+	imprints: number;
+	credits: number;
+	characters: number;
+	teams: number;
+	locations: number;
+	storyArcs: number;
+	seriesGroups: number;
+};
 
 /**
  * A single image in a comic book archive that needs a thumbnail generated.
@@ -184,8 +184,8 @@ export type SeriesAggregationResult = {
  * archive itself is located via the comic book's file path.
  */
 export interface ThumbnailCandidate {
-  comicPageId: number
-  imagePath: string
+	comicPageId: number;
+	imagePath: string;
 }
 
 /**
@@ -196,6 +196,6 @@ export interface ThumbnailCandidate {
  * reworking the payload.
  */
 export type PageThumbnailJob = {
-  comicBookId: number
-  candidates: ThumbnailCandidate[]
-}
+	comicBookId: number;
+	candidates: ThumbnailCandidate[];
+};

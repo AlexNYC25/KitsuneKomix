@@ -1,33 +1,17 @@
-import { expect, test } from "bun:test"
+import { expect, test } from "bun:test";
 
-test("file added -> enqueued to added queue", () => {
+test("file added -> enqueued to added queue", () => {});
 
-})
+test("file modified -> enqueued to modified queue", () => {});
 
-test("file modified -> enqueued to modified queue", () => {
+test("file removed -> remove job", () => {});
 
-})
+test("file removed -> mark file deleted", () => {});
 
-test("file removed -> remove job", () => {
+test("new directory added dynamically", () => {});
 
-})
+test("removed directory stops receiving events", () => {});
 
-test("file removed -> mark file deleted", () => {
+test("nested directories are watched", () => {});
 
-})
-
-test("new directory added dynamically", () => {
-
-})
-
-test("removed directory stops receiving events", () => {
-
-})
-
-test("nested directories are watched", () => {
-
-})
-
-test("ignoreinitial works", () => {
-
-})
+test("ignoreinitial works", () => {});

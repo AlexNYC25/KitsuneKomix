@@ -4,8 +4,8 @@ import { getClient } from "../drizzle/client.ts";
 import { dbLogger } from "../loggers/index.ts";
 
 import {
-  comicBookStoryArcsTable,
-  comicStoryArcsTable,
+	comicBookStoryArcsTable,
+	comicStoryArcsTable,
 } from "../schemas/index.ts";
 
 /**
@@ -15,38 +15,38 @@ import {
  * @returns The ID of the story arc
  */
 export const insertStoryArc = async (name: string): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const insertResult: { id: number }[] = await db
-      .insert(comicStoryArcsTable)
-      .values({ name })
-      .onConflictDoNothing()
-      .returning({ id: comicStoryArcsTable.id });
+	try {
+		const insertResult: { id: number }[] = await db
+			.insert(comicStoryArcsTable)
+			.values({ name })
+			.onConflictDoNothing()
+			.returning({ id: comicStoryArcsTable.id });
 
-    if (insertResult[0]) {
-      return insertResult[0].id;
-    }
+		if (insertResult[0]) {
+			return insertResult[0].id;
+		}
 
-    const existingStoryArc = await db
-      .select({ id: comicStoryArcsTable.id })
-      .from(comicStoryArcsTable)
-      .where(eq(comicStoryArcsTable.name, name))
-      .limit(1);
+		const existingStoryArc = await db
+			.select({ id: comicStoryArcsTable.id })
+			.from(comicStoryArcsTable)
+			.where(eq(comicStoryArcsTable.name, name))
+			.limit(1);
 
-    if (!existingStoryArc[0]) {
-      throw new Error("Story arc already exists but could not be fetched.");
-    }
+		if (!existingStoryArc[0]) {
+			throw new Error("Story arc already exists but could not be fetched.");
+		}
 
-    return existingStoryArc[0].id;
-  } catch (error) {
-    dbLogger.error("Error inserting story arc:" + error);
-    throw error;
-  }
+		return existingStoryArc[0].id;
+	} catch (error) {
+		dbLogger.error("Error inserting story arc:" + error);
+		throw error;
+	}
 };
 
 /**
@@ -58,30 +58,30 @@ export const insertStoryArc = async (name: string): Promise<number> => {
  * @returns A boolean indicating whether a new mapping was created
  */
 export const linkStoryArcToComicBook = async (
-  storyArcId: number,
-  comicBookId: number,
-  position: number,
+	storyArcId: number,
+	comicBookId: number,
+	position: number,
 ): Promise<boolean> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const result: { id: number }[] = await db
-      .insert(comicBookStoryArcsTable)
-      .values({
-        comicBookId,
-        comicStoryArcId: storyArcId,
-        position,
-      })
-      .onConflictDoNothing()
-      .returning({ id: comicBookStoryArcsTable.id });
+	try {
+		const result: { id: number }[] = await db
+			.insert(comicBookStoryArcsTable)
+			.values({
+				comicBookId,
+				comicStoryArcId: storyArcId,
+				position,
+			})
+			.onConflictDoNothing()
+			.returning({ id: comicBookStoryArcsTable.id });
 
-    return result.length > 0;
-  } catch (error) {
-    dbLogger.error("Error linking story arc to comic book:" + error);
-    throw error;
-  }
+		return result.length > 0;
+	} catch (error) {
+		dbLogger.error("Error linking story arc to comic book:" + error);
+		throw error;
+	}
 };

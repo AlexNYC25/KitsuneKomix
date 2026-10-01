@@ -14,39 +14,39 @@ import { comicWebLinksTable } from "../schemas/index.ts";
  * @returns The ID of the web link
  */
 export const insertWebLink = async (
-  url: string,
-  comicBookId: number,
+	url: string,
+	comicBookId: number,
 ): Promise<number> => {
-  const db = await getClient();
+	const db = await getClient();
 
-  if (!db) {
-    throw new Error("Database is not initialized.");
-  }
+	if (!db) {
+		throw new Error("Database is not initialized.");
+	}
 
-  try {
-    const insertResult: { id: number }[] = await db
-      .insert(comicWebLinksTable)
-      .values({ url, comicBookId })
-      .onConflictDoNothing()
-      .returning({ id: comicWebLinksTable.id });
+	try {
+		const insertResult: { id: number }[] = await db
+			.insert(comicWebLinksTable)
+			.values({ url, comicBookId })
+			.onConflictDoNothing()
+			.returning({ id: comicWebLinksTable.id });
 
-    if (insertResult[0]) {
-      return insertResult[0].id;
-    }
+		if (insertResult[0]) {
+			return insertResult[0].id;
+		}
 
-    const existingWebLink = await db
-      .select({ id: comicWebLinksTable.id })
-      .from(comicWebLinksTable)
-      .where(eq(comicWebLinksTable.url, url))
-      .limit(1);
+		const existingWebLink = await db
+			.select({ id: comicWebLinksTable.id })
+			.from(comicWebLinksTable)
+			.where(eq(comicWebLinksTable.url, url))
+			.limit(1);
 
-    if (!existingWebLink[0]) {
-      throw new Error("Web link already exists but could not be fetched.");
-    }
+		if (!existingWebLink[0]) {
+			throw new Error("Web link already exists but could not be fetched.");
+		}
 
-    return existingWebLink[0].id;
-  } catch (error) {
-    dbLogger.error("Error inserting web link:" + error);
-    throw error;
-  }
+		return existingWebLink[0].id;
+	} catch (error) {
+		dbLogger.error("Error inserting web link:" + error);
+		throw error;
+	}
 };
