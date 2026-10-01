@@ -1,6 +1,8 @@
+import { auth } from "../utils/auth";
+
 import { factory, finalMiddlewareApply } from "./factory";
 
-import { auth } from "../utils/auth";
+
 
 const app = factory(true);
 

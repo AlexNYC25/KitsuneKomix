@@ -1,18 +1,19 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
+import type { ApiEnv } from "../types/Auth.types";
+
+import { resolveAuthSession } from "./middleware/auth";
 import { honoCors } from "./middleware/cors";
-import { requestUUID } from "./middleware/uuid";
 import { errorLogger } from "./middleware/error";
+import { requestUUID } from "./middleware/uuid";
 
 /**
  * Set up a new OpenAPIHono instance with the necessary middleware applied.
  * @param parent A boolean indicating whether the instance is a parent instance (true) or a child instance (false). If true, CORS and request ID middleware will be applied.
  * @returns
  */
-export const factory = (
-	parent: boolean = false,
-): OpenAPIHono<{ Variables: { requestId: string } }> => {
-	const app = new OpenAPIHono<{ Variables: { requestId: string } }>();
+export const factory = (parent: boolean = false): OpenAPIHono<ApiEnv> => {
+	const app = new OpenAPIHono<ApiEnv>();
 
 	if (parent) {
 		// CORS middleware must be registered BEFORE routes
@@ -20,6 +21,9 @@ export const factory = (
 
 		// Request ID middleware — generates a UUID for each request for log correlation
 		app.use("*", requestUUID);
+
+		// Auth session resolution middleware — resolves the auth session for each request
+		app.use("/api/*", resolveAuthSession);
 	}
 
 	return app;
@@ -29,9 +33,7 @@ export const factory = (
  * Applies final middleware to the provided OpenAPIHono instance, such as error logging.
  * @param app The OpenAPIHono instance to which the final middleware will be applied.
  */
-export const finalMiddlewareApply = (
-	app: OpenAPIHono<{ Variables: { requestId: string } }>,
-) => {
+export const finalMiddlewareApply = (app: OpenAPIHono<ApiEnv>) => {
 	// Error middleware - last to be set
 	app.onError(errorLogger);
 };
