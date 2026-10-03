@@ -15,7 +15,7 @@ import {
 	insertWebLink,
 } from "kitsune-komix-database";
 
-import { workerLogger } from "../loggers/index";
+import { workerLogger } from "kitsune-komix-logging";
 
 import type { NewComicBook } from "kitsune-komix-database";
 
