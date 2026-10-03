@@ -8,6 +8,7 @@
 	},
 	"peerDependencies": {
 		"kitsune-komix-config": "workspace:*",
+		"kitsune-komix-logging": "workspace:*",
 		"typescript": "^5"
 	},
 	"dependencies": {

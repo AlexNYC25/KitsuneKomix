@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getQueue, type QueueType } from "kitsune-komix-database";
 import { initialIngestionPayloadSchema } from "kitsune-komix-schemas";
 
-import { watcherLogger } from "../loggers/index.ts";
+import { watcherLogger } from "kitsune-komix-logging";
 
 export class WatchManager {
 	private watcher = chokidar.watch([], {
