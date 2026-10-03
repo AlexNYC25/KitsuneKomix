@@ -3,8 +3,8 @@ import { expect, test } from "bun:test";
 import {
 	testSQLiteConnection,
 	generateSqlFilePath,
-	env,
 } from "kitsune-komix-database";
+import { env } from "kitsune-komix-config";
 
 test("Database package can be pinged", async () => {
 	const sqliteConnectionWorks: boolean = await testSQLiteConnection();
