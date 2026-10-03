@@ -15,6 +15,8 @@ WORKDIR /build
 COPY package.json bun.lock* ./
 COPY packages/database/package.json ./packages/database/package.json
 COPY packages/schemas/package.json ./packages/schemas/package.json
+COPY packages/logging/package.json ./packages/logging/package.json
+COPY packages/config/package.json ./packages/config/package.json
 COPY services/api/package.json ./services/api/package.json
 COPY services/watcher/package.json ./services/watcher/package.json
 COPY services/worker/package.json ./services/worker/package.json
