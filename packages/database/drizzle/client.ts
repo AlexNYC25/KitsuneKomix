@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { Database } from "bun:sqlite";
 
-import { env } from "../config/env.ts";
-import { dbLogger } from "../loggers/index.ts";
+import { env } from "kitsune-komix-config";
+import { dbLogger } from "kitsune-komix-logging";
 import { generateSqlFilePath } from "../utilities/db-file.ts";
 
 import type { DrizzleType } from "../shared/types/index.ts";

@@ -1,5 +1,5 @@
 import { getClient } from "../drizzle/client.ts";
-import { dbLogger } from "../loggers/index.ts";
+import { dbLogger } from "kitsune-komix-logging";
 
 import {
 	comicSeriesContentAggregateTable,

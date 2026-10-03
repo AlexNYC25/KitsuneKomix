@@ -1,6 +1,6 @@
 import { open, type Database, type Queue } from "@russellthehippo/honker-bun";
 
-import { env } from "../config/env.ts";
+import { env } from "kitsune-komix-config";
 import { QueueNames } from "../config/queues.ts";
 import { generateSqlFilePath } from "../utilities/db-file.ts";
 

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { getClient } from "../drizzle/client.ts";
-import { dbLogger } from "../loggers/index.ts";
+import { dbLogger } from "kitsune-komix-logging";
 
 import { comicPagesTable } from "../schemas/index.ts";
 import type { NewComicPage } from "../shared/types/database.types.ts";

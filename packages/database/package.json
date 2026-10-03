@@ -12,7 +12,9 @@
 		"drizzle-kit": "^1.0.0-rc.4"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5",
+		"kitsune-komix-logging": "workspace:*",
+		"kitsune-komix-config": "workspace:*"
 	},
 	"dependencies": {
 		"@russellthehippo/honker-bun": "^0.2.2",

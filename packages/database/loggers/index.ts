@@ -2,7 +2,7 @@ import pino from "pino";
 import { join } from "node:path";
 import { mkdir } from "node:fs/promises";
 
-import { env } from "../config/env.ts";
+import { env } from "kitsune-komix-config";
 
 const configLocation: string = env.CONFIG_DIRECTORY;
 const logsDir: string = join(configLocation, "logs");

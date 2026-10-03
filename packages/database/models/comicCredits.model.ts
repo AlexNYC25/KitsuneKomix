@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 
 import { getClient } from "../drizzle/client.ts";
-import { dbLogger } from "../loggers/index.ts";
+import { dbLogger } from "kitsune-komix-logging";
 
 import { comicBookCreditsTable, comicCreditsTable } from "../schemas/index.ts";
 

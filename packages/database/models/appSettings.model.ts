@@ -4,7 +4,7 @@ import { getClient } from "../drizzle/client.ts";
 
 import { appSettingsTable } from "../schemas/index.ts";
 
-import { dbLogger } from "../loggers/index.ts";
+import { dbLogger } from "kitsune-komix-logging";
 
 import type { DrizzleType, AppSetting } from "../shared/types/index.ts";
 

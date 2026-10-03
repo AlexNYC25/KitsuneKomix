@@ -2,8 +2,8 @@ import { eq, sql, ilike, asc, desc } from "drizzle-orm";
 import type { SQLiteSelect } from "drizzle-orm/sqlite-core";
 
 import { getClient } from "../drizzle/client.ts";
-import { dbLogger } from "../loggers/index.ts";
-import { env } from "../config/env.ts";
+import { dbLogger } from "kitsune-komix-logging";
+import { env } from "kitsune-komix-config";
 
 import {
 	comicBookGenresTable,

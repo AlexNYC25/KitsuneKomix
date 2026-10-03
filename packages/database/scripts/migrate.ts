@@ -2,9 +2,9 @@ import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import { join } from "node:path";
 import { stat, mkdir } from "node:fs/promises";
 
-import { dbLogger } from "../loggers/index.ts";
+import { dbLogger } from "kitsune-komix-logging";
 import { getClient } from "../drizzle/client.ts";
-import { env } from "../config/env.ts";
+import { env } from "kitsune-komix-config";
 import type { DrizzleType } from "../shared/types/index.ts";
 
 export async function runMigrations() {
