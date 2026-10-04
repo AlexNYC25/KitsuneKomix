@@ -72,7 +72,8 @@ const getQueueHandle = async (): Promise<Database> => {
 		db = await getQueueClient();
 	} catch (error) {
 		dbLogger.error("Queue subsystem unavailable:" + error);
-		throw new QueueUnavailableError();
+		const reason = error instanceof Error ? error.message : String(error);
+		throw new QueueUnavailableError(`Queue subsystem is unavailable: ${reason}`);
 	}
 
 	verifyHonkerSchema(db.raw);

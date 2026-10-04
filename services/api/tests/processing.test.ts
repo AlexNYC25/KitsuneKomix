@@ -83,6 +83,7 @@ describe("processing queue status", () => {
 		expect(claimedJob?.state).toBe("processing");
 		expect(claimedJob?.workerId).toBe("phase4_worker");
 		expect(claimedJob?.filePath).toBe("/libs/a.cbz");
+		// biome-ignore lint/correctness/noUnsafeOptionalChaining: <explanation>
 		expect((claimedJob?.payload as TestPayload).marker).toBe("p4-a");
 
 		const pending = await getQueueJobs({
