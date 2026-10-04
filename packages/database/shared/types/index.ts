@@ -6,6 +6,8 @@ export * from "./database.types.ts";
 // Re-export Honker-inferred types
 export * from "./queue.type.ts";
 
+export * from "./queueStatus.types.ts";
+
 export type DrizzleType = ReturnType<typeof drizzle>;
 
 // ── Sort / Filter field types (simplified — no Zod dependency) ──
