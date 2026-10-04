@@ -18,3 +18,5 @@ export * from "./comicContent.model.ts";
 export * from "./comicStoryArcs.model.ts";
 export * from "./comicSeriesGroups.model.ts";
 export * from "./comicWebLinks.model.ts";
+
+export * from "./queueStatus.model.ts";
