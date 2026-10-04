@@ -13,4 +13,4 @@ export const QueueNames = {
 	COMIC_METADATA_AGGREGATION: "comic_metadata_aggregation",
 	PROCESS_COMIC_PAGES: "process_comic_pages",
 	GENERATE_COMIC_THUMBNAILS: "generate_comic_thumbnails",
-};
+} as const;
