@@ -20,3 +20,4 @@ export * from "./comicSeriesGroups.model.ts";
 export * from "./comicWebLinks.model.ts";
 
 export * from "./queueStatus.model.ts";
+export * from "./user.model.ts";
