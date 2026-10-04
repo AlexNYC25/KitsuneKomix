@@ -39,24 +39,30 @@ describe("processing queue status", () => {
 	});
 
 	test("getQueueOverview reports active workers", async () => {
-		await resetTestQueue();
-
 		const db = await getQueueClient();
-		const queue = db.queue(TEST_QUEUE);
-		queue.enqueue({ filePath: "/libs/active.cbz", marker: "overview" });
+		const workerId = "phase4_overview_worker";
 
-		const claimed = queue.claimOne("phase4_overview_worker");
-		expect(claimed).not.toBeNull();
+		// getQueueOverview only reports configured queues, so the processing row
+		// is inserted directly into the "temp" queue. The unique worker id keeps
+		// the assertion isolated from honker-ext.test.ts, which also uses "temp".
+		db.raw.run(
+			"INSERT INTO _honker_live (queue, payload, state, worker_id, attempts) VALUES ('temp', ?, 'processing', ?, 1)",
+			[JSON.stringify({ filePath: "/libs/active.cbz", marker: "overview" }), workerId],
+		);
 
-		const overview = await getQueueOverview();
-		const tempEntry = overview.find((entry) => entry.queue === "temp");
+		try {
+			const overview = await getQueueOverview();
+			const tempEntry = overview.find((entry) => entry.queue === "temp");
 
-		expect(tempEntry?.activeWorkers.some(
-			(worker) => worker.workerId === "phase4_overview_worker",
-		)).toBe(true);
-
-		claimed?.ack();
-		await resetTestQueue();
+			expect(
+				tempEntry?.activeWorkers.some((worker) => worker.workerId === workerId),
+			).toBe(true);
+		} finally {
+			db.raw.run(
+				"DELETE FROM _honker_live WHERE queue = 'temp' AND worker_id = ?",
+				[workerId],
+			);
+		}
 	});
 
 	test("getQueueJobs lists, filters and normalizes live jobs", async () => {
