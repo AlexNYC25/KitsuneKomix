@@ -3,6 +3,7 @@ import { auth } from "../utils/auth";
 import { factory, finalMiddlewareApply } from "./factory";
 
 import processingRouter from "../modules/processing/processing.router";
+import usersRouter from "../modules/users/users.router";
 
 
 
@@ -15,6 +16,7 @@ app.get("/health", (c) => {
 });
 
 app.route("/api/processing", processingRouter);
+app.route("/api/users", usersRouter);
 
 finalMiddlewareApply(app);
 
