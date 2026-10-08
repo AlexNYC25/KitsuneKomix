@@ -73,7 +73,9 @@ const getQueueHandle = async (): Promise<Database> => {
 	} catch (error) {
 		dbLogger.error("Queue subsystem unavailable:" + error);
 		const reason = error instanceof Error ? error.message : String(error);
-		throw new QueueUnavailableError(`Queue subsystem is unavailable: ${reason}`);
+		throw new QueueUnavailableError(
+			`Queue subsystem is unavailable: ${reason}`,
+		);
 	}
 
 	verifyHonkerSchema(db.raw);
@@ -104,7 +106,8 @@ const liveRowToQueueJobStatus = (
 	state: QueueJobState,
 ): QueueJobStatus => {
 	const payload = parsePayload(row.payload);
-	const filePath = typeof payload.filePath === "string" ? payload.filePath : null;
+	const filePath =
+		typeof payload.filePath === "string" ? payload.filePath : null;
 
 	return {
 		id: row.id,
@@ -124,7 +127,8 @@ const liveRowToQueueJobStatus = (
 
 const deadRowToQueueJobStatus = (row: HonkerDeadRow): QueueJobStatus => {
 	const payload = parsePayload(row.payload);
-	const filePath = typeof payload.filePath === "string" ? payload.filePath : null;
+	const filePath =
+		typeof payload.filePath === "string" ? payload.filePath : null;
 
 	return {
 		id: row.id,
@@ -168,10 +172,7 @@ export const getQueueOverview = async (): Promise<QueueOverviewEntry[]> => {
 
 		const activeWorkerRows =
 			raw
-				.query<
-					{ queue: string; worker_id: string; activeJobs: number },
-					[]
-				>(
+				.query<{ queue: string; worker_id: string; activeJobs: number }, []>(
 					"SELECT queue, worker_id, COUNT(*) AS activeJobs FROM _honker_live WHERE state = 'processing' GROUP BY queue, worker_id",
 				)
 				.all() ?? [];
@@ -181,7 +182,10 @@ export const getQueueOverview = async (): Promise<QueueOverviewEntry[]> => {
 			const deadCount = deadRows.find((row) => row.queue === queue)?.count ?? 0;
 			const activeWorkers = activeWorkerRows
 				.filter((row) => row.queue === queue)
-				.map((row) => ({ workerId: row.worker_id, activeJobs: row.activeJobs }));
+				.map((row) => ({
+					workerId: row.worker_id,
+					activeJobs: row.activeJobs,
+				}));
 
 			return {
 				queue,

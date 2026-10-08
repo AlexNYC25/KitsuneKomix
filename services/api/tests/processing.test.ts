@@ -47,7 +47,10 @@ describe("processing queue status", () => {
 		// the assertion isolated from honker-ext.test.ts, which also uses "temp".
 		db.raw.run(
 			"INSERT INTO _honker_live (queue, payload, state, worker_id, attempts) VALUES ('temp', ?, 'processing', ?, 1)",
-			[JSON.stringify({ filePath: "/libs/active.cbz", marker: "overview" }), workerId],
+			[
+				JSON.stringify({ filePath: "/libs/active.cbz", marker: "overview" }),
+				workerId,
+			],
 		);
 
 		try {
@@ -71,8 +74,14 @@ describe("processing queue status", () => {
 		const db = await getQueueClient();
 		const queue = db.queue(TEST_QUEUE);
 
-		queue.enqueue({ filePath: "/libs/a.cbz", marker: "p4-a" } satisfies TestPayload);
-		queue.enqueue({ filePath: "/libs/b.cbz", marker: "p4-b" } satisfies TestPayload);
+		queue.enqueue({
+			filePath: "/libs/a.cbz",
+			marker: "p4-a",
+		} satisfies TestPayload);
+		queue.enqueue({
+			filePath: "/libs/b.cbz",
+			marker: "p4-b",
+		} satisfies TestPayload);
 		queue.enqueue({ marker: "p4-no-path" } satisfies TestPayload);
 
 		const claimed = queue.claimOne("phase4_worker");
@@ -139,7 +148,10 @@ describe("processing queue status", () => {
 		const db = await getQueueClient();
 		const queue = db.queue(TEST_QUEUE, { maxAttempts: 1 });
 
-		queue.enqueue({ filePath: "/libs/dead.cbz", marker: "p4-dead" } satisfies TestPayload);
+		queue.enqueue({
+			filePath: "/libs/dead.cbz",
+			marker: "p4-dead",
+		} satisfies TestPayload);
 
 		const claimed = queue.claimOne("phase4_worker");
 		expect(claimed).not.toBeNull();

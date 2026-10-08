@@ -5,7 +5,11 @@ import { deleteUser } from "kitsune-komix-database";
 import { factory } from "../../hono/factory";
 import { requireAdmin } from "../../hono/middleware/auth";
 
-import { userIdParamSchema, userDeletedSchema, userErrorSchema } from "./users.schema";
+import {
+	userIdParamSchema,
+	userDeletedSchema,
+	userErrorSchema,
+} from "./users.schema";
 
 const deleteUserRoute = createRoute({
 	method: "delete",
