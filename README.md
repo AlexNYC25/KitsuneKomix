@@ -1,21 +1,11 @@
-# kitsunekomix
+# KitsuneKomix
 
-A Comic book media server to serve your comics when you want them to your devices
+A comic server application designed for your comics.
 
-Currently being rewritten in Bun for better library compatibility
+## Set Up
 
-## Dev instructions
+Under Construction
 
-To install dependencies:
+## Features
 
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.3.14. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Under Construction
