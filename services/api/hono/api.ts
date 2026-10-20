@@ -1,9 +1,9 @@
+import processingRouter from "../modules/processing/processing.router";
+import usersRouter from "../modules/users/users.router";
+
 import { auth } from "../utils/auth";
 
 import { factory, finalMiddlewareApply } from "./factory";
-
-import processingRouter from "../modules/processing/processing.router";
-import usersRouter from "../modules/users/users.router";
 
 const app = factory(true);
 
