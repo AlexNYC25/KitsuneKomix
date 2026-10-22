@@ -3,4 +3,7 @@ export * from "./env/client.schema.ts";
 export * from "./env/env.schema.ts";
 export * from "./env/server.schema.ts";
 
+export * from "./parameters/users.schema.ts";
+
 export * from "./payload/ingestion.schema.ts";
+

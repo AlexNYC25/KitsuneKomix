@@ -2,14 +2,14 @@ import { createRoute } from "@hono/zod-openapi";
 
 import { deleteUser } from "kitsune-komix-database";
 
-import { factory } from "../../hono/factory";
-import { requireAdmin } from "../../hono/middleware/auth";
-
 import {
 	userDeletedSchema,
 	userErrorSchema,
 	userIdParamSchema,
-} from "./users.schema";
+} from "kitsune-komix-schemas";
+
+import { factory } from "../../hono/factory";
+import { requireAdmin } from "../../hono/middleware/auth";
 
 const router = factory(false);
 
