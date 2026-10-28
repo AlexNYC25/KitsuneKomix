@@ -18,6 +18,7 @@
 		"dev": "bun --watch launcher.ts",
 		"start": "bun launcher.ts",
 		"api": "bun services/api/main.ts",
+		"client" : "bunx vite services/client",
 		"watcher": "bun services/watcher/index.ts",
 		"worker": "bun services/worker/index.ts",
 		"db:push": "bun --cwd packages/database run push",
