@@ -5,6 +5,13 @@ const api = Bun.spawn({
 	stderr: "inherit",
 });
 
+const client = Bun.spawn({
+	cmd: ["bun", "run", "client"],
+	stdout: "inherit",
+	stdin: "inherit",
+	stderr: "inherit",
+});
+
 const watcher = Bun.spawn({
 	cmd: ["bun", "run", "watcher"],
 	stdout: "inherit",
@@ -19,4 +26,4 @@ const worker = Bun.spawn({
 	stderr: "inherit",
 });
 
-await Promise.all([api.exited, watcher.exited, worker.exited]);
+await Promise.all([api.exited, client.exited, watcher.exited, worker.exited]);
