@@ -3,6 +3,7 @@ services:
     build: .
     ports:
       - "8001:8001"
+      - "5173:5173"
     volumes:
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/cache:/app/data/cache
       - /Users/alexismontes/Documents/KitsuneKomix_Volumes/comics:/app/data/comics
