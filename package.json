@@ -15,7 +15,8 @@
 		"typescript": "^5"
 	},
 	"scripts": {
-		"dev": "bun --watch launcher.ts",
+		"dev": "bun launcher.ts",
+		"dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --watch",
 		"start": "bun launcher.ts",
 		"api": "bun services/api/main.ts",
 		"client" : "bunx vite services/client --host 0.0.0.0",
