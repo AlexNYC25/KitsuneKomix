@@ -1,0 +1,78 @@
+# Dev overlay: syncs source code into the container so no rebuild is
+# needed when files change. Dependencies (node_modules, native binaries,
+# the honker extension) stay baked into the image; only package/lockfile
+# changes trigger a rebuild.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --watch
+#   or: bun run dev:docker
+services:
+  app:
+    build: .
+    develop:
+      watch:
+        # Source code: synced live (add/edit/delete)
+        - action: sync
+          path: ./packages
+          target: /app/packages
+          ignore:
+            - node_modules/
+            - .DS_Store
+            - "*.log"
+        - action: sync
+          path: ./services/api
+          target: /app/services/api
+          ignore:
+            - node_modules/
+            - .DS_Store
+            - "*.log"
+        - action: sync
+          path: ./services/client
+          target: /app/services/client
+          ignore:
+            - node_modules/
+            - .DS_Store
+            - "*.log"
+        - action: sync
+          path: ./services/watcher
+          target: /app/services/watcher
+          ignore:
+            - node_modules/
+            - .DS_Store
+            - "*.log"
+        - action: sync
+          path: ./services/worker
+          target: /app/services/worker
+          ignore:
+            - node_modules/
+            - .DS_Store
+            - "*.log"
+
+        # Root files that matter at runtime
+        - action: sync
+          path: ./launcher.ts
+          target: /app/launcher.ts
+
+        # Dependency changes: rebuild the image (once on first up per change)
+        - action: rebuild
+          path: ./package.json
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./services/api/package.json
+        - action: rebuild
+          path: ./services/client/package.json
+        - action: rebuild
+          path: ./services/watcher/package.json
+        - action: rebuild
+          path: ./services/worker/package.json
+        - action: rebuild
+          path: ./packages/database/package.json
+        - action: rebuild
+          path: ./packages/schemas/package.json
+        - action: rebuild
+          path: ./packages/logging/package.json
+        - action: rebuild
+          path: ./packages/config/package.json
+        - action: rebuild
+          path: ./bun.lock
