@@ -14,7 +14,13 @@ router.beforeEach( async (to) => {
     return true;
   }
 
-  const { error, session } = useAuth();
+  const { error, session, isAuthenticated } = useAuth();
+  
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return {
+      name: "login",
+    }
+  }
 
   if ( error || !session ) {
     return {
