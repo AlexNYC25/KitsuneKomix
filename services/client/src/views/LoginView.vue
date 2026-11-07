@@ -3,8 +3,8 @@ import { ErrorMessage, Field, Form } from 'vee-validate';
 </script>
 
 <template>
-  <div id="login-form" class="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-    <div class="w-full max-w-md rounded-2xl bg-grey p-8 shadow-xl shadow-zinc-900/10 ring-1 ring-zinc-950/5">
+  <div id="login-form" class="flex w-full flex-1 items-center justify-center px-4">
+    <div class="rounded-2xl bg-grey p-8 shadow-xl shadow-zinc-900/10 ring-1 ring-zinc-950/5">
       <h1 class="mb-1 text-2xl font-semibold tracking-tight text-zinc-900">Welcome back</h1>
       <p class="mb-6 text-sm text-zinc-500">Sign in to your account to continue</p>
 
