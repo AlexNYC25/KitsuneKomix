@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import './base.css';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 #app {
   max-width: 1280px;
   margin: 0 auto;
