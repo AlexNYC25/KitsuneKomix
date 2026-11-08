@@ -8,18 +8,18 @@
 	"type": "module",
 	"private": true,
 	"devDependencies": {
-		"@biomejs/biome": "2.5.15",
-		"@types/bun": "latest"
+		"@biomejs/biome": "2.6.6",
+		"@types/bun": "^1.4.4"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^7.0.2"
 	},
 	"scripts": {
 		"dev": "bun launcher.ts",
 		"dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --watch",
 		"start": "bun launcher.ts",
 		"api": "bun services/api/main.ts",
-		"client" : "bunx vite services/client --host 0.0.0.0",
+		"client": "bunx vite services/client --host 0.0.0.0",
 		"watcher": "bun services/watcher/index.ts",
 		"worker": "bun services/worker/index.ts",
 		"db:push": "bun --cwd packages/database run push",
