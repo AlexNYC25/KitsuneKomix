@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { type MetadataCompiled } from "comic-metadata-tool";
-import {
+import type { z } from "zod";
+import type { MetadataCompiled } from "comic-metadata-tool";
+import type {
 	initialIngestionPayloadSchema,
 	comicFileWithValidatedLibrarySchema,
 	comicFileRecordedForSeriesProcessingSchema,

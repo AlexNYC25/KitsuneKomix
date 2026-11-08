@@ -1,8 +1,8 @@
 import chokidar from "chokidar";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { getQueue, type QueueType } from "kitsune-komix-database";
-import { initialIngestionPayloadSchema } from "kitsune-komix-schemas";
+import type { initialIngestionPayloadSchema } from "kitsune-komix-schemas";
 
 import { watcherLogger } from "kitsune-komix-logging";
 
