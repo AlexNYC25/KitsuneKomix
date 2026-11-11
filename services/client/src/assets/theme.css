@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/*
+ * Map Tailwind utilities to our semantic CSS variables.
+ *
+ * This creates utilities such as:
+ * bg-background
+ * text-foreground
+ * bg-surface
+ * border-border
+ * text-muted-foreground
+ */
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+
+	--color-surface: var(--surface);
+	--color-surface-muted: var(--surface-muted);
+
+	--color-border: var(--border);
+
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+
+	--color-danger: var(--danger);
+}
+
+/* Light theme */
+:root,
+:root[data-theme="light"] {
+	color-scheme: light;
+
+	--background: oklch(0.99 0 0);
+	--foreground: oklch(0.18 0 0);
+
+	--surface: oklch(1 0 0);
+	--surface-muted: oklch(0.96 0 0);
+
+	--border: oklch(0.9 0 0);
+
+	--primary: oklch(0.55 0.2 260);
+	--primary-foreground: oklch(1 0 0);
+
+	--muted: oklch(0.94 0 0);
+	--muted-foreground: oklch(0.48 0 0);
+
+	--danger: oklch(0.58 0.22 25);
+}
+
+/* Dark theme */
+:root[data-theme="dark"] {
+	color-scheme: dark;
+
+	--background: oklch(0.15 0 0);
+	--foreground: oklch(0.96 0 0);
+
+	--surface: oklch(0.19 0 0);
+	--surface-muted: oklch(0.23 0 0);
+
+	--border: oklch(0.3 0 0);
+
+	--primary: oklch(0.7 0.16 260);
+	--primary-foreground: oklch(0.15 0 0);
+
+	--muted: oklch(0.25 0 0);
+	--muted-foreground: oklch(0.7 0 0);
+
+	--danger: oklch(0.7 0.18 25);
+}
