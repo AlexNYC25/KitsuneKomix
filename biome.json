@@ -40,6 +40,11 @@
 			"quoteStyle": "double"
 		}
 	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	},
 	"assist": {
 		"enabled": true,
 		"actions": {
@@ -49,6 +54,6 @@
 		}
 	},
 	"tailwind": {
-    "stylesheet": "./services/client/src/assets/main.css"
-  }
+		"stylesheet": "./services/client/src/assets/main.css"
+	}
 }
