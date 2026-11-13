@@ -1,4 +1,4 @@
-import { getClient } from "../drizzle/client";
+import { getClient } from "../drizzle/client.ts";
 
 import type { DrizzleType } from "../shared/types/index.ts";
 

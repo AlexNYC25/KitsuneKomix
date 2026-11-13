@@ -1,30 +1,17 @@
 {
-	"name": "Kitsune Komix",
-	"workspaces": [
-		"./packages/*",
-		"./services/*"
-	],
-	"module": "index.ts",
-	"type": "module",
-	"private": true,
-	"devDependencies": {
-		"@biomejs/biome": "2.6.6",
-		"@types/bun": "^1.4.4"
-	},
-	"peerDependencies": {
-		"typescript": "^7.0.2"
-	},
-	"scripts": {
-		"dev": "bun launcher.ts",
-		"dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --watch",
-		"start": "bun launcher.ts",
-		"api": "bun services/api/main.ts",
-		"client": "bunx --bun vite services/client --host 0.0.0.0",
-		"watcher": "bun services/watcher/index.ts",
-		"worker": "bun services/worker/index.ts",
-		"db:push": "bun --cwd packages/database run push",
-		"db:migrate": "bun --cwd packages/database run migrate",
-		"db:generate": "bun --cwd packages/database run generate",
-		"format:project": "bunx --bun @biomejs/biome format --write"
-	}
+  "name": "KitsuneKomix",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt": "^4.6.4",
+    "vue": "^3.5.45",
+    "vue-router": "^5.4.0"
+  }
 }
