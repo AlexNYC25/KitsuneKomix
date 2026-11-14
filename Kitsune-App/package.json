@@ -10,8 +10,12 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.4",
     "nuxt": "^4.6.4",
     "vue": "^3.5.45",
     "vue-router": "^5.4.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.11"
   }
 }
