@@ -7,11 +7,11 @@ import { userTable } from "../../shared/database/tables/auth.schema";
  * login page can decide between the registration and login forms.
  */
 export default defineEventHandler(async () => {
-  const adminUsers = await db
-    .select({ id: userTable.id })
-    .from(userTable)
-    .where(eq(userTable.admin, true))
-    .limit(1);
+	const adminUsers = await db
+		.select({ id: userTable.id })
+		.from(userTable)
+		.where(eq(userTable.admin, true))
+		.limit(1);
 
-  return { hasAdmin: adminUsers.length > 0 };
+	return { hasAdmin: adminUsers.length > 0 };
 });
