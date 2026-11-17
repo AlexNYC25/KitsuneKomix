@@ -13,6 +13,16 @@ const mode = computed<"login" | "register">(() =>
 const session = authClient.useSession();
 const isSignedIn = computed(() => !!session.value?.data?.user);
 
+// Signed-in users don't belong on the login page — send them home
+// as soon as the session resolves (immediately if already known).
+watch(
+  isSignedIn,
+  (signedIn) => {
+    if (signedIn) navigateTo("/");
+  },
+  { immediate: true },
+);
+
 const name = ref("");
 const email = ref("");
 const password = ref("");
@@ -50,29 +60,13 @@ async function submit() {
   }
 }
 
-async function signOut() {
-  await authClient.signOut();
-  justRegistered.value = false;
-  await refreshStatus();
-}
 </script>
 
 <template>
   <main class="flex justify-center items-center min-h-screen">
     <div class="card w-96 bg-base-100 shadow-sm border-solid border-2 border-blue-500">
       <div class="card-body">
-        <!-- Signed-in state -->
-        <template v-if="isSignedIn">
-          <h1>Welcome back</h1>
-          <p class="muted">Signed in as <strong>{{ session?.data?.user.email }}</strong></p>
-          <p v-if="session?.data?.user.admin" class="badge">Admin</p>
-          <NuxtLink to="/" class="button">Continue to home</NuxtLink>
-          <button type="button" class="button secondary" @click="signOut">Sign out</button>
-        </template>
-
-        <!-- Auth forms -->
-        <template v-else>
-          <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2">
             <h1 class="text-2xl font-bold mb-2 justify-center">
               {{ mode === "register" ? "Create your account" : "Sign in" }}
             </h1>
@@ -153,7 +147,6 @@ async function signOut() {
               
             </form>
           </div>
-        </template>
       </div>
     </div>
   </main>
