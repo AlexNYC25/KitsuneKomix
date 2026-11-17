@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { authClient } from "~/utils/auth-client";
 
+definePageMeta({ layout: false });
+
 const { data: status, refresh: refreshStatus } = await useFetch("/api/auth-status");
 
 const isAdminRegistered = computed(() => status.value?.hasAdmin ?? true);
@@ -123,7 +125,7 @@ async function signOut() {
               </div>              
 
               <div class="mb-4">
-                <label for="password" class="block text-white-700 text-sm font-bold mb-2"">
+                <label for="password" class="block text-white-700 text-sm font-bold mb-2">
                   Password
                 </label>
                 <input
