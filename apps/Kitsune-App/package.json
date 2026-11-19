@@ -1,0 +1,33 @@
+{
+	"name": "Kitsune-App",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "nuxt build",
+		"dev": "nuxt dev",
+		"generate": "nuxt generate",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare",
+		"db:push": "drizzle-kit push"
+	},
+	"dependencies": {
+		"@tailwindcss/vite": "^4.3.5",
+		"better-auth": "^1.7.24",
+		"better-sqlite3": "^13.1.1",
+		"daisyui": "^5.8.1",
+		"dotenv": "^18.0.10",
+		"drizzle-orm": "1.0.0-rc.5",
+		"nuxt": "^4.6.4",
+		"tailwindcss": "^4.3.5",
+		"vue": "^3.5.45",
+		"vue-router": "^5.4.0",
+		"zod": "^4.6.7"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.6.7",
+		"@types/node": "^26.6.6",
+		"drizzle-kit": "1.0.0-rc.5",
+		"tsx": "^4.23.15",
+		"typescript": "^7.0.2"
+	}
+}
