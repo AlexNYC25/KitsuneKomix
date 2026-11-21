@@ -2,8 +2,11 @@
   "name": "kitsune-schemas",
   "version": "0.0.1",
   "description": "Schemas Package for KitsuneKomix",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
   }
 }
