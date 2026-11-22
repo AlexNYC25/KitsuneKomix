@@ -1,12 +1,24 @@
 {
   "name": "kitsune-database",
   "version": "0.0.1",
-  "description": "Database package for KitsuneKomix",
-  "main": "index.js",
+  "description": "Database Package for KitsuneKomix",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsx --test test/*.test.ts",
+    "push": "drizzle-kit push",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "drizzle": "^1.4.0"
+    "better-auth": "^1.7.27",
+    "better-sqlite3": "^12.4.6",
+    "drizzle-orm": "0.45.4",
+    "kitsune-config": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.6.6",
+    "drizzle-kit": "0.31.11",
+    "tsx": "^4.23.15"
   }
 }
