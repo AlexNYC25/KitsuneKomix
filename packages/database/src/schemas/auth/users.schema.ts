@@ -1,3 +1,4 @@
+import { relations, sql } from "drizzle-orm";
 import {
 	index,
 	int,
@@ -5,6 +6,9 @@ import {
 	sqliteTable,
 	text,
 } from "drizzle-orm/sqlite-core";
+
+import { sessionTable } from "./session.schema";
+import { accountTable } from "./account.schema";
 
 export const userTable = sqliteTable("user", {
 	id: int().primaryKey({ autoIncrement: true }),
@@ -20,3 +24,8 @@ export const userTable = sqliteTable("user", {
 		.notNull()
 		.$defaultFn(() => new Date()),
 });
+
+export const userRelations = relations(userTable, ({ many }) => ({
+	sessions: many(sessionTable),
+	accounts: many(accountTable),
+}));

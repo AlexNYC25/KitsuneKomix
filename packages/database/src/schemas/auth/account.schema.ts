@@ -1,3 +1,4 @@
+import { relations, sql } from "drizzle-orm";
 import {
 	index,
 	int,
@@ -33,3 +34,10 @@ export const accountTable = sqliteTable(
 	},
 	(table) => [index("account_user_id_idx").on(table.userId)],
 );
+
+export const accountRelations = relations(accountTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [accountTable.userId],
+    references: [userTable.id],
+  }),
+}));

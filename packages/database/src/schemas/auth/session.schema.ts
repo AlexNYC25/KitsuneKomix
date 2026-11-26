@@ -1,3 +1,4 @@
+import { relations, sql } from "drizzle-orm";
 import {
 	index,
 	int,
@@ -28,3 +29,10 @@ export const sessionTable = sqliteTable(
 	},
 	(table) => [index("session_user_id_idx").on(table.userId)],
 );
+
+export const sessionRelations = relations(sessionTable, ({ one }) => ({
+	user: one(userTable, {
+		fields: [sessionTable.userId],
+		references: [userTable.id],
+	}),
+}));
