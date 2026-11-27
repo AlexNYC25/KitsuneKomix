@@ -1,12 +1,12 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "../shared/database/index";
 import {
 	accountTable,
+	db,
 	sessionTable,
 	userTable,
 	verificationTable,
-} from "../shared/database/tables/auth.schema";
+} from "kitsune-database";
 
 /**
  * Set up the schemas so we have a matching zod schemas for the database tables

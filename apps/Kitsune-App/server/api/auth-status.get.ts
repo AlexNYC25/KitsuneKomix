@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "../../shared/database/index";
-import { userTable } from "../../shared/database/tables/auth.schema";
+import { db, userTable } from "kitsune-database";
 
 /**
  * Tells the client whether an admin account already exists, so the
