@@ -1,5 +1,5 @@
 {
-	"name": "Kitsune-App",
+	"name": "kitsune-app",
 	"type": "module",
 	"private": true,
 	"scripts": {
