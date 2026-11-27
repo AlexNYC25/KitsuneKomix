@@ -3,23 +3,37 @@ import assert from "node:assert/strict";
 
 import { sql } from "drizzle-orm";
 
-import { db, schema } from "../src";
-
-const authTables = ["user", "session", "account", "verification"];
+import {
+	accountTable,
+	comicsTable,
+	db,
+	schema,
+	sessionTable,
+	userTable,
+	verificationTable,
+} from "../src";
 
 describe("db", () => {
-  it("declares the better-auth tables", () => {
-    for (const name of authTables) {
-      assert.ok(name in schema, `missing table: ${name}`);
-    }
-  });
+	it("exports the auth and comics tables", () => {
+		assert.ok(userTable);
+		assert.ok(sessionTable);
+		assert.ok(accountTable);
+		assert.ok(verificationTable);
+		assert.ok(comicsTable);
 
-  it("connects to the sqlite file from config and runs queries", () => {
-    const result = db.get<{ version: string }>(
-      sql`select sqlite_version() as version`,
-    );
+		assert.equal(schema.userTable, userTable);
+		assert.equal(schema.sessionTable, sessionTable);
+		assert.equal(schema.accountTable, accountTable);
+		assert.equal(schema.verificationTable, verificationTable);
+		assert.equal(schema.comicsTable, comicsTable);
+	});
 
-    assert.ok(result);
-    assert.equal(typeof result.version, "string");
-  });
+	it("connects to the sqlite file from config and runs queries", () => {
+		const result = db.get<{ version: string }>(
+			sql`select sqlite_version() as version`,
+		);
+
+		assert.ok(result);
+		assert.equal(typeof result.version, "string");
+	});
 });
